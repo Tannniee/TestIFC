@@ -20,7 +20,8 @@ paths from this directory.
 The backend keeps HTTP contracts in `src/api_contracts.py` and thread-safe bridge
 state in `src/api_state.py`. Route groups live under `src/api_routes/`; `src/app.py`
 only configures middleware, creates shared state, and composes the application.
-Domain and IFC modules do not depend on FastAPI request objects.
+`src/model_operations.py` owns model use cases that can serve HTTP or future desktop
+adapters. Domain and IFC modules do not depend on FastAPI request objects.
 
 ## Environment
 

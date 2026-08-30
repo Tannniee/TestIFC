@@ -7,6 +7,7 @@ from fastapi import Path as FastApiPath
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
 
+import model_operations
 from api_contracts import ErrorResponse, LoadModelResponse, RegisterModelRequest
 from api_dependencies import require_license_dep
 from ifc_service import (
@@ -14,18 +15,9 @@ from ifc_service import (
     IndexPreparingError,
     NoActiveModelError,
     cached_fragments_file,
-    cached_model_file,
-    extract_element,
-    extract_element_by_express_id,
-    live_model_status,
-    materialize_model_stream,
-    open_active_model,
-    register_model,
     store_cached_fragments_commit,
     store_cached_fragments_start,
 )
-from mass_facts import survey_materials
-from model_query import get_model_tree, search_model
 
 
 MODEL_HASH_PATTERN = "^[0-9a-f]{64}$"
@@ -54,13 +46,15 @@ def create_model_router() -> APIRouter:
     )
     async def load_model(file: UploadFile = File(...)):
         try:
-            info = await run_in_threadpool(
-                materialize_model_stream, file.file, file.filename, True
+            loaded = await run_in_threadpool(
+                model_operations.materialize_uploaded_model,
+                file.file,
+                file.filename,
             )
             return LoadModelResponse(
-                modelHash=info["contentHashSha256"],
-                originalFilename=info["originalFilename"],
-                sizeBytes=info["sizeBytes"],
+                modelHash=loaded.model_hash,
+                originalFilename=loaded.original_filename,
+                sizeBytes=loaded.size_bytes,
             )
         except Exception as exc:
             print("ERROR /load-model:", exc)
@@ -124,8 +118,10 @@ def create_model_router() -> APIRouter:
         modelHash: str = FastApiPath(pattern=MODEL_HASH_PATTERN),
     ):
         try:
-            path = cached_model_file(modelHash)
-            info = await run_in_threadpool(register_model, str(path), modelHash, True)
+            info = await run_in_threadpool(
+                model_operations.activate_cached_model,
+                modelHash,
+            )
         except (FileNotFoundError, HashMismatchError):
             return JSONResponse(
                 status_code=404,
@@ -141,7 +137,9 @@ def create_model_router() -> APIRouter:
     async def post_register_model(request: RegisterModelRequest):
         try:
             info = await run_in_threadpool(
-                register_model, request.path, request.hash, True
+                model_operations.register_external_model,
+                request.path,
+                request.hash,
             )
         except FileNotFoundError as exc:
             return JSONResponse(
@@ -157,7 +155,7 @@ def create_model_router() -> APIRouter:
 
     @router.get("/model/runtime", response_model=None)
     async def get_model_runtime():
-        return live_model_status()
+        return model_operations.runtime_status()
 
     @router.get(
         "/model/tree",
@@ -166,7 +164,7 @@ def create_model_router() -> APIRouter:
     )
     async def get_tree():
         try:
-            return get_model_tree()
+            return model_operations.model_tree()
         except (IndexPreparingError, NoActiveModelError) as exc:
             return _model_error(exc)
         except Exception as exc:
@@ -187,7 +185,7 @@ def create_model_router() -> APIRouter:
         limit: int = 100,
     ):
         try:
-            return search_model(q=q, ifc_type=ifcType, limit=limit)
+            return model_operations.search_active_model(q, ifcType, limit)
         except (IndexPreparingError, NoActiveModelError) as exc:
             return _model_error(exc)
         except Exception as exc:
@@ -204,7 +202,7 @@ def create_model_router() -> APIRouter:
     )
     async def get_element_by_express_id(expressId: int):
         try:
-            return extract_element_by_express_id(expressId)
+            return model_operations.element_by_express_id(expressId)
         except LookupError as exc:
             return JSONResponse(
                 status_code=404,
@@ -226,7 +224,7 @@ def create_model_router() -> APIRouter:
     )
     async def get_element(globalId: str):
         try:
-            return extract_element(globalId)
+            return model_operations.element_by_global_id(globalId)
         except LookupError as exc:
             return JSONResponse(
                 status_code=404,
@@ -248,7 +246,7 @@ def create_model_router() -> APIRouter:
     )
     async def get_materials():
         try:
-            uses = survey_materials(open_active_model())
+            uses = model_operations.active_model_materials()
             return {
                 "materials": [
                     {

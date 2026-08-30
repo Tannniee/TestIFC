@@ -4,7 +4,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from fastapi.testclient import TestClient
+import httpx
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,16 +15,20 @@ if str(SRC) not in sys.path:
 import app as app_module
 
 
-class ApiContractTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client = TestClient(app_module.app)
-
-    def setUp(self):
+class ApiContractTests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
         app_module.state.clear_selection()
+        transport = httpx.ASGITransport(app=app_module.app)
+        self.client = httpx.AsyncClient(
+            transport=transport,
+            base_url="http://testclient",
+        )
 
-    def test_health_contract(self):
-        response = self.client.get("/health")
+    async def asyncTearDown(self):
+        await self.client.aclose()
+
+    async def test_health_contract(self):
+        response = await self.client.get("/health")
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertTrue(payload["ok"])
@@ -32,7 +36,7 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(payload["appVersion"], "0.4.0 ahihi")
         self.assertFalse(payload["hasSelection"])
 
-    def test_selection_round_trip(self):
+    async def test_selection_round_trip(self):
         selection = {
             "schemaVersion": 1,
             "source": "thatopen",
@@ -41,25 +45,25 @@ class ApiContractTests(unittest.TestCase):
             "selection": {"status": "selected", "selectedAt": "2026-08-30T00:00:00Z"},
             "preview": {"Name": "B1"},
         }
-        posted = self.client.post("/selection", json=selection)
+        posted = await self.client.post("/selection", json=selection)
         self.assertEqual(posted.status_code, 200)
         self.assertTrue(posted.json()["hasSelection"])
         self.assertEqual(posted.json()["globalId"], "GUID-1")
 
-        current = self.client.get("/selection").json()
+        current = (await self.client.get("/selection")).json()
         self.assertEqual(current["expressId"], 42)
         self.assertEqual(current["modelName"], "Sample")
 
-        cleared = self.client.delete("/selection").json()
+        cleared = (await self.client.delete("/selection")).json()
         self.assertFalse(cleared["hasSelection"])
         self.assertIsNone(cleared["data"])
 
-    def test_selection_validation_contract(self):
-        response = self.client.post("/selection", json={"selection": {}})
+    async def test_selection_validation_contract(self):
+        response = await self.client.post("/selection", json={"selection": {}})
         self.assertEqual(response.status_code, 422)
 
-    def test_openapi_preserves_the_complete_bridge_surface(self):
-        paths = self.client.get("/openapi.json").json()["paths"]
+    async def test_openapi_preserves_the_complete_bridge_surface(self):
+        paths = (await self.client.get("/openapi.json")).json()["paths"]
         actual = {
             path: set(methods) - {"parameters"}
             for path, methods in paths.items()
