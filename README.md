@@ -17,6 +17,10 @@ the original executable or extracted bytecode as a behavioral reference.
 The repository root is the only project root. Build scripts and tests resolve all
 paths from this directory.
 
+The backend keeps HTTP contracts in `src/api_contracts.py`, thread-safe bridge state
+in `src/api_state.py`, and route composition in `src/app.py`. Domain and IFC modules
+do not depend on FastAPI request objects.
+
 ## Environment
 
 Create the Python environment and install the pinned dependencies:

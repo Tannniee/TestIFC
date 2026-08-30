@@ -2,21 +2,30 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from threading import Lock, Thread
+from threading import Thread
 from time import sleep
-from typing import Any, Literal
+from typing import Any
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi import Path as FastApiPath
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
-from pydantic import BaseModel, Field, model_validator
 from starlette.concurrency import run_in_threadpool
 
 import excel_quickview
 import idea_export
 import license_gate
+from api_contracts import (
+    ErrorResponse,
+    HealthResponse,
+    LoadModelResponse,
+    MemberScanRequest,
+    RegisterModelRequest,
+    SelectionPayload,
+    SelectionResponse,
+    TakeoffRequest,
+)
+from api_state import BridgeState, ModelTakeoffJob, ScanState
 from ifc_service import (
     HashMismatchError,
     IndexPreparingError,
@@ -47,223 +56,11 @@ from takeoff import (
 )
 from version import APP_VERSION
 
-SCHEMA_VERSION = 1
 LOCAL_CLIENTS = {"127.0.0.1", "::1", "localhost", "testclient"}
 ALLOWED_ORIGINS = {
     "http://127.0.0.1:5173",
     "http://localhost:5173",
 }
-
-
-class ModelRef(BaseModel):
-    id: str | None = None
-    name: str | None = None
-    path: str | None = None
-
-
-class ElementRef(BaseModel):
-    globalId: str | None = None
-    expressId: int | None = None
-    localId: int | None = None
-    ifcType: str | None = None
-    objectType: str | None = None
-    description: str | None = None
-    name: str | None = None
-
-
-class SelectionMeta(BaseModel):
-    status: str = "selected"
-    selectedAt: str
-
-
-class SelectionPayload(BaseModel):
-    schemaVersion: int = SCHEMA_VERSION
-    source: str = "thatopen"
-    model: ModelRef = Field(default_factory=ModelRef)
-    element: ElementRef = Field(default_factory=ElementRef)
-    selection: SelectionMeta
-    preview: dict[str, Any] = Field(default_factory=dict)
-
-
-class SelectionResponse(BaseModel):
-    ok: bool = True
-    schemaVersion: int = SCHEMA_VERSION
-    hasSelection: bool
-    data: SelectionPayload | None = None
-    updatedAt: str | None = None
-    globalId: str | None = None
-    expressId: int | None = None
-    ifcType: str | None = None
-    objectType: str | None = None
-    name: str | None = None
-    modelName: str | None = None
-
-
-class HealthResponse(BaseModel):
-    ok: bool = True
-    service: str = "ifc-selection-bridge"
-    schemaVersion: int = SCHEMA_VERSION
-    appVersion: str = APP_VERSION
-    hasSelection: bool
-
-
-class ErrorResponse(BaseModel):
-    ok: bool = False
-    error: str
-
-
-class TakeoffRequest(BaseModel):
-    scope: Literal["selection", "model"] = "selection"
-    globalIds: list[str] = Field(default_factory=list)
-    densityTableRevision: str = "none"
-    densityKgPerM3: dict[str, float] = Field(default_factory=dict)
-    tolerance: float = Field(0.05, gt=0.0, lt=1.0)
-
-    @model_validator(mode="after")
-    def _selection_names_what_it_selects(self):
-        if self.scope == "selection" and not self.globalIds:
-            raise ValueError("scope 'selection' needs at least one globalId")
-        return self
-
-
-class LoadModelResponse(BaseModel):
-    ok: bool = True
-    modelHash: str
-    originalFilename: str | None = None
-    sizeBytes: int
-
-
-class RegisterModelRequest(BaseModel):
-    path: str
-    hash: str
-
-
-class BridgeState:
-    def __init__(self):
-        self._lock = Lock()
-        self._selection: SelectionPayload | None = None
-        self._updated_at: str | None = None
-
-    def set_selection(self, selection: SelectionPayload) -> SelectionResponse:
-        with self._lock:
-            self._selection = selection
-            self._updated_at = now_utc()
-            return make_selection_response(self._selection, self._updated_at)
-
-    def get_selection(self) -> SelectionResponse:
-        with self._lock:
-            return make_selection_response(self._selection, self._updated_at)
-
-    def clear_selection(self) -> SelectionResponse:
-        with self._lock:
-            self._selection = None
-            self._updated_at = now_utc()
-            return make_selection_response(None, self._updated_at)
-
-    def has_selection(self) -> bool:
-        with self._lock:
-            return self._selection is not None
-
-
-def now_utc() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
-
-
-def make_selection_response(
-    selection: SelectionPayload | None, updated_at: str | None
-) -> SelectionResponse:
-    if selection is None:
-        return SelectionResponse(hasSelection=False, updatedAt=updated_at)
-    return SelectionResponse(
-        hasSelection=True,
-        data=selection,
-        updatedAt=updated_at,
-        globalId=selection.element.globalId,
-        expressId=selection.element.expressId,
-        ifcType=selection.element.ifcType,
-        objectType=selection.element.objectType,
-        name=selection.element.name,
-        modelName=selection.model.name,
-    )
-
-
-class ScanState:
-    def __init__(self):
-        self._lock = Lock()
-        self._scan: idea_export.Scan | None = None
-
-    def set_scan(self, scan: idea_export.Scan) -> None:
-        with self._lock:
-            self._scan = scan
-
-    def get_scan(self) -> idea_export.Scan | None:
-        with self._lock:
-            return self._scan
-
-    def clear_scan(self) -> None:
-        with self._lock:
-            self._scan = None
-
-
-class ModelTakeoffJob:
-    def __init__(self):
-        self._lock = Lock()
-        self._status = "idle"
-        self._done = 0
-        self._total = 0
-        self._result: dict[str, Any] | None = None
-        self._error = ""
-
-    def start(self, table: DensityTable, tolerance: float) -> bool:
-        with self._lock:
-            if self._status == "running":
-                return False
-            self._status, self._done, self._total, self._result, self._error = (
-                "running",
-                0,
-                0,
-                None,
-                "",
-            )
-            Thread(
-                target=self._run,
-                args=(table, tolerance),
-                name="model-takeoff",
-                daemon=True,
-            ).start()
-            return True
-
-    def _run(self, table: DensityTable, tolerance: float) -> None:
-        try:
-            result = takeoff(
-                model_subject_ids(), table, tolerance, on_progress=self._advance
-            )
-        except Exception as exc:
-            with self._lock:
-                self._status = "failed"
-                self._error = f"{type(exc).__name__}: {exc}"
-            return
-        with self._lock:
-            self._status = "done"
-            self._result = result
-
-    def _advance(self, done: int, total: int) -> None:
-        with self._lock:
-            self._done = done
-            self._total = total
-
-    def progress(self) -> dict[str, Any]:
-        with self._lock:
-            return {
-                "status": self._status,
-                "done": self._done,
-                "total": self._total,
-                "error": self._error,
-            }
-
-    def result(self) -> dict[str, Any] | None:
-        with self._lock:
-            return self._result
 
 
 IDLE_MODEL_SWEEP_SECONDS = 60.0
@@ -638,12 +435,6 @@ async def post_takeoff_csv(request: TakeoffRequest):
         media_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="takeoff.csv"'},
     )
-
-
-class MemberScanRequest(BaseModel):
-    globalIds: list[str] = Field(min_length=1)
-    joint: tuple[float, float, float]
-    lengthUnit: Literal["m", "mm"]
 
 
 def _scan_or_error(request: MemberScanRequest):

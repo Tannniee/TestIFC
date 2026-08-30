@@ -63,6 +63,10 @@ class ApiContractTests(unittest.TestCase):
         for route in ("/health", "/selection", "/load-model", "/model/runtime", "/mass/takeoff"):
             self.assertIn(route, paths)
 
+    def test_app_reexports_modular_contracts_and_state(self):
+        self.assertEqual(app_module.SelectionPayload.__module__, "api_contracts")
+        self.assertEqual(type(app_module.state).__module__, "api_state")
+
 
 if __name__ == "__main__":
     unittest.main()
