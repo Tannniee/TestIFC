@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 3,
+  "revision": "handbook-materials-2026-07",
+  "declaredApproval": "none - published handbook values, authorized by nobody for any project",
+  "label": "Handbook material densities",
+  "note": "Nominal MASS densities for common construction materials. This is a way to fill a density basis quickly, not a basis in itself: nothing here knows what the material names in your model mean, and nobody has approved these numbers for your project. Whoever signs the deliverable owns every value they apply. Do not read a Eurocode weight density straight off a table into this field: EN 1991-1-1 quotes kN/m3, and 24.0 kN/m3 is 2447 kg/m3, not 2400.",
+  "materials": [
+    {
+      "material": "Carbon steel",
+      "kgPerM3": 7850,
+      "note": "76.98 kN/m3, the lower bound of EN 1991-1-1 Table A.4 (77.0-78.5)"
+    },
+    {
+      "material": "Stainless steel (austenitic)",
+      "kgPerM3": 7900,
+      "note": "1.4301/1.4401 family, conventional 7.90 g/cm3"
+    },
+    {
+      "material": "Cast iron",
+      "kgPerM3": 7200,
+      "note": "Grey cast iron, conventional 7.20 g/cm3. EN 1991-1-1 Table A.4 quotes 71.0-72.5 kN/m3 (7240-7393 kg/m3), so a design weight density gives a heavier figure than this"
+    },
+    {
+      "material": "Aluminium alloy",
+      "kgPerM3": 2700,
+      "note": "Wrought alloy, conventional 2.70 g/cm3"
+    },
+    {
+      "material": "Concrete, plain (normal weight)",
+      "kgPerM3": 2400,
+      "note": "Conventional mass density, 23.54 kN/m3. EN 1991-1-1 Table A.1 quotes 24.0 kN/m3 for design loads, which is 2447 kg/m3"
+    },
+    {
+      "material": "Concrete, reinforced (normal weight)",
+      "kgPerM3": 2500,
+      "note": "Conventional mass density including normal reinforcement, 24.52 kN/m3"
+    },
+    {
+      "material": "Timber, softwood C24",
+      "kgPerM3": 420,
+      "note": "EN 338 mean density for C24, quoted as a mass density directly"
+    },
+    {
+      "material": "Glass",
+      "kgPerM3": 2500,
+      "note": "Soda-lime, conventional 2.50 g/cm3"
+    }
+  ]
+}

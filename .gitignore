@@ -1,0 +1,33 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.vite-temp/
+
+# Build outputs and logs
+build/
+dist/
+build-*/
+dist-*/
+*.log
+
+# Runtime and model data
+src/.model_cache/
+test-fixtures/
+ui_reference_cache/
+
+# Recovery material is preserved locally but is not part of the maintained app.
+archive/
+decompiled/
+extracted/
+frontend_reference/
+input/
+pyinstxtractor-*/
+reports/
+tools/
