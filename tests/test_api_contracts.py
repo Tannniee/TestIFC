@@ -58,14 +58,68 @@ class ApiContractTests(unittest.TestCase):
         response = self.client.post("/selection", json={"selection": {}})
         self.assertEqual(response.status_code, 422)
 
-    def test_openapi_contains_desktop_bridge_routes(self):
+    def test_openapi_preserves_the_complete_bridge_surface(self):
         paths = self.client.get("/openapi.json").json()["paths"]
-        for route in ("/health", "/selection", "/load-model", "/model/runtime", "/mass/takeoff"):
-            self.assertIn(route, paths)
+        actual = {
+            path: set(methods) - {"parameters"}
+            for path, methods in paths.items()
+        }
+        expected = {
+            "/auth/status": {"get"},
+            "/auth/login": {"post"},
+            "/auth/logout": {"post"},
+            "/health": {"get"},
+            "/selection": {"get", "post", "delete"},
+            "/load-model": {"post"},
+            "/model/fragments/{modelHash}": {"get", "post"},
+            "/model/activate/{modelHash}": {"post"},
+            "/register-model": {"post"},
+            "/model/runtime": {"get"},
+            "/model/tree": {"get"},
+            "/model/search": {"get"},
+            "/element/by-express-id/{expressId}": {"get"},
+            "/element/{globalId}": {"get"},
+            "/model/materials": {"get"},
+            "/mass/material-reference": {"get"},
+            "/mass/takeoff": {"post"},
+            "/mass/takeoff.csv": {"post"},
+            "/mass/takeoff/open-in-excel": {"post"},
+            "/mass/takeoff/model": {"get", "post"},
+            "/mass/takeoff/model.csv": {"get"},
+            "/mass/takeoff/model/open-in-excel": {"post"},
+            "/idea/member-scan": {"get", "post", "delete"},
+            "/idea/member-scan.tsv": {"get"},
+        }
+        self.assertEqual(actual, expected)
 
     def test_app_reexports_modular_contracts_and_state(self):
         self.assertEqual(app_module.SelectionPayload.__module__, "api_contracts")
         self.assertEqual(type(app_module.state).__module__, "api_state")
+
+    def test_routes_are_composed_from_domain_modules(self):
+        included_routers = (
+            route.original_router
+            for route in app_module.app.routes
+            if hasattr(route, "original_router")
+        )
+        included_routes = (
+            route
+            for router in included_routers
+            for route in router.routes
+        )
+        endpoint_modules = {
+            route.path: route.endpoint.__module__
+            for route in included_routes
+            if hasattr(route, "endpoint")
+        }
+        expected = {
+            "/health": "api_routes.core",
+            "/model/runtime": "api_routes.model",
+            "/mass/material-reference": "api_routes.mass",
+            "/idea/member-scan": "api_routes.idea",
+        }
+        for path, module in expected.items():
+            self.assertEqual(endpoint_modules[path], module)
 
 
 if __name__ == "__main__":
