@@ -24,9 +24,9 @@ class PackagingContractTests(unittest.TestCase):
             'ROOT / "frontend" / "dist"',
             'ROOT / "backend" / "reference_data"',
             'ROOT / "desktop" / "build_config.json"',
-            'ROOT / "vendor" / "ifc_auth" / "ifc_auth.pyd"',
         ):
             self.assertIn(required, spec)
+        self.assertNotIn("ifc_auth", spec)
 
     def test_active_package_names_do_not_use_recovery_labels(self):
         active_inputs = "\n".join(

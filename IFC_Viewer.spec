@@ -12,18 +12,16 @@ webview_hidden = collect_submodules("webview")
 
 analysis = Analysis(
     [str(ROOT / "desktop" / "main.py")],
-    pathex=[str(ROOT / "src"), str(ROOT / "vendor")],
-    binaries=ifc_binaries
-    + [(str(ROOT / "vendor" / "ifc_auth" / "ifc_auth.pyd"), "ifc_auth")],
+    pathex=[str(ROOT / "src")],
+    binaries=ifc_binaries,
     datas=ifc_data
     + [
         (str(ROOT / "frontend" / "dist"), "frontend/dist"),
         (str(ROOT / "backend" / "reference_data"), "backend/reference_data"),
         (str(ROOT / "desktop" / "build_config.json"), "desktop"),
         (str(ROOT / "desktop" / "assets" / "app_icon.ico"), "desktop/assets"),
-        (str(ROOT / "vendor" / "ifc_auth" / "__init__.py"), "ifc_auth"),
     ],
-    hiddenimports=ifc_hidden + webview_hidden + ["ifc_auth", "ifc_auth.ifc_auth"],
+    hiddenimports=ifc_hidden + webview_hidden,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

@@ -20,8 +20,8 @@ The active package name comes from `src/version.py`. `desktop/build_config.json`
 is the only package auth-mode input. Specs under `packaging/legacy/` are retained
 for traceability and never participate in the active build.
 
-The active spec still carries the native auth extension for compatibility with a
-future OAuth build, but the public package does not call or enforce it.
+The active public package does not include OAuth code, credentials, or license
+enforcement.
 
 Current mass policy resolves authored IFC weight first. Analytic mesh mass remains
 unavailable for unsupported representations such as `IfcExtrudedAreaSolid` and
