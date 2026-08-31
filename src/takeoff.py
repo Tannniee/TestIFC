@@ -14,8 +14,9 @@ import ifcopenshell
 
 import mass
 import mass_facts
+import mass_wire
 import member_axis
-from ifc_service import get_active_model_info, locate_live_element, open_active_model
+from model_runtime import get_active_model_info, locate_live_element, open_active_model
 
 TAKEOFF_SCHEMA_VERSION = 5
 _METHODS = mass.MASS_METHODS
@@ -69,8 +70,8 @@ def _selected_wire(element, subject, units, table):
         "objectType": getattr(element, "ObjectType", None),
         "takeoffSubjectGlobalId": subject.GlobalId,
         "isTakeoffSubject": subject.id() == element.id(),
-        "densityXMeshVolume": mass.mass_value_wire(mass.mesh_candidate(part, table)),
-        "densityXSectionVolume": mass.mass_value_wire(
+        "densityXMeshVolume": mass_wire.mass_value_wire(mass.mesh_candidate(part, table)),
+        "densityXSectionVolume": mass_wire.mass_value_wire(
             mass.section_candidate(part, table)
         ),
     }
@@ -129,12 +130,12 @@ def _row_wire(row: mass.MassRow, subject, length_scale, facts):
         "name": getattr(subject, "Name", None),
         "section": _section_label(subject, length_scale),
         "lengthM": _length_m(facts),
-        "authoredWeight": mass.mass_value_wire(row.authored_weight),
-        "densityXMeshVolume": mass.mass_value_wire(row.density_x_mesh_volume),
-        "densityXSectionVolume": mass.mass_value_wire(
+        "authoredWeight": mass_wire.mass_value_wire(row.authored_weight),
+        "densityXMeshVolume": mass_wire.mass_value_wire(row.density_x_mesh_volume),
+        "densityXSectionVolume": mass_wire.mass_value_wire(
             row.density_x_section_volume
         ),
-        "resolved": mass.mass_value_wire(row.resolved),
+        "resolved": mass_wire.mass_value_wire(row.resolved),
         "resolvedMethod": (
             row.resolved.evidence.method if isinstance(row.resolved, mass.Value) else None
         ),
@@ -178,6 +179,7 @@ def takeoff(
     model_hash = str(info["contentHashSha256"])
     units = mass_facts.gather_project_units(ifc_file)
     subjects, selected_parts, picked = _group_selection(ifc_file, global_ids)
+    policy = mass.MassPolicy(tolerance)
     rows = []
     row_wires = []
     for done, (subject_id, subject) in enumerate(subjects.items(), start=1):
@@ -188,7 +190,7 @@ def takeoff(
             model_hash,
             sorted(chosen) if chosen is not None else None,
         )
-        row = mass.resolve_assembly(facts, table, tolerance)
+        row = mass.resolve_assembly_with_policy(facts, table, policy)
         rows.append(row)
         row_wires.append(
             _row_wire(row, subject, units.length_m_per_project_unit, facts)

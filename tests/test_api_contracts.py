@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import AsyncMock, patch
 
 import httpx
 
@@ -18,6 +19,7 @@ import app as app_module
 class ApiContractTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         app_module.state.clear_selection()
+        app_module.member_scan_service.clear()
         transport = httpx.ASGITransport(app=app_module.app)
         self.client = httpx.AsyncClient(
             transport=transport,
@@ -61,6 +63,40 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
     async def test_selection_validation_contract(self):
         response = await self.client.post("/selection", json={"selection": {}})
         self.assertEqual(response.status_code, 422)
+
+    async def test_takeoff_exports_preserve_model_state_errors(self):
+        request = {
+            "scope": "model",
+            "densityTableRevision": "steel",
+            "densityKgPerM3": {"Steel": 7850.0},
+            "tolerance": 0.05,
+        }
+        for path in ("/mass/takeoff.csv", "/mass/takeoff/open-in-excel"):
+            response = await self.client.post(path, json=request)
+            self.assertEqual(response.status_code, 409, path)
+            self.assertEqual(response.json()["error"], "no_active_model", path)
+
+    async def test_member_scan_preserves_model_state_errors(self):
+        response = await self.client.post(
+            "/idea/member-scan",
+            json={"globalIds": ["MISSING"], "joint": [0, 0, 0], "lengthUnit": "m"},
+        )
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["error"], "no_active_model")
+
+    async def test_empty_fragment_upload_has_a_stable_client_error(self):
+        model_hash = "a" * 64
+        with patch.object(
+            app_module.fragment_service,
+            "store_stream",
+            new=AsyncMock(side_effect=ValueError("empty fragments body")),
+        ):
+            response = await self.client.post(
+                f"/model/fragments/{model_hash}",
+                content=b"",
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "empty_fragments_body")
 
     async def test_openapi_preserves_the_complete_bridge_surface(self):
         paths = (await self.client.get("/openapi.json")).json()["paths"]

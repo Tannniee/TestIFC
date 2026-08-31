@@ -177,6 +177,8 @@ export const copy = {
   },
 } as const;
 
+export type CopyText = (typeof copy)[Locale];
+
 export const helpTopics: Record<Locale, HelpTopic[]> = {
   vi: [
     {

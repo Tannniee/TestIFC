@@ -3,6 +3,9 @@ from pathlib import Path
 from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 ROOT = Path(SPECPATH)
+version_namespace = {}
+exec((ROOT / "src" / "version.py").read_text(encoding="utf-8"), version_namespace)
+PACKAGE_NAME = f"IFC Viewer {version_namespace['APP_VERSION']}"
 
 ifc_data, ifc_binaries, ifc_hidden = collect_all("ifcopenshell")
 webview_hidden = collect_submodules("webview")
@@ -37,7 +40,7 @@ exe = EXE(
     analysis.binaries,
     analysis.datas,
     [],
-    name="IFC Viewer 0.4.0 ahihi Fixed",
+    name=PACKAGE_NAME,
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

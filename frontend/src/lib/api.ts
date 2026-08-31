@@ -1,57 +1,29 @@
-export interface HealthResponse {
-  ok: boolean;
-  service: string;
-  schemaVersion: number;
-  appVersion: string;
-  hasSelection: boolean;
-}
+import {
+  API_ENDPOINTS,
+  apiPath,
+  type ActivateModelResponse,
+  type ApiActionResponse,
+  type AuthStatus,
+  type FragmentStoredResponse,
+  type HealthResponse,
+  type LoadModelResponse,
+  type ModelRuntimeResponse,
+  type SelectionPayload,
+  type SelectionResponse,
+} from "./api-contracts";
 
-export interface AuthStatus {
-  authenticated: boolean;
-  valid: boolean;
-  enforced: boolean;
-  authMode: string;
-  daysRemaining?: number;
-  name?: string;
-  email?: string;
-}
-
-export interface LoadModelResponse {
-  ok: boolean;
-  modelHash: string;
-  originalFilename: string;
-  sizeBytes: number;
-}
-
-export interface ModelRuntimeResponse {
-  hasActiveModel: boolean;
-  modelResident: boolean;
-  preparing: boolean;
-  prepareError: string | null;
-  storeBacked: boolean;
-  sizeBytes: number;
-  liveModelMaxBytes: number;
-  idleSeconds: number;
-}
-
-export interface SelectionElement {
-  globalId: string | null;
-  expressId: number | null;
-  localId: number | null;
-  ifcType: string | null;
-  objectType: string | null;
-  description: string | null;
-  name: string | null;
-}
-
-export interface SelectionPayload {
-  schemaVersion: number;
-  source: string;
-  model: { id: string; name: string; path: null };
-  element: SelectionElement;
-  selection: { status: "selected"; selectedAt: string };
-  preview: Record<string, unknown>;
-}
+export type {
+  ActivateModelResponse,
+  ApiActionResponse,
+  AuthStatus,
+  FragmentStoredResponse,
+  HealthResponse,
+  LoadModelResponse,
+  ModelRuntimeResponse,
+  SelectionElement,
+  SelectionPayload,
+  SelectionResponse,
+} from "./api-contracts";
 
 export class ApiError extends Error {
   constructor(
@@ -98,21 +70,21 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  authStatus: () => requestJson<AuthStatus>("/auth/status"),
-  health: () => requestJson<HealthResponse>("/health"),
-  login: () => requestJson<Record<string, unknown>>("/auth/login", { method: "POST" }),
-  logout: () => requestJson<Record<string, unknown>>("/auth/logout", { method: "POST" }),
+  authStatus: () => requestJson<AuthStatus>(API_ENDPOINTS.authStatus.path),
+  health: () => requestJson<HealthResponse>(API_ENDPOINTS.health.path),
+  login: () => requestJson<ApiActionResponse>(API_ENDPOINTS.authLogin.path, { method: API_ENDPOINTS.authLogin.method }),
+  logout: () => requestJson<ApiActionResponse>(API_ENDPOINTS.authLogout.path, { method: API_ENDPOINTS.authLogout.method }),
   loadModel(file: File): Promise<LoadModelResponse> {
     const body = new FormData();
     body.append("file", file, file.name);
-    return requestJson<LoadModelResponse>("/load-model", { method: "POST", body });
+    return requestJson<LoadModelResponse>(API_ENDPOINTS.loadModel.path, { method: API_ENDPOINTS.loadModel.method, body });
   },
   uploadModel(file: File, onProgress: (progress: number) => void): Promise<LoadModelResponse> {
     return new Promise((resolve, reject) => {
       const body = new FormData();
       body.append("file", file, file.name);
       const request = new XMLHttpRequest();
-      request.open("POST", "/load-model");
+      request.open(API_ENDPOINTS.loadModel.method, API_ENDPOINTS.loadModel.path);
       request.responseType = "json";
       request.upload.addEventListener("progress", (event) => {
         if (event.lengthComputable) onProgress(event.loaded / event.total);
@@ -130,10 +102,15 @@ export const api = {
     });
   },
   activateModel(modelHash: string) {
-    return requestJson<{ ok: boolean; modelHash: string }>(`/model/activate/${modelHash}`, { method: "POST" });
+    return requestJson<ActivateModelResponse>(
+      apiPath(API_ENDPOINTS.activateModel, { modelHash }),
+      { method: API_ENDPOINTS.activateModel.method },
+    );
   },
   async tryActivateModel(modelHash: string): Promise<boolean> {
-    const response = await fetch(`/model/activate/${modelHash}`, { method: "POST" });
+    const response = await fetch(apiPath(API_ENDPOINTS.activateModel, { modelHash }), {
+      method: API_ENDPOINTS.activateModel.method,
+    });
     if (response.status === 404) return false;
     if (!response.ok) {
       const body = await response.text();
@@ -141,9 +118,9 @@ export const api = {
     }
     return true;
   },
-  runtime: () => requestJson<ModelRuntimeResponse>("/model/runtime"),
+  runtime: () => requestJson<ModelRuntimeResponse>(API_ENDPOINTS.modelRuntime.path),
   async getFragments(modelHash: string): Promise<ArrayBuffer | null> {
-    const response = await fetch(`/model/fragments/${modelHash}`);
+    const response = await fetch(apiPath(API_ENDPOINTS.getFragments, { modelHash }));
     if (response.status === 404) return null;
     if (!response.ok) {
       const body = await response.text();
@@ -152,8 +129,8 @@ export const api = {
     return response.arrayBuffer();
   },
   async putFragments(modelHash: string, fragments: Uint8Array): Promise<void> {
-    const response = await fetch(`/model/fragments/${modelHash}`, {
-      method: "POST",
+    const response = await fetch(apiPath(API_ENDPOINTS.putFragments, { modelHash }), {
+      method: API_ENDPOINTS.putFragments.method,
       headers: { "Content-Type": "application/octet-stream" },
       body: fragments as unknown as BodyInit,
     });
@@ -161,15 +138,18 @@ export const api = {
       const body = await response.text();
       throw new ApiError(responseMessage(response.status, response.statusText, body), response.status, body);
     }
+    await response.json() as FragmentStoredResponse;
   },
   setSelection(selection: SelectionPayload) {
-    return requestJson("/selection", {
-      method: "POST",
+    return requestJson<SelectionResponse>(API_ENDPOINTS.setSelection.path, {
+      method: API_ENDPOINTS.setSelection.method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(selection),
     });
   },
   clearSelection() {
-    return requestJson("/selection", { method: "DELETE" });
+    return requestJson<SelectionResponse>(API_ENDPOINTS.clearSelection.path, {
+      method: API_ENDPOINTS.clearSelection.method,
+    });
   },
 };

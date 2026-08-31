@@ -5,23 +5,29 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 import license_gate
-from api_contracts import HealthResponse, SelectionPayload, SelectionResponse
+from api_contracts import (
+    ApiActionResponse,
+    AuthStatusResponse,
+    HealthResponse,
+    SelectionPayload,
+    SelectionResponse,
+)
 from api_state import BridgeState
 
 
 def create_core_router(state: BridgeState) -> APIRouter:
     router = APIRouter()
 
-    @router.get("/auth/status", response_model=dict)
-    async def auth_status():
+    @router.get("/auth/status", response_model=AuthStatusResponse)
+    def auth_status():
         return license_gate.status()
 
     @router.post("/auth/login", response_model=dict)
-    async def auth_login():
+    def auth_login():
         return license_gate.login()
 
-    @router.post("/auth/logout", response_model=dict)
-    async def auth_logout():
+    @router.post("/auth/logout", response_model=ApiActionResponse)
+    def auth_logout():
         license_gate.logout()
         return {"ok": True}
 

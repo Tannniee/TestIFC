@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from threading import Thread
 from time import sleep
 
@@ -23,8 +24,11 @@ from api_routes.core import create_core_router
 from api_routes.idea import create_idea_router
 from api_routes.mass import create_mass_router
 from api_routes.model import create_model_router
-from api_state import BridgeState, ModelTakeoffJob, ScanState
-from ifc_service import release_idle_model
+from api_state import BridgeState
+from fragment_service import FragmentService
+from member_scan_service import MemberScanService
+from model_runtime import release_idle_model
+from takeoff_service import ModelTakeoffJob, TakeoffService
 from version import APP_VERSION
 
 
@@ -34,6 +38,7 @@ ALLOWED_ORIGINS = {
     "http://localhost:5173",
 }
 IDLE_MODEL_SWEEP_SECONDS = 60.0
+logger = logging.getLogger("ifc_viewer.backend")
 
 
 def _reap_idle_model() -> None:
@@ -42,12 +47,17 @@ def _reap_idle_model() -> None:
         try:
             release_idle_model()
         except Exception:
-            pass
+            logger.exception(
+                "Idle model reaper failed",
+                extra={"event": "idle_model_reaper_failed"},
+            )
 
 
 state = BridgeState()
-scan_state = ScanState()
-model_takeoff_job = ModelTakeoffJob()
+fragment_service = FragmentService()
+member_scan_service = MemberScanService()
+takeoff_service = TakeoffService()
+model_takeoff_job = ModelTakeoffJob(takeoff_service)
 
 app = FastAPI(title="IFC Viewer", version=APP_VERSION)
 app.add_middleware(
@@ -71,8 +81,8 @@ async def reject_non_local_clients(request: Request, call_next):
 
 
 app.include_router(create_core_router(state))
-app.include_router(create_model_router())
-app.include_router(create_mass_router(model_takeoff_job))
-app.include_router(create_idea_router(scan_state))
+app.include_router(create_model_router(fragment_service))
+app.include_router(create_mass_router(model_takeoff_job, takeoff_service))
+app.include_router(create_idea_router(member_scan_service))
 
 Thread(target=_reap_idle_model, name="idle-model-reaper", daemon=True).start()

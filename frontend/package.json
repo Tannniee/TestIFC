@@ -1,11 +1,12 @@
 {
-  "name": "ifc-viewer-recovered-frontend",
+  "name": "ifc-viewer-alternative-frontend",
   "private": true,
-  "version": "0.4.0-recovered.1",
+  "version": "0.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "preview": "vite preview --host 127.0.0.1"
   },

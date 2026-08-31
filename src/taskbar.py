@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ctypes
+import logging
 import threading
 from ctypes import wintypes
 
@@ -22,6 +23,7 @@ _RPC_E_CHANGED_MODE = -2147417850
 
 _lock = threading.Lock()
 _failure_logged = False
+logger = logging.getLogger("ifc_viewer.desktop.taskbar")
 
 
 class _Guid(ctypes.Structure):
@@ -83,7 +85,11 @@ def _set_state(hwnd: int, flag: int, completed: int | None) -> bool:
         except OSError as error:
             if not _failure_logged:
                 _failure_logged = True
-                print(f"WARN taskbar progress unavailable: {error}")
+                logger.warning(
+                    "Taskbar progress is unavailable: %s",
+                    error,
+                    extra={"event": "taskbar_unavailable"},
+                )
             return False
         finally:
             if taskbar.value:

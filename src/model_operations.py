@@ -5,10 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, BinaryIO
 
-from ifc_service import (
-    cached_model_file,
+from ifc_elements import (
     extract_element,
     extract_element_by_express_id,
+)
+from model_cache import cached_model_file
+from model_runtime import (
     live_model_status,
     materialize_model_stream,
     open_active_model,

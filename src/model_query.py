@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ifc_service import active_index
+from model_runtime import active_index
 from model_index import ModelIndex
 
 DEFAULT_SEARCH_LIMIT = 100

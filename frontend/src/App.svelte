@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
+  import AppRail from "./lib/AppRail.svelte";
+  import AuthDialog from "./lib/AuthDialog.svelte";
+  import HelpDialog from "./lib/HelpDialog.svelte";
   import Icon from "./lib/Icon.svelte";
+  import InspectorDrawer from "./lib/InspectorDrawer.svelte";
   import ViewCube from "./lib/ViewCube.svelte";
-  import { api, isAuthorizationError, type AuthStatus } from "./lib/api";
-  import { copy, helpTopics, type Locale } from "./lib/i18n";
-  import { loadDesktopSettings, saveDesktopSettings, type AppSettings } from "./lib/settings";
-  import { ViewerService, isLoadCancelledError, type BridgeProgress, type CameraOrientation, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewportBackground, type ViewPreset } from "./lib/viewer";
+  import { AppShellService, type AppSettings, type AuthStatus, type BridgeProgress, type CameraOrientation, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
+  import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
 
   type ModelState = "empty" | "loading" | "ready" | "error";
   const sectionAxes = ["x", "y", "z"] as const;
@@ -29,7 +31,7 @@
   let selectedTopic = 0;
   let fileInput: HTMLInputElement;
   let viewerHost: HTMLDivElement;
-  let viewer: ViewerService | null = null;
+  const shell = new AppShellService();
   let appVersion = "0.4.0 ahihi";
   let modelStatus: string | null = null;
   let modelState: ModelState = "empty";
@@ -41,23 +43,17 @@
   let authOpen = false;
   let authBusy = true;
   let authError: string | null = null;
-  let helpDialog: HTMLDivElement;
-  let helpCloseButton: HTMLButtonElement;
-  let previousFocus: HTMLElement | null = null;
   let drawerWidth = 360;
   let appLoadSequence = 0;
   let gridVisible = true;
   let viewportBackground: ViewportBackground = "gray";
   let wheelZoomSpeed = 1;
   let cameraOrientation: CameraOrientation = { x: 0, y: 0, z: 0, w: 1 };
-  let settingsInitialized = false;
-  let settingsSaveTimer: number | null = null;
   let themeTransitioning = false;
   let themeTransitionTimer: number | null = null;
 
   $: t = copy[locale];
   $: topics = helpTopics[locale];
-  $: topic = topics[selectedTopic] ?? topics[0];
   $: hasModel = modelState === "ready";
   $: themeLabel = mode === "light" ? t.themeDark : t.themeLight;
   $: viewCubeText = {
@@ -78,7 +74,7 @@
 
   onMount(async () => {
     try {
-      const [health] = await Promise.all([api.health(), refreshAuth()]);
+      const [health] = await Promise.all([shell.health(), refreshAuth()]);
       appVersion = health.appVersion;
     } catch {
       // The source UI also runs without the Python bridge during visual work.
@@ -88,15 +84,11 @@
 
   onMount(() => {
     let cancelled = false;
-    const fallbackSettings = readLocalSettings();
+    const fallbackSettings = shell.readLocalSettings();
     applySettings(fallbackSettings);
 
     const initializeViewer = async () => {
-      const desktopSettings = await loadDesktopSettings();
-      if (cancelled) return;
-      applySettings(desktopSettings ?? fallbackSettings);
-
-      viewer = new ViewerService(viewerHost, {
+      const settings = await shell.initializeViewer(viewerHost, {
         onProgress(progress) {
           viewerProgress = progress;
           errorMessage = progress.stage === "error" ? progress.detail ?? "Viewer error" : null;
@@ -128,39 +120,21 @@
           authError = error instanceof Error ? error.message : t.authRequired;
           authOpen = true;
         },
-      });
-      viewer.setBackground(viewportBackground);
-      viewer.setGridVisible(gridVisible);
-      viewer.setWheelZoomSpeed(wheelZoomSpeed);
-      settingsInitialized = true;
-      if (!desktopSettings) void saveDesktopSettings(currentSettings());
+      }, fallbackSettings);
+      if (cancelled) {
+        void shell.dispose();
+        return;
+      }
+      applySettings(settings);
     };
 
     void initializeViewer();
     return () => {
       cancelled = true;
-      settingsInitialized = false;
-      if (settingsSaveTimer !== null) window.clearTimeout(settingsSaveTimer);
       if (themeTransitionTimer !== null) window.clearTimeout(themeTransitionTimer);
-      void viewer?.dispose();
-      viewer = null;
+      void shell.dispose();
     };
   });
-
-  function readLocalSettings(): AppSettings {
-    const savedLocale = localStorage.getItem("ifc-viewer-locale");
-    const savedMode = localStorage.getItem("ifc-viewer-theme");
-    const savedBackground = localStorage.getItem("ifc-viewer-background");
-    const savedZoomSpeed = Number(localStorage.getItem("ifc-viewer-wheel-zoom-speed"));
-    return {
-      schemaVersion: 1,
-      locale: savedLocale === "en" ? "en" : "vi",
-      mode: savedMode === "dark" ? "dark" : "light",
-      gridVisible: localStorage.getItem("ifc-viewer-grid") !== "hidden",
-      viewportBackground: savedBackground === "white" || savedBackground === "oled" ? savedBackground : "gray",
-      wheelZoomSpeed: Number.isFinite(savedZoomSpeed) && savedZoomSpeed >= 0.25 && savedZoomSpeed <= 3 ? savedZoomSpeed : 1,
-    };
-  }
 
   function applySettings(settings: AppSettings) {
     locale = settings.locale;
@@ -169,9 +143,7 @@
     viewportBackground = settings.viewportBackground;
     wheelZoomSpeed = settings.wheelZoomSpeed;
     document.documentElement.lang = locale;
-    viewer?.setBackground(viewportBackground);
-    viewer?.setGridVisible(gridVisible);
-    viewer?.setWheelZoomSpeed(wheelZoomSpeed);
+    shell.applyViewerSettings(settings);
   }
 
   function currentSettings(): AppSettings {
@@ -179,31 +151,20 @@
   }
 
   function persistSettings(delay = 0) {
-    const settings = currentSettings();
-    localStorage.setItem("ifc-viewer-locale", settings.locale);
-    localStorage.setItem("ifc-viewer-theme", settings.mode);
-    localStorage.setItem("ifc-viewer-grid", settings.gridVisible ? "visible" : "hidden");
-    localStorage.setItem("ifc-viewer-background", settings.viewportBackground);
-    localStorage.setItem("ifc-viewer-wheel-zoom-speed", String(settings.wheelZoomSpeed));
-    if (!settingsInitialized) return;
-    if (settingsSaveTimer !== null) window.clearTimeout(settingsSaveTimer);
-    settingsSaveTimer = window.setTimeout(() => {
-      settingsSaveTimer = null;
-      void saveDesktopSettings(currentSettings());
-    }, delay);
+    shell.persistSettings(currentSettings(), delay);
   }
 
-  function progressText(progress: ViewerProgress | null): string | null {
+  function progressText(progress: ViewerProgress | null, text: CopyText): string | null {
     if (!progress) return null;
     if (progress.stage === "error") return progress.detail ?? "Error";
     const labels: Record<ViewerProgress["stage"], string> = {
-      uploading: t.uploading,
-      cache: t.cache,
-      reading: t.opening,
-      converting: t.converting,
-      loading: t.loading,
-      ready: t.ready,
-      selecting: t.selecting,
+      uploading: text.uploading,
+      cache: text.cache,
+      reading: text.opening,
+      converting: text.converting,
+      loading: text.loading,
+      ready: text.ready,
+      selecting: text.selecting,
       error: "Error",
     };
     const percent = progress.progress !== undefined && progress.stage !== "ready"
@@ -213,17 +174,17 @@
     return `${labels[progress.stage]}${percent}${detail}`;
   }
 
-  function bridgeText(progress: BridgeProgress): string {
+  function bridgeText(progress: BridgeProgress, language: Locale): string {
     const labels: Record<BridgeProgress["stage"], string> = {
-      activating: locale === "vi" ? "đang kích hoạt mô hình" : "activating model",
-      uploading: locale === "vi" ? "đang nhận file" : "receiving file",
-      preparing: locale === "vi" ? "đang lập chỉ mục" : "building index",
-      ready: locale === "vi" ? "sẵn sàng" : "ready",
-      cleared: locale === "vi" ? "đã xoá lựa chọn" : "selection cleared",
-      error: locale === "vi" ? "có lỗi" : "error",
+      activating: language === "vi" ? "đang kích hoạt mô hình" : "activating model",
+      uploading: language === "vi" ? "đang nhận file" : "receiving file",
+      preparing: language === "vi" ? "đang lập chỉ mục" : "building index",
+      ready: language === "vi" ? "sẵn sàng" : "ready",
+      cleared: language === "vi" ? "đã xoá lựa chọn" : "selection cleared",
+      error: language === "vi" ? "có lỗi" : "error",
     };
     const percent = progress.progress === undefined ? "" : ` ${Math.round(progress.progress * 100)}%`;
-    return `${locale === "vi" ? "Cầu nối" : "Bridge"}: ${labels[progress.stage]}${percent}`;
+    return `${language === "vi" ? "Cầu nối" : "Bridge"}: ${labels[progress.stage]}${percent}`;
   }
 
   function switchLanguage() {
@@ -255,7 +216,7 @@
   async function refreshAuth() {
     authBusy = true;
     try {
-      authStatus = await api.authStatus();
+      authStatus = await shell.authStatus();
       authOpen = authStatus.enforced && (!authStatus.authenticated || !authStatus.valid);
       authError = authOpen ? t.authRequired : null;
     } finally {
@@ -267,8 +228,7 @@
     authBusy = true;
     authError = null;
     try {
-      await api.login();
-      authStatus = await api.authStatus();
+      authStatus = await shell.login();
       authOpen = authStatus.enforced && (!authStatus.authenticated || !authStatus.valid);
       if (authOpen) authError = t.authRequired;
     } catch (error) {
@@ -281,8 +241,7 @@
   async function logout() {
     authBusy = true;
     try {
-      await api.logout();
-      authStatus = await api.authStatus();
+      authStatus = await shell.logout();
       authOpen = authStatus.enforced;
       authError = authOpen ? t.authRequired : null;
     } catch (error) {
@@ -292,28 +251,22 @@
     }
   }
 
-  async function openHelp() {
-    previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  function openHelp() {
     helpOpen = true;
-    await tick();
-    helpCloseButton?.focus();
   }
 
-  async function closeHelp() {
+  function closeHelp() {
     helpOpen = false;
-    await tick();
-    previousFocus?.focus();
-    previousFocus = null;
   }
 
   function handleGlobalKeydown(event: KeyboardEvent) {
     if (event.key === "Escape" && boxZoomActive) {
-      viewer?.setBoxZoomEnabled(false);
+      shell.setBoxZoomEnabled(false);
       event.preventDefault();
       return;
     }
     if (event.key === "Escape" && sectionPickActive) {
-      viewer?.setSectionPickEnabled(false);
+      shell.setSectionPickEnabled(false);
       event.preventDefault();
       return;
     }
@@ -322,28 +275,6 @@
       event.preventDefault();
       return;
     }
-    if (!helpOpen) return;
-    if (event.key === "Escape") {
-      event.preventDefault();
-      void closeHelp();
-      return;
-    }
-    if (event.key !== "Tab" || !helpDialog) return;
-    const focusable = [...helpDialog.querySelectorAll<HTMLElement>('button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')];
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
-
-  function handleHelpBackdrop(event: MouseEvent) {
-    if (event.target === event.currentTarget) void closeHelp();
   }
 
   function startDrawerResize(event: PointerEvent) {
@@ -373,23 +304,23 @@
     displaySettingsOpen = !displaySettingsOpen;
     if (displaySettingsOpen) {
       sectionPanelOpen = false;
-      viewer?.setSectionPickEnabled(false);
+      shell.setSectionPickEnabled(false);
     }
   }
 
   function toggleBoxZoom() {
-    viewer?.setBoxZoomEnabled(!boxZoomActive);
+    shell.setBoxZoomEnabled(!boxZoomActive);
   }
 
   function toggleSectionPanel() {
     sectionPanelOpen = !sectionPanelOpen;
     if (sectionPanelOpen) displaySettingsOpen = false;
-    else viewer?.setSectionPickEnabled(false);
+    else shell.setSectionPickEnabled(false);
   }
 
   function startSectionPick() {
     sectionMode = "surface";
-    viewer?.setSectionPickEnabled(true);
+    shell.setSectionPickEnabled(true);
   }
 
   function applyCoordinateSection() {
@@ -397,12 +328,12 @@
     const normal = { x: 0, y: 0, z: 0 };
     point[sectionAxis] = sectionCoordinate;
     normal[sectionAxis] = 1;
-    viewer?.setSectionPlane({ point, normal, side: sectionSide });
+    shell.setSectionPlane({ point, normal, side: sectionSide });
   }
 
   function changeSectionSide(side: SectionSide) {
     sectionSide = side;
-    viewer?.setSectionSide(side);
+    shell.setSectionSide(side);
   }
 
   function flipSectionSide() {
@@ -410,8 +341,8 @@
   }
 
   function clearSection() {
-    viewer?.setSectionPickEnabled(false);
-    viewer?.clearSectionPlane();
+    shell.setSectionPickEnabled(false);
+    shell.clearSectionPlane();
   }
 
   function formatVector(vector: { x: number; y: number; z: number }) {
@@ -419,32 +350,32 @@
   }
 
   function changeView(preset: ViewPreset) {
-    viewer?.setView(preset);
+    shell.setView(preset);
   }
 
   function changeViewDirection(direction: ViewDirection) {
-    viewer?.setViewDirection(direction);
+    shell.setViewDirection(direction);
   }
 
   function orbitFromViewCube(deltaAzimuth: number, deltaPolar: number) {
-    viewer?.orbitView(deltaAzimuth, deltaPolar);
+    shell.orbitView(deltaAzimuth, deltaPolar);
   }
 
   function changeGridVisibility(visible: boolean) {
     gridVisible = visible;
-    viewer?.setGridVisible(visible);
+    shell.setGridVisible(visible);
     persistSettings();
   }
 
   function changeViewportBackground(background: ViewportBackground) {
     viewportBackground = background;
-    viewer?.setBackground(background);
+    shell.setBackground(background);
     persistSettings();
   }
 
   function changeWheelZoomSpeed(speed: number) {
     wheelZoomSpeed = Math.min(3, Math.max(0.25, speed));
-    viewer?.setWheelZoomSpeed(wheelZoomSpeed);
+    shell.setWheelZoomSpeed(wheelZoomSpeed);
     persistSettings(160);
   }
 
@@ -465,17 +396,17 @@
     bridgeProgress = { stage: "activating", detail: file.name };
     modelStatus = `${t.opening} ${file.name}`;
     try {
-      await viewer?.load(file);
+      await shell.load(file);
       if (sequence !== appLoadSequence) return;
       modelStatus = file.name;
       modelState = "ready";
     } catch (error) {
-      if (isLoadCancelledError(error) || sequence !== appLoadSequence) return;
+      if (shell.isCancelledLoad(error) || sequence !== appLoadSequence) return;
       const message = error instanceof Error ? error.message : String(error);
       errorMessage = message;
       viewerProgress = { stage: "error", detail: message };
       modelState = "error";
-      if (isAuthorizationError(error)) authOpen = true;
+      if (shell.isAuthorizationFailure(error)) authOpen = true;
     }
   }
 
@@ -524,95 +455,27 @@
 <svelte:window onkeydown={handleGlobalKeydown} />
 
 <main class={`app-shell qn-theme${themeTransitioning ? " theme-transitioning" : ""}`} data-mode={mode}>
-  <nav class="qn-rail" aria-label={t.rail}>
-    <div class="qn-rail-brand" aria-hidden="true">IFC</div>
-    <input
-      bind:this={fileInput}
-      class="file-input"
-      type="file"
-      accept=".ifc"
-      onchange={handleFile}
-    />
-
-    <button class="qn-rail-button" title={t.open} aria-label={t.open} data-tooltip={t.open} onclick={openFilePicker}>
-      <Icon name="folder" />
-    </button>
-    <button class="qn-rail-button" title={t.fit} aria-label={t.fit} data-tooltip={t.fit} disabled={!hasModel} onclick={() => viewer?.fit()}>
-      <Icon name="fit" />
-    </button>
-    <button
-      class:qn-rail-button-active={boxZoomActive}
-      class="qn-rail-button"
-      title={t.boxZoom}
-      aria-label={t.boxZoom}
-      aria-pressed={boxZoomActive}
-      data-tooltip={t.boxZoom}
-      disabled={!hasModel}
-      onclick={toggleBoxZoom}
-    >
-      <Icon name="zoomBox" />
-    </button>
-    <button
-      class:qn-rail-button-active={sectionPanelOpen || sectionPickActive || Boolean(sectionDefinition)}
-      class="qn-rail-button"
-      title={t.sectionPlane}
-      aria-label={t.sectionPlane}
-      aria-pressed={sectionPanelOpen}
-      data-tooltip={t.sectionPlane}
-      disabled={!hasModel}
-      onclick={toggleSectionPanel}
-    >
-      <Icon name="section" />
-    </button>
-    <button
-      class:qn-rail-button-active={displaySettingsOpen}
-      class="qn-rail-button"
-      title={t.displaySettings}
-      aria-label={t.displaySettings}
-      aria-pressed={displaySettingsOpen}
-      data-tooltip={t.displaySettings}
-      onclick={toggleDisplaySettings}
-    >
-      <Icon name="settings" />
-    </button>
-    <button
-      class="qn-rail-button"
-      title={themeLabel}
-      aria-label={themeLabel}
-      data-tooltip={themeLabel}
-      onclick={toggleTheme}
-    >
-      <Icon name={mode === "light" ? "moon" : "sun"} />
-    </button>
-    <button class="qn-rail-button" title={t.language} aria-label={t.language} data-tooltip={t.language} onclick={switchLanguage}>
-      <Icon name="globe" />
-    </button>
-
-    <div class="qn-rail-divider"></div>
-
-    <button
-      class:qn-rail-button-active={inspectorOpen}
-      class="qn-rail-button"
-      title={t.inspector}
-      aria-label={t.inspector}
-      aria-pressed={inspectorOpen}
-      data-tooltip={t.inspector}
-      onclick={() => (inspectorOpen = !inspectorOpen)}
-    >
-      <Icon name="panel" />
-    </button>
-    <button
-      class:qn-rail-button-active={helpOpen}
-      class="qn-rail-button"
-      title={t.help}
-      aria-label={t.help}
-      aria-pressed={helpOpen}
-      data-tooltip={t.help}
-      onclick={openHelp}
-    >
-      <Icon name="help" />
-    </button>
-  </nav>
+  <input bind:this={fileInput} class="file-input" type="file" accept=".ifc" onchange={handleFile} />
+  <AppRail
+    text={t}
+    {mode}
+    {hasModel}
+    {boxZoomActive}
+    sectionActive={sectionPanelOpen || sectionPickActive || Boolean(sectionDefinition)}
+    {displaySettingsOpen}
+    {inspectorOpen}
+    {helpOpen}
+    {themeLabel}
+    onOpen={openFilePicker}
+    onFit={() => shell.fit()}
+    onBoxZoom={toggleBoxZoom}
+    onSection={toggleSectionPanel}
+    onDisplaySettings={toggleDisplaySettings}
+    onTheme={toggleTheme}
+    onLanguage={switchLanguage}
+    onInspector={() => (inspectorOpen = !inspectorOpen)}
+    onHelp={openHelp}
+  />
 
   <section
     class:viewer-drop-active={dragActive}
@@ -679,12 +542,12 @@
       <section class="viewer-section-panel" aria-label={t.sectionPlane}>
         <header class="viewer-settings__header">
           <h2>{t.sectionPlane}</h2>
-          <button aria-label={t.close} onclick={() => { sectionPanelOpen = false; viewer?.setSectionPickEnabled(false); }}>×</button>
+          <button aria-label={t.close} onclick={() => { sectionPanelOpen = false; shell.setSectionPickEnabled(false); }}>×</button>
         </header>
 
         <div class="viewer-section-tabs" role="tablist" aria-label={t.sectionMode}>
           <button class:viewer-section-tab-active={sectionMode === "surface"} role="tab" aria-selected={sectionMode === "surface"} onclick={() => (sectionMode = "surface")}>{t.sectionSurface}</button>
-          <button class:viewer-section-tab-active={sectionMode === "coordinate"} role="tab" aria-selected={sectionMode === "coordinate"} onclick={() => { sectionMode = "coordinate"; viewer?.setSectionPickEnabled(false); }}>{t.sectionCoordinate}</button>
+          <button class:viewer-section-tab-active={sectionMode === "coordinate"} role="tab" aria-selected={sectionMode === "coordinate"} onclick={() => { sectionMode = "coordinate"; shell.setSectionPickEnabled(false); }}>{t.sectionCoordinate}</button>
         </div>
 
         {#if sectionMode === "surface"}
@@ -720,7 +583,7 @@
         </div>
 
         <div class="viewer-section-actions">
-          <button disabled={!sectionDefinition} onclick={() => viewer?.viewSectionPlane()}>{t.sectionView}</button>
+          <button disabled={!sectionDefinition} onclick={() => shell.viewSectionPlane()}>{t.sectionView}</button>
           <button disabled={!sectionDefinition} onclick={clearSection}>{t.sectionClear}</button>
         </div>
       </section>
@@ -733,89 +596,42 @@
     {/if}
     {#if !hasModel || errorMessage}
       <div class:viewer-empty-state-error={Boolean(errorMessage)} class="viewer-empty-state">
-        <p>{errorMessage ?? progressText(viewerProgress) ?? modelStatus ?? t.empty}</p>
+        <p>{errorMessage ?? progressText(viewerProgress, t) ?? modelStatus ?? t.empty}</p>
       </div>
     {/if}
     <footer class="qn-status-bar">
-      <span>{progressText(viewerProgress) ?? modelStatus ?? t.noModel}</span>
-      <span title={bridgeProgress.detail}>{bridgeText(bridgeProgress)}</span>
+      <span>{progressText(viewerProgress, t) ?? modelStatus ?? t.noModel}</span>
+      <span title={bridgeProgress.detail}>{bridgeText(bridgeProgress, locale)}</span>
       <span>{t.modelData}: {modelState === "ready" ? `${t.modelReady} · ${modelStatus ?? ""}` : modelState === "loading" ? t.modelLoading : modelState === "error" ? t.modelError : t.nothingSelected}</span>
       <span>{t.element}: {selectedElement?.name ?? selectedElement?.ifcType ?? t.nothingSelected}</span>
       <span>{t.version} {appVersion}</span>
     </footer>
 
-    <aside class:qn-drawer-open={inspectorOpen} class="qn-drawer" aria-label={t.selection} style:width={`${drawerWidth}px`}>
-      <button class="qn-drawer-handle" aria-label="Resize panel" onpointerdown={startDrawerResize} onkeydown={resizeDrawerByKeyboard}></button>
-      <header class="qn-drawer-header">
-        <h2>{t.selection}</h2>
-        <button class="qn-drawer-close" aria-label={t.close} onclick={() => (inspectorOpen = false)}><Icon name="close" size={17} /></button>
-      </header>
-      <div class="qn-drawer-body">
-        <div class="drawer-heading"><span class="qn-badge qn-badge-soft">{selectedElement?.ifcType ?? t.nothingSelected}</span></div>
-        <section class="qn-property-group">
-          <button class="qn-property-group__header" aria-expanded={identityExpanded} onclick={() => (identityExpanded = !identityExpanded)}><span>{identityExpanded ? "▾" : "▸"}</span> {t.identity}</button>
-          {#if identityExpanded}<div class="qn-property-group__body">
-            <div class="qn-property-row"><span class="qn-property-label">{t.status}</span><span class="qn-property-value">{selectedElement ? "selected" : t.nothingSelected}</span></div>
-            {#if selectedElement}
-              <div class="qn-property-row"><span class="qn-property-label">Name</span><span class="qn-property-value">{selectedElement.name ?? "—"}</span></div>
-              <div class="qn-property-row"><span class="qn-property-label">IFC type</span><span class="qn-property-value">{selectedElement.ifcType ?? "—"}</span></div>
-              <div class="qn-property-row"><span class="qn-property-label">GlobalId</span><span class="qn-property-value" title={selectedElement.globalId ?? undefined}>{selectedElement.globalId ?? "—"}</span></div>
-              <div class="qn-property-row"><span class="qn-property-label">Express ID</span><span class="qn-property-value">{selectedElement.expressId ?? "—"}</span></div>
-            {/if}
-          </div>{/if}
-        </section>
-        <p class="inspector-empty">{selectedElement?.name ? `${t.element.replace(t.nothingSelected, selectedElement.name)}` : t.element}</p>
-      </div>
-    </aside>
+    <InspectorDrawer
+      text={t}
+      open={inspectorOpen}
+      width={drawerWidth}
+      {identityExpanded}
+      selection={selectedElement}
+      onClose={() => (inspectorOpen = false)}
+      onToggleIdentity={() => (identityExpanded = !identityExpanded)}
+      onResizeStart={startDrawerResize}
+      onResizeKeydown={resizeDrawerByKeyboard}
+    />
   </section>
 
   {#if helpOpen}
-    <div class="dialog-backdrop" role="presentation" onclick={handleHelpBackdrop}>
-      <div bind:this={helpDialog} class="qn-dialog qn-dialog-lg help-dialog" role="dialog" aria-modal="true" aria-labelledby="help-title">
-        <header class="qn-dialog__header">
-          <h2 id="help-title">{t.helpTitle} · v{appVersion}</h2>
-          <button bind:this={helpCloseButton} class="qn-dialog__close" aria-label={t.closeDialog} onclick={closeHelp}>×</button>
-        </header>
-        <div class="qn-help">
-          <nav class="qn-help__nav" aria-label={t.topics}>
-            {#each topics as item, index}
-              {#if index === 0 || item.group !== topics[index - 1].group}
-                <h4 class="qn-help__heading">{item.group}</h4>
-              {/if}
-              <button class:qn-help__topic--active={selectedTopic === index} class="qn-help__topic" onclick={() => (selectedTopic = index)}>
-                <span class="qn-help__topic-number">{index - topics.findIndex((candidate) => candidate.group === item.group) + 1}.</span>
-                <span>{item.title}</span>
-              </button>
-            {/each}
-          </nav>
-          <article class="qn-help__body">
-            <h3>{topics.findIndex((candidate) => candidate.group === topic.group) <= selectedTopic ? selectedTopic - topics.findIndex((candidate) => candidate.group === topic.group) + 1 : 1}. {topic.title}</h3>
-            {#if topic.intro}<p>{topic.intro}</p>{/if}
-            <ol>{#each topic.steps as step}<li>{step}</li>{/each}</ol>
-            {#if topic.note}<p class="qn-help__note">{topic.note}</p>{/if}
-          </article>
-        </div>
-      </div>
-    </div>
+    <HelpDialog
+      text={t}
+      version={appVersion}
+      {topics}
+      {selectedTopic}
+      onSelectTopic={(index) => (selectedTopic = index)}
+      onClose={closeHelp}
+    />
   {/if}
 
   {#if authOpen}
-    <div class="dialog-backdrop auth-backdrop">
-      <div class="qn-dialog auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-        <header class="qn-dialog__header"><h2 id="auth-title">{t.authTitle}</h2></header>
-        <div class="auth-dialog__body">
-          <p>{t.authIntro}</p>
-          {#if authBusy}<p>{t.authChecking}</p>{/if}
-          {#if authError}<p class="auth-error" role="alert">{authError}</p>{/if}
-          {#if authStatus?.name}<p>{authStatus.name}{authStatus.email ? ` · ${authStatus.email}` : ""}</p>{/if}
-          <div class="auth-actions">
-            {#if authStatus?.authenticated}
-              <button class="qn-action-button qn-action-button-secondary" disabled={authBusy} onclick={logout}>{t.authLogout}</button>
-            {/if}
-            <button class="qn-action-button" disabled={authBusy} onclick={login}>{t.authLogin}</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <AuthDialog text={t} busy={authBusy} error={authError} status={authStatus} onLogin={login} onLogout={logout} />
   {/if}
 </main>

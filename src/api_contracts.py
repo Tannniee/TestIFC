@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from version import APP_VERSION
 
@@ -64,6 +64,26 @@ class HealthResponse(BaseModel):
     hasSelection: bool
 
 
+class AuthStatusResponse(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    authenticated: bool
+    valid: bool
+    enforced: bool
+    authMode: str
+    daysRemaining: int | None = None
+    name: str | None = None
+    email: str | None = None
+    error: str | None = None
+
+
+class ApiActionResponse(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    ok: bool
+    message: str | None = None
+
+
 class ErrorResponse(BaseModel):
     ok: bool = False
     error: str
@@ -87,6 +107,32 @@ class LoadModelResponse(BaseModel):
     ok: bool = True
     modelHash: str
     originalFilename: str | None = None
+    sizeBytes: int
+
+
+class ActivateModelResponse(BaseModel):
+    ok: bool = True
+    path: str
+    contentHashSha256: str
+    originalFilename: str | None = None
+    sizeBytes: int
+    loadedAt: str
+
+
+class ModelRuntimeResponse(BaseModel):
+    hasActiveModel: bool
+    modelResident: bool
+    preparing: bool
+    prepareError: str | None = None
+    storeBacked: bool
+    sizeBytes: int
+    liveModelMaxBytes: int
+    idleSeconds: float
+
+
+class FragmentStoredResponse(BaseModel):
+    ok: bool = True
+    modelHash: str
     sizeBytes: int
 
 

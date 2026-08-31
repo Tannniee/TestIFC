@@ -12,7 +12,7 @@ from typing import Sequence
 import ifcopenshell
 import ifcopenshell.util.unit
 
-from ifc_service import _lengths_to_m, _named_unit_scale_to_si
+from ifc_units import lengths_to_m, named_unit_scale_to_si
 
 
 @dataclass(frozen=True)
@@ -80,9 +80,9 @@ def gather_project_units(ifc_file: ifcopenshell.file) -> UnitFacts:
     area = ifcopenshell.util.unit.get_project_unit(ifc_file, "AREAUNIT")
     mass = ifcopenshell.util.unit.get_project_unit(ifc_file, "MASSUNIT")
     return UnitFacts(
-        _named_unit_scale_to_si(length) if length is not None else None,
-        _named_unit_scale_to_si(area) if area is not None else None,
-        _named_unit_scale_to_si(mass) if mass is not None else None,
+        named_unit_scale_to_si(length) if length is not None else None,
+        named_unit_scale_to_si(area) if area is not None else None,
+        named_unit_scale_to_si(mass) if mass is not None else None,
         length.id() if length is not None else None,
         area.id() if area is not None else None,
         mass.id() if mass is not None else None,
@@ -106,7 +106,7 @@ def _mass_measure_fact(
             units.mass_grams_per_project_unit,
         )
     is_mass = getattr(explicit_unit, "UnitType", None) == "MASSUNIT"
-    scale = _named_unit_scale_to_si(explicit_unit) if is_mass else None
+    scale = named_unit_scale_to_si(explicit_unit) if is_mass else None
     resolution = "explicit_mass_unit" if scale is not None else "unit_unresolved"
     return MassMeasureFact(
         raw_value,
@@ -213,7 +213,7 @@ def _loop_points(bound, length_scale: float):
     if not loop.is_a("IfcPolyLoop"):
         raise NotImplementedError(f"Unsupported face loop: {loop.is_a()}")
     points = tuple(
-        tuple(_lengths_to_m(point.Coordinates, length_scale))
+        tuple(lengths_to_m(point.Coordinates, length_scale))
         for point in loop.Polygon or ()
     )
     if len(points) < 3:

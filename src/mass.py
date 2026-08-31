@@ -12,7 +12,7 @@ from re import IGNORECASE, compile as compile_pattern
 from typing import Iterable, Literal, Mapping, Sequence, TypeAlias
 
 from content_hash import mapping_digest
-from ifc_service import _lengths_to_m, _to_kilograms
+from ifc_units import lengths_to_m, mass_to_kilograms
 from mass_facts import (
     AssemblyFacts,
     AuthoredWeightFacts,
@@ -37,6 +37,7 @@ __all__ = [
     "MASS_METHODS",
     "MassMeasureFact",
     "MassMethod",
+    "MassPolicy",
     "MassRow",
     "MassValue",
     "MeshFacts",
@@ -50,13 +51,13 @@ __all__ = [
     "authored_weight_candidate",
     "compare_methods",
     "gather_assembly_facts",
-    "mass_value_wire",
     "gather_authored_weight_facts",
     "gather_mesh_facts",
     "gather_part_facts",
     "gather_project_units",
     "mesh_candidate",
     "resolve_assembly",
+    "resolve_assembly_with_policy",
     "resolve_candidates",
     "section_candidate",
 ]
@@ -125,6 +126,26 @@ class DensityTable:
 
 
 @dataclass(frozen=True)
+class MassPolicy:
+    """Business rules that choose, compare, and exclude assembly masses."""
+
+    disagreement_tolerance: float = 0.05
+    excluded_assembly_names: frozenset[str] = DEFAULT_EXCLUDED_ASSEMBLY_NAMES
+
+    def __post_init__(self) -> None:
+        if not 0.0 < self.disagreement_tolerance < 1.0:
+            raise ValueError("disagreement tolerance must be between 0 and 1")
+        object.__setattr__(
+            self,
+            "excluded_assembly_names",
+            frozenset(name.upper() for name in self.excluded_assembly_names),
+        )
+
+    def excludes(self, assembly_name: str | None) -> bool:
+        return str(assembly_name or "").upper() in self.excluded_assembly_names
+
+
+@dataclass(frozen=True)
 class MassRow:
     model_hash: str
     assembly_global_id: str
@@ -180,7 +201,7 @@ def _authored_candidate(measures: Sequence[MassMeasureFact]) -> MassValue:
     if any(measure.mass_scale_to_grams is None for measure in measures):
         return Absent("unit_unresolved")
     kilograms = tuple(
-        _to_kilograms(measure.raw_value, float(measure.mass_scale_to_grams))
+        mass_to_kilograms(measure.raw_value, float(measure.mass_scale_to_grams))
         for measure in measures
     )
     if len({round(value, 12) for value in kilograms}) != 1:
@@ -217,7 +238,7 @@ def _section_area_m2(text: str | None, length_scale: float) -> float | None:
         return None
     match = _CHS.fullmatch(text.strip())
     if match is not None:
-        diameter, thickness = _lengths_to_m(
+        diameter, thickness = lengths_to_m(
             [float(match["d"]), float(match["t"])], length_scale
         )
         if 0.0 < 2.0 * thickness < diameter:
@@ -225,7 +246,7 @@ def _section_area_m2(text: str | None, length_scale: float) -> float | None:
         return None
     match = _H_SECTION.fullmatch(text.strip())
     if match is not None:
-        height, width, web, flange = _lengths_to_m(
+        height, width, web, flange = lengths_to_m(
             [float(match[name]) for name in ("h", "b", "tw", "tf")],
             length_scale,
         )
@@ -235,7 +256,7 @@ def _section_area_m2(text: str | None, length_scale: float) -> float | None:
     match = _PLATE.fullmatch(text.strip())
     if match is None:
         return None
-    thickness, width = _lengths_to_m(
+    thickness, width = lengths_to_m(
         [float(match["t"]), float(match["w"])], length_scale
     )
     return thickness * width if thickness > 0.0 and width > 0.0 else None
@@ -379,6 +400,18 @@ def resolve_assembly(
     tolerance: float = 0.05,
     exclusion_names=DEFAULT_EXCLUDED_ASSEMBLY_NAMES,
 ) -> MassRow:
+    return resolve_assembly_with_policy(
+        facts,
+        density_table,
+        MassPolicy(tolerance, frozenset(exclusion_names)),
+    )
+
+
+def resolve_assembly_with_policy(
+    facts: AssemblyFacts,
+    density_table: DensityTable,
+    policy: MassPolicy,
+) -> MassRow:
     authored = authored_weight_candidate(facts.authored_weight)
     if _partial_selection(facts):
         selected = len(set(facts.selected_part_ids or ()) & {part.entity_id for part in facts.parts})
@@ -411,7 +444,7 @@ def resolve_assembly(
         "density_x_section_volume": section,
     }
     disagreement_percent = _disagreement_percent(candidates)
-    excluded = str(facts.name or "").upper() in exclusion_names
+    excluded = policy.excludes(facts.name)
     return MassRow(
         facts.model_hash,
         facts.assembly_global_id,
@@ -419,7 +452,7 @@ def resolve_assembly(
         mesh,
         section,
         resolve_candidates(candidates),
-        disagreement_percent > tolerance * 100.0,
+        disagreement_percent > policy.disagreement_tolerance * 100.0,
         disagreement_percent,
         excluded,
     )
@@ -508,50 +541,3 @@ def compare_methods(
         else None
     )
     return MethodComparison(left, right, intersection, left_sum, right_sum, percent)
-
-
-def _evidence_wire(evidence: Evidence) -> dict:
-    inputs = {}
-    if evidence.density_kg_per_m3 is not None:
-        inputs["density"] = {
-            "value": evidence.density_kg_per_m3,
-            "units": {"density": "kg/m3"},
-        }
-    if evidence.volume_m3 is not None:
-        inputs["volume"] = {
-            "value": evidence.volume_m3,
-            "units": {"volume": "m3"},
-        }
-    if evidence.section_area_m2 is not None:
-        inputs["sectionArea"] = {
-            "value": evidence.section_area_m2,
-            "units": {"area": "m2"},
-        }
-    if evidence.section_length_m is not None:
-        inputs["sectionLength"] = {
-            "value": evidence.section_length_m,
-            "units": {"length": "m"},
-        }
-    return {
-        "method": evidence.method,
-        "sourceEntityIds": list(evidence.source_entity_ids),
-        "entityKind": evidence.entity_kind,
-        "measureType": evidence.measure_type,
-        "unitResolution": evidence.unit_resolution,
-        "densityTableRevision": evidence.density_table_revision,
-        "inputs": inputs,
-        "components": [_evidence_wire(component) for component in evidence.components],
-    }
-
-
-def mass_value_wire(value: MassValue) -> dict:
-    if isinstance(value, Value):
-        return {
-            "status": "value",
-            "kg": value.kg,
-            "units": {"mass": "kg"},
-            "evidence": _evidence_wire(value.evidence),
-        }
-    if isinstance(value, Absent):
-        return {"status": "unavailable", "reason": value.reason, "detail": value.detail}
-    return {"status": "ambiguous", "reason": value.reason, "detail": None}

@@ -17,6 +17,8 @@ if errorlevel 1 (
 
 call pnpm install --frozen-lockfile
 if errorlevel 1 exit /b 1
+call pnpm run test
+if errorlevel 1 exit /b 1
 call pnpm run check
 if errorlevel 1 exit /b 1
 call pnpm run build
@@ -24,6 +26,8 @@ exit /b %errorlevel%
 
 :bundled_pnpm
 call "%CODEX_PNPM%" install --frozen-lockfile
+if errorlevel 1 exit /b 1
+call "%CODEX_PNPM%" run test
 if errorlevel 1 exit /b 1
 call "%CODEX_PNPM%" run check
 if errorlevel 1 exit /b 1

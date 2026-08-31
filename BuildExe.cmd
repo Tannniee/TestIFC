@@ -22,4 +22,7 @@ if not exist "frontend\dist\index.html" (
 
 echo [3/3] Packaging the desktop application...
 ".venv\Scripts\python.exe" -m PyInstaller --noconfirm --clean --distpath dist --workpath build IFC_Viewer.spec
-exit /b %errorlevel%
+if errorlevel 1 exit /b 1
+
+echo Package created in dist\ using APP_VERSION from src\version.py.
+exit /b 0

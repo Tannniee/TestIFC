@@ -1,47 +1,38 @@
-import { FragmentsModels, RenderedFaces, ifcCategoryMap, type FragmentsModel, type ItemData } from "@thatopen/fragments";
+import { FragmentsModels, RenderedFaces, type FragmentsModel } from "@thatopen/fragments";
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { api, isAuthorizationError, type SelectionElement, type SelectionPayload } from "./api";
+import { IfcConverter, sha256Hex } from "./ifc-converter";
+import { ViewerBridge } from "./viewer-bridge";
+import { ViewerCamera } from "./viewer-camera";
+import {
+  LoadCancelledError,
+  type BridgeProgress,
+  type CameraOrientation,
+  type SectionPlaneDefinition,
+  type SectionSide,
+  type ViewDirection,
+  type ViewerCallbacks,
+  type ViewerProgress,
+  type ViewerSelection,
+  type ViewportBackground,
+  type ViewPreset,
+} from "./viewer-contracts";
+import { createViewerSelection } from "./viewer-selection";
 
-export type ViewerStage =
-  | "uploading"
-  | "cache"
-  | "reading"
-  | "converting"
-  | "loading"
-  | "ready"
-  | "selecting"
-  | "error";
-
-export type ViewportBackground = "gray" | "white" | "oled";
-export type ViewPreset = "iso" | "positiveX" | "negativeX" | "positiveY" | "negativeY" | "positiveZ" | "negativeZ";
-export type SectionSide = "positive" | "negative";
-export type ViewStep = -1 | 0 | 1;
-
-export interface ViewDirection {
-  x: ViewStep;
-  y: ViewStep;
-  z: ViewStep;
-}
-
-export interface Vector3Value {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface CameraOrientation {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
-}
-
-export interface SectionPlaneDefinition {
-  point: Vector3Value;
-  normal: Vector3Value;
-  side: SectionSide;
-}
+export { isLoadCancelledError, LoadCancelledError } from "./viewer-contracts";
+export type {
+  BridgeProgress,
+  CameraOrientation,
+  SectionPlaneDefinition,
+  SectionSide,
+  ViewDirection,
+  ViewerCallbacks,
+  ViewerProgress,
+  ViewerSelection,
+  ViewerStage,
+  ViewportBackground,
+  ViewPreset,
+  ViewStep,
+} from "./viewer-contracts";
 
 const VIEWPORT_COLORS: Record<ViewportBackground, { background: number; center: number; grid: number }> = {
   gray: { background: 0x20262b, center: 0x596872, grid: 0x354149 },
@@ -49,226 +40,20 @@ const VIEWPORT_COLORS: Record<ViewportBackground, { background: number; center: 
   oled: { background: 0x000000, center: 0x53636d, grid: 0x202a30 },
 };
 
-export interface ViewerProgress {
-  stage: ViewerStage;
-  progress?: number;
-  detail?: string;
-}
-
-export interface ViewerSelection extends SelectionElement {
-  modelId: string;
-  modelName: string;
-  raw: ItemData | null;
-}
-
-export type BridgeStage = "activating" | "uploading" | "preparing" | "ready" | "cleared" | "error";
-
-export interface BridgeProgress {
-  stage: BridgeStage;
-  progress?: number;
-  detail?: string;
-}
-
-export interface ViewerCallbacks {
-  onProgress(event: ViewerProgress): void;
-  onBridgeProgress(event: BridgeProgress): void;
-  onSelection(selection: ViewerSelection | null): void;
-  onBoxZoomActiveChange(active: boolean): void;
-  onSectionPickActiveChange(active: boolean): void;
-  onSectionPlaneChange(section: SectionPlaneDefinition | null): void;
-  onCameraOrientationChange(orientation: CameraOrientation): void;
-  onAuthorizationRequired(error: unknown): void;
-}
-
-interface WorkerProgressMessage {
-  type: "progress";
-  id: number;
-  progress: number;
-}
-
-interface WorkerDoneMessage {
-  type: "done";
-  id: number;
-  fragments: Uint8Array;
-}
-
-interface WorkerErrorMessage {
-  type: "error";
-  id: number;
-  message: string;
-}
-
-type WorkerMessage = WorkerProgressMessage | WorkerDoneMessage | WorkerErrorMessage;
-
-class IfcConverter {
-  private worker: Worker | null = null;
-  private nextId = 1;
-  private pending: {
-    id: number;
-    resolve(value: Uint8Array): void;
-    reject(reason: unknown): void;
-    onProgress(progress: number): void;
-  } | null = null;
-
-  constructor() {
-    this.startWorker();
-  }
-
-  convert(bytes: ArrayBuffer, onProgress: (progress: number) => void): Promise<Uint8Array> {
-    this.cancel();
-    const id = this.nextId++;
-    return new Promise((resolve, reject) => {
-      this.pending = { id, resolve, reject, onProgress };
-      this.worker?.postMessage({ id, bytes }, [bytes]);
-    });
-  }
-
-  cancel() {
-    if (this.pending) {
-      this.pending.reject(new LoadCancelledError());
-      this.pending = null;
-      this.worker?.terminate();
-      this.startWorker();
-    }
-  }
-
-  dispose() {
-    this.pending?.reject(new LoadCancelledError());
-    this.pending = null;
-    this.worker?.terminate();
-    this.worker = null;
-  }
-
-  private startWorker() {
-    this.worker = new Worker(new URL("../workers/ifc-convert.worker.ts", import.meta.url), { type: "module" });
-    this.worker.addEventListener("message", this.onMessage);
-    this.worker.addEventListener("error", this.onWorkerError);
-    this.worker.addEventListener("messageerror", this.onMessageError);
-  }
-
-  private readonly onMessage = (event: MessageEvent<WorkerMessage>) => {
-    const pending = this.pending;
-    if (!pending || event.data.id !== pending.id) return;
-    if (event.data.type === "progress") {
-      pending.onProgress(event.data.progress);
-      return;
-    }
-    this.pending = null;
-    if (event.data.type === "done") pending.resolve(event.data.fragments);
-    else pending.reject(new Error(event.data.message));
-  };
-
-  private readonly onWorkerError = (event: ErrorEvent) => {
-    this.rejectPending(new Error(event.message || "IFC conversion worker failed"));
-  };
-
-  private readonly onMessageError = () => {
-    this.rejectPending(new Error("IFC conversion worker returned unreadable data"));
-  };
-
-  private rejectPending(error: Error) {
-    const pending = this.pending;
-    this.pending = null;
-    pending?.reject(error);
-  }
-}
-
-export class LoadCancelledError extends Error {
-  constructor() {
-    super("Model load was replaced by a newer request");
-    this.name = "LoadCancelledError";
-  }
-}
-
-export function isLoadCancelledError(error: unknown): boolean {
-  return error instanceof LoadCancelledError;
-}
-
-function attributeValue(item: ItemData | null, name: string): unknown {
-  const attribute = item?.[name];
-  if (Array.isArray(attribute) || attribute == null) return null;
-  if (typeof attribute === "object" && "value" in attribute) return attribute.value;
-  return null;
-}
-
-function textAttribute(item: ItemData | null, ...names: string[]): string | null {
-  for (const name of names) {
-    const value = attributeValue(item, name);
-    if (value !== null && value !== undefined && String(value).trim()) return String(value);
-  }
-  return null;
-}
-
-function categoryName(item: ItemData | null): string | null {
-  const value = attributeValue(item, "_category");
-  if (typeof value === "number") return ifcCategoryMap[value] ?? String(value);
-  if (typeof value === "string") return value;
-  return textAttribute(item, "type", "Type");
-}
-
-function flattenPreview(item: ItemData | null): Record<string, unknown> {
-  if (!item) return {};
-  const preview: Record<string, unknown> = {};
-  for (const [key, raw] of Object.entries(item)) {
-    if (Array.isArray(raw) || raw == null) continue;
-    if (typeof raw === "object" && "value" in raw) {
-      const value = raw.value;
-      if (["string", "number", "boolean"].includes(typeof value)) preview[key] = value;
-    } else if (["string", "number", "boolean"].includes(typeof raw)) {
-      preview[key] = raw;
-    }
-  }
-  return preview;
-}
-
-async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", buffer);
-  return [...new Uint8Array(digest)].map((value) => value.toString(16).padStart(2, "0")).join("");
-}
-
-const wait = (milliseconds: number) => new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
 const FRAGMENTS_MAX_UPDATE_RATE_MS = 16;
-const FIT_PADDING = 1.08;
-const FIT_ANIMATION_DURATION_MS = 420;
-const FIT_ZOOM_OUT_DURATION_PER_OCTAVE_MS = 115;
-const FIT_ZOOM_OUT_MAX_EXTRA_DURATION_MS = 680;
-const BOX_ZOOM_PADDING = 1.05;
-const BOX_ZOOM_ANIMATION_DURATION_MS = 400;
 const BOX_ZOOM_MIN_SIZE_PX = 8;
-const CAMERA_ROTATION_DURATION_MS = 120;
 const SECTION_CLIP_EPSILON_RATIO = 0.00001;
 const SECTION_CLIP_EPSILON_MIN = 0.0001;
 const SECTION_CLIP_EPSILON_MAX = 0.02;
 
-interface FitCameraState {
-  position: THREE.Vector3;
-  target: THREE.Vector3;
-  up: THREE.Vector3;
-  effectiveHeight: number;
-  zoom: number;
-  near: number;
-  far: number;
-}
-
-interface FitAnimation {
-  startedAt: number;
-  durationMs: number;
-  from: FitCameraState;
-  to: FitCameraState;
-  fromRotation: THREE.Quaternion;
-  toRotation: THREE.Quaternion;
-  fromDistance: number;
-  toDistance: number;
-}
-
 export class ViewerService {
   private readonly scene = new THREE.Scene();
-  private readonly camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 1_000_000);
   private readonly renderer: THREE.WebGLRenderer;
-  private readonly controls: OrbitControls;
+  private readonly view: ViewerCamera;
   private readonly boxZoomRectangle: HTMLDivElement;
   private readonly fragments = new FragmentsModels("/vendor/fragments/worker.mjs", { maxWorkers: 2 });
   private readonly converter = new IfcConverter();
+  private readonly bridge: ViewerBridge;
   private readonly resizeObserver: ResizeObserver;
   private readonly callbacks: ViewerCallbacks;
   private readonly models = new Map<string, FragmentsModel>();
@@ -278,7 +63,6 @@ export class ViewerService {
   private activeModel: FragmentsModel | null = null;
   private activeModelName = "";
   private selected: { model: FragmentsModel; localId: number } | null = null;
-  private orthographicHeight = 24;
   private loadSequence = 0;
   private selectionSequence = 0;
   private loadingModelId: string | null = null;
@@ -288,11 +72,14 @@ export class ViewerService {
   private boxZoomStart: { id: number; x: number; y: number } | null = null;
   private sectionPickEnabled = false;
   private sectionDefinition: SectionPlaneDefinition | null = null;
-  private fitAnimation: FitAnimation | null = null;
   private disposed = false;
 
   constructor(private readonly host: HTMLElement, callbacks: ViewerCallbacks) {
     this.callbacks = callbacks;
+    this.bridge = new ViewerBridge({
+      onProgress: (progress) => this.callbacks.onBridgeProgress(progress),
+      onAuthorizationRequired: (error) => this.callbacks.onAuthorizationRequired(error),
+    });
     this.fragments.settings.maxUpdateRate = FRAGMENTS_MAX_UPDATE_RATE_MS;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -300,22 +87,14 @@ export class ViewerService {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.domElement.setAttribute("aria-label", "IFC 3D viewport");
     this.host.append(this.renderer.domElement);
+    this.view = new ViewerCamera(this.host, this.renderer.domElement, {
+      onOrientationChange: (orientation) => this.callbacks.onCameraOrientationChange(orientation),
+      onUpdate: (force) => void this.fragments.update(force),
+    });
     this.boxZoomRectangle = document.createElement("div");
     this.boxZoomRectangle.className = "viewer-box-zoom-rectangle";
     this.boxZoomRectangle.hidden = true;
     this.host.append(this.boxZoomRectangle);
-
-    this.camera.position.set(14, 12, 14);
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.08;
-    this.controls.zoomToCursor = true;
-    this.controls.screenSpacePanning = true;
-    this.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
-    this.controls.mouseButtons.MIDDLE = THREE.MOUSE.PAN;
-    this.controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
-    this.controls.target.set(0, 0, 0);
-    this.controls.update();
 
     this.grid = this.createGrid("gray");
     this.scene.add(this.grid);
@@ -331,11 +110,12 @@ export class ViewerService {
     this.renderer.domElement.addEventListener("pointerup", this.onPointerUp, true);
     this.renderer.domElement.addEventListener("pointercancel", this.onPointerCancel, true);
     this.renderer.domElement.addEventListener("click", this.onClick);
-    this.controls.addEventListener("start", this.onControlsStart);
-    this.controls.addEventListener("change", this.onControlsChanged);
     this.renderer.setAnimationLoop(this.render);
     this.resize();
-    this.emitCameraOrientation();
+  }
+
+  private get camera() {
+    return this.view.camera;
   }
 
   get hasModel() {
@@ -355,7 +135,7 @@ export class ViewerService {
   }
 
   get wheelZoomSpeed() {
-    return this.controls.zoomSpeed;
+    return this.view.zoomSpeed;
   }
 
   get sectionPickActive() {
@@ -381,15 +161,15 @@ export class ViewerService {
   }
 
   setWheelZoomSpeed(speed: number) {
-    this.controls.zoomSpeed = THREE.MathUtils.clamp(speed, 0.25, 3);
+    this.view.setZoomSpeed(speed);
   }
 
   setBoxZoomEnabled(enabled: boolean) {
     if (enabled === this.boxZoomEnabled) return;
     if (enabled && this.sectionPickEnabled) this.setSectionPickEnabled(false);
-    this.fitAnimation = null;
+    this.view.cancelAnimation();
     this.boxZoomEnabled = enabled;
-    this.controls.enabled = !enabled;
+    this.view.setEnabled(!enabled);
     this.pointerStart = null;
     this.resetBoxZoomDrag();
     this.host.classList.toggle("viewer-box-zoom-active", enabled);
@@ -399,9 +179,9 @@ export class ViewerService {
   setSectionPickEnabled(enabled: boolean) {
     if (enabled === this.sectionPickEnabled) return;
     if (enabled && this.boxZoomEnabled) this.setBoxZoomEnabled(false);
-    this.fitAnimation = null;
+    this.view.cancelAnimation();
     this.sectionPickEnabled = enabled;
-    this.controls.enabled = !this.boxZoomEnabled;
+    this.view.setEnabled(!this.boxZoomEnabled);
     this.pointerStart = null;
     this.host.classList.toggle("viewer-section-pick-active", enabled);
     this.callbacks.onSectionPickActiveChange(enabled);
@@ -447,59 +227,32 @@ export class ViewerService {
 
   setView(preset: ViewPreset) {
     const model = this.activeModel;
-    if (!model || model.box.isEmpty()) return;
+    if (!model) return;
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
-    const { direction, up } = this.viewPresetVectors(preset);
-    const targetState = this.createFitCameraState(model.box, direction, up);
-    this.startCameraAnimation(targetState, FIT_ANIMATION_DURATION_MS, true);
+    this.view.setView(model.box, preset);
   }
 
-  setViewDirection(directionValue: ViewDirection) {
+  setViewDirection(direction: ViewDirection) {
     const model = this.activeModel;
-    if (!model || model.box.isEmpty()) return;
-    // ViewCube directions use the engineering Z-up convention. Fragments and
-    // Three.js use Y-up, so rotate the cube vector -90 degrees around X before
-    // applying it to the camera: (X, Y, Z) -> (X, Z, -Y).
-    const direction = new THREE.Vector3(directionValue.x, directionValue.z, -directionValue.y);
-    if (direction.lengthSq() < Number.EPSILON) return;
+    if (!model) return;
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
-    direction.normalize();
-    const up = Math.abs(direction.y) > 0.95
-      ? new THREE.Vector3(0, 0, direction.y > 0 ? -1 : 1)
-      : new THREE.Vector3(0, 1, 0);
-    this.startCameraAnimation(this.createFitCameraState(model.box, direction, up), FIT_ANIMATION_DURATION_MS, true);
+    this.view.setViewDirection(model.box, direction);
   }
 
   orbitView(deltaAzimuth: number, deltaPolar: number) {
-    if (!this.activeModel || !Number.isFinite(deltaAzimuth) || !Number.isFinite(deltaPolar)) return;
+    if (!this.activeModel) return;
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
-    this.fitAnimation = null;
-
-    const offset = this.camera.position.clone().sub(this.controls.target);
-    const spherical = new THREE.Spherical().setFromVector3(offset);
-    spherical.theta -= deltaAzimuth;
-    spherical.phi = THREE.MathUtils.clamp(spherical.phi + deltaPolar, 0.01, Math.PI - 0.01);
-    this.camera.up.set(0, 1, 0);
-    this.camera.position.copy(this.controls.target).add(offset.setFromSpherical(spherical));
-    this.camera.lookAt(this.controls.target);
-    this.controls.update();
-    void this.fragments.update();
+    this.view.orbit(deltaAzimuth, deltaPolar);
   }
 
   viewSectionPlane() {
     const model = this.activeModel;
     const section = this.sectionDefinition;
-    if (!model || model.box.isEmpty() || !section) return;
-    const direction = new THREE.Vector3(section.normal.x, section.normal.y, section.normal.z)
-      .multiplyScalar(section.side === "positive" ? 1 : -1)
-      .normalize();
-    const up = Math.abs(direction.dot(new THREE.Vector3(0, 1, 0))) > 0.95
-      ? new THREE.Vector3(0, 0, -1)
-      : new THREE.Vector3(0, 1, 0);
-    this.startCameraAnimation(this.createFitCameraState(model.box, direction, up), FIT_ANIMATION_DURATION_MS, true);
+    if (!model || !section) return;
+    this.view.viewSection(model.box, section);
   }
 
   async load(file: File): Promise<void> {
@@ -517,16 +270,13 @@ export class ViewerService {
     this.assertCurrent(sequence);
     const modelHash = await sha256Hex(ifcBuffer);
     this.assertCurrent(sequence);
-    void this.prepareBridge(file, modelHash, sequence);
+    void this.bridge.prepareModel(file, modelHash, () => this.assertCurrent(sequence));
     this.publishProgress(sequence, { stage: "cache", detail: file.name });
     let fragmentBuffer: ArrayBuffer | null = null;
     try {
-      fragmentBuffer = await api.getFragments(modelHash);
+      fragmentBuffer = await this.bridge.fragments(modelHash);
     } catch (error) {
-      if (isAuthorizationError(error)) {
-        this.callbacks.onAuthorizationRequired(error);
-        throw error;
-      }
+      if (this.bridge.isAuthorizationFailure(error)) throw error;
       this.publishBridge(sequence, { stage: "error", detail: `Fragments cache: ${this.errorText(error)}` });
     }
     this.assertCurrent(sequence);
@@ -538,9 +288,11 @@ export class ViewerService {
       this.assertCurrent(sequence);
       fragmentBuffer = converted.buffer.slice(converted.byteOffset, converted.byteOffset + converted.byteLength) as ArrayBuffer;
       const cacheCopy = converted.slice();
-      void api.putFragments(modelHash, cacheCopy).catch((error) => {
-        this.publishBridge(sequence, { stage: "error", detail: `Fragments cache: ${this.errorText(error)}` });
-      });
+      this.bridge.cacheFragments(
+        modelHash,
+        cacheCopy,
+        () => sequence === this.loadSequence && !this.disposed,
+      );
     }
 
     this.publishProgress(sequence, { stage: "loading", progress: 0, detail: file.name });
@@ -579,17 +331,8 @@ export class ViewerService {
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
     const model = this.activeModel;
-    if (!model || model.box.isEmpty()) return;
-    const targetState = this.createFitCameraState(model.box);
-    this.fitAnimation = null;
-
-    if (!animate) {
-      this.applyFitCameraState(targetState);
-      void this.fragments.update(true);
-      return;
-    }
-
-    this.startCameraAnimation(targetState, FIT_ANIMATION_DURATION_MS, true);
+    if (!model) return;
+    this.view.fit(model.box, animate);
   }
 
   async clearSelection() {
@@ -598,29 +341,21 @@ export class ViewerService {
     if (selectionSequence !== this.selectionSequence) return;
     this.selected = null;
     this.callbacks.onSelection(null);
-    try {
-      await api.clearSelection();
-      if (selectionSequence === this.selectionSequence) this.callbacks.onBridgeProgress({ stage: "cleared" });
-    } catch (error) {
-      if (isAuthorizationError(error)) this.callbacks.onAuthorizationRequired(error);
-      this.callbacks.onBridgeProgress({ stage: "error", detail: this.errorText(error) });
-    }
+    await this.bridge.clearSelection(() => selectionSequence === this.selectionSequence);
   }
 
   async dispose() {
     if (this.disposed) return;
     this.disposed = true;
-    this.fitAnimation = null;
+    this.view.cancelAnimation();
     this.renderer.setAnimationLoop(null);
     this.resizeObserver.disconnect();
-    this.controls.removeEventListener("start", this.onControlsStart);
-    this.controls.removeEventListener("change", this.onControlsChanged);
     this.renderer.domElement.removeEventListener("pointerdown", this.onPointerDown, true);
     this.renderer.domElement.removeEventListener("pointermove", this.onPointerMove, true);
     this.renderer.domElement.removeEventListener("pointerup", this.onPointerUp, true);
     this.renderer.domElement.removeEventListener("pointercancel", this.onPointerCancel, true);
     this.renderer.domElement.removeEventListener("click", this.onClick);
-    this.controls.dispose();
+    this.view.dispose();
     this.converter.dispose();
     await this.fragments.dispose();
     this.host.classList.remove("viewer-box-zoom-active");
@@ -635,139 +370,7 @@ export class ViewerService {
     const width = Math.max(this.host.clientWidth, 1);
     const height = Math.max(this.host.clientHeight, 1);
     this.renderer.setSize(width, height, false);
-    this.updateCameraProjection(width, height);
-  }
-
-  private updateCameraProjection(width: number, height: number) {
-    const halfHeight = this.orthographicHeight * 0.5;
-    const halfWidth = halfHeight * (width / height);
-    this.camera.left = -halfWidth;
-    this.camera.right = halfWidth;
-    this.camera.top = halfHeight;
-    this.camera.bottom = -halfHeight;
-    this.camera.updateProjectionMatrix();
-  }
-
-  private createFitCameraState(
-    box: THREE.Box3,
-    direction = new THREE.Vector3(8, 6, 8).normalize(),
-    up = new THREE.Vector3(0, 1, 0),
-  ): FitCameraState {
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const radius = Math.max(size.length() * 0.5, 1);
-    const normalizedDirection = direction.clone().normalize();
-    const normalizedUp = up.clone().normalize();
-    const position = center.clone().addScaledVector(normalizedDirection, radius * 2.5);
-    const viewDirection = center.clone().sub(position).normalize();
-    const right = viewDirection.clone().cross(normalizedUp).normalize();
-    const viewUp = right.clone().cross(viewDirection).normalize();
-    let halfProjectedWidth = 0;
-    let halfProjectedHeight = 0;
-
-    for (const x of [box.min.x, box.max.x]) {
-      for (const y of [box.min.y, box.max.y]) {
-        for (const z of [box.min.z, box.max.z]) {
-          const offset = new THREE.Vector3(x, y, z).sub(center);
-          halfProjectedWidth = Math.max(halfProjectedWidth, Math.abs(offset.dot(right)));
-          halfProjectedHeight = Math.max(halfProjectedHeight, Math.abs(offset.dot(viewUp)));
-        }
-      }
-    }
-
-    const aspect = Math.max(this.host.clientWidth, 1) / Math.max(this.host.clientHeight, 1);
-    const effectiveHeight = Math.max(halfProjectedHeight * 2, (halfProjectedWidth * 2) / aspect, 1) * FIT_PADDING;
-    return {
-      position,
-      target: center,
-      up: normalizedUp,
-      effectiveHeight,
-      zoom: 1,
-      near: Math.max(radius / 10_000, 0.01),
-      far: Math.max(radius * 20, 10_000),
-    };
-  }
-
-  private applyFitCameraState(state: FitCameraState) {
-    this.camera.position.copy(state.position);
-    this.controls.target.copy(state.target);
-    this.camera.up.copy(state.up);
-    this.camera.zoom = state.zoom;
-    this.camera.near = state.near;
-    this.camera.far = state.far;
-    this.orthographicHeight = state.effectiveHeight * state.zoom;
-    this.updateCameraProjection(Math.max(this.host.clientWidth, 1), Math.max(this.host.clientHeight, 1));
-    this.controls.update();
-  }
-
-  private currentCameraState(): FitCameraState {
-    const zoom = Math.max(this.camera.zoom, Number.EPSILON);
-    return {
-      position: this.camera.position.clone(),
-      target: this.controls.target.clone(),
-      up: this.camera.up.clone(),
-      effectiveHeight: this.orthographicHeight / zoom,
-      zoom,
-      near: this.camera.near,
-      far: this.camera.far,
-    };
-  }
-
-  private startCameraAnimation(targetState: FitCameraState, durationMs: number, adaptToZoomOut = false) {
-    const currentState = this.currentCameraState();
-    const fromRotation = this.cameraRotationForState(currentState);
-    const toRotation = this.cameraRotationForState(targetState);
-    const rotationRatio = fromRotation.angleTo(toRotation) / Math.PI;
-    const zoomOutRatio = targetState.effectiveHeight / Math.max(currentState.effectiveHeight, Number.EPSILON);
-    const zoomOutOctaves = adaptToZoomOut ? Math.max(0, Math.log2(zoomOutRatio)) : 0;
-    const zoomOutExtraDuration = THREE.MathUtils.clamp(
-      zoomOutOctaves * FIT_ZOOM_OUT_DURATION_PER_OCTAVE_MS,
-      0,
-      FIT_ZOOM_OUT_MAX_EXTRA_DURATION_MS,
-    );
-    this.camera.near = Math.min(currentState.near, targetState.near);
-    this.camera.far = Math.max(currentState.far, targetState.far);
-    this.camera.updateProjectionMatrix();
-    this.fitAnimation = {
-      startedAt: performance.now(),
-      durationMs: durationMs + zoomOutExtraDuration + rotationRatio * CAMERA_ROTATION_DURATION_MS,
-      from: currentState,
-      to: targetState,
-      fromRotation,
-      toRotation,
-      fromDistance: currentState.position.distanceTo(currentState.target),
-      toDistance: targetState.position.distanceTo(targetState.target),
-    };
-  }
-
-  private cameraRotationForState(state: FitCameraState) {
-    const matrix = new THREE.Matrix4().lookAt(state.position, state.target, state.up);
-    return new THREE.Quaternion().setFromRotationMatrix(matrix).normalize();
-  }
-
-  private advanceFitAnimation(now: number) {
-    const animation = this.fitAnimation;
-    if (!animation) return;
-    const progress = THREE.MathUtils.clamp((now - animation.startedAt) / animation.durationMs, 0, 1);
-    const eased = progress < 0.5 ? 4 * progress ** 3 : 1 - (-2 * progress + 2) ** 3 / 2;
-    const effectiveHeight = THREE.MathUtils.lerp(animation.from.effectiveHeight, animation.to.effectiveHeight, eased);
-    const zoom = THREE.MathUtils.lerp(animation.from.zoom, animation.to.zoom, eased);
-
-    this.controls.target.lerpVectors(animation.from.target, animation.to.target, eased);
-    const rotation = animation.fromRotation.clone().slerp(animation.toRotation, eased);
-    const distance = THREE.MathUtils.lerp(animation.fromDistance, animation.toDistance, eased);
-    this.camera.up.set(0, 1, 0).applyQuaternion(rotation).normalize();
-    this.camera.position.copy(this.controls.target)
-      .add(new THREE.Vector3(0, 0, 1).applyQuaternion(rotation).multiplyScalar(distance));
-    this.camera.zoom = zoom;
-    this.orthographicHeight = effectiveHeight * zoom;
-    this.updateCameraProjection(Math.max(this.host.clientWidth, 1), Math.max(this.host.clientHeight, 1));
-
-    if (progress >= 1) {
-      this.fitAnimation = null;
-      this.applyFitCameraState(animation.to);
-      void this.fragments.update(true);
-    }
+    this.view.resize(width, height);
   }
 
   private createGrid(background: ViewportBackground): THREE.GridHelper {
@@ -781,19 +384,6 @@ export class ViewerService {
       material.depthWrite = false;
     }
     return grid;
-  }
-
-  private viewPresetVectors(preset: ViewPreset) {
-    const directions: Record<ViewPreset, { direction: THREE.Vector3; up: THREE.Vector3 }> = {
-      iso: { direction: new THREE.Vector3(8, 6, 8).normalize(), up: new THREE.Vector3(0, 1, 0) },
-      positiveX: { direction: new THREE.Vector3(1, 0, 0), up: new THREE.Vector3(0, 1, 0) },
-      negativeX: { direction: new THREE.Vector3(-1, 0, 0), up: new THREE.Vector3(0, 1, 0) },
-      positiveY: { direction: new THREE.Vector3(0, 1, 0), up: new THREE.Vector3(0, 0, -1) },
-      negativeY: { direction: new THREE.Vector3(0, -1, 0), up: new THREE.Vector3(0, 0, 1) },
-      positiveZ: { direction: new THREE.Vector3(0, 0, 1), up: new THREE.Vector3(0, 1, 0) },
-      negativeZ: { direction: new THREE.Vector3(0, 0, -1), up: new THREE.Vector3(0, 1, 0) },
-    };
-    return directions[preset];
   }
 
   private disposeGrid(grid: THREE.GridHelper) {
@@ -816,25 +406,10 @@ export class ViewerService {
   }
 
   private readonly render = (time: number) => {
-    this.advanceFitAnimation(time);
-    this.controls.update();
+    this.view.render(time);
     const opacity = 0.34 * THREE.MathUtils.smoothstep(this.camera.zoom, 0.08, 0.65);
     for (const material of this.gridMaterials) material.opacity = opacity;
     this.renderer.render(this.scene, this.camera);
-  };
-
-  private readonly onControlsChanged = () => {
-    this.emitCameraOrientation();
-    void this.fragments.update();
-  };
-
-  private emitCameraOrientation() {
-    const { x, y, z, w } = this.camera.quaternion;
-    this.callbacks.onCameraOrientationChange({ x, y, z, w });
-  }
-
-  private readonly onControlsStart = () => {
-    this.fitAnimation = null;
   };
 
   private readonly onPointerDown = (event: PointerEvent) => {
@@ -933,27 +508,7 @@ export class ViewerService {
   private zoomToViewportBox(left: number, top: number, width: number, height: number) {
     const viewportWidth = Math.max(this.renderer.domElement.clientWidth, 1);
     const viewportHeight = Math.max(this.renderer.domElement.clientHeight, 1);
-    const current = this.currentCameraState();
-    const viewWidth = current.effectiveHeight * (viewportWidth / viewportHeight);
-    const centerX = left + width * 0.5;
-    const centerY = top + height * 0.5;
-    const ndcX = (centerX / viewportWidth) * 2 - 1;
-    const ndcY = 1 - (centerY / viewportHeight) * 2;
-    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(this.camera.quaternion);
-    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(this.camera.quaternion);
-    const offset = right.multiplyScalar(ndcX * viewWidth * 0.5)
-      .add(up.multiplyScalar(ndcY * current.effectiveHeight * 0.5));
-    const scale = Math.max(width / viewportWidth, height / viewportHeight);
-    const targetState: FitCameraState = {
-      position: current.position.clone().add(offset),
-      target: current.target.clone().add(offset),
-      up: current.up.clone(),
-      effectiveHeight: Math.max(current.effectiveHeight * scale * BOX_ZOOM_PADDING, Number.EPSILON),
-      zoom: 1,
-      near: current.near,
-      far: current.far,
-    };
-    this.startCameraAnimation(targetState, BOX_ZOOM_ANIMATION_DURATION_MS);
+    this.view.zoomToViewportBox(left, top, width, height, viewportWidth, viewportHeight);
   }
 
   private async pickSectionPlane(clientX: number, clientY: number) {
@@ -1018,48 +573,20 @@ export class ViewerService {
     const [item = null] = await hit.fragments.getItemsData([hit.localId]);
     const [guid = null] = await hit.fragments.getGuidsByLocalIds([hit.localId]);
     if (selectionSequence !== this.selectionSequence || activeModel !== this.activeModel) return;
-    const selection: ViewerSelection = {
-      modelId: hit.fragments.modelId,
-      modelName: this.activeModelName,
-      globalId: guid,
-      expressId: hit.localId,
-      localId: hit.localId,
-      ifcType: categoryName(item),
-      objectType: textAttribute(item, "ObjectType"),
-      description: textAttribute(item, "Description"),
-      name: textAttribute(item, "Name", "LongName"),
-      raw: item,
-    };
+    const selection = createViewerSelection(
+      hit.fragments.modelId,
+      this.activeModelName,
+      hit.localId,
+      item,
+      guid,
+    );
     this.callbacks.onSelection(selection);
-
-    const payload: SelectionPayload = {
-      schemaVersion: 1,
-      source: "thatopen",
-      model: { id: selection.modelId, name: selection.modelName, path: null },
-      element: {
-        globalId: selection.globalId,
-        expressId: selection.expressId,
-        localId: selection.localId,
-        ifcType: selection.ifcType,
-        objectType: selection.objectType,
-        description: selection.description,
-        name: selection.name,
-      },
-      selection: { status: "selected", selectedAt: new Date().toISOString() },
-      preview: flattenPreview(item),
-    };
-    try {
-      await api.setSelection(payload);
-      this.callbacks.onBridgeProgress({ stage: "ready", detail: selection.name ?? selection.ifcType ?? undefined });
-    } catch (error) {
-      if (isAuthorizationError(error)) this.callbacks.onAuthorizationRequired(error);
-      this.callbacks.onBridgeProgress({ stage: "error", detail: this.errorText(error) });
-    }
+    await this.bridge.publishSelection(selection);
     this.callbacks.onProgress({ stage: "ready", detail: this.activeModelName });
   }
 
   private async clearModel() {
-    this.fitAnimation = null;
+    this.view.cancelAnimation();
     await this.clearSelection();
     if (!this.activeModel) return;
     const modelId = this.activeModel.modelId;
@@ -1068,40 +595,6 @@ export class ViewerService {
     await this.fragments.disposeModel(modelId);
     this.models.delete(modelId);
     this.grid.position.y = -0.001;
-  }
-
-  private async prepareBridge(file: File, modelHash: string, sequence: number) {
-    try {
-      this.callbacks.onBridgeProgress({ stage: "activating", detail: file.name });
-      const activated = await api.tryActivateModel(modelHash);
-      this.assertCurrent(sequence);
-      if (!activated) {
-        this.callbacks.onBridgeProgress({ stage: "uploading", progress: 0, detail: file.name });
-        const uploaded = await api.uploadModel(file, (progress) => {
-          if (sequence === this.loadSequence) {
-            this.callbacks.onBridgeProgress({ stage: "uploading", progress, detail: file.name });
-          }
-        });
-        this.assertCurrent(sequence);
-        if (uploaded.modelHash !== modelHash) throw new Error("Backend model hash does not match the local file");
-      }
-      while (sequence === this.loadSequence) {
-        const runtime = await api.runtime();
-        this.assertCurrent(sequence);
-        if (runtime.prepareError) throw new Error(runtime.prepareError);
-        if (runtime.hasActiveModel && !runtime.preparing) {
-          this.callbacks.onBridgeProgress({ stage: "ready", detail: file.name });
-          return;
-        }
-        this.callbacks.onBridgeProgress({ stage: "preparing", detail: file.name });
-        await wait(2000);
-      }
-    } catch (error) {
-      if (isAuthorizationError(error)) this.callbacks.onAuthorizationRequired(error);
-      if (sequence === this.loadSequence && !isLoadCancelledError(error)) {
-        this.callbacks.onBridgeProgress({ stage: "error", detail: this.errorText(error) });
-      }
-    }
   }
 
   private assertCurrent(sequence: number) {

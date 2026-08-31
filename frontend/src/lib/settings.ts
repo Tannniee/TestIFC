@@ -1,5 +1,5 @@
 import type { Locale } from "./i18n";
-import type { ViewportBackground } from "./viewer";
+import type { ViewportBackground } from "./viewer-contracts";
 
 export interface AppSettings {
   schemaVersion: 1;

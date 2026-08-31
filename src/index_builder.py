@@ -70,19 +70,20 @@ def _worker(
 ) -> None:
     os.environ["IFC_MODEL_CACHE_DIR"] = cache_dir
     import ifcopenshell
-    import ifc_service
+    import ifc_elements
+    import ifc_units
 
     source = _ensure_store(model_path, model_hash, Path(cache_dir)) or model_path
     ifc_file = ifcopenshell.open(source)
     if keep_alive is not None:
         keep_alive.append(ifc_file)
-    units = ifc_service.project_units(ifc_file)
+    units = ifc_units.project_units(ifc_file)
     model_index.build(
         ifc_file,
         model_index.index_path_for(Path(cache_dir), model_hash),
         model_hash,
-        build_record=lambda entity: ifc_service.build_semantic_record(entity, ifc_file, units),
-        child_ids=lambda entity: [child.id() for child in ifc_service.direct_children(entity)],
+        build_record=lambda entity: ifc_elements.build_semantic_record(entity, ifc_file, units),
+        child_ids=lambda entity: [child.id() for child in ifc_elements.direct_children(entity)],
     )
 
 

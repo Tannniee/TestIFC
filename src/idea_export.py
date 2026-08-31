@@ -10,7 +10,7 @@ import ifcopenshell
 
 import mass_facts
 import member_axis
-from ifc_service import locate_live_element, open_active_model
+from model_runtime import locate_live_element, open_active_model
 
 IDEA_SCHEMA_VERSION = 1
 MEMBER_TYPES = ("IfcBeam", "IfcColumn", "IfcMember")

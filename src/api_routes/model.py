@@ -2,41 +2,41 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, File, Request, UploadFile
 from fastapi import Path as FastApiPath
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 import model_operations
-from api_contracts import ErrorResponse, LoadModelResponse, RegisterModelRequest
+from api_contracts import (
+    ActivateModelResponse,
+    ErrorResponse,
+    FragmentStoredResponse,
+    LoadModelResponse,
+    ModelRuntimeResponse,
+    RegisterModelRequest,
+)
 from api_dependencies import require_license_dep
-from ifc_service import (
+from api_errors import error_response, model_state_error
+from fragment_service import FragmentService
+from model_runtime import (
     HashMismatchError,
     IndexPreparingError,
     NoActiveModelError,
-    cached_fragments_file,
-    store_cached_fragments_commit,
-    store_cached_fragments_start,
 )
 
 
 MODEL_HASH_PATTERN = "^[0-9a-f]{64}$"
+logger = logging.getLogger("ifc_viewer.backend.routes.model")
 
 
 def _model_error(exc: Exception):
-    if isinstance(exc, IndexPreparingError):
-        return JSONResponse(
-            status_code=409,
-            content=ErrorResponse(error="index_preparing").model_dump(),
-        )
-    if isinstance(exc, NoActiveModelError):
-        return JSONResponse(
-            status_code=409,
-            content=ErrorResponse(error="no_active_model").model_dump(),
-        )
+    return model_state_error(exc)
 
 
-def create_model_router() -> APIRouter:
+def create_model_router(fragment_service: FragmentService) -> APIRouter:
     router = APIRouter()
 
     @router.post(
@@ -56,8 +56,11 @@ def create_model_router() -> APIRouter:
                 originalFilename=loaded.original_filename,
                 sizeBytes=loaded.size_bytes,
             )
-        except Exception as exc:
-            print("ERROR /load-model:", exc)
+        except Exception:
+            logger.exception(
+                "Model upload materialization failed",
+                extra={"event": "model_materialization_failed"},
+            )
             return JSONResponse(
                 status_code=500,
                 content=ErrorResponse(error="materialization_failed").model_dump(),
@@ -72,46 +75,35 @@ def create_model_router() -> APIRouter:
         modelHash: str = FastApiPath(pattern=MODEL_HASH_PATTERN),
     ):
         try:
-            path = cached_fragments_file(modelHash)
+            path = fragment_service.cached_file(modelHash)
         except FileNotFoundError:
-            return JSONResponse(
-                status_code=404,
-                content=ErrorResponse(error="fragments_not_cached").model_dump(),
-            )
+            return error_response(404, "fragments_not_cached")
         return FileResponse(path, media_type="application/octet-stream")
 
     @router.post(
         "/model/fragments/{modelHash}",
-        response_model=None,
+        response_model=FragmentStoredResponse,
         dependencies=[Depends(require_license_dep)],
     )
     async def post_model_fragments(
         request: Request,
         modelHash: str = FastApiPath(pattern=MODEL_HASH_PATTERN),
     ):
-        staging = store_cached_fragments_start(modelHash)
         try:
-            with staging.open("wb") as sink:
-                async for chunk in request.stream():
-                    await run_in_threadpool(sink.write, chunk)
-            size = store_cached_fragments_commit(modelHash, staging)
+            size = await fragment_service.store_stream(modelHash, request.stream())
         except ValueError:
-            return JSONResponse(
-                status_code=400,
-                content=ErrorResponse(error="empty_fragments_body").model_dump(),
+            return error_response(400, "empty_fragments_body")
+        except Exception:
+            logger.exception(
+                "Fragment cache write failed",
+                extra={"event": "fragment_store_failed"},
             )
-        except Exception as exc:
-            staging.unlink(missing_ok=True)
-            print("ERROR /model/fragments:", exc)
-            return JSONResponse(
-                status_code=500,
-                content=ErrorResponse(error="fragments_store_failed").model_dump(),
-            )
+            return error_response(500, "fragments_store_failed")
         return {"ok": True, "modelHash": modelHash, "sizeBytes": size}
 
     @router.post(
         "/model/activate/{modelHash}",
-        response_model=None,
+        response_model=ActivateModelResponse,
         dependencies=[Depends(require_license_dep)],
     )
     async def post_model_activate(
@@ -123,10 +115,7 @@ def create_model_router() -> APIRouter:
                 modelHash,
             )
         except (FileNotFoundError, HashMismatchError):
-            return JSONResponse(
-                status_code=404,
-                content=ErrorResponse(error="model_not_cached").model_dump(),
-            )
+            return error_response(404, "model_not_cached")
         return {"ok": True, **info}
 
     @router.post(
@@ -142,18 +131,12 @@ def create_model_router() -> APIRouter:
                 request.hash,
             )
         except FileNotFoundError as exc:
-            return JSONResponse(
-                status_code=404,
-                content=ErrorResponse(error=str(exc)).model_dump(),
-            )
+            return error_response(404, str(exc))
         except HashMismatchError as exc:
-            return JSONResponse(
-                status_code=409,
-                content=ErrorResponse(error=str(exc)).model_dump(),
-            )
+            return error_response(409, str(exc))
         return {"ok": True, **info}
 
-    @router.get("/model/runtime", response_model=None)
+    @router.get("/model/runtime", response_model=ModelRuntimeResponse)
     async def get_model_runtime():
         return model_operations.runtime_status()
 
@@ -162,13 +145,16 @@ def create_model_router() -> APIRouter:
         response_model=None,
         dependencies=[Depends(require_license_dep)],
     )
-    async def get_tree():
+    def get_tree():
         try:
             return model_operations.model_tree()
         except (IndexPreparingError, NoActiveModelError) as exc:
             return _model_error(exc)
-        except Exception as exc:
-            print("ERROR /model/tree:", exc)
+        except Exception:
+            logger.exception(
+                "Model tree extraction failed",
+                extra={"event": "model_tree_failed"},
+            )
             return JSONResponse(
                 status_code=500,
                 content=ErrorResponse(error="model_tree_failed").model_dump(),
@@ -179,7 +165,7 @@ def create_model_router() -> APIRouter:
         response_model=None,
         dependencies=[Depends(require_license_dep)],
     )
-    async def search_active_model(
+    def search_active_model(
         q: str | None = None,
         ifcType: str | None = None,
         limit: int = 100,
@@ -188,8 +174,11 @@ def create_model_router() -> APIRouter:
             return model_operations.search_active_model(q, ifcType, limit)
         except (IndexPreparingError, NoActiveModelError) as exc:
             return _model_error(exc)
-        except Exception as exc:
-            print("ERROR /model/search:", exc)
+        except Exception:
+            logger.exception(
+                "Model search failed",
+                extra={"event": "model_search_failed"},
+            )
             return JSONResponse(
                 status_code=500,
                 content=ErrorResponse(error="model_search_failed").model_dump(),
@@ -200,7 +189,7 @@ def create_model_router() -> APIRouter:
         response_model=None,
         dependencies=[Depends(require_license_dep)],
     )
-    async def get_element_by_express_id(expressId: int):
+    def get_element_by_express_id(expressId: int):
         try:
             return model_operations.element_by_express_id(expressId)
         except LookupError as exc:
@@ -210,8 +199,11 @@ def create_model_router() -> APIRouter:
             )
         except (IndexPreparingError, NoActiveModelError) as exc:
             return _model_error(exc)
-        except Exception as exc:
-            print("ERROR /element/by-express-id:", exc)
+        except Exception:
+            logger.exception(
+                "Element extraction by express id failed",
+                extra={"event": "element_extraction_failed"},
+            )
             return JSONResponse(
                 status_code=500,
                 content=ErrorResponse(error="extraction_failed").model_dump(),
@@ -222,7 +214,7 @@ def create_model_router() -> APIRouter:
         response_model=None,
         dependencies=[Depends(require_license_dep)],
     )
-    async def get_element(globalId: str):
+    def get_element(globalId: str):
         try:
             return model_operations.element_by_global_id(globalId)
         except LookupError as exc:
@@ -232,8 +224,11 @@ def create_model_router() -> APIRouter:
             )
         except (IndexPreparingError, NoActiveModelError) as exc:
             return _model_error(exc)
-        except Exception as exc:
-            print("ERROR /element:", exc)
+        except Exception:
+            logger.exception(
+                "Element extraction by global id failed",
+                extra={"event": "element_extraction_failed"},
+            )
             return JSONResponse(
                 status_code=500,
                 content=ErrorResponse(error="extraction_failed").model_dump(),
@@ -244,7 +239,7 @@ def create_model_router() -> APIRouter:
         response_model=None,
         dependencies=[Depends(require_license_dep)],
     )
-    async def get_materials():
+    def get_materials():
         try:
             uses = model_operations.active_model_materials()
             return {

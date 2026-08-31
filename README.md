@@ -6,7 +6,7 @@ the original executable or extracted bytecode as a behavioral reference.
 
 ## Project layout
 
-- `desktop/`: PyWebView desktop host and application startup.
+- `desktop/`: PyWebView platform adapters and the desktop composition root.
 - `src/`: FastAPI bridge, IFC services, takeoff, exports, and settings.
 - `frontend/`: Svelte and Three.js viewer.
 - `backend/reference_data/`: material reference data packaged with the app.
@@ -21,7 +21,50 @@ The backend keeps HTTP contracts in `src/api_contracts.py` and thread-safe bridg
 state in `src/api_state.py`. Route groups live under `src/api_routes/`; `src/app.py`
 only configures middleware, creates shared state, and composes the application.
 `src/model_operations.py` owns model use cases that can serve HTTP or future desktop
-adapters. Domain and IFC modules do not depend on FastAPI request objects.
+adapters. The IFC foundation is split into four services:
+
+- `src/ifc_units.py`: unit resolution and quantity normalization.
+- `src/model_cache.py`: persistent IFC, fragment, index, and store cache paths.
+- `src/model_runtime.py`: active-model lifecycle, index preparation, and live IFC access.
+- `src/ifc_elements.py`: semantic records and optional element geometry.
+
+`src/ifc_service.py` remains a compatibility facade. Production modules import the
+smaller services directly. Domain and IFC modules do not depend on FastAPI request
+objects.
+
+Application orchestration also stays outside the HTTP and bridge-state modules:
+
+- `src/takeoff_service.py`: synchronous takeoff, Excel handoff, and background jobs.
+- `src/member_scan_service.py`: IDEA scan execution and latest-result lifecycle.
+- `src/fragment_service.py`: streamed fragment storage and cache lookup.
+- `src/api_errors.py`: shared HTTP mapping for model-state failures.
+
+`src/api_state.py` owns selection state only. Mass policy lives in `src/mass.py`;
+wire serialization lives in `src/mass_wire.py`. Architecture tests enforce these
+boundaries, and versioned golden fixtures protect takeoff exports.
+
+The frontend follows the same composition boundary:
+
+- `frontend/src/lib/app-shell.ts` owns auth, settings, viewer lifecycle, and commands.
+- `App.svelte` composes the rail, dialogs, inspector, and viewer workspace.
+- `viewer.ts` coordinates rendering through focused camera, bridge, conversion,
+  selection, and contract modules.
+- `viewcube-math.ts` owns the pure ViewCube geometry, naming, and orientation math.
+- `api-contracts.ts` is the typed frontend endpoint manifest. Contract tests compare
+  it with the backend OpenAPI document, and Vite derives its proxy prefixes from it.
+
+Frontend architecture tests prevent `App.svelte` and the renderer from importing
+HTTP or persistence adapters directly.
+
+The desktop layer is split by platform concern:
+
+- `desktop/main.py` only composes the window, bridges, logger, and server host.
+- `desktop/server_host.py` owns port selection, SPA mounting, readiness, and graceful
+  Uvicorn shutdown.
+- `desktop/desktop_bridges.py` exposes the stable taskbar and settings JavaScript API.
+- `desktop/platform_paths.py` resolves source, packaged, cache, and user-data paths.
+- `desktop/logging_config.py` writes rotating structured logs to
+  `%LOCALAPPDATA%\IFC Viewer\logs\desktop.jsonl`.
 
 ## Environment
 
@@ -43,10 +86,12 @@ Run the Python suite:
 .\.venv\Scripts\python.exe -m unittest discover -v -s tests -p "test_*.py"
 ```
 
-Check and build the frontend:
+Check the frontend during refactoring without creating a package:
 
 ```powershell
-.\frontend\BuildFrontend.cmd
+cd frontend
+node .\node_modules\typescript\bin\tsc --noEmit
+node .\node_modules\svelte-check\bin\svelte-check --tsconfig .\tsconfig.json
 ```
 
 ## Run from source
@@ -68,9 +113,11 @@ PyInstaller executable:
 .\BuildExe.cmd
 ```
 
-The executable is written to `dist\IFC Viewer 0.4.0 ahihi Fixed.exe`. The packaged
-application uses `desktop\build_config.json`; keep that file as the single build-mode
-configuration.
+The executable name comes from `APP_VERSION` in `src\version.py`. For the current
+version it is written to `dist\IFC Viewer 0.4.0 ahihi.exe`. The packaged application
+uses `desktop\build_config.json`; keep that file as the single build-mode
+configuration. The active release uses `authMode: public` and does not require login.
+Follow `packaging\RELEASE.md` for the real-model and artifact gates.
 
 ## Historical material
 
