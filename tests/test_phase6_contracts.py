@@ -45,6 +45,13 @@ class Phase6ContractTests(unittest.TestCase):
         self.assertIn("cmd /c BuildExe.cmd", release)
         self.assertIn("packaging/smoke_test_package.py", release)
         self.assertIn("test:webview2", release)
+        self.assertIn("MicrosoftEdgeWebview2Setup.exe", release)
+        webview2_smoke = (
+            ROOT / "frontend" / "e2e" / "webview2-smoke.mjs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("WEBVIEW2_USER_DATA_FOLDER", webview2_smoke)
+        self.assertIn("--headless=new", webview2_smoke)
+        self.assertIn("reserveFreePort", webview2_smoke)
 
 
 if __name__ == "__main__":

@@ -38,6 +38,15 @@ jobs:
       - name: Install Playwright Chromium
         working-directory: frontend
         run: pnpm exec playwright install chromium
+      - name: Install WebView2 Runtime
+        shell: powershell
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP "MicrosoftEdgeWebview2Setup.exe"
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile $installer
+          & $installer /silent /install
+          if ($LASTEXITCODE -ne 0) {
+            throw "WebView2 Runtime installer failed with exit code $LASTEXITCODE"
+          }
       - name: Run browser lifecycle E2E
         working-directory: frontend
         run: pnpm run test:e2e

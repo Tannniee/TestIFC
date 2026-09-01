@@ -1,19 +1,39 @@
 import { chromium } from "@playwright/test";
 import { spawn } from "node:child_process";
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
+import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
 const executable = process.env.IFC_VIEWER_EXE;
 if (!executable) throw new Error("IFC_VIEWER_EXE must point to the packaged application");
 
-const cdpUrl = process.env.IFC_WEBVIEW2_CDP_URL ?? "http://127.0.0.1:9222";
+async function reserveFreePort() {
+  const server = createServer();
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  const address = server.address();
+  const port = typeof address === "object" && address ? address.port : undefined;
+  await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  if (!port) throw new Error("Could not reserve a WebView2 CDP port");
+  return port;
+}
+
+const requestedCdpUrl = process.env.IFC_WEBVIEW2_CDP_URL;
+const cdpPort = requestedCdpUrl ? Number(new URL(requestedCdpUrl).port) : await reserveFreePort();
+if (!Number.isInteger(cdpPort) || cdpPort < 1 || cdpPort > 65_535) {
+  throw new Error(`Invalid WebView2 CDP port: ${requestedCdpUrl}`);
+}
+const cdpUrl = requestedCdpUrl ?? `http://127.0.0.1:${cdpPort}`;
 const userDataDir = await mkdtemp(path.join(tmpdir(), "ifc-viewer-webview2-"));
 const child = spawn(executable, [], {
   env: {
     ...process.env,
+    WEBVIEW2_USER_DATA_FOLDER: userDataDir,
     WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:
-      `--remote-debugging-port=9222 --user-data-dir=${userDataDir}`,
+      `--remote-debugging-port=${cdpPort} --headless=new --disable-gpu --no-first-run`,
   },
   stdio: "inherit",
 });
@@ -49,4 +69,5 @@ try {
 } finally {
   await browser?.close().catch(() => undefined);
   if (child.exitCode === null) child.kill();
+  await rm(userDataDir, { recursive: true, force: true }).catch(() => undefined);
 }
