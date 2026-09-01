@@ -46,6 +46,8 @@ class Phase6ContractTests(unittest.TestCase):
         self.assertIn("packaging/smoke_test_package.py", release)
         self.assertIn("test:webview2", release)
         self.assertIn("MicrosoftEdgeWebview2Setup.exe", release)
+        self.assertIn("Start-Process", release)
+        self.assertIn("-Wait -PassThru", release)
         webview2_smoke = (
             ROOT / "frontend" / "e2e" / "webview2-smoke.mjs"
         ).read_text(encoding="utf-8")
