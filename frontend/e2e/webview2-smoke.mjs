@@ -33,7 +33,7 @@ const child = spawn(executable, [], {
     ...process.env,
     WEBVIEW2_USER_DATA_FOLDER: userDataDir,
     WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:
-      `--remote-debugging-port=${cdpPort} --headless=new --disable-gpu --no-first-run`,
+      `--remote-debugging-port=${cdpPort} --enable-unsafe-swiftshader --no-first-run`,
   },
   stdio: "inherit",
 });
@@ -60,7 +60,15 @@ try {
   browser = await chromium.connectOverCDP(cdpUrl);
   const page = browser.contexts().flatMap((context) => context.pages())[0];
   if (!page) throw new Error("WebView2 did not expose an application page");
-  await page.waitForSelector(".viewer-mount canvas", { timeout: 30_000 });
+  const diagnostics = [];
+  page.on("console", (message) => diagnostics.push(`console.${message.type()}: ${message.text()}`));
+  page.on("pageerror", (error) => diagnostics.push(`pageerror: ${error.message}`));
+  try {
+    await page.waitForSelector(".viewer-mount canvas", { timeout: 30_000 });
+  } catch (error) {
+    process.stderr.write(`WebView2 page: ${page.url()}\n${diagnostics.join("\n")}\n`);
+    throw error;
+  }
   const canvasCount = await page.locator(".viewer-mount canvas").count();
   if (canvasCount !== 1) throw new Error(`Expected one viewer canvas, found ${canvasCount}`);
   const health = await page.evaluate(async () => (await fetch("/health")).json());

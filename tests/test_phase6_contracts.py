@@ -52,7 +52,7 @@ class Phase6ContractTests(unittest.TestCase):
             ROOT / "frontend" / "e2e" / "webview2-smoke.mjs"
         ).read_text(encoding="utf-8")
         self.assertIn("WEBVIEW2_USER_DATA_FOLDER", webview2_smoke)
-        self.assertIn("--headless=new", webview2_smoke)
+        self.assertIn("--enable-unsafe-swiftshader", webview2_smoke)
         self.assertIn("reserveFreePort", webview2_smoke)
 
 
