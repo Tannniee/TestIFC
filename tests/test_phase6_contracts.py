@@ -45,6 +45,7 @@ class Phase6ContractTests(unittest.TestCase):
         self.assertIn("cmd /c BuildExe.cmd", release)
         self.assertIn("packaging/smoke_test_package.py", release)
         self.assertIn("test:webview2", release)
+        self.assertIn("continue-on-error: true", release)
         self.assertIn("MicrosoftEdgeWebview2Setup.exe", release)
         self.assertIn("Start-Process", release)
         self.assertIn("-Wait -PassThru", release)

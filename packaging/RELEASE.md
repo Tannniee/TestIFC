@@ -17,6 +17,10 @@ Create the executable only after every gate below passes.
 9. Connect Playwright to packaged WebView2 over CDP and verify one viewer canvas
    plus local bridge access.
 
+The WebView2/CDP step is advisory on GitHub-hosted runners because they do not
+provide a supported interactive desktop session. Enforce step 9 against the
+packaged executable on an interactive Windows release machine before distribution.
+
 The active package name comes from `src/version.py`. The application has no license
 gate, authentication endpoint, login UI, credential, or build-mode switch.
 
