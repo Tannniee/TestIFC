@@ -500,7 +500,6 @@
       onMeasureMode={changeMeasureMode}
       onClearMeasurements={() => shell.clearMeasurements()}
       onSetDistance={(distance) => shell.setLatestMeasurementDistance(distance)}
-      onQuit={() => void quitInteractionTool()}
     />
     <div class="view-cube-host">
       <ViewCube

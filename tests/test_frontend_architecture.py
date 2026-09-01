@@ -73,6 +73,11 @@ class FrontendArchitectureTests(unittest.TestCase):
         self.assertIn('tool === "multiSelect" ? THREE.MOUSE.ROTATE', camera)
         self.assertIn("event.altKey", interaction)
 
+    def test_tool_cluster_uses_a_fixed_vertical_anchor(self):
+        styles = source(FRONTEND / "styles.css")
+        self.assertIn("translate: 0 -70px", styles)
+        self.assertNotIn(".viewer-toolbar { position: absolute; top: 50%; left: 12px; z-index: 14; translate: 0 -50%", styles)
+
     def test_api_runtime_imports_stay_in_shell_and_bridge_adapters(self):
         expected = {"app-shell.ts", "viewer-bridge.ts"}
         actual = {

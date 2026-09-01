@@ -13,7 +13,6 @@
   export let onMeasureMode: (mode: MeasureMode) => void;
   export let onClearMeasurements: () => void;
   export let onSetDistance: (distance: number) => void;
-  export let onQuit: () => void;
 
   let targetValue = "";
   let targetUnit: MeasurementUnit = "mm";
@@ -56,11 +55,6 @@
         onclick={() => onTool(item.id)}
       ><Icon name={item.icon} /></button>
     {/each}
-    {#if tool !== "pan"}
-      <button class="viewer-toolbar__quit" title={text.quitTool} aria-label={text.quitTool} onclick={onQuit}>
-        <span>Quit</span><kbd>Esc</kbd>
-      </button>
-    {/if}
   </div>
 
   {#if tool === "multiSelect"}

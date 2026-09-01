@@ -27,8 +27,7 @@ export const copy = {
     measureUnit: "Đơn vị đo",
     applyDistance: "Áp dụng",
     measurementsOnScreen: "kết quả trên màn hình",
-    quitTool: "Quit - thoát chế độ",
-    quitHint: "Quit/Esc lần đầu xóa kết quả; lần tiếp theo thoát chế độ đo.",
+    quitHint: "Esc lần đầu xóa kết quả; nhấn lần nữa để thoát chế độ đo.",
     toolNavigationHint: "Kéo trái để xoay; kéo phải để dịch; lăn để zoom.",
     selectedElements: "cấu kiện đã chọn",
     open: "Mở file IFC",
@@ -123,8 +122,7 @@ export const copy = {
     measureUnit: "Measurement unit",
     applyDistance: "Apply",
     measurementsOnScreen: "measurements on screen",
-    quitTool: "Quit tool",
-    quitHint: "The first Quit/Esc clears results; the next exits Measure.",
+    quitHint: "The first Escape clears results; press it again to exit Measure.",
     toolNavigationHint: "Left-drag to orbit; right-drag to pan; wheel to zoom.",
     selectedElements: "elements selected",
     open: "Open IFC file",
@@ -232,7 +230,7 @@ export const helpTopics: Record<Locale, HelpTopic[]> = {
     {
       group: "Chọn và xem dữ liệu",
       title: "Đo kích thước",
-      steps: ["Chọn Đo và Điểm đến điểm; đưa chuột gần góc hoặc cạnh để auto-snap rồi bấm hai điểm.", "Kéo trái để xoay, kéo phải để dịch và lăn để zoom mà không thoát Measure.", "Nhập khoảng cách theo mm hoặc m và bấm Áp dụng để kéo điểm cuối tới đúng giá trị.", "Các phép đo tiếp tục nằm trên màn hình; Quit/Esc lần đầu xóa chúng, lần tiếp theo thoát Measure.", "Hoặc chọn Bám cạnh và bấm một cạnh để lấy toàn bộ chiều dài cạnh."],
+      steps: ["Chọn Đo và Điểm đến điểm; đưa chuột gần góc hoặc cạnh để auto-snap rồi bấm hai điểm.", "Kéo trái để xoay, kéo phải để dịch và lăn để zoom mà không thoát Measure.", "Nhập khoảng cách theo mm hoặc m và bấm Áp dụng để kéo điểm cuối tới đúng giá trị.", "Các phép đo tiếp tục nằm trên màn hình; Esc lần đầu xóa chúng, lần tiếp theo thoát Measure.", "Hoặc chọn Bám cạnh và bấm một cạnh để lấy toàn bộ chiều dài cạnh."],
     },
     {
       group: "Chọn và xem dữ liệu",
@@ -266,7 +264,7 @@ export const helpTopics: Record<Locale, HelpTopic[]> = {
     {
       group: "Select and inspect",
       title: "Measure",
-      steps: ["Choose Measure and Point to point; move near a corner or edge to auto-snap, then click two points.", "Left-drag to orbit, right-drag to pan, and use the wheel to zoom without leaving Measure.", "Enter a distance in mm or m and choose Apply to place the endpoint at that exact distance.", "Measurements stay on screen; the first Quit/Escape clears them and the next exits Measure.", "Or choose Snap to edge and click an edge to capture its full length."],
+      steps: ["Choose Measure and Point to point; move near a corner or edge to auto-snap, then click two points.", "Left-drag to orbit, right-drag to pan, and use the wheel to zoom without leaving Measure.", "Enter a distance in mm or m and choose Apply to place the endpoint at that exact distance.", "Measurements stay on screen; the first Escape clears them and the next exits Measure.", "Or choose Snap to edge and click an edge to capture its full length."],
     },
     {
       group: "Select and inspect",
