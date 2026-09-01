@@ -45,7 +45,7 @@ boundaries, and versioned golden fixtures protect takeoff exports.
 
 The frontend follows the same composition boundary:
 
-- `frontend/src/lib/app-shell.ts` owns auth, settings, viewer lifecycle, and commands.
+- `frontend/src/lib/app-shell.ts` owns settings, viewer lifecycle, and commands.
 - `App.svelte` composes the rail, dialogs, inspector, and viewer workspace.
 - `viewer.ts` coordinates rendering through focused camera, bridge, conversion,
   selection, and contract modules.
@@ -94,6 +94,35 @@ node .\node_modules\typescript\bin\tsc --noEmit
 node .\node_modules\svelte-check\bin\svelte-check --tsconfig .\tsconfig.json
 ```
 
+## Performance baseline
+
+The repository contains a repeatable backend benchmark contract under
+`benchmarks/`. Copy `corpus.example.json` to `corpus.local.json`, point it at
+sanitized or locally controlled IFC files, then run:
+
+```powershell
+.\.venv\Scripts\python.exe .\benchmarks\run_backend_baseline.py
+```
+
+The runner verifies optional SHA-256 expectations and records hashing, IFC open,
+semantic-index preparation, and search timings as JSON under
+`benchmarks/results/`. The local corpus and generated results are ignored by Git;
+no private IFC model is committed to this repository.
+
+For fragment metadata A/B testing, follow
+`benchmarks/fragment-ab.md`. The `full` profile remains the default until the
+lighter profiles pass the real-model feature matrix.
+
+Semantic DB v2, facts-cache versioning, and take-off schema v6 are documented in
+`benchmarks/phase4-5.md`.
+
+Semantic DB v3 search, byte-aware cache retention, browser lifecycle E2E, and CI
+are documented in `benchmarks/phase6.md`.
+
+The cache keeps at most three model bundles and 10 GiB by default. Override the
+limits with `IFC_CACHE_KEEP_MODELS` and `IFC_CACHE_MAX_BYTES`. Active, pinned,
+uploading, and building bundles remain protected even when they exceed a limit.
+
 ## Run from source
 
 Build the frontend once, then start the integrated desktop host:
@@ -113,11 +142,10 @@ PyInstaller executable:
 .\BuildExe.cmd
 ```
 
-The executable name comes from `APP_VERSION` in `src\version.py`. For the current
-version it is written to `dist\IFC Viewer 0.4.0 ahihi.exe`. The packaged application
-uses `desktop\build_config.json`; keep that file as the single build-mode
-configuration. The active release uses `authMode: public` and does not require login.
-Follow `packaging\RELEASE.md` for the real-model and artifact gates.
+The executable name comes from `APP_VERSION` in `src\version.py`. Version 1.0.0 is
+written to `dist\IFC Viewer 1.0.0.exe`. The application contains no licensing or
+authentication layer. Follow `packaging\RELEASE.md` for the real-model and artifact
+gates.
 
 ## Historical material
 

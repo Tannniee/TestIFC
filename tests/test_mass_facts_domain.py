@@ -24,6 +24,20 @@ class MappingTarget:
         return self.non_uniform and kind == "IfcCartesianTransformationOperator3DnonUniform"
 
 
+class Entity:
+    def __init__(self, entity_id, ifc_type, **values):
+        self._id = entity_id
+        self._type = ifc_type
+        for name, value in values.items():
+            setattr(self, name, value)
+
+    def id(self):
+        return self._id
+
+    def is_a(self, kind=None):
+        return self._type if kind is None else self._type == kind
+
+
 class MassFactsDomainTests(unittest.TestCase):
     def test_tetrahedron_volume_uses_signed_orientation(self):
         positive = mass_facts._tetrahedron_volume((1, 0, 0), (0, 1, 0), (0, 0, 1))
@@ -52,6 +66,35 @@ class MassFactsDomainTests(unittest.TestCase):
             mass_facts._mapping_scale_factors(MappingTarget(2.0)),
             (2.0, 2.0, 2.0),
         )
+
+    def test_extruded_rectangle_volume_is_analytic_and_unit_normalized(self):
+        profile = Entity(20, "IfcRectangleProfileDef", XDim=200.0, YDim=10.0)
+        solid = Entity(21, "IfcExtrudedAreaSolid", SweptArea=profile, Depth=4000.0)
+
+        facts = mass_facts._analytic_from_item(solid, 0.001)
+
+        self.assertAlmostEqual(facts.volume_m3, 0.008)
+        self.assertAlmostEqual(facts.length_m, 4.0)
+        self.assertEqual(facts.method, "ifc_extruded_area_solid")
+
+    def test_swept_disk_polyline_volume_uses_curve_length(self):
+        points = (
+            Entity(31, "IfcCartesianPoint", Coordinates=(0.0, 0.0, 0.0)),
+            Entity(32, "IfcCartesianPoint", Coordinates=(3000.0, 4000.0, 0.0)),
+        )
+        directrix = Entity(33, "IfcPolyline", Points=points)
+        solid = Entity(
+            34,
+            "IfcSweptDiskSolid",
+            Directrix=directrix,
+            Radius=100.0,
+            InnerRadius=80.0,
+        )
+
+        facts = mass_facts._analytic_from_item(solid, 0.001)
+
+        self.assertAlmostEqual(facts.length_m, 5.0)
+        self.assertAlmostEqual(facts.volume_m3, 3.141592653589793 * (0.1**2 - 0.08**2) * 5.0)
 
 
 if __name__ == "__main__":

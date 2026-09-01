@@ -14,12 +14,15 @@ from typing import Iterable, Literal, Mapping, Sequence, TypeAlias
 from content_hash import mapping_digest
 from ifc_units import lengths_to_m, mass_to_kilograms
 from mass_facts import (
+    AnalyticFacts,
     AssemblyFacts,
+    AuthoredVolumeFacts,
     AuthoredWeightFacts,
     MassMeasureFact,
     MeshFacts,
     PartFacts,
     UnitFacts,
+    VolumeMeasureFact,
     gather_assembly_facts,
     gather_authored_weight_facts,
     gather_mesh_facts,
@@ -29,9 +32,11 @@ from mass_facts import (
 
 __all__ = [
     "Absent",
+    "AnalyticFacts",
     "Ambiguous",
     "AssemblyFacts",
     "AuthoredWeightFacts",
+    "AuthoredVolumeFacts",
     "DensityTable",
     "Evidence",
     "MASS_METHODS",
@@ -47,8 +52,11 @@ __all__ = [
     "Totals",
     "UnitFacts",
     "Value",
+    "VolumeMeasureFact",
     "accumulate_totals",
     "authored_weight_candidate",
+    "authored_volume_candidate",
+    "analytic_candidate",
     "compare_methods",
     "gather_assembly_facts",
     "gather_authored_weight_facts",
@@ -63,12 +71,18 @@ __all__ = [
 ]
 
 MassMethod: TypeAlias = Literal[
-    "authored_weight", "density_x_mesh_volume", "density_x_section_volume"
+    "authored_weight",
+    "density_x_authored_volume",
+    "density_x_analytic_volume",
+    "density_x_mesh_volume",
+    "density_x_section_volume",
 ]
 AbsenceReason: TypeAlias = Literal[
     "density_missing",
     "unit_unresolved",
     "no_mesh",
+    "no_authored_volume",
+    "no_analytic",
     "no_section",
     "no_authored_weight",
     "partial_assembly_selection",
@@ -77,6 +91,8 @@ MassValue: TypeAlias = "Value | Absent | Ambiguous"
 
 MASS_METHODS: tuple[MassMethod, ...] = (
     "authored_weight",
+    "density_x_authored_volume",
+    "density_x_analytic_volume",
     "density_x_mesh_volume",
     "density_x_section_volume",
 )
@@ -150,6 +166,8 @@ class MassRow:
     model_hash: str
     assembly_global_id: str
     authored_weight: MassValue
+    density_x_authored_volume: MassValue
+    density_x_analytic_volume: MassValue
     density_x_mesh_volume: MassValue
     density_x_section_volume: MassValue
     resolved: MassValue
@@ -172,6 +190,8 @@ class Total:
 @dataclass(frozen=True)
 class Totals:
     authored_weight: Total
+    density_x_authored_volume: Total
+    density_x_analytic_volume: Total
     density_x_mesh_volume: Total
     density_x_section_volume: Total
     resolved: Total
@@ -233,6 +253,84 @@ def authored_weight_candidate(facts: AuthoredWeightFacts) -> MassValue:
     return Absent("no_authored_weight")
 
 
+def _volume_measure_candidate(
+    measures: Sequence[VolumeMeasureFact],
+    part: PartFacts,
+    table: DensityTable,
+) -> MassValue:
+    if not measures or any(measure.volume_scale_to_m3 is None for measure in measures):
+        return Absent("unit_unresolved")
+    volumes = tuple(
+        measure.raw_value * float(measure.volume_scale_to_m3) for measure in measures
+    )
+    if len({round(value, 12) for value in volumes}) != 1:
+        return Ambiguous("conflicting_authored_volume")
+    density = _density(part, table)
+    if density is None:
+        return _missing_density(part)
+    resolutions = {measure.unit_resolution for measure in measures}
+    evidence = Evidence(
+        "density_x_authored_volume",
+        tuple(
+            sorted(
+                {
+                    part.entity_id,
+                    *part.material_source_entity_ids,
+                    *(measure.source_entity_id for measure in measures),
+                }
+            )
+        ),
+        part.ifc_type,
+        "/".join(sorted({measure.quantity_name for measure in measures})),
+        next(iter(resolutions)) if len(resolutions) == 1 else "mixed_volume_units",
+        density,
+        table.revision,
+        volumes[0],
+    )
+    return Value(density * volumes[0], evidence)
+
+
+def authored_volume_candidate(part: PartFacts, table: DensityTable) -> MassValue:
+    facts = part.authored_volume
+    if facts.invalid_source_ids:
+        return Absent("unit_unresolved")
+    if not facts.has_quantity_volume:
+        return Absent("no_authored_volume")
+    preferred_name = (
+        "NETVOLUME"
+        if any(measure.quantity_name.upper() == "NETVOLUME" for measure in facts.measures)
+        else "GROSSVOLUME"
+    )
+    preferred = tuple(
+        measure
+        for measure in facts.measures
+        if measure.quantity_name.upper() == preferred_name
+    )
+    return _volume_measure_candidate(preferred, part, table)
+
+
+def analytic_candidate(part: PartFacts, table: DensityTable) -> MassValue:
+    analytic = part.analytic
+    if analytic.volume_m3 is None:
+        detail = ", ".join(analytic.unsupported_item_types) or None
+        return Absent("no_analytic", detail)
+    density = _density(part, table)
+    if density is None:
+        return _missing_density(part)
+    evidence = Evidence(
+        "density_x_analytic_volume",
+        (part.entity_id, *analytic.source_entity_ids, *part.material_source_entity_ids),
+        part.ifc_type,
+        analytic.method or "analytic_ifc_geometry",
+        "project_length_unit",
+        density,
+        table.revision,
+        analytic.volume_m3,
+        section_length_m=analytic.length_m,
+    )
+    return Value(density * analytic.volume_m3, evidence)
+
+
 def _section_area_m2(text: str | None, length_scale: float) -> float | None:
     if text is None:
         return None
@@ -283,7 +381,7 @@ def mesh_candidate(part: PartFacts, table: DensityTable) -> MassValue:
         "density_x_mesh_volume",
         (part.entity_id, *part.mesh.source_entity_ids, *part.material_source_entity_ids),
         part.ifc_type,
-        "IfcClosedShell",
+        part.mesh.method or "IfcClosedShell",
         "project_length_unit",
         density,
         table.revision,
@@ -339,7 +437,13 @@ def _rolled_up_absence(absences: Sequence[Absent]) -> Absent:
 
 def _roll_up(values: Sequence[MassValue], method: MassMethod) -> MassValue:
     if not values:
-        return Absent("no_mesh" if method == "density_x_mesh_volume" else "no_section")
+        reasons = {
+            "density_x_authored_volume": "no_authored_volume",
+            "density_x_analytic_volume": "no_analytic",
+            "density_x_mesh_volume": "no_mesh",
+            "density_x_section_volume": "no_section",
+        }
+        return Absent(reasons.get(method, "no_authored_weight"))
     ambiguous = tuple(value for value in values if isinstance(value, Ambiguous))
     if ambiguous:
         return ambiguous[0]
@@ -426,10 +530,20 @@ def resolve_assembly_with_policy(
             partial,
             partial,
             partial,
+            partial,
+            partial,
             False,
             0.0,
             False,
         )
+    authored_volume = _roll_up(
+        tuple(authored_volume_candidate(part, density_table) for part in facts.parts),
+        "density_x_authored_volume",
+    )
+    analytic = _roll_up(
+        tuple(analytic_candidate(part, density_table) for part in facts.parts),
+        "density_x_analytic_volume",
+    )
     mesh = _roll_up(
         tuple(mesh_candidate(part, density_table) for part in facts.parts),
         "density_x_mesh_volume",
@@ -440,6 +554,8 @@ def resolve_assembly_with_policy(
     )
     candidates = {
         "authored_weight": authored,
+        "density_x_authored_volume": authored_volume,
+        "density_x_analytic_volume": analytic,
         "density_x_mesh_volume": mesh,
         "density_x_section_volume": section,
     }
@@ -449,6 +565,8 @@ def resolve_assembly_with_policy(
         facts.model_hash,
         facts.assembly_global_id,
         authored,
+        authored_volume,
+        analytic,
         mesh,
         section,
         resolve_candidates(candidates),
@@ -512,6 +630,8 @@ def accumulate_totals(rows: Iterable[MassRow]) -> Totals:
     materialized = tuple(rows)
     return Totals(
         _total(materialized, "authored_weight"),
+        _total(materialized, "density_x_authored_volume"),
+        _total(materialized, "density_x_analytic_volume"),
         _total(materialized, "density_x_mesh_volume"),
         _total(materialized, "density_x_section_volume"),
         _total(materialized, None),

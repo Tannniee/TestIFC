@@ -18,7 +18,6 @@ analysis = Analysis(
     + [
         (str(ROOT / "frontend" / "dist"), "frontend/dist"),
         (str(ROOT / "backend" / "reference_data"), "backend/reference_data"),
-        (str(ROOT / "desktop" / "build_config.json"), "desktop"),
         (str(ROOT / "desktop" / "assets" / "app_icon.ico"), "desktop/assets"),
     ],
     hiddenimports=ifc_hidden + webview_hidden,

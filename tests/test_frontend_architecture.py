@@ -19,7 +19,6 @@ class FrontendArchitectureTests(unittest.TestCase):
         self.assertIn('from "./lib/app-shell"', app)
         for component in (
             "AppRail",
-            "AuthDialog",
             "HelpDialog",
             "InspectorDrawer",
         ):

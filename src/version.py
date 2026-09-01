@@ -1,6 +1,5 @@
-"""Application version and the shipped-version reference."""
+"""Application version."""
 
 from __future__ import annotations
 
-BASE_VERSION = "0.4.0"
-APP_VERSION = "0.4.0 ahihi"
+APP_VERSION = "1.0.0"

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, File, Request, UploadFile
+from fastapi import APIRouter, File, Request, UploadFile
 from fastapi import Path as FastApiPath
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
@@ -18,7 +18,6 @@ from api_contracts import (
     ModelRuntimeResponse,
     RegisterModelRequest,
 )
-from api_dependencies import require_license_dep
 from api_errors import error_response, model_state_error
 from fragment_service import FragmentService
 from model_runtime import (
@@ -29,6 +28,9 @@ from model_runtime import (
 
 
 MODEL_HASH_PATTERN = "^[0-9a-f]{64}$"
+FRAGMENT_CACHE_KEY_PATTERN = (
+    "^[0-9a-f]{64}\\.fragments-v[0-9]+-(?:full|attributes|minimum)$"
+)
 logger = logging.getLogger("ifc_viewer.backend.routes.model")
 
 
@@ -42,7 +44,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.post(
         "/load-model",
         response_model=LoadModelResponse,
-        dependencies=[Depends(require_license_dep)],
     )
     async def load_model(file: UploadFile = File(...)):
         try:
@@ -69,10 +70,9 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.get(
         "/model/fragments/{modelHash}",
         response_model=None,
-        dependencies=[Depends(require_license_dep)],
     )
     async def get_model_fragments(
-        modelHash: str = FastApiPath(pattern=MODEL_HASH_PATTERN),
+        modelHash: str = FastApiPath(pattern=FRAGMENT_CACHE_KEY_PATTERN),
     ):
         try:
             path = fragment_service.cached_file(modelHash)
@@ -83,11 +83,10 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.post(
         "/model/fragments/{modelHash}",
         response_model=FragmentStoredResponse,
-        dependencies=[Depends(require_license_dep)],
     )
     async def post_model_fragments(
         request: Request,
-        modelHash: str = FastApiPath(pattern=MODEL_HASH_PATTERN),
+        modelHash: str = FastApiPath(pattern=FRAGMENT_CACHE_KEY_PATTERN),
     ):
         try:
             size = await fragment_service.store_stream(modelHash, request.stream())
@@ -104,7 +103,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.post(
         "/model/activate/{modelHash}",
         response_model=ActivateModelResponse,
-        dependencies=[Depends(require_license_dep)],
     )
     async def post_model_activate(
         modelHash: str = FastApiPath(pattern=MODEL_HASH_PATTERN),
@@ -121,7 +119,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.post(
         "/register-model",
         response_model=None,
-        dependencies=[Depends(require_license_dep)],
     )
     async def post_register_model(request: RegisterModelRequest):
         try:
@@ -143,7 +140,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.get(
         "/model/tree",
         response_model=None,
-        dependencies=[Depends(require_license_dep)],
     )
     def get_tree():
         try:
@@ -163,7 +159,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.get(
         "/model/search",
         response_model=None,
-        dependencies=[Depends(require_license_dep)],
     )
     def search_active_model(
         q: str | None = None,
@@ -187,7 +182,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.get(
         "/element/by-express-id/{expressId}",
         response_model=None,
-        dependencies=[Depends(require_license_dep)],
     )
     def get_element_by_express_id(expressId: int):
         try:
@@ -212,7 +206,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.get(
         "/element/{globalId}",
         response_model=None,
-        dependencies=[Depends(require_license_dep)],
     )
     def get_element(globalId: str):
         try:
@@ -237,7 +230,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.get(
         "/model/materials",
         response_model=None,
-        dependencies=[Depends(require_license_dep)],
     )
     def get_materials():
         try:

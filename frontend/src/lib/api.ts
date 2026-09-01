@@ -2,8 +2,6 @@ import {
   API_ENDPOINTS,
   apiPath,
   type ActivateModelResponse,
-  type ApiActionResponse,
-  type AuthStatus,
   type FragmentStoredResponse,
   type HealthResponse,
   type LoadModelResponse,
@@ -14,8 +12,6 @@ import {
 
 export type {
   ActivateModelResponse,
-  ApiActionResponse,
-  AuthStatus,
   FragmentStoredResponse,
   HealthResponse,
   LoadModelResponse,
@@ -34,10 +30,6 @@ export class ApiError extends Error {
     super(message);
     this.name = "ApiError";
   }
-}
-
-export function isAuthorizationError(error: unknown): boolean {
-  return error instanceof ApiError && (error.status === 401 || error.status === 403);
 }
 
 function responseMessage(status: number, statusText: string, body: string): string {
@@ -70,10 +62,7 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  authStatus: () => requestJson<AuthStatus>(API_ENDPOINTS.authStatus.path),
   health: () => requestJson<HealthResponse>(API_ENDPOINTS.health.path),
-  login: () => requestJson<ApiActionResponse>(API_ENDPOINTS.authLogin.path, { method: API_ENDPOINTS.authLogin.method }),
-  logout: () => requestJson<ApiActionResponse>(API_ENDPOINTS.authLogout.path, { method: API_ENDPOINTS.authLogout.method }),
   loadModel(file: File): Promise<LoadModelResponse> {
     const body = new FormData();
     body.append("file", file, file.name);

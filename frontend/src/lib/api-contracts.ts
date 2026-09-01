@@ -6,22 +6,6 @@ export interface HealthResponse {
   hasSelection: boolean;
 }
 
-export interface AuthStatus {
-  authenticated: boolean;
-  valid: boolean;
-  enforced: boolean;
-  authMode: string;
-  daysRemaining?: number;
-  name?: string;
-  email?: string;
-  error?: string;
-}
-
-export interface ApiActionResponse {
-  ok: boolean;
-  message?: string;
-}
-
 export interface LoadModelResponse {
   ok: boolean;
   modelHash: string;
@@ -40,9 +24,13 @@ export interface ActivateModelResponse {
 
 export interface ModelRuntimeResponse {
   hasActiveModel: boolean;
+  activeModelHash: string | null;
   modelResident: boolean;
   preparing: boolean;
   prepareError: string | null;
+  hotIndexStatus: "idle" | "indexing" | "ready" | "error";
+  coldIndexStatus: "not_configured" | "indexing" | "ready" | "error";
+  coldIndexError: string | null;
   storeBacked: boolean;
   sizeBytes: number;
   liveModelMaxBytes: number;
@@ -96,7 +84,6 @@ export interface ApiEndpoint {
 }
 
 export const API_PROXY_PREFIXES = [
-  "/auth",
   "/element",
   "/health",
   "/idea",
@@ -109,9 +96,6 @@ export const API_PROXY_PREFIXES = [
 
 // Paths are checked against the backend OpenAPI document by the Python contract suite.
 export const API_ENDPOINTS = {
-  authStatus: { method: "GET", path: "/auth/status" },
-  authLogin: { method: "POST", path: "/auth/login" },
-  authLogout: { method: "POST", path: "/auth/logout" },
   health: { method: "GET", path: "/health" },
   loadModel: { method: "POST", path: "/load-model" },
   activateModel: { method: "POST", path: "/model/activate/{modelHash}" },

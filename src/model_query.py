@@ -10,8 +10,8 @@ MAX_SEARCH_LIMIT = 500
 MAX_TREE_DEPTH = 32
 
 
-def get_model_tree() -> dict[str, Any]:
-    index = active_index()
+def get_model_tree(index: ModelIndex | None = None) -> dict[str, Any]:
+    index = index or active_index()
     roots = index.roots()
     return {
         "ok": True,
@@ -24,10 +24,11 @@ def search_model(
     q: str | None,
     ifc_type: str | None,
     limit: int,
+    index: ModelIndex | None = None,
 ) -> dict[str, Any]:
     bounded_limit = max(1, min(limit, MAX_SEARCH_LIMIT))
-    query = (q or "").strip().lower()
-    results, truncated = active_index().search(
+    query = (q or "").strip()
+    results, truncated = (index or active_index()).search(
         query, (ifc_type or "").strip(), bounded_limit
     )
     return {

@@ -23,7 +23,6 @@ def imports(path: Path) -> set[str]:
 class ArchitectureBoundaryTests(unittest.TestCase):
     def test_blocking_bridge_operations_use_sync_threadpool_endpoints(self):
         expected_sync_routes = {
-            "api_routes/core.py": ("auth_status", "auth_login", "auth_logout"),
             "api_routes/model.py": (
                 "get_tree",
                 "search_active_model",

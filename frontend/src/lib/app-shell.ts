@@ -1,4 +1,4 @@
-import { api, isAuthorizationError, type AuthStatus, type HealthResponse } from "./api";
+import { api, type HealthResponse } from "./api";
 import { loadDesktopSettings, saveDesktopSettings, type AppSettings } from "./settings";
 import { ViewerService } from "./viewer";
 import { isLoadCancelledError } from "./viewer-contracts";
@@ -11,11 +11,11 @@ import type {
   ViewPreset,
 } from "./viewer-contracts";
 
-export type { AuthStatus } from "./api";
 export type { AppSettings } from "./settings";
 export type {
   BridgeProgress,
   CameraOrientation,
+  FragmentMetrics,
   SectionPlaneDefinition,
   SectionSide,
   ViewDirection,
@@ -78,24 +78,6 @@ export class AppShellService {
 
   health(): Promise<HealthResponse> {
     return api.health();
-  }
-
-  authStatus(): Promise<AuthStatus> {
-    return api.authStatus();
-  }
-
-  async login(): Promise<AuthStatus> {
-    await api.login();
-    return api.authStatus();
-  }
-
-  async logout(): Promise<AuthStatus> {
-    await api.logout();
-    return api.authStatus();
-  }
-
-  isAuthorizationFailure(error: unknown) {
-    return isAuthorizationError(error);
   }
 
   isCancelledLoad(error: unknown) {

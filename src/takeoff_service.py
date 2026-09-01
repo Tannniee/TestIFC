@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from threading import Lock, Thread
+from contextlib import AbstractContextManager
 from typing import Any, Callable, Sequence
 
 import excel_quickview
 from mass import DensityTable
+from model_runtime import ModelLease, ModelSession, lease_active_model, open_model_session
 from takeoff import (
     QUICKVIEW_KG_COLUMNS,
     UnknownElementError,
@@ -18,7 +20,8 @@ from takeoff import (
 
 
 TakeoffRunner = Callable[..., dict[str, Any]]
-SubjectIdReader = Callable[[], list[str]]
+SubjectIdReader = Callable[[ModelSession], list[str]]
+SessionFactory = Callable[..., AbstractContextManager[ModelSession]]
 
 
 class QuickviewUnavailableError(RuntimeError):
@@ -35,9 +38,11 @@ class TakeoffService:
         self,
         subject_id_reader: SubjectIdReader = model_subject_ids,
         runner: TakeoffRunner = takeoff,
+        session_factory: SessionFactory = open_model_session,
     ) -> None:
         self._subject_id_reader = subject_id_reader
         self._runner = runner
+        self._session_factory = session_factory
 
     def run(
         self,
@@ -46,17 +51,30 @@ class TakeoffService:
         table: DensityTable,
         tolerance: float,
         on_progress: Callable[[int, int], Any] | None = None,
+        lease: ModelLease | None = None,
     ) -> dict[str, Any]:
-        subjects = list(global_ids) if scope == "selection" else self._subject_id_reader()
-        return self._runner(subjects, table, tolerance, on_progress=on_progress)
+        with self._session_factory(lease=lease) as session:
+            subjects = (
+                list(global_ids)
+                if scope == "selection"
+                else self._subject_id_reader(session)
+            )
+            return self._runner(
+                session,
+                subjects,
+                table,
+                tolerance,
+                on_progress=on_progress,
+            )
 
     def run_model(
         self,
         table: DensityTable,
         tolerance: float,
         on_progress: Callable[[int, int], Any] | None = None,
+        lease: ModelLease | None = None,
     ) -> dict[str, Any]:
-        return self.run("model", (), table, tolerance, on_progress)
+        return self.run("model", (), table, tolerance, on_progress, lease)
 
     @staticmethod
     def csv(result: dict[str, Any]) -> str:
@@ -89,30 +107,55 @@ class ModelTakeoffJob:
         self._total = 0
         self._result: dict[str, Any] | None = None
         self._error = ""
+        self._model_hash = ""
 
     def start(self, table: DensityTable, tolerance: float) -> bool:
         with self._lock:
-            if self._status == "running":
+            if self._status in ("starting", "running"):
                 return False
-            self._status = "running"
+            self._status = "starting"
             self._done = 0
             self._total = 0
             self._result = None
             self._error = ""
-            Thread(
-                target=self._run,
-                args=(table, tolerance),
-                name="model-takeoff",
-                daemon=True,
-            ).start()
+            self._model_hash = ""
+
+        try:
+            lease = lease_active_model()
+        except BaseException:
+            with self._lock:
+                self._status = "idle"
+            raise
+
+        with self._lock:
+            self._status = "running"
+            self._model_hash = lease.ref.model_hash
+            try:
+                Thread(
+                    target=self._run,
+                    args=(table, tolerance, lease),
+                    name="model-takeoff",
+                    daemon=True,
+                ).start()
+            except BaseException:
+                lease.release()
+                self._status = "idle"
+                self._model_hash = ""
+                raise
             return True
 
-    def _run(self, table: DensityTable, tolerance: float) -> None:
+    def _run(
+        self,
+        table: DensityTable,
+        tolerance: float,
+        lease: ModelLease,
+    ) -> None:
         try:
             result = self._service.run_model(
                 table,
                 tolerance,
                 on_progress=self._advance,
+                lease=lease,
             )
         except Exception as exc:
             with self._lock:
@@ -135,6 +178,7 @@ class ModelTakeoffJob:
                 "done": self._done,
                 "total": self._total,
                 "error": self._error,
+                "modelHash": self._model_hash,
             }
 
     def result(self) -> dict[str, Any] | None:

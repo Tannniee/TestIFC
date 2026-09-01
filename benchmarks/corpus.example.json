@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "models": [
+    {
+      "id": "small-sanitized",
+      "path": "../private-corpus/small-sanitized.ifc",
+      "searches": [
+        {
+          "query": "beam",
+          "ifcType": "IfcBeam",
+          "limit": 100
+        },
+        {
+          "query": "",
+          "ifcType": "IfcColumn",
+          "limit": 100
+        }
+      ]
+    }
+  ]
+}

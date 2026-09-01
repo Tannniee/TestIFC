@@ -7,12 +7,14 @@ import logging
 import os
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
+from pathlib import Path
 from threading import Lock, Thread
 from time import monotonic
 from typing import Any, BinaryIO
 
 import ifcopenshell
 
+import facts_cache
 import index_builder
 import model_cache
 import model_index
@@ -30,6 +32,18 @@ class ActiveModel:
     originalFilename: str | None
     sizeBytes: int
     loadedAt: str
+
+
+@dataclass(frozen=True, slots=True)
+class ModelRef:
+    """Immutable paths and identity captured for one model operation."""
+
+    path: str
+    source_path: str
+    model_hash: str
+    index_path: str
+    original_filename: str | None
+    size_bytes: int
 
 
 class NoActiveModelError(Exception):
@@ -115,6 +129,14 @@ class _ActiveModelState:
         with self._lock:
             return self._active
 
+    def capture_and_pin(self) -> ActiveModel:
+        with self._lock:
+            if self._active is None:
+                raise NoActiveModelError("no active model")
+            model = self._active
+            model_cache.pin_model(model.contentHashSha256)
+            return model
+
     def get_open_file(self):
         with self._lock:
             if self._active is None:
@@ -157,6 +179,92 @@ class _ActiveModelState:
 
 _prepare = _PrepareState()
 _state = _ActiveModelState()
+
+
+class ModelLease:
+    """Own a cache-retention pin for one immutable model reference."""
+
+    def __init__(self, ref: ModelRef) -> None:
+        self.ref = ref
+        self._lock = Lock()
+        self._released = False
+        self._session_opened = False
+
+    @property
+    def index(self) -> model_index.ModelIndex:
+        return model_index.ModelIndex(Path(self.ref.index_path))
+
+    def open_session(self) -> ModelSession:
+        with self._lock:
+            if self._released:
+                raise RuntimeError("model lease has been released")
+            if self._session_opened:
+                raise RuntimeError("model lease already opened a session")
+            self._session_opened = True
+        try:
+            ifc_file = ifcopenshell.open(self.ref.source_path)
+        except BaseException:
+            self.release()
+            raise
+        return ModelSession(self, ifc_file)
+
+    def release(self) -> None:
+        with self._lock:
+            if self._released:
+                return
+            self._released = True
+        model_cache.unpin_model(self.ref.model_hash)
+
+    def __enter__(self) -> ModelLease:
+        return self
+
+    def __exit__(self, *_args) -> None:
+        self.release()
+
+
+class ModelSession:
+    """Dedicated IFC handle and semantic index bound to one model hash."""
+
+    def __init__(self, lease: ModelLease, ifc_file: Any) -> None:
+        self._lease = lease
+        self.ref = lease.ref
+        self.ifc_file = ifc_file
+        self.index = lease.index
+        self._facts = None
+        self._closed = False
+
+    @property
+    def facts(self) -> facts_cache.FactsCache:
+        if self._facts is None:
+            self._facts = facts_cache.FactsCache(
+                facts_cache.path_for(
+                    Path(self.ref.index_path).parent, self.ref.model_hash
+                ),
+                self.ref.model_hash,
+            )
+        return self._facts
+
+    def locate_global_id(self, global_id: str):
+        record = self.index.record_by_global_id(global_id)
+        element = self.ifc_file.by_id(int(record["expressId"]))
+        if getattr(element, "GlobalId", None) != global_id:
+            raise LookupError(
+                f"{global_id} is not express id {record['expressId']} in this model"
+            )
+        return element
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        self.ifc_file = None
+        self._lease.release()
+
+    def __enter__(self) -> ModelSession:
+        return self
+
+    def __exit__(self, *_args) -> None:
+        self.close()
 
 
 def now_utc() -> str:
@@ -208,6 +316,7 @@ def register_model(path: str, expected_hash: str, background: bool = False) -> d
 
 def _activate(model: ActiveModel) -> None:
     _state.set(model)
+    model_cache.enforce_cache_retention(model.contentHashSha256)
     target = model_index.index_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
     if model_index.is_usable(target):
         _prepare.clear_error(model.contentHashSha256)
@@ -231,13 +340,63 @@ def _run_build(model: ActiveModel, target) -> None:
             )
     except Exception as error:
         _prepare.end(model.contentHashSha256, error=str(error))
-        _state.clear_if(model.contentHashSha256)
         raise
     _prepare.end(model.contentHashSha256, None)
 
 
+def _ref_for(model: ActiveModel) -> ModelRef:
+    target = model_index.index_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
+    return ModelRef(
+        path=model.path,
+        source_path=model_source_path(model),
+        model_hash=model.contentHashSha256,
+        index_path=str(target),
+        original_filename=model.originalFilename,
+        size_bytes=model.sizeBytes,
+    )
+
+
+def lease_active_model() -> ModelLease:
+    """Atomically capture and pin the active model for a request or job."""
+    model = _state.capture_and_pin()
+    try:
+        if _prepare.is_preparing(model.contentHashSha256):
+            raise IndexPreparingError(model.contentHashSha256)
+        target = model_index.index_path_for(
+            model_cache.CACHE_DIR,
+            model.contentHashSha256,
+        )
+        if not model_index.is_usable(target):
+            if not _prepare.begin(model.contentHashSha256):
+                raise IndexPreparingError(model.contentHashSha256)
+            _run_build(model, target)
+        return ModelLease(_ref_for(model))
+    except BaseException:
+        model_cache.unpin_model(model.contentHashSha256)
+        raise
+
+
+def lease_model(ref: ModelRef) -> ModelLease:
+    """Pin an explicit reference, primarily for benchmark and offline workflows."""
+    if not model_index.is_usable(Path(ref.index_path)):
+        raise FileNotFoundError(f"no usable index for {ref.model_hash}")
+    model_cache.pin_model(ref.model_hash)
+    return ModelLease(ref)
+
+
+def open_model_session(
+    lease: ModelLease | None = None,
+    model_ref: ModelRef | None = None,
+) -> ModelSession:
+    if lease is not None and model_ref is not None:
+        raise ValueError("provide either lease or model_ref, not both")
+    owned_lease = lease or (lease_model(model_ref) if model_ref else lease_active_model())
+    return owned_lease.open_session()
+
+
 def _activate_in_background(model: ActiveModel) -> None:
     _state.set(model)
+    model_cache.enforce_cache_retention(model.contentHashSha256)
     target = model_index.index_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
     if model_index.is_usable(target):
         _prepare.clear_error(model.contentHashSha256)
@@ -259,13 +418,8 @@ def _activate_in_background(model: ActiveModel) -> None:
 
 
 def active_index() -> model_index.ModelIndex:
-    model = _state.get()
-    if _prepare.is_preparing(model.contentHashSha256):
-        raise IndexPreparingError(model.contentHashSha256)
-    target = model_index.index_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
-    if not model_index.is_usable(target):
-        _activate(model)
-    return model_index.ModelIndex(target)
+    with lease_active_model() as lease:
+        return lease.index
 
 
 def get_active_model_info() -> dict:
@@ -295,11 +449,30 @@ def release_idle_model() -> bool:
 
 def live_model_status() -> dict:
     model = _state.get_or_none()
+    target = (
+        model_index.index_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
+        if model
+        else None
+    )
+    preparing = model is not None and _prepare.is_preparing(model.contentHashSha256)
+    prepare_error = _prepare.error_for(model.contentHashSha256) if model else None
+    if model is None:
+        hot_index_status = "idle"
+    elif preparing:
+        hot_index_status = "indexing"
+    elif prepare_error:
+        hot_index_status = "error"
+    else:
+        hot_index_status = "ready"
     return {
         "hasActiveModel": model is not None,
+        "activeModelHash": model.contentHashSha256 if model else None,
         "modelResident": _state.is_open(),
-        "preparing": model is not None and _prepare.is_preparing(model.contentHashSha256),
-        "prepareError": _prepare.error_for(model.contentHashSha256) if model else None,
+        "preparing": preparing,
+        "prepareError": prepare_error,
+        "hotIndexStatus": hot_index_status,
+        "coldIndexStatus": model_index.cold_status(target) if target else "not_configured",
+        "coldIndexError": model_index.cold_error(target) if target else None,
         "storeBacked": model is not None
         and index_builder.store_is_usable(
             index_builder.store_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
@@ -321,6 +494,11 @@ def should_open_for_geometry() -> bool:
     ):
         return True
     return model.sizeBytes <= LIVE_MODEL_MAX_BYTES
+
+
+def should_open_ref_for_geometry(ref: ModelRef) -> bool:
+    source = Path(ref.source_path)
+    return source.is_dir() or ref.size_bytes <= LIVE_MODEL_MAX_BYTES
 
 
 _should_open_for_geometry = should_open_for_geometry

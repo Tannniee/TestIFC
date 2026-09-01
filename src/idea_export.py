@@ -6,11 +6,9 @@ from dataclasses import dataclass
 from math import asin, atan2, degrees
 from typing import Any, Sequence
 
-import ifcopenshell
-
 import mass_facts
 import member_axis
-from model_runtime import locate_live_element, open_active_model
+from model_runtime import ModelSession
 
 IDEA_SCHEMA_VERSION = 1
 MEMBER_TYPES = ("IfcBeam", "IfcColumn", "IfcMember")
@@ -141,11 +139,12 @@ def _row(
 
 
 def scan(
+    session: ModelSession,
     global_ids: Sequence[str], joint: Sequence[float], length_unit: str
 ) -> Scan:
     if length_unit not in _UNIT_SCALE:
         raise ValueError(f"length_unit must be one of {sorted(_UNIT_SCALE)}")
-    model = open_active_model()
+    model = session.ifc_file
     scale = _UNIT_SCALE[length_unit]
     project_scale = mass_facts.gather_project_units(
         model
@@ -156,7 +155,7 @@ def scan(
     skipped = []
     for global_id in global_ids:
         outcome = _row_or_skip(
-            locate_live_element(model, global_id),
+            session.locate_global_id(global_id),
             joint,
             nodes,
             scale,

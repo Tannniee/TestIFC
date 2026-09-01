@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse, Response
 
 from api_contracts import TakeoffRequest
-from api_dependencies import require_license_dep
 from api_errors import error_response, model_state_error
 from model_runtime import IndexPreparingError, NoActiveModelError
 from mass import DensityTable
@@ -64,19 +63,11 @@ def create_mass_router(
     def get_material_reference():
         return {"references": load_material_reference()}
 
-    @router.post(
-        "/mass/takeoff",
-        response_model=None,
-        dependencies=[Depends(require_license_dep)],
-    )
+    @router.post("/mass/takeoff", response_model=None)
     def post_takeoff(request: TakeoffRequest):
         return _takeoff_or_error(takeoff_service, request)
 
-    @router.post(
-        "/mass/takeoff.csv",
-        response_model=None,
-        dependencies=[Depends(require_license_dep)],
-    )
+    @router.post("/mass/takeoff.csv", response_model=None)
     def post_takeoff_csv(request: TakeoffRequest):
         result = _takeoff_or_error(takeoff_service, request)
         if isinstance(result, JSONResponse):
@@ -87,39 +78,31 @@ def create_mass_router(
             headers={"Content-Disposition": 'attachment; filename="takeoff.csv"'},
         )
 
-    @router.post(
-        "/mass/takeoff/open-in-excel",
-        response_model=None,
-        dependencies=[Depends(require_license_dep)],
-    )
+    @router.post("/mass/takeoff/open-in-excel", response_model=None)
     def post_takeoff_in_excel(request: TakeoffRequest):
         result = _takeoff_or_error(takeoff_service, request)
         if isinstance(result, JSONResponse):
             return result
         return _open_quickview(takeoff_service, result)
 
-    @router.post(
-        "/mass/takeoff/model",
-        response_model=None,
-        dependencies=[Depends(require_license_dep)],
-    )
+    @router.post("/mass/takeoff/model", response_model=None)
     async def post_model_takeoff(request: TakeoffRequest):
         table = DensityTable(
             request.densityTableRevision, dict(request.densityKgPerM3)
         )
-        if not model_takeoff_job.start(table, request.tolerance):
+        try:
+            started = model_takeoff_job.start(table, request.tolerance)
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return model_state_error(exc)
+        if not started:
             return error_response(409, "model_takeoff_already_running")
-        return {"status": "running"}
+        return model_takeoff_job.progress()
 
     @router.get("/mass/takeoff/model", response_model=None)
     async def get_model_takeoff():
         return model_takeoff_job.progress()
 
-    @router.get(
-        "/mass/takeoff/model.csv",
-        response_model=None,
-        dependencies=[Depends(require_license_dep)],
-    )
+    @router.get("/mass/takeoff/model.csv", response_model=None)
     def get_model_takeoff_csv():
         result = finished_model_takeoff()
         if isinstance(result, JSONResponse):
@@ -129,11 +112,7 @@ def create_mass_router(
             media_type="text/csv; charset=utf-8",
         )
 
-    @router.post(
-        "/mass/takeoff/model/open-in-excel",
-        response_model=None,
-        dependencies=[Depends(require_license_dep)],
-    )
+    @router.post("/mass/takeoff/model/open-in-excel", response_model=None)
     def post_model_takeoff_in_excel():
         result = finished_model_takeoff()
         if isinstance(result, JSONResponse):

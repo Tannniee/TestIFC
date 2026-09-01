@@ -1,4 +1,4 @@
-"""Shared hashing helpers reconstructed from the shipped 0.4.0 bytecode."""
+"""Shared hashing helpers for model and configuration content."""
 
 from __future__ import annotations
 

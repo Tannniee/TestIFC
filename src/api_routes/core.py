@@ -1,13 +1,10 @@
-"""Authentication, health, and selection routes."""
+"""Health and selection routes."""
 
 from __future__ import annotations
 
 from fastapi import APIRouter
 
-import license_gate
 from api_contracts import (
-    ApiActionResponse,
-    AuthStatusResponse,
     HealthResponse,
     SelectionPayload,
     SelectionResponse,
@@ -17,19 +14,6 @@ from api_state import BridgeState
 
 def create_core_router(state: BridgeState) -> APIRouter:
     router = APIRouter()
-
-    @router.get("/auth/status", response_model=AuthStatusResponse)
-    def auth_status():
-        return license_gate.status()
-
-    @router.post("/auth/login", response_model=dict)
-    def auth_login():
-        return license_gate.login()
-
-    @router.post("/auth/logout", response_model=ApiActionResponse)
-    def auth_logout():
-        license_gate.logout()
-        return {"ok": True}
 
     @router.get("/health", response_model=HealthResponse)
     async def health():

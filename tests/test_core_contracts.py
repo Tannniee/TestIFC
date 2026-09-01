@@ -17,7 +17,7 @@ if str(SRC) not in sys.path:
 import content_hash
 import material_reference
 import model_query
-from version import APP_VERSION, BASE_VERSION
+from version import APP_VERSION
 
 
 class FakeIndex:
@@ -39,7 +39,8 @@ class FakeIndex:
         return links.get(express_id, [])
 
     def search(self, query, ifc_type, limit):
-        values = [value for value in self.summaries.values() if query in (value["name"] or "").lower()]
+        token = query.lower()
+        values = [value for value in self.summaries.values() if token in (value["name"] or "").lower()]
         if ifc_type:
             values = [value for value in values if value["ifcType"] == ifc_type]
         return values[:limit], len(values) > limit
@@ -47,8 +48,7 @@ class FakeIndex:
 
 class CoreContractTests(unittest.TestCase):
     def test_version_contract(self):
-        self.assertEqual(BASE_VERSION, "0.4.0")
-        self.assertEqual(APP_VERSION, "0.4.0 ahihi")
+        self.assertEqual(APP_VERSION, "1.0.0")
 
     def test_content_hash_contract(self):
         sample = bytes(range(256)) * 4

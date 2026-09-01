@@ -10,17 +10,17 @@ from csv import writer as csv_writer
 from io import StringIO
 from typing import Any, Callable, Sequence
 
-import ifcopenshell
-
 import mass
 import mass_facts
 import mass_wire
 import member_axis
-from model_runtime import get_active_model_info, locate_live_element, open_active_model
+from model_runtime import ModelSession
 
-TAKEOFF_SCHEMA_VERSION = 5
+TAKEOFF_SCHEMA_VERSION = 6
 _METHODS = mass.MASS_METHODS
 _COMPARISONS = (
+    ("authored_weight", "density_x_authored_volume"),
+    ("authored_weight", "density_x_analytic_volume"),
     ("authored_weight", "density_x_mesh_volume"),
     ("authored_weight", "density_x_section_volume"),
 )
@@ -30,20 +30,20 @@ class UnknownElementError(LookupError):
     """A requested GlobalId is not present in the active model."""
 
 
-def _element(ifc_file: ifcopenshell.file, global_id: str):
+def _element(session: ModelSession, global_id: str):
     try:
-        return locate_live_element(ifc_file, global_id)
+        return session.locate_global_id(global_id)
     except (LookupError, RuntimeError) as error:
         raise UnknownElementError(global_id) from error
 
 
-def _group_selection(ifc_file, global_ids: Sequence[str]):
+def _group_selection(session: ModelSession, global_ids: Sequence[str]):
     subjects = {}
     parts_by_subject = {}
     whole = set()
     picked = []
     for global_id in global_ids:
-        element = _element(ifc_file, global_id)
+        element = _element(session, global_id)
         picked.append(element)
         subject = mass_facts.takeoff_subject(element)
         subjects[subject.id()] = subject
@@ -60,8 +60,8 @@ def _group_selection(ifc_file, global_ids: Sequence[str]):
     return subjects, selected, picked
 
 
-def _selected_wire(element, subject, units, table):
-    part = mass_facts.gather_part_facts(element, units)
+def _selected_wire(ifc_file, element, subject, units, table, cache=None):
+    part = mass_facts.cached_part_facts(ifc_file, element, units, cache)
     return {
         "globalId": element.GlobalId,
         "expressId": element.id(),
@@ -70,6 +70,12 @@ def _selected_wire(element, subject, units, table):
         "objectType": getattr(element, "ObjectType", None),
         "takeoffSubjectGlobalId": subject.GlobalId,
         "isTakeoffSubject": subject.id() == element.id(),
+        "densityXAuthoredVolume": mass_wire.mass_value_wire(
+            mass.authored_volume_candidate(part, table)
+        ),
+        "densityXAnalyticVolume": mass_wire.mass_value_wire(
+            mass.analytic_candidate(part, table)
+        ),
         "densityXMeshVolume": mass_wire.mass_value_wire(mass.mesh_candidate(part, table)),
         "densityXSectionVolume": mass_wire.mass_value_wire(
             mass.section_candidate(part, table)
@@ -115,9 +121,9 @@ def _tapered_label(first: str, last: str) -> str:
 
 def _length_m(facts: mass_facts.AssemblyFacts):
     lengths = [
-        part.mesh.length_m
+        part.analytic.length_m if part.analytic.length_m is not None else part.mesh.length_m
         for part in facts.parts
-        if part.mesh.length_m is not None
+        if part.analytic.length_m is not None or part.mesh.length_m is not None
     ]
     return round(max(lengths), 3) if lengths else ""
 
@@ -131,6 +137,12 @@ def _row_wire(row: mass.MassRow, subject, length_scale, facts):
         "section": _section_label(subject, length_scale),
         "lengthM": _length_m(facts),
         "authoredWeight": mass_wire.mass_value_wire(row.authored_weight),
+        "densityXAuthoredVolume": mass_wire.mass_value_wire(
+            row.density_x_authored_volume
+        ),
+        "densityXAnalyticVolume": mass_wire.mass_value_wire(
+            row.density_x_analytic_volume
+        ),
         "densityXMeshVolume": mass_wire.mass_value_wire(row.density_x_mesh_volume),
         "densityXSectionVolume": mass_wire.mass_value_wire(
             row.density_x_section_volume
@@ -160,25 +172,25 @@ def _total_wire(total: mass.Total):
     }
 
 
-def model_subject_ids() -> list[str]:
+def model_subject_ids(session: ModelSession) -> list[str]:
     seen = {}
-    for element in open_active_model().by_type("IfcElement"):
+    for element in session.ifc_file.by_type("IfcElement"):
         subject = mass_facts.takeoff_subject(element)
         seen.setdefault(subject.id(), subject.GlobalId)
     return list(seen.values())
 
 
 def takeoff(
+    session: ModelSession,
     global_ids: Sequence[str],
     table: mass.DensityTable,
     tolerance: float = 0.05,
     on_progress: Callable[[int, int], Any] | None = None,
 ) -> dict[str, Any]:
-    ifc_file = open_active_model()
-    info = get_active_model_info()
-    model_hash = str(info["contentHashSha256"])
+    ifc_file = session.ifc_file
+    model_hash = session.ref.model_hash
     units = mass_facts.gather_project_units(ifc_file)
-    subjects, selected_parts, picked = _group_selection(ifc_file, global_ids)
+    subjects, selected_parts, picked = _group_selection(session, global_ids)
     policy = mass.MassPolicy(tolerance)
     rows = []
     row_wires = []
@@ -189,6 +201,7 @@ def takeoff(
             subject,
             model_hash,
             sorted(chosen) if chosen is not None else None,
+            session.facts,
         )
         row = mass.resolve_assembly_with_policy(facts, table, policy)
         rows.append(row)
@@ -220,16 +233,24 @@ def takeoff(
         "tolerance": tolerance,
         "selection": [
             _selected_wire(
+                ifc_file,
                 element,
                 mass_facts.takeoff_subject(element),
                 units,
                 table,
+                session.facts,
             )
             for element in picked
         ],
         "subjects": row_wires,
         "totals": {
             "authoredWeight": _total_wire(totals.authored_weight),
+            "densityXAuthoredVolume": _total_wire(
+                totals.density_x_authored_volume
+            ),
+            "densityXAnalyticVolume": _total_wire(
+                totals.density_x_analytic_volume
+            ),
             "densityXMeshVolume": _total_wire(totals.density_x_mesh_volume),
             "densityXSectionVolume": _total_wire(
                 totals.density_x_section_volume
@@ -249,6 +270,10 @@ _CSV_COLUMNS = (
     "length_m",
     "authoredWeight_kg",
     "authoredWeight_status",
+    "densityXAuthoredVolume_kg",
+    "densityXAuthoredVolume_status",
+    "densityXAnalyticVolume_kg",
+    "densityXAnalyticVolume_status",
     "densityXMeshVolume_kg",
     "densityXMeshVolume_status",
     "densityXSectionVolume_kg",
@@ -278,12 +303,14 @@ _QUICKVIEW_COLUMNS = (
     "Section",
     "Length (m)",
     "M1 authored WEIGHT (kg)",
-    "M2 density x mesh (kg)",
-    "M3 density x section (kg)",
+    "M2 density x authored volume (kg)",
+    "M3 density x analytic IFC geometry (kg)",
+    "M4 density x mesh (kg)",
+    "M5 density x section (kg)",
     "Resolved (kg)",
     "Method",
 )
-QUICKVIEW_KG_COLUMNS = (4, 5, 6, 7)
+QUICKVIEW_KG_COLUMNS = (4, 5, 6, 7, 8, 9)
 
 
 def quickview_rows(result: dict[str, Any]):
@@ -325,6 +352,8 @@ def quickview_rows(result: dict[str, Any]):
                 row["section"],
                 row["lengthM"],
                 _cell(row["authoredWeight"])[0],
+                _cell(row["densityXAuthoredVolume"])[0],
+                _cell(row["densityXAnalyticVolume"])[0],
                 _cell(row["densityXMeshVolume"])[0],
                 _cell(row["densityXSectionVolume"])[0],
                 _cell(row["resolved"])[0],
@@ -380,6 +409,10 @@ def takeoff_rows(result: dict[str, Any]) -> list[list[Any]]:
     rows.append(list(_CSV_COLUMNS))
     for row in result["subjects"]:
         authored_kg, authored_status = _cell(row["authoredWeight"])
+        authored_volume_kg, authored_volume_status = _cell(
+            row["densityXAuthoredVolume"]
+        )
+        analytic_kg, analytic_status = _cell(row["densityXAnalyticVolume"])
         mesh_kg, mesh_status = _cell(row["densityXMeshVolume"])
         section_kg, section_status = _cell(row["densityXSectionVolume"])
         resolved_kg, resolved_status = _cell(row["resolved"])
@@ -393,6 +426,10 @@ def takeoff_rows(result: dict[str, Any]) -> list[list[Any]]:
                 row["lengthM"],
                 authored_kg,
                 authored_status,
+                authored_volume_kg,
+                authored_volume_status,
+                analytic_kg,
+                analytic_status,
                 mesh_kg,
                 mesh_status,
                 section_kg,

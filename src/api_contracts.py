@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from version import APP_VERSION
 
@@ -64,26 +64,6 @@ class HealthResponse(BaseModel):
     hasSelection: bool
 
 
-class AuthStatusResponse(BaseModel):
-    model_config = ConfigDict(extra="allow")
-
-    authenticated: bool
-    valid: bool
-    enforced: bool
-    authMode: str
-    daysRemaining: int | None = None
-    name: str | None = None
-    email: str | None = None
-    error: str | None = None
-
-
-class ApiActionResponse(BaseModel):
-    model_config = ConfigDict(extra="allow")
-
-    ok: bool
-    message: str | None = None
-
-
 class ErrorResponse(BaseModel):
     ok: bool = False
     error: str
@@ -121,9 +101,13 @@ class ActivateModelResponse(BaseModel):
 
 class ModelRuntimeResponse(BaseModel):
     hasActiveModel: bool
+    activeModelHash: str | None = None
     modelResident: bool
     preparing: bool
     prepareError: str | None = None
+    hotIndexStatus: Literal["idle", "indexing", "ready", "error"]
+    coldIndexStatus: Literal["not_configured", "indexing", "ready", "error"]
+    coldIndexError: str | None = None
     storeBacked: bool
     sizeBytes: int
     liveModelMaxBytes: int

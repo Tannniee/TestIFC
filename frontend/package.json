@@ -1,16 +1,20 @@
 {
   "name": "ifc-viewer-alternative-frontend",
   "private": true,
-  "version": "0.4.0",
+  "version": "1.0.0",
+  "packageManager": "pnpm@11.19.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:e2e": "playwright test",
+    "test:webview2": "node e2e/webview2-smoke.mjs",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "preview": "vite preview --host 127.0.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.0",
     "@sveltejs/vite-plugin-svelte": "7.3.0",
     "@types/three": "0.185.0",
     "svelte": "5.56.10",

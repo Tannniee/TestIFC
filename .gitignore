@@ -9,6 +9,9 @@ frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 frontend/.vite-temp/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
 
 # Build outputs and logs
 build/
@@ -21,9 +24,8 @@ dist-*/
 src/.model_cache/
 test-fixtures/
 ui_reference_cache/
-
-# Public source does not ship the legacy OAuth extension.
-vendor/ifc_auth/
+benchmarks/corpus.local.json
+benchmarks/results/
 
 # Recovery material is preserved locally but is not part of the maintained app.
 archive/

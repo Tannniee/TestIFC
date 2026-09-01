@@ -35,8 +35,21 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["service"], "ifc-selection-bridge")
-        self.assertEqual(payload["appVersion"], "0.4.0 ahihi")
+        self.assertEqual(payload["appVersion"], "1.0.0")
         self.assertFalse(payload["hasSelection"])
+
+    async def test_runtime_exposes_separate_semantic_readiness(self):
+        response = await self.client.get("/model/runtime")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn(payload["hotIndexStatus"], {"idle", "indexing", "ready", "error"})
+        self.assertIn(
+            payload["coldIndexStatus"],
+            {"not_configured", "indexing", "ready", "error"},
+        )
+        if not payload["hasActiveModel"]:
+            self.assertIsNone(payload["activeModelHash"])
+            self.assertEqual(payload["hotIndexStatus"], "idle")
 
     async def test_selection_round_trip(self):
         selection = {
@@ -85,7 +98,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response.json()["error"], "no_active_model")
 
     async def test_empty_fragment_upload_has_a_stable_client_error(self):
-        model_hash = "a" * 64
+        model_hash = f"{'a' * 64}.fragments-v2-full"
         with patch.object(
             app_module.fragment_service,
             "store_stream",
@@ -105,9 +118,6 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             for path, methods in paths.items()
         }
         expected = {
-            "/auth/status": {"get"},
-            "/auth/login": {"post"},
-            "/auth/logout": {"post"},
             "/health": {"get"},
             "/selection": {"get", "post", "delete"},
             "/load-model": {"post"},

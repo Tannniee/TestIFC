@@ -25,6 +25,8 @@ from ifc_units import (
 from model_cache import (
     CACHE_DIR,
     CACHE_KEEP_MODELS,
+    CACHE_MAX_BYTES,
+    _cache_max_bytes,
     _cache_keep_models,
     _enforce_cache_retention,
     _ensure_cache_dir,
@@ -67,6 +69,7 @@ __all__ = [
     "ActiveModel",
     "CACHE_DIR",
     "CACHE_KEEP_MODELS",
+    "CACHE_MAX_BYTES",
     "HashMismatchError",
     "IndexPreparingError",
     "LIVE_MODEL_IDLE_SECONDS",

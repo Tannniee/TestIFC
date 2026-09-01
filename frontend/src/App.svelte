@@ -1,15 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import AppRail from "./lib/AppRail.svelte";
-  import AuthDialog from "./lib/AuthDialog.svelte";
   import HelpDialog from "./lib/HelpDialog.svelte";
   import Icon from "./lib/Icon.svelte";
   import InspectorDrawer from "./lib/InspectorDrawer.svelte";
   import ViewCube from "./lib/ViewCube.svelte";
-  import { AppShellService, type AppSettings, type AuthStatus, type BridgeProgress, type CameraOrientation, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
+  import { AppShellService, type AppSettings, type BridgeProgress, type CameraOrientation, type FragmentMetrics, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
   import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
+  import { applyGeometryProgress, applySemanticProgress, beginModelLoad, emptyModelReadiness, geometryReady } from "./lib/model-readiness";
 
-  type ModelState = "empty" | "loading" | "ready" | "error";
   const sectionAxes = ["x", "y", "z"] as const;
 
   let locale: Locale = "vi";
@@ -32,17 +31,14 @@
   let fileInput: HTMLInputElement;
   let viewerHost: HTMLDivElement;
   const shell = new AppShellService();
-  let appVersion = "0.4.0 ahihi";
+  let appVersion = "1.0.0";
   let modelStatus: string | null = null;
-  let modelState: ModelState = "empty";
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;
   let viewerProgress: ViewerProgress | null = null;
-  let bridgeProgress: BridgeProgress = { stage: "cleared" };
-  let authStatus: AuthStatus | null = null;
-  let authOpen = false;
-  let authBusy = true;
-  let authError: string | null = null;
+  let bridgeProgress: BridgeProgress | null = null;
+  let readiness = emptyModelReadiness();
+  let fragmentMetrics: FragmentMetrics | null = null;
   let drawerWidth = 360;
   let appLoadSequence = 0;
   let gridVisible = true;
@@ -54,7 +50,7 @@
 
   $: t = copy[locale];
   $: topics = helpTopics[locale];
-  $: hasModel = modelState === "ready";
+  $: hasModel = geometryReady(readiness);
   $: themeLabel = mode === "light" ? t.themeDark : t.themeLight;
   $: viewCubeText = {
     viewCube: t.viewCube,
@@ -74,11 +70,10 @@
 
   onMount(async () => {
     try {
-      const [health] = await Promise.all([shell.health(), refreshAuth()]);
+      const health = await shell.health();
       appVersion = health.appVersion;
     } catch {
       // The source UI also runs without the Python bridge during visual work.
-      authBusy = false;
     }
   });
 
@@ -90,14 +85,26 @@
     const initializeViewer = async () => {
       const settings = await shell.initializeViewer(viewerHost, {
         onProgress(progress) {
-          viewerProgress = progress;
+          const next = applyGeometryProgress(readiness, progress);
+          if (next === readiness) return;
+          readiness = next;
+          viewerProgress = readiness.geometry;
           errorMessage = progress.stage === "error" ? progress.detail ?? "Viewer error" : null;
-          if (["reading", "cache", "converting", "loading"].includes(progress.stage)) modelState = "loading";
-          if (progress.stage === "ready") modelState = "ready";
-          if (progress.stage === "error") modelState = "error";
         },
         onBridgeProgress(progress) {
-          bridgeProgress = progress;
+          const next = applySemanticProgress(readiness, progress);
+          if (next === readiness) return;
+          readiness = next;
+          bridgeProgress = readiness.semantic;
+        },
+        onFragmentMetrics(metrics) {
+          if (
+            metrics.loadSequence === readiness.loadSequence
+            && metrics.modelHash === readiness.modelHash
+          ) {
+            fragmentMetrics = metrics;
+            window.dispatchEvent(new CustomEvent("ifc-fragment-metrics", { detail: metrics }));
+          }
         },
         onSelection(selection) {
           selectedElement = selection;
@@ -115,10 +122,6 @@
         },
         onCameraOrientationChange(orientation) {
           cameraOrientation = orientation;
-        },
-        onAuthorizationRequired(error) {
-          authError = error instanceof Error ? error.message : t.authRequired;
-          authOpen = true;
         },
       }, fallbackSettings);
       if (cancelled) {
@@ -158,13 +161,12 @@
     if (!progress) return null;
     if (progress.stage === "error") return progress.detail ?? "Error";
     const labels: Record<ViewerProgress["stage"], string> = {
-      uploading: text.uploading,
+      idle: text.noModel,
       cache: text.cache,
       reading: text.opening,
       converting: text.converting,
       loading: text.loading,
       ready: text.ready,
-      selecting: text.selecting,
       error: "Error",
     };
     const percent = progress.progress !== undefined && progress.stage !== "ready"
@@ -174,17 +176,20 @@
     return `${labels[progress.stage]}${percent}${detail}`;
   }
 
-  function bridgeText(progress: BridgeProgress, language: Locale): string {
+  function bridgeText(progress: BridgeProgress | null, language: Locale): string {
+    if (!progress) return language === "vi" ? "Ngữ nghĩa: chưa bắt đầu" : "Semantics: idle";
     const labels: Record<BridgeProgress["stage"], string> = {
+      idle: language === "vi" ? "chưa bắt đầu" : "idle",
       activating: language === "vi" ? "đang kích hoạt mô hình" : "activating model",
       uploading: language === "vi" ? "đang nhận file" : "receiving file",
-      preparing: language === "vi" ? "đang lập chỉ mục" : "building index",
+      indexing_hot: language === "vi" ? "đang lập chỉ mục chính" : "building hot index",
+      indexing_cold: language === "vi" ? "đang lập chỉ mục chi tiết" : "building detail index",
       ready: language === "vi" ? "sẵn sàng" : "ready",
-      cleared: language === "vi" ? "đã xoá lựa chọn" : "selection cleared",
       error: language === "vi" ? "có lỗi" : "error",
     };
     const percent = progress.progress === undefined ? "" : ` ${Math.round(progress.progress * 100)}%`;
-    return `${language === "vi" ? "Cầu nối" : "Bridge"}: ${labels[progress.stage]}${percent}`;
+    const detail = progress.stage === "error" && progress.detail ? ` · ${progress.detail}` : "";
+    return `${language === "vi" ? "Ngữ nghĩa" : "Semantics"}: ${labels[progress.stage]}${percent}${detail}`;
   }
 
   function switchLanguage() {
@@ -206,49 +211,7 @@
   }
 
   function openFilePicker() {
-    if (authStatus?.enforced && (!authStatus.authenticated || !authStatus.valid)) {
-      authOpen = true;
-      return;
-    }
     fileInput.click();
-  }
-
-  async function refreshAuth() {
-    authBusy = true;
-    try {
-      authStatus = await shell.authStatus();
-      authOpen = authStatus.enforced && (!authStatus.authenticated || !authStatus.valid);
-      authError = authOpen ? t.authRequired : null;
-    } finally {
-      authBusy = false;
-    }
-  }
-
-  async function login() {
-    authBusy = true;
-    authError = null;
-    try {
-      authStatus = await shell.login();
-      authOpen = authStatus.enforced && (!authStatus.authenticated || !authStatus.valid);
-      if (authOpen) authError = t.authRequired;
-    } catch (error) {
-      authError = error instanceof Error ? error.message : t.authFailed;
-    } finally {
-      authBusy = false;
-    }
-  }
-
-  async function logout() {
-    authBusy = true;
-    try {
-      authStatus = await shell.logout();
-      authOpen = authStatus.enforced;
-      authError = authOpen ? t.authRequired : null;
-    } catch (error) {
-      authError = error instanceof Error ? error.message : t.authFailed;
-    } finally {
-      authBusy = false;
-    }
   }
 
   function openHelp() {
@@ -385,28 +348,29 @@
       errorMessage = t.unsupported;
       return;
     }
-    if (authStatus?.enforced && (!authStatus.authenticated || !authStatus.valid)) {
-      authOpen = true;
-      return;
-    }
     const sequence = ++appLoadSequence;
-    modelState = "loading";
+    readiness = beginModelLoad(sequence, file.name);
     selectedElement = null;
-    viewerProgress = { stage: "reading", detail: file.name };
-    bridgeProgress = { stage: "activating", detail: file.name };
+    viewerProgress = readiness.geometry;
+    bridgeProgress = readiness.semantic;
+    fragmentMetrics = null;
     modelStatus = `${t.opening} ${file.name}`;
     try {
       await shell.load(file);
       if (sequence !== appLoadSequence) return;
       modelStatus = file.name;
-      modelState = "ready";
     } catch (error) {
       if (shell.isCancelledLoad(error) || sequence !== appLoadSequence) return;
       const message = error instanceof Error ? error.message : String(error);
       errorMessage = message;
-      viewerProgress = { stage: "error", detail: message };
-      modelState = "error";
-      if (shell.isAuthorizationFailure(error)) authOpen = true;
+      const progress: ViewerProgress = {
+        loadSequence: sequence,
+        modelHash: readiness.modelHash,
+        stage: "error",
+        detail: message,
+      };
+      readiness = applyGeometryProgress(readiness, progress);
+      viewerProgress = readiness.geometry;
     }
   }
 
@@ -601,8 +565,8 @@
     {/if}
     <footer class="qn-status-bar">
       <span>{progressText(viewerProgress, t) ?? modelStatus ?? t.noModel}</span>
-      <span title={bridgeProgress.detail}>{bridgeText(bridgeProgress, locale)}</span>
-      <span>{t.modelData}: {modelState === "ready" ? `${t.modelReady} · ${modelStatus ?? ""}` : modelState === "loading" ? t.modelLoading : modelState === "error" ? t.modelError : t.nothingSelected}</span>
+      <span title={bridgeProgress?.detail}>{bridgeText(bridgeProgress, locale)}</span>
+      <span title={fragmentMetrics ? `${fragmentMetrics.profile} · ${fragmentMetrics.fragmentBytes} bytes · ${Math.round(fragmentMetrics.totalMilliseconds)} ms` : undefined}>{t.modelData}: {hasModel ? `${t.modelReady} · ${modelStatus ?? ""}` : viewerProgress?.stage === "error" ? t.modelError : viewerProgress ? t.modelLoading : t.nothingSelected}</span>
       <span>{t.element}: {selectedElement?.name ?? selectedElement?.ifcType ?? t.nothingSelected}</span>
       <span>{t.version} {appVersion}</span>
     </footer>
@@ -629,9 +593,5 @@
       onSelectTopic={(index) => (selectedTopic = index)}
       onClose={closeHelp}
     />
-  {/if}
-
-  {#if authOpen}
-    <AuthDialog text={t} busy={authBusy} error={authError} status={authStatus} onLogin={login} onLogout={logout} />
   {/if}
 </main>

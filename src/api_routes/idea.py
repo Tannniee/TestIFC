@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from fastapi.responses import Response
 
 from api_contracts import MemberScanRequest
-from api_dependencies import require_license_dep
 from api_errors import error_response, model_state_error
 from member_scan_service import MemberScanService
 from model_runtime import IndexPreparingError, NoActiveModelError
@@ -24,11 +23,7 @@ def _scan_or_error(service: MemberScanService, request: MemberScanRequest):
 def create_idea_router(scan_service: MemberScanService) -> APIRouter:
     router = APIRouter()
 
-    @router.post(
-        "/idea/member-scan",
-        response_model=None,
-        dependencies=[Depends(require_license_dep)],
-    )
+    @router.post("/idea/member-scan", response_model=None)
     def post_member_scan(request: MemberScanRequest):
         return _scan_or_error(scan_service, request)
 

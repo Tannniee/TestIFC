@@ -11,9 +11,10 @@ from ifc_elements import (
 )
 from model_cache import cached_model_file
 from model_runtime import (
+    lease_active_model,
     live_model_status,
     materialize_model_stream,
-    open_active_model,
+    open_model_session,
     register_model,
 )
 from mass_facts import MaterialUse, survey_materials
@@ -53,7 +54,8 @@ def runtime_status() -> dict[str, Any]:
 
 
 def model_tree() -> dict[str, Any]:
-    return get_model_tree()
+    with lease_active_model() as lease:
+        return get_model_tree(lease.index)
 
 
 def search_active_model(
@@ -61,16 +63,20 @@ def search_active_model(
     ifc_type: str | None,
     limit: int,
 ) -> dict[str, Any]:
-    return search_model(q=query, ifc_type=ifc_type, limit=limit)
+    with lease_active_model() as lease:
+        return search_model(q=query, ifc_type=ifc_type, limit=limit, index=lease.index)
 
 
 def element_by_express_id(express_id: int) -> dict[str, Any]:
-    return extract_element_by_express_id(express_id)
+    with lease_active_model() as lease:
+        return extract_element_by_express_id(lease, express_id)
 
 
 def element_by_global_id(global_id: str) -> dict[str, Any]:
-    return extract_element(global_id)
+    with lease_active_model() as lease:
+        return extract_element(lease, global_id)
 
 
 def active_model_materials() -> tuple[MaterialUse, ...]:
-    return survey_materials(open_active_model())
+    with open_model_session() as session:
+        return survey_materials(session.ifc_file)

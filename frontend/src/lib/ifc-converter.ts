@@ -1,4 +1,5 @@
 import { LoadCancelledError } from "./viewer-contracts";
+import type { FragmentMetadataProfile } from "./fragment-profile";
 
 interface WorkerProgressMessage {
   type: "progress";
@@ -31,7 +32,7 @@ export class IfcConverter {
     onProgress(progress: number): void;
   } | null = null;
 
-  constructor() {
+  constructor(private readonly profile: FragmentMetadataProfile) {
     this.startWorker();
   }
 
@@ -41,7 +42,7 @@ export class IfcConverter {
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
       this.pending = { id, resolve, reject, onProgress };
-      this.worker?.postMessage({ id, bytes }, [bytes]);
+      this.worker?.postMessage({ id, bytes, profile: this.profile }, [bytes]);
     });
   }
 

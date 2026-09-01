@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+from contextlib import nullcontext
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -24,12 +25,18 @@ from takeoff_service import ModelTakeoffJob, TakeoffService
 class TakeoffApplicationTests(unittest.TestCase):
     def test_service_resolves_selection_and_model_scopes(self):
         calls = []
+        session = object()
 
-        def run(subjects, table, tolerance, on_progress=None):
+        def run(actual_session, subjects, table, tolerance, on_progress=None):
+            self.assertIs(actual_session, session)
             calls.append((list(subjects), table.revision, tolerance, on_progress))
             return {"subjects": list(subjects)}
 
-        service = TakeoffService(lambda: ["MODEL-A", "MODEL-B"], run)
+        service = TakeoffService(
+            lambda actual: ["MODEL-A", "MODEL-B"],
+            run,
+            lambda **_kwargs: nullcontext(session),
+        )
         table = DensityTable("steel", {})
         self.assertEqual(
             service.run("selection", ["SELECTED"], table, 0.05)["subjects"],
@@ -40,21 +47,72 @@ class TakeoffApplicationTests(unittest.TestCase):
         self.assertEqual(calls[1][:3], (["MODEL-A", "MODEL-B"], "steel", 0.10))
 
     def test_model_takeoff_job_records_success_and_failure(self):
+        class Lease:
+            ref = type("Ref", (), {"model_hash": "model-a"})()
+
         result = {"ok": True, "subjects": []}
-        successful = TakeoffService(lambda: [], lambda *args, **kwargs: result)
+        successful = TakeoffService(
+            lambda _session: [],
+            lambda *args, **kwargs: result,
+            lambda **_kwargs: nullcontext(object()),
+        )
         job = ModelTakeoffJob(successful)
-        job._run(DensityTable("steel", {}), 0.05)
+        job._run(DensityTable("steel", {}), 0.05, Lease())
         self.assertEqual(job.progress()["status"], "done")
         self.assertIs(job.result(), result)
 
         def fail(*args, **kwargs):
             raise RuntimeError("failed")
 
-        failed = ModelTakeoffJob(TakeoffService(lambda: [], fail))
-        failed._run(DensityTable("steel", {}), 0.05)
+        failed = ModelTakeoffJob(
+            TakeoffService(
+                lambda _session: [],
+                fail,
+                lambda **_kwargs: nullcontext(object()),
+            )
+        )
+        failed._run(DensityTable("steel", {}), 0.05, Lease())
         self.assertEqual(failed.progress()["status"], "failed")
         self.assertIn("RuntimeError: failed", failed.progress()["error"])
         self.assertIsNone(failed.result())
+
+    def test_model_takeoff_job_captures_the_lease_before_thread_start(self):
+        events = []
+
+        class Lease:
+            ref = type("Ref", (), {"model_hash": "captured-hash"})()
+
+            def release(self):
+                events.append("released")
+
+        class Thread:
+            def __init__(self, *, target, args, **_kwargs):
+                self.args = args
+                events.append(("thread-created", args[2]))
+
+            def start(self):
+                events.append("thread-started")
+
+        job = ModelTakeoffJob()
+        with (
+            patch("takeoff_service.lease_active_model", side_effect=lambda: events.append("leased") or Lease()),
+            patch("takeoff_service.Thread", Thread),
+        ):
+            self.assertTrue(job.start(DensityTable("steel", {}), 0.05))
+
+        self.assertEqual(events[0], "leased")
+        self.assertEqual(events[-1], "thread-started")
+        self.assertEqual(job.progress()["modelHash"], "captured-hash")
+
+    def test_model_takeoff_job_returns_to_idle_when_capture_fails(self):
+        job = ModelTakeoffJob()
+        with patch(
+            "takeoff_service.lease_active_model",
+            side_effect=RuntimeError("capture failed"),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "capture failed"):
+                job.start(DensityTable("steel", {}), 0.05)
+        self.assertEqual(job.progress()["status"], "idle")
 
     def test_quickview_maps_excel_outcomes_at_the_application_boundary(self):
         service = TakeoffService()
@@ -80,6 +138,11 @@ class MemberScanApplicationTests(unittest.TestCase):
             patch.object(member_scan_service.idea_export, "scan", return_value=scan),
             patch.object(member_scan_service.idea_export, "scan_wire", return_value={"schemaVersion": 1, "rows": []}),
             patch.object(member_scan_service.idea_export, "scan_tsv", return_value="header\n"),
+            patch.object(
+                member_scan_service,
+                "open_model_session",
+                return_value=nullcontext(object()),
+            ),
         ):
             self.assertFalse(service.current()["hasScan"])
             self.assertEqual(service.run(["A"], (0, 0, 0), "m")["rows"], [])

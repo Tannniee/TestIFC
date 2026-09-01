@@ -1,12 +1,19 @@
 import { FragmentsModels, RenderedFaces, type FragmentsModel } from "@thatopen/fragments";
 import * as THREE from "three";
 import { IfcConverter, sha256Hex } from "./ifc-converter";
+import { markViewerCreated, markViewerDisposed } from "./lifecycle-diagnostics";
+import {
+  browserFragmentMetadataProfile,
+  fragmentCacheKey,
+  type FragmentMetadataProfile,
+} from "./fragment-profile";
 import { ViewerBridge } from "./viewer-bridge";
 import { ViewerCamera } from "./viewer-camera";
 import {
   LoadCancelledError,
   type BridgeProgress,
   type CameraOrientation,
+  type FragmentMetrics,
   type SectionPlaneDefinition,
   type SectionSide,
   type ViewDirection,
@@ -22,6 +29,7 @@ export { isLoadCancelledError, LoadCancelledError } from "./viewer-contracts";
 export type {
   BridgeProgress,
   CameraOrientation,
+  FragmentMetrics,
   SectionPlaneDefinition,
   SectionSide,
   ViewDirection,
@@ -52,7 +60,8 @@ export class ViewerService {
   private readonly view: ViewerCamera;
   private readonly boxZoomRectangle: HTMLDivElement;
   private readonly fragments = new FragmentsModels("/vendor/fragments/worker.mjs", { maxWorkers: 2 });
-  private readonly converter = new IfcConverter();
+  private readonly converter: IfcConverter;
+  private readonly fragmentProfile: FragmentMetadataProfile;
   private readonly bridge: ViewerBridge;
   private readonly resizeObserver: ResizeObserver;
   private readonly callbacks: ViewerCallbacks;
@@ -74,11 +83,16 @@ export class ViewerService {
   private sectionDefinition: SectionPlaneDefinition | null = null;
   private disposed = false;
 
-  constructor(private readonly host: HTMLElement, callbacks: ViewerCallbacks) {
+  constructor(
+    private readonly host: HTMLElement,
+    callbacks: ViewerCallbacks,
+    fragmentProfile = browserFragmentMetadataProfile(),
+  ) {
     this.callbacks = callbacks;
+    this.fragmentProfile = fragmentProfile;
+    this.converter = new IfcConverter(fragmentProfile);
     this.bridge = new ViewerBridge({
-      onProgress: (progress) => this.callbacks.onBridgeProgress(progress),
-      onAuthorizationRequired: (error) => this.callbacks.onAuthorizationRequired(error),
+      onProgress: (progress) => this.publishBridge(progress.loadSequence, progress),
     });
     this.fragments.settings.maxUpdateRate = FRAGMENTS_MAX_UPDATE_RATE_MS;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -112,6 +126,7 @@ export class ViewerService {
     this.renderer.domElement.addEventListener("click", this.onClick);
     this.renderer.setAnimationLoop(this.render);
     this.resize();
+    markViewerCreated();
   }
 
   private get camera() {
@@ -256,6 +271,7 @@ export class ViewerService {
   }
 
   async load(file: File): Promise<void> {
+    const loadStarted = performance.now();
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
     this.clearSectionPlane();
@@ -265,45 +281,59 @@ export class ViewerService {
     if (this.loadingModelId) this.fragments.abort(this.loadingModelId);
     await this.clearModel();
     this.assertCurrent(sequence);
-    this.publishProgress(sequence, { stage: "reading", detail: file.name });
+    this.publishProgress(sequence, { modelHash: null, stage: "reading", detail: file.name });
     const ifcBuffer = await file.arrayBuffer();
+    const ifcBytes = ifcBuffer.byteLength;
     this.assertCurrent(sequence);
     const modelHash = await sha256Hex(ifcBuffer);
     this.assertCurrent(sequence);
-    void this.bridge.prepareModel(file, modelHash, () => this.assertCurrent(sequence));
-    this.publishProgress(sequence, { stage: "cache", detail: file.name });
+    void this.bridge.prepareModel(
+      file,
+      modelHash,
+      sequence,
+      () => this.assertCurrent(sequence),
+    );
+    this.publishProgress(sequence, { modelHash, stage: "cache", detail: file.name });
+    const cacheKey = fragmentCacheKey(modelHash, this.fragmentProfile);
     let fragmentBuffer: ArrayBuffer | null = null;
+    let cacheHit = false;
+    let conversionMilliseconds = 0;
     try {
-      fragmentBuffer = await this.bridge.fragments(modelHash);
+      fragmentBuffer = await this.bridge.fragments(cacheKey);
+      cacheHit = fragmentBuffer !== null;
     } catch (error) {
-      if (this.bridge.isAuthorizationFailure(error)) throw error;
-      this.publishBridge(sequence, { stage: "error", detail: `Fragments cache: ${this.errorText(error)}` });
+      console.warn(`Fragments cache: ${this.errorText(error)}`);
     }
     this.assertCurrent(sequence);
     if (!fragmentBuffer) {
-      this.publishProgress(sequence, { stage: "converting", progress: 0, detail: file.name });
+      this.publishProgress(sequence, { modelHash, stage: "converting", progress: 0, detail: file.name });
+      const conversionStarted = performance.now();
       const converted = await this.converter.convert(ifcBuffer, (progress) => {
-        this.publishProgress(sequence, { stage: "converting", progress, detail: file.name });
+        this.publishProgress(sequence, { modelHash, stage: "converting", progress, detail: file.name });
       });
+      conversionMilliseconds = performance.now() - conversionStarted;
       this.assertCurrent(sequence);
       fragmentBuffer = converted.buffer.slice(converted.byteOffset, converted.byteOffset + converted.byteLength) as ArrayBuffer;
       const cacheCopy = converted.slice();
       this.bridge.cacheFragments(
-        modelHash,
+        cacheKey,
         cacheCopy,
         () => sequence === this.loadSequence && !this.disposed,
       );
     }
 
-    this.publishProgress(sequence, { stage: "loading", progress: 0, detail: file.name });
+    const fragmentBytes = fragmentBuffer.byteLength;
+    this.publishProgress(sequence, { modelHash, stage: "loading", progress: 0, detail: file.name });
     const modelId = `${modelHash}-${sequence}`;
     this.loadingModelId = modelId;
     let model: FragmentsModel;
+    const fragmentLoadStarted = performance.now();
+    let fragmentLoadMilliseconds = 0;
     try {
       model = await this.fragments.load(fragmentBuffer, {
         modelId,
         camera: this.camera,
-        onProgress: ({ progress }) => this.publishProgress(sequence, { stage: "loading", progress, detail: file.name }),
+        onProgress: ({ progress }) => this.publishProgress(sequence, { modelHash, stage: "loading", progress, detail: file.name }),
       });
     } catch (error) {
       if (sequence !== this.loadSequence || this.disposed) throw new LoadCancelledError();
@@ -311,6 +341,7 @@ export class ViewerService {
     } finally {
       if (this.loadingModelId === modelId) this.loadingModelId = null;
     }
+    fragmentLoadMilliseconds = performance.now() - fragmentLoadStarted;
     if (sequence !== this.loadSequence || this.disposed) {
       await this.fragments.disposeModel(model.modelId);
       throw new LoadCancelledError();
@@ -324,7 +355,19 @@ export class ViewerService {
     await this.fragments.update(true);
     this.assertCurrent(sequence);
     this.fit({ animate: false });
-    this.publishProgress(sequence, { stage: "ready", progress: 1, detail: this.activeModelName });
+    const metrics: FragmentMetrics = {
+      loadSequence: sequence,
+      modelHash,
+      profile: this.fragmentProfile,
+      cacheHit,
+      ifcBytes,
+      fragmentBytes,
+      conversionMilliseconds,
+      fragmentLoadMilliseconds,
+      totalMilliseconds: performance.now() - loadStarted,
+    };
+    this.publishProgress(sequence, { modelHash, stage: "ready", progress: 1, detail: this.activeModelName });
+    this.callbacks.onFragmentMetrics(metrics);
   }
 
   fit({ animate = true }: { animate?: boolean } = {}) {
@@ -364,6 +407,7 @@ export class ViewerService {
     this.disposeGrid(this.grid);
     this.renderer.dispose();
     this.renderer.domElement.remove();
+    markViewerDisposed();
   }
 
   private resize() {
@@ -548,14 +592,12 @@ export class ViewerService {
     if (!this.activeModel) return;
     const selectionSequence = ++this.selectionSequence;
     const activeModel = this.activeModel;
-    this.callbacks.onProgress({ stage: "selecting" });
     // FragmentsModels converts viewport coordinates to NDC internally.
     const mouse = new THREE.Vector2(event.clientX, event.clientY);
     const hit = await activeModel.raycast({ camera: this.camera, mouse, dom: this.renderer.domElement });
     if (selectionSequence !== this.selectionSequence || activeModel !== this.activeModel) return;
     if (!hit) {
       await this.clearSelection();
-      this.callbacks.onProgress({ stage: "ready", detail: this.activeModelName });
       return;
     }
 
@@ -582,7 +624,6 @@ export class ViewerService {
     );
     this.callbacks.onSelection(selection);
     await this.bridge.publishSelection(selection);
-    this.callbacks.onProgress({ stage: "ready", detail: this.activeModelName });
   }
 
   private async clearModel() {
@@ -601,8 +642,13 @@ export class ViewerService {
     if (sequence !== this.loadSequence || this.disposed) throw new LoadCancelledError();
   }
 
-  private publishProgress(sequence: number, progress: ViewerProgress) {
-    if (sequence === this.loadSequence && !this.disposed) this.callbacks.onProgress(progress);
+  private publishProgress(
+    sequence: number,
+    progress: Omit<ViewerProgress, "loadSequence">,
+  ) {
+    if (sequence === this.loadSequence && !this.disposed) {
+      this.callbacks.onProgress({ ...progress, loadSequence: sequence });
+    }
   }
 
   private publishBridge(sequence: number, progress: BridgeProgress) {

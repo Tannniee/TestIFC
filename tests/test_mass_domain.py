@@ -12,14 +12,31 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 import mass
-from mass_facts import AssemblyFacts, AuthoredWeightFacts, MassMeasureFact, MeshFacts, PartFacts
+from mass_facts import (
+    AnalyticFacts,
+    AssemblyFacts,
+    AuthoredVolumeFacts,
+    AuthoredWeightFacts,
+    MassMeasureFact,
+    MeshFacts,
+    PartFacts,
+    VolumeMeasureFact,
+)
 
 
 def no_authored_weight() -> AuthoredWeightFacts:
     return AuthoredWeightFacts((), (), (), (), False)
 
 
-def part(*, entity_id=10, section="PL 10x200", volume=0.008, length=4.0):
+def part(
+    *,
+    entity_id=10,
+    section="PL 10x200",
+    volume=0.008,
+    length=4.0,
+    authored_volume=None,
+    analytic=None,
+):
     return PartFacts(
         entity_id,
         f"PART-{entity_id}",
@@ -29,6 +46,8 @@ def part(*, entity_id=10, section="PL 10x200", volume=0.008, length=4.0):
         (entity_id + 100,),
         MeshFacts(volume, length, (entity_id + 200,)),
         0.001,
+        authored_volume or AuthoredVolumeFacts((), (), False),
+        analytic or AnalyticFacts(None, None, ()),
     )
 
 
@@ -84,6 +103,30 @@ class MassDomainTests(unittest.TestCase):
         self.assertIsInstance(row.resolved, mass.Value)
         self.assertEqual(row.resolved.evidence.method, "authored_weight")
         self.assertTrue(row.disagreement)
+
+    def test_resolve_prefers_authored_volume_then_analytic_before_mesh(self):
+        authored = AuthoredVolumeFacts(
+            (VolumeMeasureFact(8_000_000.0, 300, "NetVolume", "project_volume_unit", 1e-9),),
+            (),
+            True,
+        )
+        analytic = AnalyticFacts(0.009, 4.0, (400,), "ifc_extruded_area_solid")
+        facts = AssemblyFacts(
+            "hash",
+            "ASSEMBLY",
+            1,
+            "FRAME",
+            no_authored_weight(),
+            (part(authored_volume=authored, analytic=analytic),),
+            None,
+        )
+
+        row = mass.resolve_assembly(facts, mass.DensityTable("steel", {"Steel": 7850.0}))
+
+        self.assertIsInstance(row.resolved, mass.Value)
+        self.assertEqual(row.resolved.evidence.method, "density_x_authored_volume")
+        self.assertAlmostEqual(row.resolved.kg, 62.8)
+        self.assertAlmostEqual(row.density_x_analytic_volume.kg, 70.65)
 
     def test_partial_assembly_selection_never_reports_a_derived_total(self):
         facts = AssemblyFacts(

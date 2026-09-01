@@ -37,7 +37,7 @@ class FrontendApiContractTests(unittest.TestCase):
             r'\w+: \{ method: "(GET|POST|DELETE)", path: "([^"]+)" \}',
             self.source,
         )
-        self.assertGreaterEqual(len(endpoints), 10)
+        self.assertGreaterEqual(len(endpoints), 8)
         paths = self.openapi["paths"]
         for method, path in endpoints:
             self.assertIn(path, paths)
@@ -60,8 +60,6 @@ class FrontendApiContractTests(unittest.TestCase):
     def test_typescript_response_shapes_match_openapi_properties(self):
         schema_pairs = {
             "HealthResponse": "HealthResponse",
-            "AuthStatus": "AuthStatusResponse",
-            "ApiActionResponse": "ApiActionResponse",
             "LoadModelResponse": "LoadModelResponse",
             "ActivateModelResponse": "ActivateModelResponse",
             "ModelRuntimeResponse": "ModelRuntimeResponse",

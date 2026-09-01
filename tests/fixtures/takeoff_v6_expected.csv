@@ -1,0 +1,14 @@
+# takeoffSchemaVersion,6
+# modelHash,hash
+# densityTableRevision,steel
+# densityTableDigest,digest
+# tolerance,0.05
+# density,Steel,7850.0,kg/m3
+# total.authoredWeight,,kg,counted=0,missing=1,ambiguous=0,excluded=0,disagreement=0
+# total.densityXAuthoredVolume,,kg,counted=0,missing=1,ambiguous=0,excluded=0,disagreement=0
+# total.densityXAnalyticVolume,,kg,counted=0,missing=1,ambiguous=0,excluded=0,disagreement=0
+# total.densityXMeshVolume,62.8,kg,counted=1,missing=0,ambiguous=0,excluded=0,disagreement=0
+# total.densityXSectionVolume,62.8,kg,counted=1,missing=0,ambiguous=0,excluded=0,disagreement=0
+# total.resolved,62.8,kg,counted=1,missing=0,ambiguous=0,excluded=0,disagreement=0
+globalId,expressId,ifcType,name,section,length_m,authoredWeight_kg,authoredWeight_status,densityXAuthoredVolume_kg,densityXAuthoredVolume_status,densityXAnalyticVolume_kg,densityXAnalyticVolume_status,densityXMeshVolume_kg,densityXMeshVolume_status,densityXSectionVolume_kg,densityXSectionVolume_status,resolved_kg,resolved_status,resolvedMethod,disagreementPercent,excluded
+A,1,IfcBeam,B1,PL 10x200,4.0,,no_authored_weight,,no_authored_volume,,no_analytic,62.8,value,62.8,value,62.8,value,density_x_mesh_volume,0.0,False

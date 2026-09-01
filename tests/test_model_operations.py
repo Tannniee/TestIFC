@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,6 +17,15 @@ from mass_facts import MaterialUse
 
 
 class ModelOperationsTests(unittest.TestCase):
+    class Lease:
+        index = object()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
     def test_materialize_uploaded_model_returns_a_stable_result(self):
         info = {
             "contentHashSha256": "a" * 64,
@@ -81,8 +91,10 @@ class ModelOperationsTests(unittest.TestCase):
         with (
             patch.object(
                 model_operations,
-                "open_active_model",
-                return_value=active_model,
+                "open_model_session",
+                return_value=nullcontext(
+                    type("Session", (), {"ifc_file": active_model})()
+                ),
             ) as open_model,
             patch.object(
                 model_operations,
@@ -101,6 +113,11 @@ class ModelOperationsTests(unittest.TestCase):
         search = {"results": []}
         element = {"globalId": "GUID-1"}
         with (
+            patch.object(
+                model_operations,
+                "lease_active_model",
+                return_value=self.Lease(),
+            ),
             patch.object(model_operations, "get_model_tree", return_value=tree),
             patch.object(
                 model_operations,
@@ -127,8 +144,9 @@ class ModelOperationsTests(unittest.TestCase):
             q="beam",
             ifc_type="IfcBeam",
             limit=25,
+            index=self.Lease.index,
         )
-        extract.assert_called_once_with("GUID-1")
+        extract.assert_called_once_with(unittest.mock.ANY, "GUID-1")
 
 
 if __name__ == "__main__":

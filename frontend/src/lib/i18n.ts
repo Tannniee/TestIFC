@@ -84,13 +84,6 @@ export const copy = {
     modelLoading: "đang mở",
     modelReady: "sẵn sàng",
     modelError: "lỗi",
-    authTitle: "Đăng nhập để tiếp tục",
-    authIntro: "Bản đóng gói cần xác thực hợp lệ trước khi mở mô hình.",
-    authLogin: "Đăng nhập",
-    authLogout: "Đăng xuất",
-    authChecking: "Đang kiểm tra đăng nhập…",
-    authRequired: "Phiên đăng nhập chưa hợp lệ.",
-    authFailed: "Không thể xác thực.",
   },
   en: {
     rail: "App actions",
@@ -167,13 +160,6 @@ export const copy = {
     modelLoading: "opening",
     modelReady: "ready",
     modelError: "error",
-    authTitle: "Sign in to continue",
-    authIntro: "The packaged app requires valid authentication before it can open a model.",
-    authLogin: "Sign in",
-    authLogout: "Sign out",
-    authChecking: "Checking sign-in…",
-    authRequired: "Your sign-in is not valid.",
-    authFailed: "Authentication failed.",
   },
 } as const;
 

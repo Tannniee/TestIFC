@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import ifcopenshell.geom
+import ifcopenshell.util.classification
 import ifcopenshell.util.element
 import ifcopenshell.util.shape
 import ifcopenshell.util.unit
@@ -67,7 +68,53 @@ def direct_children(entity: Any) -> list[Any]:
     )
 
 
-def build_semantic_record(
+def build_hot_record(element: Any) -> dict:
+    """Return identity fields required before expensive semantic extraction."""
+    record = {
+        "globalId": getattr(element, "GlobalId", None),
+        "expressId": element.id(),
+        "ifcType": element.is_a(),
+        "name": getattr(element, "Name", None),
+        "objectType": getattr(element, "ObjectType", None),
+        "description": getattr(element, "Description", None),
+    }
+    type_entity = ifcopenshell.util.element.get_type(element)
+    if type_entity is not None and type_entity.id() != element.id():
+        record["type"] = {
+            "expressId": type_entity.id(),
+            "ifcType": type_entity.is_a(),
+            "name": getattr(type_entity, "Name", None),
+        }
+    material = ifcopenshell.util.element.get_material(element, should_skip_usage=True)
+    if material is not None:
+        record["material"] = {
+            "expressId": material.id(),
+            "ifcType": material.is_a(),
+            "name": getattr(material, "Name", None),
+        }
+    return record
+
+
+def _classification_records(element: Any) -> list[dict]:
+    records = [
+        {
+            "expressId": reference.id(),
+            "identification": getattr(reference, "Identification", None),
+            "name": getattr(reference, "Name", None),
+        }
+        for reference in ifcopenshell.util.classification.get_references(element)
+    ]
+    return sorted(
+        records,
+        key=lambda record: (
+            str(record["identification"] or ""),
+            str(record["name"] or ""),
+            record["expressId"],
+        ),
+    )
+
+
+def build_cold_record(
     element: Any,
     ifc_file: Any,
     project_unit_state: ifc_units.ProjectUnits | None = None,
@@ -101,13 +148,22 @@ def build_semantic_record(
             unit_record["massUnit"] = "kg"
 
     return {
-        "globalId": getattr(element, "GlobalId", None),
-        "expressId": element.id(),
-        "ifcType": element.is_a(),
-        "name": getattr(element, "Name", None),
         "properties": properties,
         "quantities": normalized_quantities,
+        "classifications": _classification_records(element),
         "units": unit_record,
+    }
+
+
+def build_semantic_record(
+    element: Any,
+    ifc_file: Any,
+    project_unit_state: ifc_units.ProjectUnits | None = None,
+) -> dict:
+    """Build the complete record for compatibility and offline callers."""
+    return {
+        **build_hot_record(element),
+        **build_cold_record(element, ifc_file, project_unit_state),
     }
 
 
@@ -137,20 +193,21 @@ def build_geometry(element: Any, unit_scale: float) -> dict | None:
         return None
 
 
-def _with_geometry(record: dict, locate) -> dict:
-    if not model_runtime.should_open_for_geometry():
+def _with_geometry(lease: model_runtime.ModelLease, record: dict, express_id: int) -> dict:
+    if not model_runtime.should_open_ref_for_geometry(lease.ref):
         return {
             **record,
             "geometry": None,
             "geometryStatus": "not_loaded_large_model",
         }
-    ifc_file = model_runtime.open_active_model()
-    try:
-        element = locate(ifc_file)
-    except (RuntimeError, LookupError):
-        return {**record, "geometry": None, "geometryStatus": "unavailable"}
-    unit_scale = ifcopenshell.util.unit.calculate_unit_scale(ifc_file)
-    geometry = build_geometry(element, unit_scale)
+    with lease.open_session() as session:
+        ifc_file = session.ifc_file
+        try:
+            element = ifc_file.by_id(express_id)
+        except (RuntimeError, LookupError):
+            return {**record, "geometry": None, "geometryStatus": "unavailable"}
+        unit_scale = ifcopenshell.util.unit.calculate_unit_scale(ifc_file)
+        geometry = build_geometry(element, unit_scale)
     return {
         **record,
         "geometry": geometry,
@@ -158,15 +215,18 @@ def _with_geometry(record: dict, locate) -> dict:
     }
 
 
-def extract_element(global_id: str) -> dict:
-    record = model_runtime.active_index().record_by_global_id(global_id)
+def extract_element(lease: model_runtime.ModelLease, global_id: str) -> dict:
+    record = lease.index.record_by_global_id(global_id)
     express_id = int(record["expressId"])
-    return _with_geometry(record, lambda ifc_file: ifc_file.by_id(express_id))
+    return _with_geometry(lease, record, express_id)
 
 
-def extract_element_by_express_id(express_id: int) -> dict:
-    record = model_runtime.active_index().record_by_express_id(express_id)
-    return _with_geometry(record, lambda ifc_file: ifc_file.by_id(express_id))
+def extract_element_by_express_id(
+    lease: model_runtime.ModelLease,
+    express_id: int,
+) -> dict:
+    record = lease.index.record_by_express_id(express_id)
+    return _with_geometry(lease, record, express_id)
 
 
 _build_geometry = build_geometry

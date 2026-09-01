@@ -1,14 +1,14 @@
 import type { ItemData } from "@thatopen/fragments";
 import type { SelectionElement } from "./api";
+import type { FragmentMetadataProfile } from "./fragment-profile";
 
 export type ViewerStage =
-  | "uploading"
+  | "idle"
   | "cache"
   | "reading"
   | "converting"
   | "loading"
   | "ready"
-  | "selecting"
   | "error";
 
 export type ViewportBackground = "gray" | "white" | "oled";
@@ -42,6 +42,8 @@ export interface SectionPlaneDefinition {
 }
 
 export interface ViewerProgress {
+  loadSequence: number;
+  modelHash: string | null;
   stage: ViewerStage;
   progress?: number;
   detail?: string;
@@ -53,23 +55,44 @@ export interface ViewerSelection extends SelectionElement {
   raw: ItemData | null;
 }
 
-export type BridgeStage = "activating" | "uploading" | "preparing" | "ready" | "cleared" | "error";
+export type BridgeStage =
+  | "idle"
+  | "activating"
+  | "uploading"
+  | "indexing_hot"
+  | "indexing_cold"
+  | "ready"
+  | "error";
 
 export interface BridgeProgress {
+  loadSequence: number;
+  modelHash: string | null;
   stage: BridgeStage;
   progress?: number;
   detail?: string;
 }
 
+export interface FragmentMetrics {
+  loadSequence: number;
+  modelHash: string;
+  profile: FragmentMetadataProfile;
+  cacheHit: boolean;
+  ifcBytes: number;
+  fragmentBytes: number;
+  conversionMilliseconds: number;
+  fragmentLoadMilliseconds: number;
+  totalMilliseconds: number;
+}
+
 export interface ViewerCallbacks {
   onProgress(event: ViewerProgress): void;
   onBridgeProgress(event: BridgeProgress): void;
+  onFragmentMetrics(event: FragmentMetrics): void;
   onSelection(selection: ViewerSelection | null): void;
   onBoxZoomActiveChange(active: boolean): void;
   onSectionPickActiveChange(active: boolean): void;
   onSectionPlaneChange(section: SectionPlaneDefinition | null): void;
   onCameraOrientationChange(orientation: CameraOrientation): void;
-  onAuthorizationRequired(error: unknown): void;
 }
 
 export class LoadCancelledError extends Error {

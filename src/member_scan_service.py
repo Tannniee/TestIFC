@@ -6,6 +6,7 @@ from threading import Lock
 from typing import Sequence
 
 import idea_export
+from model_runtime import open_model_session
 
 
 class MemberScanService:
@@ -19,7 +20,8 @@ class MemberScanService:
         joint: Sequence[float],
         length_unit: str,
     ) -> dict:
-        result = idea_export.scan(global_ids, joint, length_unit)
+        with open_model_session() as session:
+            result = idea_export.scan(session, global_ids, joint, length_unit)
         with self._lock:
             self._scan = result
         return idea_export.scan_wire(result)
