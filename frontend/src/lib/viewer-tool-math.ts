@@ -21,9 +21,22 @@ export function measurementMidpoint(measurement: MeasurementResult): Vector3Valu
 
 export type MeasurementUnit = "mm" | "m";
 
+export interface ParsedMeasurementInput {
+  distance: number;
+  unit: MeasurementUnit;
+}
+
 export function measurementInputToMeters(value: number, unit: MeasurementUnit): number {
   if (!Number.isFinite(value) || value <= 0) return Number.NaN;
   return unit === "mm" ? value / 1000 : value;
+}
+
+export function parseMeasurementInput(text: string, defaultUnit: MeasurementUnit): ParsedMeasurementInput | null {
+  const match = text.trim().match(/^(\d+(?:[.,]\d+)?)\s*(mm|m)?$/i);
+  if (!match) return null;
+  const distance = Number(match[1].replace(",", "."));
+  if (!Number.isFinite(distance) || distance <= 0) return null;
+  return { distance, unit: (match[2]?.toLowerCase() as MeasurementUnit | undefined) ?? defaultUnit };
 }
 
 export function pointAtDistance(start: Vector3Value, end: Vector3Value, distance: number): Vector3Value | null {

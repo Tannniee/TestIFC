@@ -178,13 +178,8 @@ export class ViewerService {
   setMeasureMode(mode: MeasureMode) {
     this.interaction.setMeasureMode(mode);
   }
-  clearMeasurements() {
-    this.interaction.clearMeasurements();
-  }
-  setLatestMeasurementDistance(distance: number) {
-    return this.interaction.setLatestMeasurementDistance(distance);
-  }
   async quitTool(): Promise<ViewerTool> {
+    if (this.activeTool === "measure" && this.interaction.cancelAction()) return "measure";
     if (this.activeTool === "measure" && this.interaction.hasMeasurementState()) {
       this.interaction.clearMeasurements();
       return "measure";

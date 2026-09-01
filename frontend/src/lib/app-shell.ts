@@ -109,14 +109,6 @@ export class AppShellService {
     this.viewer?.setMeasureMode(mode);
   }
 
-  clearMeasurements() {
-    this.viewer?.clearMeasurements();
-  }
-
-  setLatestMeasurementDistance(distance: number) {
-    return this.viewer?.setLatestMeasurementDistance(distance) ?? false;
-  }
-
   quitTool() {
     return this.viewer?.quitTool() ?? Promise.resolve<ViewerTool>("pan");
   }

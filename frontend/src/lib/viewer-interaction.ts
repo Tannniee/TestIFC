@@ -6,7 +6,15 @@ import {
 } from "@thatopen/fragments";
 import * as THREE from "three";
 import type { MeasureMode, MeasurementResult, ViewerTool } from "./viewer-contracts";
-import { formatMeasurement, isFullyIncludedSweep, measurementMidpoint, pointAtDistance } from "./viewer-tool-math";
+import {
+  formatMeasurement,
+  isFullyIncludedSweep,
+  measurementInputToMeters,
+  measurementMidpoint,
+  parseMeasurementInput,
+  pointAtDistance,
+  type MeasurementUnit,
+} from "./viewer-tool-math";
 
 const SWEEP_MIN_SIZE_PX = 8;
 
@@ -33,13 +41,19 @@ export interface ViewerInteractionCallbacks {
 
 export class ViewerInteraction {
   private readonly sweepRectangle: HTMLDivElement;
+  private readonly measurementEntry: HTMLDivElement;
+  private readonly measurementInput: HTMLInputElement;
+  private readonly measurementUnit: HTMLSelectElement;
   private tool: ViewerTool = "pan";
   private measureMode: MeasureMode = "pointToPoint";
   private sweepStart: SweepStart | null = null;
   private measurementStart: THREE.Vector3 | null = null;
   private draftPoint: THREE.Points | null = null;
+  private draftLine: THREE.Line | null = null;
   private snapPoint: THREE.Points | null = null;
   private snapEdge: THREE.Line | null = null;
+  private fixedDistance: number | null = null;
+  private lastPointer = { clientX: 0, clientY: 0 };
   private measurements: MeasurementVisual[] = [];
   private nextMeasurementId = 1;
   private snapSequence = 0;
@@ -58,6 +72,29 @@ export class ViewerInteraction {
     this.sweepRectangle.className = "viewer-selection-rectangle";
     this.sweepRectangle.hidden = true;
     this.host.append(this.sweepRectangle);
+
+    this.measurementEntry = document.createElement("div");
+    this.measurementEntry.className = "viewer-measurement-entry";
+    this.measurementEntry.hidden = true;
+    this.measurementInput = document.createElement("input");
+    this.measurementInput.className = "viewer-measurement-entry__input";
+    this.measurementInput.inputMode = "decimal";
+    this.measurementInput.setAttribute("aria-label", "Measurement distance");
+    this.measurementUnit = document.createElement("select");
+    this.measurementUnit.className = "viewer-measurement-entry__unit";
+    this.measurementUnit.setAttribute("aria-label", "Measurement unit");
+    for (const unit of ["mm", "m"] as MeasurementUnit[]) {
+      const option = document.createElement("option");
+      option.value = unit;
+      option.textContent = unit;
+      this.measurementUnit.append(option);
+    }
+    const enterHint = document.createElement("kbd");
+    enterHint.textContent = "Enter";
+    this.measurementEntry.append(this.measurementInput, this.measurementUnit, enterHint);
+    this.host.append(this.measurementEntry);
+    this.measurementInput.addEventListener("input", () => this.measurementEntry.classList.remove("viewer-measurement-entry--invalid"));
+    window.addEventListener("keydown", this.onMeasurementKeyDown, true);
     this.applyHostClasses();
   }
 
@@ -84,17 +121,6 @@ export class ViewerInteraction {
     for (const visual of this.measurements) this.disposeMeasurement(visual);
     this.measurements = [];
     this.publishMeasurements();
-  }
-
-  setLatestMeasurementDistance(distance: number) {
-    const visual = [...this.measurements].reverse().find((candidate) => candidate.result.mode === "pointToPoint");
-    if (!visual) return false;
-    const end = pointAtDistance(visual.result.start, visual.result.end, distance);
-    if (!end) return false;
-    visual.result = { ...visual.result, end, distance };
-    this.updateMeasurementVisual(visual);
-    this.publishMeasurements();
-    return true;
   }
 
   cancelAction() {
@@ -133,6 +159,8 @@ export class ViewerInteraction {
   }
 
   handlePointerMove(event: PointerEvent): boolean {
+    this.lastPointer = { clientX: event.clientX, clientY: event.clientY };
+    if (!this.measurementEntry.hidden) this.positionMeasurementEntry();
     const start = this.sweepStart;
     if (start?.pointerId === event.pointerId) {
       event.preventDefault();
@@ -165,6 +193,11 @@ export class ViewerInteraction {
   handleClick(event: MouseEvent): boolean {
     if (this.tool === "multiSelect") return true;
     if (this.tool !== "measure" || event.button !== 0) return false;
+    this.lastPointer = { clientX: event.clientX, clientY: event.clientY };
+    if (this.measureMode === "pointToPoint" && !this.measurementEntry.hidden && this.fixedDistance === null) {
+      this.measurementInput.focus();
+      return true;
+    }
     void this.measure(event.clientX, event.clientY);
     return true;
   }
@@ -186,11 +219,13 @@ export class ViewerInteraction {
   }
 
   dispose() {
+    window.removeEventListener("keydown", this.onMeasurementKeyDown, true);
     this.cancelSweep();
     this.clearDraft();
     for (const visual of this.measurements) this.disposeMeasurement(visual);
     this.measurements = [];
     this.sweepRectangle.remove();
+    this.measurementEntry.remove();
     this.host.classList.remove("viewer-pan-active", "viewer-multi-select-active", "viewer-measure-active");
   }
 
@@ -243,6 +278,18 @@ export class ViewerInteraction {
     if (model !== this.callbacks.activeModel() || this.tool !== "measure" || this.measureMode !== mode || !hit) return;
     if (mode === "edge") {
       if (hit.snappedEdgeP1 && hit.snappedEdgeP2) this.commitMeasurement(hit.snappedEdgeP1, hit.snappedEdgeP2, mode);
+      return;
+    }
+    if (this.measurementStart && this.fixedDistance !== null) {
+      const end = pointAtDistance(
+        { x: this.measurementStart.x, y: this.measurementStart.y, z: this.measurementStart.z },
+        { x: hit.point.x, y: hit.point.y, z: hit.point.z },
+        this.fixedDistance,
+      );
+      if (!end) return;
+      const start = this.measurementStart;
+      this.clearDraft();
+      this.commitMeasurement(start, new THREE.Vector3(end.x, end.y, end.z), "pointToPoint");
       return;
     }
     this.acceptMeasurementPoint(hit.point);
@@ -307,28 +354,110 @@ export class ViewerInteraction {
     this.publishMeasurements();
   }
 
-  private updateMeasurementVisual(visual: MeasurementVisual) {
-    const start = new THREE.Vector3(visual.result.start.x, visual.result.start.y, visual.result.start.z);
-    const end = new THREE.Vector3(visual.result.end.x, visual.result.end.y, visual.result.end.z);
-    visual.line.geometry.dispose();
-    visual.points.geometry.dispose();
-    visual.line.geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
-    visual.points.geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
-    visual.label.textContent = formatMeasurement(visual.result.distance);
-  }
-
   private drawSnapPreview(hit: RaycastResult | null) {
     this.disposeObject(this.snapPoint);
     this.disposeObject(this.snapEdge);
+    this.disposeObject(this.draftLine);
     this.snapPoint = null;
     this.snapEdge = null;
+    this.draftLine = null;
     if (!hit) return;
-    this.snapPoint = this.createPoints([hit.point], 0x32d6ff, 11);
+    let previewPoint = hit.point;
+    if (this.measurementStart && this.fixedDistance !== null) {
+      const fixedPoint = pointAtDistance(
+        { x: this.measurementStart.x, y: this.measurementStart.y, z: this.measurementStart.z },
+        { x: hit.point.x, y: hit.point.y, z: hit.point.z },
+        this.fixedDistance,
+      );
+      if (fixedPoint) previewPoint = new THREE.Vector3(fixedPoint.x, fixedPoint.y, fixedPoint.z);
+    }
+    this.snapPoint = this.createPoints([previewPoint], 0x32d6ff, 11);
     this.scene.add(this.snapPoint);
+    if (this.measurementStart) {
+      this.draftLine = this.createLine([this.measurementStart, previewPoint], 0xffb020);
+      this.scene.add(this.draftLine);
+    }
     if (hit.snappedEdgeP1 && hit.snappedEdgeP2) {
       this.snapEdge = this.createLine([hit.snappedEdgeP1, hit.snappedEdgeP2], 0x32d6ff);
       this.scene.add(this.snapEdge);
     }
+  }
+
+  private readonly onMeasurementKeyDown = (event: KeyboardEvent) => {
+    if (this.tool !== "measure" || this.measureMode !== "pointToPoint" || !this.measurementStart) return;
+    if (event.key === "Escape" && (!this.measurementEntry.hidden || this.fixedDistance !== null)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.cancelNumericEntry();
+      return;
+    }
+    if (event.target === this.measurementInput || event.target === this.measurementUnit) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.confirmNumericEntry();
+      }
+      return;
+    }
+    if (this.fixedDistance === null && /^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.openMeasurementEntry(event.key);
+    }
+  };
+
+  private openMeasurementEntry(seed: string) {
+    this.fixedDistance = null;
+    this.measurementInput.readOnly = false;
+    this.measurementUnit.disabled = false;
+    this.measurementInput.value = seed;
+    this.measurementEntry.hidden = false;
+    this.measurementEntry.classList.remove("viewer-measurement-entry--invalid", "viewer-measurement-entry--locked");
+    this.positionMeasurementEntry();
+    this.measurementInput.focus();
+    this.measurementInput.setSelectionRange(seed.length, seed.length);
+  }
+
+  private confirmNumericEntry() {
+    const defaultUnit = this.measurementUnit.value === "m" ? "m" : "mm";
+    const parsed = parseMeasurementInput(this.measurementInput.value, defaultUnit);
+    if (!parsed) {
+      this.measurementEntry.classList.add("viewer-measurement-entry--invalid");
+      return;
+    }
+    const distance = measurementInputToMeters(parsed.distance, parsed.unit);
+    if (!Number.isFinite(distance)) return;
+    this.fixedDistance = distance;
+    this.measurementInput.value = String(parsed.distance);
+    this.measurementUnit.value = parsed.unit;
+    this.measurementInput.readOnly = true;
+    this.measurementUnit.disabled = true;
+    this.measurementEntry.classList.add("viewer-measurement-entry--locked");
+    this.measurementEntry.classList.remove("viewer-measurement-entry--invalid");
+    this.measurementInput.blur();
+  }
+
+  private cancelNumericEntry() {
+    this.fixedDistance = null;
+    this.hideMeasurementEntry();
+    this.disposeObject(this.draftLine);
+    this.draftLine = null;
+  }
+
+  private hideMeasurementEntry() {
+    this.measurementEntry.hidden = true;
+    this.measurementEntry.classList.remove("viewer-measurement-entry--invalid", "viewer-measurement-entry--locked");
+    this.measurementInput.readOnly = false;
+    this.measurementUnit.disabled = false;
+    this.measurementInput.value = "";
+  }
+
+  private positionMeasurementEntry() {
+    const bounds = this.canvas.getBoundingClientRect();
+    const left = THREE.MathUtils.clamp(this.lastPointer.clientX - bounds.left + 14, 8, Math.max(bounds.width - 190, 8));
+    const top = THREE.MathUtils.clamp(this.lastPointer.clientY - bounds.top + 14, 8, Math.max(bounds.height - 48, 8));
+    this.measurementEntry.style.left = `${left}px`;
+    this.measurementEntry.style.top = `${top}px`;
   }
 
   private createLine(points: THREE.Vector3[], color: number) {
@@ -355,16 +484,20 @@ export class ViewerInteraction {
 
   private clearDraft() {
     this.measurementStart = null;
+    this.fixedDistance = null;
     this.snapSequence++;
     if (this.snapFrame !== null) cancelAnimationFrame(this.snapFrame);
     this.snapFrame = null;
     this.queuedSnap = null;
     this.disposeObject(this.draftPoint);
+    this.disposeObject(this.draftLine);
     this.disposeObject(this.snapPoint);
     this.disposeObject(this.snapEdge);
     this.draftPoint = null;
+    this.draftLine = null;
     this.snapPoint = null;
     this.snapEdge = null;
+    this.hideMeasurementEntry();
   }
 
   private disposeMeasurement(visual: MeasurementVisual) {

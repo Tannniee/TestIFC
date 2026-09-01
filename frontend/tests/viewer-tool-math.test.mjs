@@ -6,6 +6,7 @@ import {
   isFullyIncludedSweep,
   measurementInputToMeters,
   measurementMidpoint,
+  parseMeasurementInput,
   pointAtDistance,
 } from "../src/lib/viewer-tool-math.ts";
 
@@ -34,6 +35,14 @@ test("typed millimetres and metres convert to model metres", () => {
   assert.equal(measurementInputToMeters(1250, "mm"), 1.25);
   assert.equal(measurementInputToMeters(2.4, "m"), 2.4);
   assert.equal(Number.isNaN(measurementInputToMeters(0, "m")), true);
+});
+
+test("dynamic measurement input accepts a unit suffix or the selected default", () => {
+  assert.deepEqual(parseMeasurementInput("5000mm", "m"), { distance: 5000, unit: "mm" });
+  assert.deepEqual(parseMeasurementInput("5 m", "mm"), { distance: 5, unit: "m" });
+  assert.deepEqual(parseMeasurementInput("2,5", "m"), { distance: 2.5, unit: "m" });
+  assert.equal(parseMeasurementInput("0mm", "mm"), null);
+  assert.equal(parseMeasurementInput("five", "m"), null);
 });
 
 test("exact distance keeps the snapped measurement direction", () => {

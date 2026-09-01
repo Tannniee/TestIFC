@@ -78,6 +78,17 @@ class FrontendArchitectureTests(unittest.TestCase):
         self.assertIn("translate: 0 -70px", styles)
         self.assertNotIn(".viewer-toolbar { position: absolute; top: 50%; left: 12px; z-index: 14; translate: 0 -50%", styles)
 
+    def test_measurement_ui_uses_minimal_modes_and_inline_distance_entry(self):
+        toolbar = source(LIB / "ViewerToolbar.svelte")
+        interaction = source(LIB / "viewer-interaction.ts")
+        math = source(LIB / "viewer-tool-math.ts")
+        self.assertEqual(toolbar.count("onMeasureMode("), 2)
+        self.assertNotIn("measurementsOnScreen", toolbar)
+        self.assertNotIn("targetDistance", toolbar)
+        self.assertIn("viewer-measurement-entry", interaction)
+        self.assertIn("onMeasurementKeyDown", interaction)
+        self.assertIn("parseMeasurementInput", math)
+
     def test_api_runtime_imports_stay_in_shell_and_bridge_adapters(self):
         expected = {"app-shell.ts", "viewer-bridge.ts"}
         actual = {

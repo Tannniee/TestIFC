@@ -6,7 +6,7 @@
   import InspectorDrawer from "./lib/InspectorDrawer.svelte";
   import ViewCube from "./lib/ViewCube.svelte";
   import ViewerToolbar from "./lib/ViewerToolbar.svelte";
-  import { AppShellService, type AppSettings, type BridgeProgress, type CameraOrientation, type FragmentMetrics, type MeasureMode, type MeasurementResult, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewerTool, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
+  import { AppShellService, type AppSettings, type BridgeProgress, type CameraOrientation, type FragmentMetrics, type MeasureMode, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewerTool, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
   import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
   import { applyGeometryProgress, applySemanticProgress, beginModelLoad, emptyModelReadiness, geometryReady } from "./lib/model-readiness";
 
@@ -39,7 +39,6 @@
   let multiSelectionCount = 0;
   let interactionTool: ViewerTool = "pan";
   let measureMode: MeasureMode = "pointToPoint";
-  let measurements: MeasurementResult[] = [];
   let viewerProgress: ViewerProgress | null = null;
   let bridgeProgress: BridgeProgress | null = null;
   let readiness = emptyModelReadiness();
@@ -118,9 +117,7 @@
         onMultiSelectionChange(count) {
           multiSelectionCount = count;
         },
-        onMeasurementChange(results) {
-          measurements = results;
-        },
+        onMeasurementChange() {},
         onBoxZoomActiveChange(active) {
           boxZoomActive = active;
         },
@@ -389,7 +386,6 @@
     readiness = beginModelLoad(sequence, file.name);
     selectedElement = null;
     multiSelectionCount = 0;
-    measurements = [];
     viewerProgress = readiness.geometry;
     bridgeProgress = readiness.semantic;
     fragmentMetrics = null;
@@ -495,11 +491,8 @@
       {hasModel}
       tool={interactionTool}
       {measureMode}
-      {measurements}
       onTool={selectTool}
       onMeasureMode={changeMeasureMode}
-      onClearMeasurements={() => shell.clearMeasurements()}
-      onSetDistance={(distance) => shell.setLatestMeasurementDistance(distance)}
     />
     <div class="view-cube-host">
       <ViewCube
