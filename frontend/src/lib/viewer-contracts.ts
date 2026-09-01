@@ -15,6 +15,8 @@ export type ViewportBackground = "gray" | "white" | "oled";
 export type ViewPreset = "iso" | "positiveX" | "negativeX" | "positiveY" | "negativeY" | "positiveZ" | "negativeZ";
 export type SectionSide = "positive" | "negative";
 export type ViewStep = -1 | 0 | 1;
+export type ViewerTool = "pan" | "multiSelect" | "measure";
+export type MeasureMode = "pointToPoint" | "edge";
 
 export interface ViewDirection {
   x: ViewStep;
@@ -39,6 +41,14 @@ export interface SectionPlaneDefinition {
   point: Vector3Value;
   normal: Vector3Value;
   side: SectionSide;
+}
+
+export interface MeasurementResult {
+  id: number;
+  mode: MeasureMode;
+  start: Vector3Value;
+  end: Vector3Value;
+  distance: number;
 }
 
 export interface ViewerProgress {
@@ -89,6 +99,8 @@ export interface ViewerCallbacks {
   onBridgeProgress(event: BridgeProgress): void;
   onFragmentMetrics(event: FragmentMetrics): void;
   onSelection(selection: ViewerSelection | null): void;
+  onMultiSelectionChange(count: number): void;
+  onMeasurementChange(measurements: MeasurementResult[]): void;
   onBoxZoomActiveChange(active: boolean): void;
   onSectionPickActiveChange(active: boolean): void;
   onSectionPlaneChange(section: SectionPlaneDefinition | null): void;

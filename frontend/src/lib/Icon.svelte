@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let name: "folder" | "fit" | "zoomBox" | "section" | "moon" | "sun" | "globe" | "panel" | "settings" | "help" | "close";
+  export let name: "folder" | "fit" | "zoomBox" | "section" | "moon" | "sun" | "globe" | "panel" | "settings" | "help" | "close" | "pan" | "multiSelect" | "measure" | "point" | "edge" | "trash";
   export let size = 20;
 </script>
 
@@ -37,6 +37,18 @@
     <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1v.1h-4v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1-.4h-.1v-4H3A1.7 1.7 0 0 0 4.6 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1v-.1h4V3a1.7 1.7 0 0 0 1.1 1.6 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.12.37.33.7.6 1 .27.27.62.48 1 .6h.1v4H21a1.7 1.7 0 0 0-1.6 1.1z" />
   {:else if name === "help"}
     <circle cx="12" cy="12" r="9" /><path d="M9.8 9a2.4 2.4 0 1 1 3.5 2.1c-.8.4-1.3 1-1.3 1.9M12 17h.01" />
+  {:else if name === "pan"}
+    <path d="M8.5 11V6.5a1.5 1.5 0 0 1 3 0V10M11.5 9V5.5a1.5 1.5 0 0 1 3 0V10M14.5 9V7a1.5 1.5 0 0 1 3 0v5M8.5 9.5V9a1.5 1.5 0 0 0-3 0v4.2c0 4.3 2.7 7.3 6.8 7.3h.9c4.2 0 6.8-2.8 6.8-7V10a1.5 1.5 0 0 0-2.5-1.1" />
+  {:else if name === "multiSelect"}
+    <rect x="4" y="4" width="7" height="7" rx="1" /><rect x="13" y="13" width="7" height="7" rx="1" /><path d="M14 4h6v6M4 14v6h6" stroke-dasharray="2 2" />
+  {:else if name === "measure"}
+    <path d="m5 18 13-13 2 2L7 20z" /><path d="m9 14 2 2m1-5 2 2m1-5 2 2" />
+  {:else if name === "point"}
+    <circle cx="5" cy="19" r="2" /><circle cx="19" cy="5" r="2" /><path d="M7 17 17 7" stroke-dasharray="2.5 2.5" />
+  {:else if name === "edge"}
+    <path d="M4 18 19 6" /><circle cx="4" cy="18" r="2" /><circle cx="19" cy="6" r="2" />
+  {:else if name === "trash"}
+    <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
   {:else}
     <path d="M6 6l12 12M18 6 6 18" />
   {/if}

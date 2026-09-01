@@ -1,4 +1,5 @@
-import { ifcCategoryMap, type ItemData } from "@thatopen/fragments";
+import { ifcCategoryMap, RenderedFaces, type FragmentsModel, type ItemData } from "@thatopen/fragments";
+import * as THREE from "three";
 import type { SelectionPayload } from "./api";
 import type { ViewerSelection } from "./viewer-contracts";
 
@@ -77,4 +78,39 @@ export function createSelectionPayload(selection: ViewerSelection): SelectionPay
     selection: { status: "selected", selectedAt: new Date().toISOString() },
     preview: flattenPreview(selection.raw),
   };
+}
+
+export class ViewerHighlights {
+  private single: { model: FragmentsModel; localId: number } | null = null;
+  private multiple: { model: FragmentsModel; localIds: number[] } | null = null;
+
+  get hasMultiple() {
+    return Boolean(this.multiple?.localIds.length);
+  }
+
+  async clear() {
+    if (this.single) await this.single.model.resetHighlight([this.single.localId]);
+    if (this.multiple) await this.multiple.model.resetHighlight(this.multiple.localIds);
+    this.single = null;
+    this.multiple = null;
+  }
+
+  async setSingle(model: FragmentsModel, localId: number) {
+    await model.highlight([localId], this.material());
+    this.single = { model, localId };
+  }
+
+  async setMultiple(model: FragmentsModel, localIds: number[]) {
+    await model.highlight(localIds, this.material());
+    this.multiple = { model, localIds: [...localIds] };
+  }
+
+  private material() {
+    return {
+      color: new THREE.Color(0x2d8cff),
+      renderedFaces: RenderedFaces.TWO,
+      opacity: 1,
+      transparent: false,
+    };
+  }
 }

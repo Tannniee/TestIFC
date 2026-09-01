@@ -21,6 +21,7 @@ class FrontendArchitectureTests(unittest.TestCase):
             "AppRail",
             "HelpDialog",
             "InspectorDrawer",
+            "ViewerToolbar",
         ):
             self.assertIn(f"<{component}", app)
         for forbidden in (
@@ -55,6 +56,22 @@ class FrontendArchitectureTests(unittest.TestCase):
         for forbidden in ('from "./api"', "new Worker", "crypto.subtle"):
             self.assertNotIn(forbidden, viewer)
         self.assertLess(len(viewer.splitlines()), 700)
+
+    def test_interaction_tools_use_fragment_spatial_apis(self):
+        interaction = source(LIB / "viewer-interaction.ts")
+        self.assertIn("rectangleRaycast", interaction)
+        self.assertIn("raycastWithSnapping", interaction)
+        self.assertIn("SnappingClass.LINE", interaction)
+        self.assertIn("SnappingClass.POINT", interaction)
+        self.assertIn("this.measurements.push", interaction)
+        self.assertNotIn("getItemsWithGeometry", interaction)
+
+    def test_interaction_tools_keep_camera_navigation_available(self):
+        camera = source(LIB / "viewer-camera.ts")
+        interaction = source(LIB / "viewer-interaction.ts")
+        self.assertIn("this.controls.enabled = true", camera)
+        self.assertIn('tool === "multiSelect" ? THREE.MOUSE.ROTATE', camera)
+        self.assertIn("event.altKey", interaction)
 
     def test_api_runtime_imports_stay_in_shell_and_bridge_adapters(self):
         expected = {"app-shell.ts", "viewer-bridge.ts"}

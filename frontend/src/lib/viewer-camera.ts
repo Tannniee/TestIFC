@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import type { CameraOrientation, SectionPlaneDefinition, ViewDirection, ViewPreset } from "./viewer-contracts";
+import type { CameraOrientation, SectionPlaneDefinition, ViewerTool, ViewDirection, ViewPreset } from "./viewer-contracts";
 
 const FIT_PADDING = 1.08;
 const FIT_ANIMATION_DURATION_MS = 420;
@@ -73,6 +73,13 @@ export class ViewerCamera {
 
   setEnabled(enabled: boolean) {
     this.controls.enabled = enabled;
+  }
+
+  setTool(tool: ViewerTool) {
+    this.controls.enabled = true;
+    this.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+    this.controls.mouseButtons.MIDDLE = tool === "multiSelect" ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
+    this.controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
   }
 
   cancelAnimation() {

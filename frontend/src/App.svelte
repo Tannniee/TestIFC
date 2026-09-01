@@ -5,7 +5,8 @@
   import Icon from "./lib/Icon.svelte";
   import InspectorDrawer from "./lib/InspectorDrawer.svelte";
   import ViewCube from "./lib/ViewCube.svelte";
-  import { AppShellService, type AppSettings, type BridgeProgress, type CameraOrientation, type FragmentMetrics, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
+  import ViewerToolbar from "./lib/ViewerToolbar.svelte";
+  import { AppShellService, type AppSettings, type BridgeProgress, type CameraOrientation, type FragmentMetrics, type MeasureMode, type MeasurementResult, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewerTool, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
   import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
   import { applyGeometryProgress, applySemanticProgress, beginModelLoad, emptyModelReadiness, geometryReady } from "./lib/model-readiness";
 
@@ -35,6 +36,10 @@
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;
+  let multiSelectionCount = 0;
+  let interactionTool: ViewerTool = "pan";
+  let measureMode: MeasureMode = "pointToPoint";
+  let measurements: MeasurementResult[] = [];
   let viewerProgress: ViewerProgress | null = null;
   let bridgeProgress: BridgeProgress | null = null;
   let readiness = emptyModelReadiness();
@@ -109,6 +114,12 @@
         onSelection(selection) {
           selectedElement = selection;
           if (selection) inspectorOpen = true;
+        },
+        onMultiSelectionChange(count) {
+          multiSelectionCount = count;
+        },
+        onMeasurementChange(results) {
+          measurements = results;
         },
         onBoxZoomActiveChange(active) {
           boxZoomActive = active;
@@ -223,6 +234,11 @@
   }
 
   function handleGlobalKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape" && interactionTool !== "pan") {
+      event.preventDefault();
+      void quitInteractionTool();
+      return;
+    }
     if (event.key === "Escape" && boxZoomActive) {
       shell.setBoxZoomEnabled(false);
       event.preventDefault();
@@ -272,7 +288,9 @@
   }
 
   function toggleBoxZoom() {
-    shell.setBoxZoomEnabled(!boxZoomActive);
+    const enabled = !boxZoomActive;
+    selectTool("pan");
+    shell.setBoxZoomEnabled(enabled);
   }
 
   function toggleSectionPanel() {
@@ -283,7 +301,26 @@
 
   function startSectionPick() {
     sectionMode = "surface";
+    selectTool("pan");
     shell.setSectionPickEnabled(true);
+  }
+
+  function selectTool(tool: ViewerTool) {
+    interactionTool = tool;
+    if (tool !== "pan") {
+      shell.setBoxZoomEnabled(false);
+      shell.setSectionPickEnabled(false);
+    }
+    shell.setTool(tool);
+  }
+
+  function changeMeasureMode(nextMode: MeasureMode) {
+    measureMode = nextMode;
+    shell.setMeasureMode(nextMode);
+  }
+
+  async function quitInteractionTool() {
+    interactionTool = await shell.quitTool();
   }
 
   function applyCoordinateSection() {
@@ -351,6 +388,8 @@
     const sequence = ++appLoadSequence;
     readiness = beginModelLoad(sequence, file.name);
     selectedElement = null;
+    multiSelectionCount = 0;
+    measurements = [];
     viewerProgress = readiness.geometry;
     bridgeProgress = readiness.semantic;
     fragmentMetrics = null;
@@ -451,6 +490,18 @@
     ondrop={handleDrop}
   >
     <div bind:this={viewerHost} class="viewer-mount"></div>
+    <ViewerToolbar
+      text={t}
+      {hasModel}
+      tool={interactionTool}
+      {measureMode}
+      {measurements}
+      onTool={selectTool}
+      onMeasureMode={changeMeasureMode}
+      onClearMeasurements={() => shell.clearMeasurements()}
+      onSetDistance={(distance) => shell.setLatestMeasurementDistance(distance)}
+      onQuit={() => void quitInteractionTool()}
+    />
     <div class="view-cube-host">
       <ViewCube
         disabled={!hasModel}
@@ -567,7 +618,7 @@
       <span>{progressText(viewerProgress, t) ?? modelStatus ?? t.noModel}</span>
       <span title={bridgeProgress?.detail}>{bridgeText(bridgeProgress, locale)}</span>
       <span title={fragmentMetrics ? `${fragmentMetrics.profile} · ${fragmentMetrics.fragmentBytes} bytes · ${Math.round(fragmentMetrics.totalMilliseconds)} ms` : undefined}>{t.modelData}: {hasModel ? `${t.modelReady} · ${modelStatus ?? ""}` : viewerProgress?.stage === "error" ? t.modelError : viewerProgress ? t.modelLoading : t.nothingSelected}</span>
-      <span>{t.element}: {selectedElement?.name ?? selectedElement?.ifcType ?? t.nothingSelected}</span>
+      <span>{t.element}: {multiSelectionCount ? `${multiSelectionCount} ${t.selectedElements}` : selectedElement?.name ?? selectedElement?.ifcType ?? t.nothingSelected}</span>
       <span>{t.version} {appVersion}</span>
     </footer>
 

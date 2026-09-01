@@ -1,4 +1,4 @@
-import { FragmentsModels, RenderedFaces, type FragmentsModel } from "@thatopen/fragments";
+import { FragmentsModels, type FragmentsModel } from "@thatopen/fragments";
 import * as THREE from "three";
 import { IfcConverter, sha256Hex } from "./ifc-converter";
 import { markViewerCreated, markViewerDisposed } from "./lifecycle-diagnostics";
@@ -14,50 +14,38 @@ import {
   type BridgeProgress,
   type CameraOrientation,
   type FragmentMetrics,
+  type MeasureMode,
   type SectionPlaneDefinition,
   type SectionSide,
   type ViewDirection,
   type ViewerCallbacks,
   type ViewerProgress,
   type ViewerSelection,
+  type ViewerTool,
   type ViewportBackground,
   type ViewPreset,
 } from "./viewer-contracts";
-import { createViewerSelection } from "./viewer-selection";
+import { createViewerSelection, ViewerHighlights } from "./viewer-selection";
+import { ViewerInteraction } from "./viewer-interaction";
 
 export { isLoadCancelledError, LoadCancelledError } from "./viewer-contracts";
-export type {
-  BridgeProgress,
-  CameraOrientation,
-  FragmentMetrics,
-  SectionPlaneDefinition,
-  SectionSide,
-  ViewDirection,
-  ViewerCallbacks,
-  ViewerProgress,
-  ViewerSelection,
-  ViewerStage,
-  ViewportBackground,
-  ViewPreset,
-  ViewStep,
-} from "./viewer-contracts";
+export type * from "./viewer-contracts";
 
 const VIEWPORT_COLORS: Record<ViewportBackground, { background: number; center: number; grid: number }> = {
   gray: { background: 0x20262b, center: 0x596872, grid: 0x354149 },
   white: { background: 0xffffff, center: 0x7a8790, grid: 0xc6cdd2 },
   oled: { background: 0x000000, center: 0x53636d, grid: 0x202a30 },
 };
-
 const FRAGMENTS_MAX_UPDATE_RATE_MS = 16;
 const BOX_ZOOM_MIN_SIZE_PX = 8;
 const SECTION_CLIP_EPSILON_RATIO = 0.00001;
 const SECTION_CLIP_EPSILON_MIN = 0.0001;
 const SECTION_CLIP_EPSILON_MAX = 0.02;
-
 export class ViewerService {
   private readonly scene = new THREE.Scene();
   private readonly renderer: THREE.WebGLRenderer;
   private readonly view: ViewerCamera;
+  private readonly interaction: ViewerInteraction;
   private readonly boxZoomRectangle: HTMLDivElement;
   private readonly fragments = new FragmentsModels("/vendor/fragments/worker.mjs", { maxWorkers: 2 });
   private readonly converter: IfcConverter;
@@ -71,7 +59,8 @@ export class ViewerService {
   private viewportBackground: ViewportBackground = "gray";
   private activeModel: FragmentsModel | null = null;
   private activeModelName = "";
-  private selected: { model: FragmentsModel; localId: number } | null = null;
+  private readonly highlights = new ViewerHighlights();
+  private activeTool: ViewerTool = "pan";
   private loadSequence = 0;
   private selectionSequence = 0;
   private loadingModelId: string | null = null;
@@ -82,7 +71,6 @@ export class ViewerService {
   private sectionPickEnabled = false;
   private sectionDefinition: SectionPlaneDefinition | null = null;
   private disposed = false;
-
   constructor(
     private readonly host: HTMLElement,
     callbacks: ViewerCallbacks,
@@ -105,6 +93,17 @@ export class ViewerService {
       onOrientationChange: (orientation) => this.callbacks.onCameraOrientationChange(orientation),
       onUpdate: (force) => void this.fragments.update(force),
     });
+    this.interaction = new ViewerInteraction(
+      this.host,
+      this.renderer.domElement,
+      this.scene,
+      this.camera,
+      {
+        activeModel: () => this.activeModel,
+        onMultiSelection: (result) => void this.applyMultiSelection(result?.fragments ?? null, result?.localIds ?? []),
+        onMeasurements: (measurements) => this.callbacks.onMeasurementChange(measurements),
+      },
+    );
     this.boxZoomRectangle = document.createElement("div");
     this.boxZoomRectangle.className = "viewer-box-zoom-rectangle";
     this.boxZoomRectangle.hidden = true;
@@ -128,39 +127,30 @@ export class ViewerService {
     this.resize();
     markViewerCreated();
   }
-
   private get camera() {
     return this.view.camera;
   }
-
   get hasModel() {
     return this.activeModel !== null;
   }
-
   get gridVisible() {
     return this.grid.visible;
   }
-
   get background() {
     return this.viewportBackground;
   }
-
   get boxZoomActive() {
     return this.boxZoomEnabled;
   }
-
   get wheelZoomSpeed() {
     return this.view.zoomSpeed;
   }
-
   get sectionPickActive() {
     return this.sectionPickEnabled;
   }
-
   setGridVisible(visible: boolean) {
     this.grid.visible = visible;
   }
-
   setBackground(background: ViewportBackground) {
     if (background === this.viewportBackground) return;
     const elevation = this.grid.position.y;
@@ -174,9 +164,38 @@ export class ViewerService {
     this.grid.visible = visible;
     this.scene.add(this.grid);
   }
-
   setWheelZoomSpeed(speed: number) {
     this.view.setZoomSpeed(speed);
+  }
+  setTool(tool: ViewerTool) {
+    if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
+    if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
+    this.view.cancelAnimation();
+    this.activeTool = tool;
+    this.view.setTool(tool);
+    this.interaction.setTool(tool);
+  }
+  setMeasureMode(mode: MeasureMode) {
+    this.interaction.setMeasureMode(mode);
+  }
+  clearMeasurements() {
+    this.interaction.clearMeasurements();
+  }
+  setLatestMeasurementDistance(distance: number) {
+    return this.interaction.setLatestMeasurementDistance(distance);
+  }
+  async quitTool(): Promise<ViewerTool> {
+    if (this.activeTool === "measure" && this.interaction.hasMeasurementState()) {
+      this.interaction.clearMeasurements();
+      return "measure";
+    }
+    if (this.activeTool === "multiSelect" && this.interaction.cancelAction()) return "multiSelect";
+    if (this.activeTool === "multiSelect" && this.highlights.hasMultiple) {
+      await this.clearSelection();
+      return "multiSelect";
+    }
+    this.setTool("pan");
+    return "pan";
   }
 
   setBoxZoomEnabled(enabled: boolean) {
@@ -275,6 +294,7 @@ export class ViewerService {
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
     this.clearSectionPlane();
+    this.interaction.reset();
     const sequence = ++this.loadSequence;
     this.selectionSequence++;
     this.converter.cancel();
@@ -380,10 +400,10 @@ export class ViewerService {
 
   async clearSelection() {
     const selectionSequence = ++this.selectionSequence;
-    if (this.selected) await this.selected.model.resetHighlight([this.selected.localId]);
+    await this.highlights.clear();
     if (selectionSequence !== this.selectionSequence) return;
-    this.selected = null;
     this.callbacks.onSelection(null);
+    this.callbacks.onMultiSelectionChange(0);
     await this.bridge.clearSelection(() => selectionSequence === this.selectionSequence);
   }
 
@@ -399,6 +419,7 @@ export class ViewerService {
     this.renderer.domElement.removeEventListener("pointercancel", this.onPointerCancel, true);
     this.renderer.domElement.removeEventListener("click", this.onClick);
     this.view.dispose();
+    this.interaction.dispose();
     this.converter.dispose();
     await this.fragments.dispose();
     this.host.classList.remove("viewer-box-zoom-active");
@@ -451,6 +472,7 @@ export class ViewerService {
 
   private readonly render = (time: number) => {
     this.view.render(time);
+    this.interaction.updateOverlay();
     const opacity = 0.34 * THREE.MathUtils.smoothstep(this.camera.zoom, 0.08, 0.65);
     for (const material of this.gridMaterials) material.opacity = opacity;
     this.renderer.render(this.scene, this.camera);
@@ -461,12 +483,14 @@ export class ViewerService {
       this.startBoxZoomDrag(event);
       return;
     }
+    if (this.interaction.handlePointerDown(event)) return;
     if (event.button !== 0) return;
     this.pointerStart = { id: event.pointerId, x: event.clientX, y: event.clientY };
     this.suppressNextClick = false;
   };
 
   private readonly onPointerMove = (event: PointerEvent) => {
+    if (this.interaction.handlePointerMove(event)) return;
     const start = this.boxZoomStart;
     if (!this.boxZoomEnabled || start?.id !== event.pointerId) return;
     event.preventDefault();
@@ -480,6 +504,7 @@ export class ViewerService {
       this.finishBoxZoomDrag(event);
       return;
     }
+    if (this.interaction.handlePointerUp(event)) return;
     const start = this.pointerStart;
     if (start?.id === event.pointerId) {
       this.suppressNextClick = Math.hypot(event.clientX - start.x, event.clientY - start.y) > 4;
@@ -488,6 +513,10 @@ export class ViewerService {
   };
 
   private readonly onPointerCancel = (event: PointerEvent) => {
+    if (this.interaction.handlePointerCancel(event)) {
+      this.suppressNextClick = true;
+      return;
+    }
     if (this.boxZoomStart?.id === event.pointerId) {
       this.suppressNextClick = true;
       this.setBoxZoomEnabled(false);
@@ -581,6 +610,7 @@ export class ViewerService {
       this.suppressNextClick = false;
       return;
     }
+    if (this.interaction.handleClick(event)) return;
     if (this.sectionPickEnabled) {
       void this.pickSectionPlane(event.clientX, event.clientY);
       return;
@@ -601,16 +631,11 @@ export class ViewerService {
       return;
     }
 
-    if (this.selected) await this.selected.model.resetHighlight([this.selected.localId]);
+    await this.highlights.clear();
     if (selectionSequence !== this.selectionSequence) return;
-    await hit.fragments.highlight([hit.localId], {
-      color: new THREE.Color(0x2d8cff),
-      renderedFaces: RenderedFaces.TWO,
-      opacity: 1,
-      transparent: false,
-    });
+    await this.highlights.setSingle(hit.fragments, hit.localId);
     if (selectionSequence !== this.selectionSequence) return;
-    this.selected = { model: hit.fragments, localId: hit.localId };
+    this.callbacks.onMultiSelectionChange(0);
 
     const [item = null] = await hit.fragments.getItemsData([hit.localId]);
     const [guid = null] = await hit.fragments.getGuidsByLocalIds([hit.localId]);
@@ -624,6 +649,19 @@ export class ViewerService {
     );
     this.callbacks.onSelection(selection);
     await this.bridge.publishSelection(selection);
+  }
+
+  private async applyMultiSelection(model: FragmentsModel | null, localIds: number[]) {
+    const selectionSequence = ++this.selectionSequence;
+    await this.highlights.clear();
+    if (selectionSequence !== this.selectionSequence) return;
+    this.callbacks.onSelection(null);
+    if (model && localIds.length) {
+      await this.highlights.setMultiple(model, localIds);
+      if (selectionSequence !== this.selectionSequence || model !== this.activeModel) return;
+    }
+    this.callbacks.onMultiSelectionChange(localIds.length);
+    await this.bridge.clearSelection(() => selectionSequence === this.selectionSequence);
   }
 
   private async clearModel() {

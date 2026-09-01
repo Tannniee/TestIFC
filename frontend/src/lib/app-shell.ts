@@ -5,6 +5,8 @@ import { isLoadCancelledError } from "./viewer-contracts";
 import type {
   SectionPlaneDefinition,
   SectionSide,
+  MeasureMode,
+  ViewerTool,
   ViewDirection,
   ViewerCallbacks,
   ViewportBackground,
@@ -16,12 +18,15 @@ export type {
   BridgeProgress,
   CameraOrientation,
   FragmentMetrics,
+  MeasureMode,
+  MeasurementResult,
   SectionPlaneDefinition,
   SectionSide,
   ViewDirection,
   ViewerCallbacks,
   ViewerProgress,
   ViewerSelection,
+  ViewerTool,
   ViewportBackground,
   ViewPreset,
 } from "./viewer-contracts";
@@ -94,6 +99,26 @@ export class AppShellService {
 
   setBoxZoomEnabled(enabled: boolean) {
     this.viewer?.setBoxZoomEnabled(enabled);
+  }
+
+  setTool(tool: ViewerTool) {
+    this.viewer?.setTool(tool);
+  }
+
+  setMeasureMode(mode: MeasureMode) {
+    this.viewer?.setMeasureMode(mode);
+  }
+
+  clearMeasurements() {
+    this.viewer?.clearMeasurements();
+  }
+
+  setLatestMeasurementDistance(distance: number) {
+    return this.viewer?.setLatestMeasurementDistance(distance) ?? false;
+  }
+
+  quitTool() {
+    return this.viewer?.quitTool() ?? Promise.resolve<ViewerTool>("pan");
   }
 
   setSectionPickEnabled(enabled: boolean) {
