@@ -3,20 +3,29 @@ import { isLoadCancelledError, type BridgeProgress, type ViewerSelection } from 
 import { createSelectionPayload } from "./viewer-selection";
 
 const wait = (milliseconds: number) => new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
+// Preserve write ordering across viewer remounts in the same window as well.
+let activationQueue: Promise<void> = Promise.resolve();
 
 export interface ViewerBridgeCallbacks {
   onProgress(progress: BridgeProgress): void;
 }
 
 export class ViewerBridge {
+  private fragmentRequests = new AbortController();
+
   constructor(private readonly callbacks: ViewerBridgeCallbacks) {}
 
+  cancelFragmentRequests() {
+    this.fragmentRequests.abort();
+    this.fragmentRequests = new AbortController();
+  }
+
   async fragments(modelHash: string): Promise<ArrayBuffer | null> {
-    return api.getFragments(modelHash);
+    return api.getFragments(modelHash, this.fragmentRequests.signal);
   }
 
   cacheFragments(modelHash: string, fragments: Uint8Array, isCurrent: () => boolean) {
-    void api.putFragments(modelHash, fragments).catch((error) => {
+    void api.putFragments(modelHash, fragments, this.fragmentRequests.signal).catch((error) => {
       if (isCurrent()) console.warn(`Fragments cache: ${this.errorText(error)}`);
     });
   }
@@ -47,22 +56,30 @@ export class ViewerBridge {
       progress: Omit<BridgeProgress, "loadSequence" | "modelHash">,
     ) => this.callbacks.onProgress({ ...progress, loadSequence, modelHash });
     try {
-      publish({ stage: "activating", detail: file.name });
-      const activated = await api.tryActivateModel(modelHash);
-      assertCurrent();
-      if (!activated) {
-        publish({ stage: "uploading", progress: 0, detail: file.name });
-        const uploaded = await api.uploadModel(file, (progress) => {
-          try {
-            assertCurrent();
-            publish({ stage: "uploading", progress, detail: file.name });
-          } catch {
-            // A newer model load owns progress now.
-          }
-        });
+      // An HTTP abort cannot undo server-side activation. Serialize these writes
+      // so an older upload can never activate after the newest model.
+      const activation = activationQueue.then(async () => {
         assertCurrent();
-        if (uploaded.modelHash !== modelHash) throw new Error("Backend model hash does not match the local file");
-      }
+        publish({ stage: "activating", detail: file.name });
+        const activated = await api.tryActivateModel(modelHash);
+        assertCurrent();
+        if (!activated) {
+          publish({ stage: "uploading", progress: 0, detail: file.name });
+          const uploaded = await api.uploadModel(file, (progress) => {
+            try {
+              assertCurrent();
+              publish({ stage: "uploading", progress, detail: file.name });
+            } catch {
+              // A newer model load owns progress now.
+            }
+          });
+          assertCurrent();
+          if (uploaded.modelHash !== modelHash) throw new Error("Backend model hash does not match the local file");
+        }
+      });
+      activationQueue = activation.catch(() => {});
+      await activation;
+      assertCurrent();
       while (true) {
         const runtime = await api.runtime();
         assertCurrent();

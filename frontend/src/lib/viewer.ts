@@ -1,6 +1,7 @@
 import { FragmentsModels, type FragmentsModel } from "@thatopen/fragments";
 import * as THREE from "three";
 import { IfcConverter, sha256Hex } from "./ifc-converter";
+import { fragmentArrayBuffer } from "./fragment-buffer";
 import { markViewerCreated, markViewerDisposed } from "./lifecycle-diagnostics";
 import {
   browserFragmentMetadataProfile,
@@ -291,6 +292,7 @@ export class ViewerService {
     this.clearSectionPlane();
     this.interaction.reset();
     const sequence = ++this.loadSequence;
+    this.bridge.cancelFragmentRequests();
     this.selectionSequence++;
     this.converter.cancel();
     if (this.loadingModelId) this.fragments.abort(this.loadingModelId);
@@ -328,11 +330,11 @@ export class ViewerService {
       });
       conversionMilliseconds = performance.now() - conversionStarted;
       this.assertCurrent(sequence);
-      fragmentBuffer = converted.buffer.slice(converted.byteOffset, converted.byteOffset + converted.byteLength) as ArrayBuffer;
-      const cacheCopy = converted.slice();
+      fragmentBuffer = fragmentArrayBuffer(converted);
+      // fetch snapshots the body before Fragments transfers/detaches the buffer.
       this.bridge.cacheFragments(
         cacheKey,
-        cacheCopy,
+        converted,
         () => sequence === this.loadSequence && !this.disposed,
       );
     }
@@ -416,6 +418,7 @@ export class ViewerService {
     this.view.dispose();
     this.interaction.dispose();
     this.converter.dispose();
+    this.bridge.cancelFragmentRequests();
     await this.fragments.dispose();
     this.host.classList.remove("viewer-box-zoom-active");
     this.host.classList.remove("viewer-section-pick-active");

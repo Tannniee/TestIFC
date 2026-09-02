@@ -18,6 +18,14 @@ class FragmentService:
         model_hash: str,
         chunks: AsyncIterable[bytes],
     ) -> int:
+        bundle_hash = model_hash.partition(".fragments-v")[0]
+        model_cache.pin_model(bundle_hash)
+        try:
+            return await self._store_stream(model_hash, chunks)
+        finally:
+            model_cache.unpin_model(bundle_hash)
+
+    async def _store_stream(self, model_hash: str, chunks: AsyncIterable[bytes]) -> int:
         staging = model_cache.store_cached_fragments_start(model_hash)
         try:
             with staging.open("wb") as sink:

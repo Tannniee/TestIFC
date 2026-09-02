@@ -8,6 +8,8 @@ from datetime import UTC, datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from version import APP_VERSION
+
 
 LOGGER_NAME = "ifc_viewer"
 LOG_FILENAME = "desktop.jsonl"
@@ -21,7 +23,12 @@ class JsonFormatter(logging.Formatter):
             "logger": record.name,
             "event": getattr(record, "event", "log"),
             "message": record.getMessage(),
+            "appVersion": APP_VERSION,
         }
+        for key in ("modelHash", "expressId", "globalId", "ifcClass", "operation"):
+            value = getattr(record, key, None)
+            if value is not None:
+                payload[key] = value
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)
         return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))

@@ -2,6 +2,9 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 
+if not defined IFC_BUILD_DIST set "IFC_BUILD_DIST=dist"
+if not defined IFC_BUILD_WORK set "IFC_BUILD_WORK=build"
+
 if not exist ".venv\Scripts\python.exe" (
   echo ERROR: Missing .venv. Create it with Python 3.14 first.
   exit /b 1
@@ -21,8 +24,8 @@ if not exist "frontend\dist\index.html" (
 )
 
 echo [3/3] Packaging the desktop application...
-".venv\Scripts\python.exe" -m PyInstaller --noconfirm --clean --distpath dist --workpath build IFC_Viewer.spec
+".venv\Scripts\python.exe" -m PyInstaller --noconfirm --clean --distpath "%IFC_BUILD_DIST%" --workpath "%IFC_BUILD_WORK%" IFC_Viewer.spec
 if errorlevel 1 exit /b 1
 
-echo Package created in dist\ using APP_VERSION from src\version.py.
+echo Package created in %IFC_BUILD_DIST%\ using APP_VERSION from src\version.py.
 exit /b 0

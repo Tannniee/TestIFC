@@ -108,8 +108,8 @@ export const api = {
     return true;
   },
   runtime: () => requestJson<ModelRuntimeResponse>(API_ENDPOINTS.modelRuntime.path),
-  async getFragments(modelHash: string): Promise<ArrayBuffer | null> {
-    const response = await fetch(apiPath(API_ENDPOINTS.getFragments, { modelHash }));
+  async getFragments(modelHash: string, signal?: AbortSignal): Promise<ArrayBuffer | null> {
+    const response = await fetch(apiPath(API_ENDPOINTS.getFragments, { modelHash }), { signal });
     if (response.status === 404) return null;
     if (!response.ok) {
       const body = await response.text();
@@ -117,11 +117,12 @@ export const api = {
     }
     return response.arrayBuffer();
   },
-  async putFragments(modelHash: string, fragments: Uint8Array): Promise<void> {
+  async putFragments(modelHash: string, fragments: Uint8Array, signal?: AbortSignal): Promise<void> {
     const response = await fetch(apiPath(API_ENDPOINTS.putFragments, { modelHash }), {
       method: API_ENDPOINTS.putFragments.method,
       headers: { "Content-Type": "application/octet-stream" },
       body: fragments as unknown as BodyInit,
+      signal,
     });
     if (!response.ok) {
       const body = await response.text();

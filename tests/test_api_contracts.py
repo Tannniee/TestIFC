@@ -35,7 +35,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["service"], "ifc-selection-bridge")
-        self.assertEqual(payload["appVersion"], "1.0.0")
+        self.assertEqual(payload["appVersion"], "1.0.1")
         self.assertFalse(payload["hasSelection"])
 
     async def test_runtime_exposes_separate_semantic_readiness(self):

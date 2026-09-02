@@ -11,6 +11,7 @@ from time import monotonic_ns, time
 from typing import Any, BinaryIO
 
 import index_builder
+from background_tasks import LatestTaskRunner
 from content_hash import copy_and_hash, sha256_file
 
 
@@ -43,6 +44,29 @@ _BUILD_LOCK_PATTERN = "*.semantic-v*.lock"
 _VERSIONED_BUNDLE_MARKERS = (".fragments-v", ".semantic-v", ".facts-v")
 _retention_lock = threading.RLock()
 _pins: dict[str, int] = {}
+_active_retention_hash: str | None = None
+_retention_jobs = LatestTaskRunner("ifc-cache-retention")
+CACHE_RETENTION_DELAY_SECONDS = 30.0
+
+
+def schedule_cache_retention(active_hash: str) -> None:
+    """Coalesce switches and keep scans off the activation request thread."""
+    global _active_retention_hash
+    _retention_jobs.cancel()
+    with _retention_lock:
+        _active_retention_hash = active_hash
+
+    def maintain(cancelled: threading.Event) -> None:
+        if cancelled.wait(CACHE_RETENTION_DELAY_SECONDS):
+            return
+        lock_path = index_builder.build_lock_path_for(CACHE_DIR, active_hash)
+        while lock_path.exists():
+            if cancelled.wait(5.0):
+                return
+        enforce_cache_retention(active_hash, cancelled)
+
+    # A unique key also restarts the quiet period for a reopen of the same model.
+    _retention_jobs.submit(f"{active_hash}-{monotonic_ns()}", maintain)
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,82 +149,103 @@ def _path_size(path: Path) -> int:
         return 0
 
 
-def enforce_cache_retention(active_hash: str) -> None:
-    with _retention_lock:
-        ensure_cache_dir()
-        live_partials: set[Path] = set()
-        for pattern in _PARTIAL_PATTERNS:
-            for path in CACHE_DIR.glob(pattern):
-                try:
-                    stale = time() - path.stat().st_mtime >= _PARTIAL_MAX_AGE_SECONDS
-                except OSError:
-                    stale = False
-                if stale:
-                    _remove_cache_path(path)
-                else:
-                    live_partials.add(path)
+def enforce_cache_retention(active_hash: str, cancelled: threading.Event | None = None) -> None:
+    # Scan outside the pin lock so large RocksDB folders cannot block requests.
+    # Recheck current ownership under the lock immediately before each deletion.
+    def stopped() -> bool:
+        return cancelled is not None and cancelled.is_set()
 
-        bundles: dict[str, list[Path]] = {}
-        for pattern in _BUNDLE_PATTERNS:
-            for path in CACHE_DIR.glob(pattern):
-                bundles.setdefault(_bundle_hash(path), []).append(path)
+    def remove_if_unprotected(path: Path, model_hash: str | None) -> None:
+        with _retention_lock:
+            if stopped() or (model_hash is not None and (
+                model_hash in _pins or model_hash in (active_hash, _active_retention_hash)
+            )):
+                return
+            _remove_cache_path(path)
 
-        protected = set(_pins)
-        protected.add(active_hash)
-        protected.update(
-            model_hash
-            for path in live_partials
-            if (model_hash := _partial_bundle_hash(path)) is not None
-        )
-        for path in CACHE_DIR.glob(_BUILD_LOCK_PATTERN):
+    ensure_cache_dir()
+    live_partials: set[Path] = set()
+    for pattern in _PARTIAL_PATTERNS:
+        for path in CACHE_DIR.glob(pattern):
+            if stopped():
+                return
             try:
-                stale = (
-                    time() - path.stat().st_mtime
-                    >= index_builder._BUILD_LOCK_MAX_AGE_SECONDS
-                )
+                stale = time() - path.stat().st_mtime >= _PARTIAL_MAX_AGE_SECONDS
             except OSError:
                 stale = False
             if stale:
-                _remove_cache_path(path)
+                remove_if_unprotected(path, _partial_bundle_hash(path))
             else:
-                protected.add(_bundle_hash(path))
-        for model_hash in protected:
-            for path in bundles.get(model_hash, []):
-                try:
-                    os.utime(path)
-                except Exception:
-                    continue
+                live_partials.add(path)
 
-        def recency(model_hash: str) -> float:
-            times = []
-            for path in bundles[model_hash]:
-                try:
-                    times.append(path.stat().st_mtime)
-                except OSError:
-                    continue
-            return max(times, default=0.0)
+    bundles: dict[str, list[Path]] = {}
+    for pattern in _BUNDLE_PATTERNS:
+        for path in CACHE_DIR.glob(pattern):
+            if stopped():
+                return
+            bundles.setdefault(_bundle_hash(path), []).append(path)
 
-        candidates = sorted(
-            (model_hash for model_hash in bundles if model_hash not in protected),
-            key=recency,
-            reverse=True,
-        )
-        kept_count = sum(1 for model_hash in bundles if model_hash in protected)
-        kept_bytes = sum(
-            _path_size(path)
-            for model_hash in protected
-            for path in bundles.get(model_hash, [])
-        )
-        for model_hash in candidates:
-            size = sum(_path_size(path) for path in bundles[model_hash])
-            within_count = kept_count < CACHE_KEEP_MODELS
-            within_bytes = kept_bytes + size <= CACHE_MAX_BYTES
-            if within_count and within_bytes:
-                kept_count += 1
-                kept_bytes += size
+    with _retention_lock:
+        protected = set(_pins)
+        protected.add(active_hash)
+        if _active_retention_hash:
+            protected.add(_active_retention_hash)
+    protected.update(
+        model_hash
+        for path in live_partials
+        if (model_hash := _partial_bundle_hash(path)) is not None
+    )
+    for path in CACHE_DIR.glob(_BUILD_LOCK_PATTERN):
+        if stopped():
+            return
+        try:
+            stale = time() - path.stat().st_mtime >= index_builder._BUILD_LOCK_MAX_AGE_SECONDS
+        except OSError:
+            stale = False
+        if stale:
+            remove_if_unprotected(path, _bundle_hash(path))
+        else:
+            protected.add(_bundle_hash(path))
+    for model_hash in protected:
+        for path in bundles.get(model_hash, []):
+            try:
+                os.utime(path)
+            except OSError:
                 continue
-            for path in bundles[model_hash]:
-                _remove_cache_path(path)
+
+    def recency(model_hash: str) -> float:
+        times = []
+        for path in bundles[model_hash]:
+            try:
+                times.append(path.stat().st_mtime)
+            except OSError:
+                continue
+        return max(times, default=0.0)
+
+    candidates = sorted(
+        (model_hash for model_hash in bundles if model_hash not in protected),
+        key=recency,
+        reverse=True,
+    )
+    kept_count = sum(1 for model_hash in bundles if model_hash in protected)
+    kept_bytes = 0
+    for model_hash in protected:
+        for path in bundles.get(model_hash, []):
+            if stopped():
+                return
+            kept_bytes += _path_size(path)
+    for model_hash in candidates:
+        if stopped():
+            return
+        size = sum(_path_size(path) for path in bundles[model_hash])
+        within_count = kept_count < CACHE_KEEP_MODELS
+        within_bytes = kept_bytes + size <= CACHE_MAX_BYTES
+        if within_count and within_bytes:
+            kept_count += 1
+            kept_bytes += size
+            continue
+        for path in bundles[model_hash]:
+            remove_if_unprotected(path, model_hash)
 
 
 def fragments_cache_path(model_hash: str) -> Path:
@@ -238,7 +283,7 @@ def store_cached_fragments_commit(model_hash: str, staging: Path) -> int:
     return size
 
 
-def store_model_stream(reader: BinaryIO) -> CachedModel:
+def store_model_stream(reader: BinaryIO, *, pin_for_activation: bool = False) -> CachedModel:
     """Copy, hash, and atomically install an IFC stream in the model cache."""
     ensure_cache_dir()
     staging = CACHE_DIR / (
@@ -253,6 +298,8 @@ def store_model_stream(reader: BinaryIO) -> CachedModel:
         raise
 
     target = CACHE_DIR / f"{model_hash}.ifc"
+    if pin_for_activation:
+        pin_model(model_hash)
     try:
         target_is_valid = (
             target.exists()
@@ -266,6 +313,8 @@ def store_model_stream(reader: BinaryIO) -> CachedModel:
         return CachedModel(target, model_hash, size)
     except BaseException:
         staging.unlink(missing_ok=True)
+        if pin_for_activation:
+            unpin_model(model_hash)
         raise
 
 

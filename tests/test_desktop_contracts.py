@@ -219,9 +219,14 @@ class DesktopContractTests(unittest.TestCase):
             None,
         )
         record.event = "test_ready"
+        record.modelHash = "model-a"
+        record.operation = "index"
         payload = json.loads(JsonFormatter().format(record))
         self.assertEqual(payload["event"], "test_ready")
+        self.assertEqual(payload["appVersion"], "1.0.1")
         self.assertEqual(payload["message"], "ready now")
+        self.assertEqual(payload["modelHash"], "model-a")
+        self.assertEqual(payload["operation"], "index")
 
         with TemporaryDirectory() as temporary:
             configured = configure_logging(Path(temporary))

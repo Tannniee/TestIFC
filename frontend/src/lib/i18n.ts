@@ -210,6 +210,7 @@ export const helpTopics: Record<Locale, HelpTopic[]> = {
     {
       group: "Chọn và xem dữ liệu",
       title: "Đo kích thước",
+      note: "Kết quả đo dựa trên hình học đang hiển thị. Đường cong và bề mặt chia lưới có thể khác kích thước thiết kế trong dữ liệu IFC.",
       steps: ["Chọn Đo > Điểm đến điểm rồi bấm hoặc snap điểm 1.", "Bấm điểm 2 để đo bình thường; hoặc bắt đầu gõ 5000mm hay 5m để mở ô nhập cạnh con trỏ.", "Nhấn Enter để khóa chiều dài, di chuột và bấm lần nữa để chọn hướng đo.", "Esc khi đang nhập sẽ quay lại bước chọn điểm 2; Esc tiếp theo hủy điểm 1, rồi xóa kết quả và thoát Measure.", "Chọn Bám cạnh và bấm một cạnh để lấy toàn bộ chiều dài cạnh. Vẫn có thể xoay, dịch và zoom trong lúc đo."],
     },
     {
@@ -244,6 +245,7 @@ export const helpTopics: Record<Locale, HelpTopic[]> = {
     {
       group: "Select and inspect",
       title: "Measure",
+      note: "Measurements use the displayed geometry. Curves and tessellated surfaces may differ from design dimensions in the IFC data.",
       steps: ["Choose Measure > Point to point, then click or snap point 1.", "Click point 2 for a normal measurement, or start typing 5000mm or 5m to open the entry beside the pointer.", "Press Enter to lock the length, move the pointer, then click again to choose the measurement direction.", "Escape while entering a length returns to point-2 selection; subsequent presses cancel point 1, clear results, then exit Measure.", "Choose Snap to edge and click an edge for its full length. Orbit, pan, and zoom remain available while measuring."],
     },
     {

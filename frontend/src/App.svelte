@@ -32,7 +32,7 @@
   let fileInput: HTMLInputElement;
   let viewerHost: HTMLDivElement;
   const shell = new AppShellService();
-  let appVersion = "1.0.0";
+  let appVersion = "1.0.1";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;

@@ -56,6 +56,9 @@ export class ViewerInteraction {
   private lastPointer = { clientX: 0, clientY: 0 };
   private measurements: MeasurementVisual[] = [];
   private nextMeasurementId = 1;
+  private measurementEpoch = 0;
+  private measurementQueue: Promise<void> = Promise.resolve();
+  private pendingMeasurements = 0;
   private snapSequence = 0;
   private snapFrame: number | null = null;
   private snapPending = false;
@@ -128,7 +131,7 @@ export class ViewerInteraction {
       this.cancelSweep();
       return true;
     }
-    if (this.measurementStart) {
+    if (this.measurementStart || this.pendingMeasurements > 0) {
       this.clearDraft();
       return true;
     }
@@ -198,7 +201,13 @@ export class ViewerInteraction {
       this.measurementInput.focus();
       return true;
     }
-    void this.measure(event.clientX, event.clientY);
+    const epoch = this.measurementEpoch;
+    this.pendingMeasurements++;
+    this.measurementQueue = this.measurementQueue.then(async () => {
+      if (epoch === this.measurementEpoch) await this.measure(event.clientX, event.clientY, epoch);
+    }).catch((error) => {
+      if (epoch === this.measurementEpoch) console.warn("Measurement snap failed", error);
+    }).finally(() => { this.pendingMeasurements--; });
     return true;
   }
 
@@ -246,6 +255,7 @@ export class ViewerInteraction {
   }
 
   private scheduleSnapPreview(clientX: number, clientY: number) {
+    this.snapSequence++;
     this.queuedSnap = { x: clientX, y: clientY };
     if (this.snapFrame !== null || this.snapPending) return;
     this.snapFrame = requestAnimationFrame(() => {
@@ -254,7 +264,9 @@ export class ViewerInteraction {
       this.queuedSnap = null;
       if (!point) return;
       this.snapPending = true;
-      void this.updateSnapPreview(point.x, point.y).finally(() => {
+      void this.updateSnapPreview(point.x, point.y).catch(() => {
+        // A disposed or aborted model can reject a pending raycast.
+      }).finally(() => {
         this.snapPending = false;
         if (this.queuedSnap) this.scheduleSnapPreview(this.queuedSnap.x, this.queuedSnap.y);
       });
@@ -270,12 +282,12 @@ export class ViewerInteraction {
     this.drawSnapPreview(hit);
   }
 
-  private async measure(clientX: number, clientY: number) {
+  private async measure(clientX: number, clientY: number, epoch: number) {
     const model = this.callbacks.activeModel();
     if (!model) return;
     const mode = this.measureMode;
     const hit = await this.snapAt(model, clientX, clientY, mode);
-    if (model !== this.callbacks.activeModel() || this.tool !== "measure" || this.measureMode !== mode || !hit) return;
+    if (epoch !== this.measurementEpoch || model !== this.callbacks.activeModel() || this.tool !== "measure" || this.measureMode !== mode || !hit) return;
     if (mode === "edge") {
       if (hit.snappedEdgeP1 && hit.snappedEdgeP2) this.commitMeasurement(hit.snappedEdgeP1, hit.snappedEdgeP2, mode);
       return;
@@ -288,7 +300,7 @@ export class ViewerInteraction {
       );
       if (!end) return;
       const start = this.measurementStart;
-      this.clearDraft();
+      this.clearDraft(false);
       this.commitMeasurement(start, new THREE.Vector3(end.x, end.y, end.z), "pointToPoint");
       return;
     }
@@ -324,7 +336,7 @@ export class ViewerInteraction {
       return;
     }
     const start = this.measurementStart;
-    this.clearDraft();
+    this.clearDraft(false);
     this.commitMeasurement(start, point, "pointToPoint");
   }
 
@@ -407,6 +419,7 @@ export class ViewerInteraction {
   };
 
   private openMeasurementEntry(seed: string) {
+    this.measurementEpoch++;
     this.fixedDistance = null;
     this.measurementInput.readOnly = false;
     this.measurementUnit.disabled = false;
@@ -427,6 +440,7 @@ export class ViewerInteraction {
     }
     const distance = measurementInputToMeters(parsed.distance, parsed.unit);
     if (!Number.isFinite(distance)) return;
+    this.measurementEpoch++;
     this.fixedDistance = distance;
     this.measurementInput.value = String(parsed.distance);
     this.measurementUnit.value = parsed.unit;
@@ -438,6 +452,8 @@ export class ViewerInteraction {
   }
 
   private cancelNumericEntry() {
+    this.measurementEpoch++;
+    this.snapSequence++;
     this.fixedDistance = null;
     this.hideMeasurementEntry();
     this.disposeObject(this.draftLine);
@@ -482,7 +498,8 @@ export class ViewerInteraction {
     this.callbacks.onMeasurements(this.measurements.map((visual) => ({ ...visual.result })));
   }
 
-  private clearDraft() {
+  private clearDraft(invalidatePending = true) {
+    if (invalidatePending) this.measurementEpoch++;
     this.measurementStart = null;
     this.fixedDistance = null;
     this.snapSequence++;

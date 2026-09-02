@@ -13,6 +13,7 @@ from typing import Any, Callable, Iterable, Literal
 import ifcopenshell
 
 INDEX_SCHEMA_VERSION = 3
+EXTRACTOR_VERSION = 1
 INDEXED_TYPES = ("IfcProject", "IfcProduct", "IfcTypeProduct")
 IndexStatus = Literal["not_configured", "indexing", "ready", "error"]
 
@@ -74,8 +75,18 @@ def _meta(path: Path, key: str) -> str | None:
 def is_usable(path: Path) -> bool:
     return (
         _meta(path, "schema_version") == str(INDEX_SCHEMA_VERSION)
+        and _meta(path, "extractor_version") == str(EXTRACTOR_VERSION)
         and _meta(path, "hot_status") == "ready"
     )
+
+
+def is_complete(path: Path) -> bool:
+    return is_usable(path) and cold_status(path) == "ready"
+
+
+def recover_interrupted_build(path: Path) -> None:
+    with closing(sqlite3.connect(path)) as connection:
+        connection.execute("SELECT value FROM meta LIMIT 1").fetchone()
 
 
 def cold_status(path: Path) -> IndexStatus:
@@ -143,6 +154,7 @@ def build_hot(
             "INSERT INTO meta (key, value) VALUES (?, ?)",
             [
                 ("schema_version", str(INDEX_SCHEMA_VERSION)),
+                ("extractor_version", str(EXTRACTOR_VERSION)),
                 ("model_hash", model_hash),
                 ("hot_status", "indexing"),
                 ("cold_status", "indexing"),

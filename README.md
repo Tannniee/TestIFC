@@ -142,8 +142,9 @@ PyInstaller executable:
 .\BuildExe.cmd
 ```
 
-The executable name comes from `APP_VERSION` in `src\version.py`. Version 1.0.0 is
-written to `dist\IFC Viewer 1.0.0.exe`. The application contains no licensing or
+The executable name and Windows version metadata come from `APP_VERSION` in
+`src\version.py`. Version 1.0.1 is written to `dist\IFC Viewer 1.0.1.exe`.
+Release changes are recorded in `CHANGELOG.md`. The application contains no licensing or
 authentication layer. Follow `packaging\RELEASE.md` for the real-model and artifact
 gates.
 

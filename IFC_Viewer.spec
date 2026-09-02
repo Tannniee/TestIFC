@@ -1,11 +1,33 @@
 from pathlib import Path
 
 from PyInstaller.utils.hooks import collect_all, collect_submodules
+from PyInstaller.utils.win32.versioninfo import (
+    FixedFileInfo, StringFileInfo, StringStruct, StringTable, VarFileInfo,
+    VarStruct, VSVersionInfo,
+)
 
 ROOT = Path(SPECPATH)
 version_namespace = {}
 exec((ROOT / "src" / "version.py").read_text(encoding="utf-8"), version_namespace)
 PACKAGE_NAME = f"IFC Viewer {version_namespace['APP_VERSION']}"
+VERSION = version_namespace["APP_VERSION"]
+VERSION_PARTS = tuple(int(part) for part in VERSION.split(".")) + (0,)
+VERSION_INFO = VSVersionInfo(
+    ffi=FixedFileInfo(
+        filevers=VERSION_PARTS, prodvers=VERSION_PARTS, mask=0x3F,
+        flags=0, OS=0x40004, fileType=1, subtype=0, date=(0, 0),
+    ),
+    kids=[
+        StringFileInfo([StringTable("040904B0", [
+            StringStruct("FileDescription", "IFC Viewer"),
+            StringStruct("FileVersion", VERSION),
+            StringStruct("ProductName", "IFC Viewer"),
+            StringStruct("ProductVersion", VERSION),
+            StringStruct("OriginalFilename", f"{PACKAGE_NAME}.exe"),
+        ])]),
+        VarFileInfo([VarStruct("Translation", [1033, 1200])]),
+    ],
+)
 
 ifc_data, ifc_binaries, ifc_hidden = collect_all("ifcopenshell")
 webview_hidden = collect_submodules("webview")
@@ -51,4 +73,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=[str(ROOT / "desktop" / "assets" / "app_icon.ico")],
+    version=VERSION_INFO,
 )

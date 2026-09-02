@@ -21,10 +21,10 @@ class IndexBuilderLockTests(unittest.TestCase):
             cache_dir = Path(temporary)
             target = cache_dir / "model.sqlite"
             lock = cache_dir / "model.lock"
-            with patch.object(index_builder.model_index, "is_usable", return_value=False):
+            with patch.object(index_builder.model_index, "is_complete", return_value=False):
                 self.assertTrue(index_builder._claim_build_lock(target, lock))
                 self.assertTrue(lock.exists())
-            with patch.object(index_builder.model_index, "is_usable", return_value=True):
+            with patch.object(index_builder.model_index, "is_complete", return_value=True):
                 self.assertFalse(index_builder._claim_build_lock(target, lock))
 
     def test_stale_lock_is_replaced(self):
@@ -37,7 +37,7 @@ class IndexBuilderLockTests(unittest.TestCase):
             import os
 
             os.utime(lock, (old, old))
-            with patch.object(index_builder.model_index, "is_usable", return_value=False):
+            with patch.object(index_builder.model_index, "is_complete", return_value=False):
                 self.assertTrue(index_builder._claim_build_lock(target, lock))
             self.assertIn("pid=", lock.read_text(encoding="ascii"))
 

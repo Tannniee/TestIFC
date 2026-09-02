@@ -8,7 +8,7 @@ import os
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from threading import Lock, Thread
+from threading import Event, Lock
 from time import monotonic
 from typing import Any, BinaryIO
 
@@ -18,6 +18,7 @@ import facts_cache
 import index_builder
 import model_cache
 import model_index
+from background_tasks import LatestTaskRunner
 
 
 LIVE_MODEL_MAX_BYTES = int(os.environ.get("IFC_LIVE_MODEL_MAX_BYTES") or 268_435_456)
@@ -179,6 +180,7 @@ class _ActiveModelState:
 
 _prepare = _PrepareState()
 _state = _ActiveModelState()
+_background_indexes = LatestTaskRunner("ifc-index-prepare")
 
 
 class ModelLease:
@@ -290,10 +292,13 @@ def materialize_model_stream(
     original_filename: str | None,
     background: bool = False,
 ) -> dict:
-    cached = model_cache.store_model_stream(reader)
-    model = _active_model(cached, original_filename)
-    (_activate_in_background if background else _activate)(model)
-    return asdict(model)
+    cached = model_cache.store_model_stream(reader, pin_for_activation=True)
+    try:
+        model = _active_model(cached, original_filename)
+        (_activate_in_background if background else _activate)(model)
+        return asdict(model)
+    finally:
+        model_cache.unpin_model(cached.content_hash)
 
 
 def materialize_model_file(
@@ -305,18 +310,23 @@ def materialize_model_file(
 
 
 def register_model(path: str, expected_hash: str, background: bool = False) -> dict:
+    model_cache.pin_model(expected_hash)
     try:
-        cached = model_cache.validate_model_file(path, expected_hash)
-    except ValueError as error:
-        raise HashMismatchError(str(error)) from error
-    model = _active_model(cached, cached.path.name)
-    (_activate_in_background if background else _activate)(model)
-    return asdict(model)
+        try:
+            cached = model_cache.validate_model_file(path, expected_hash)
+        except ValueError as error:
+            raise HashMismatchError(str(error)) from error
+        model = _active_model(cached, cached.path.name)
+        (_activate_in_background if background else _activate)(model)
+        return asdict(model)
+    finally:
+        model_cache.unpin_model(expected_hash)
 
 
 def _activate(model: ActiveModel) -> None:
     _state.set(model)
-    model_cache.enforce_cache_retention(model.contentHashSha256)
+    model_cache.schedule_cache_retention(model.contentHashSha256)
+    _background_indexes.cancel()
     target = model_index.index_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
     if model_index.is_usable(target):
         _prepare.clear_error(model.contentHashSha256)
@@ -326,18 +336,23 @@ def _activate(model: ActiveModel) -> None:
     _run_build(model, target)
 
 
-def _run_build(model: ActiveModel, target) -> None:
+def _run_build(model: ActiveModel, target, cancelled: Event | None = None) -> None:
     model_cache.ensure_cache_dir()
     try:
         index_builder.prepare_model(
             model.path,
             model.contentHashSha256,
             str(model_cache.CACHE_DIR),
+            cancelled=cancelled.is_set if cancelled else lambda: False,
+            on_hot_ready=lambda: _prepare.end(model.contentHashSha256),
         )
         if not model_index.is_usable(target):
             raise RuntimeError(
                 f"index build produced no usable index for {model.contentHashSha256}"
             )
+    except index_builder.BuildCancelled:
+        _prepare.end(model.contentHashSha256)
+        raise
     except Exception as error:
         _prepare.end(model.contentHashSha256, error=str(error))
         raise
@@ -360,13 +375,13 @@ def lease_active_model() -> ModelLease:
     """Atomically capture and pin the active model for a request or job."""
     model = _state.capture_and_pin()
     try:
-        if _prepare.is_preparing(model.contentHashSha256):
-            raise IndexPreparingError(model.contentHashSha256)
         target = model_index.index_path_for(
             model_cache.CACHE_DIR,
             model.contentHashSha256,
         )
         if not model_index.is_usable(target):
+            if _background_indexes.contains(model.contentHashSha256):
+                raise IndexPreparingError(model.contentHashSha256)
             if not _prepare.begin(model.contentHashSha256):
                 raise IndexPreparingError(model.contentHashSha256)
             _run_build(model, target)
@@ -396,25 +411,35 @@ def open_model_session(
 
 def _activate_in_background(model: ActiveModel) -> None:
     _state.set(model)
-    model_cache.enforce_cache_retention(model.contentHashSha256)
+    model_cache.schedule_cache_retention(model.contentHashSha256)
     target = model_index.index_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
-    if model_index.is_usable(target):
+    if model_index.is_complete(target):
+        _background_indexes.cancel()
         _prepare.clear_error(model.contentHashSha256)
         return
-    if not _prepare.begin(model.contentHashSha256):
-        return
+    _prepare.clear_error(model.contentHashSha256)
 
-    def run() -> None:
+    def run(cancelled: Event) -> None:
+        model_cache.pin_model(model.contentHashSha256)
         try:
-            _run_build(model, target)
+            if not _prepare.begin(model.contentHashSha256):
+                return
+            _run_build(model, target, cancelled)
+        except index_builder.BuildCancelled:
+            logger.info(
+                "Index build superseded by a newer model",
+                extra={"event": "background_index_cancelled", "modelHash": model.contentHashSha256},
+            )
         except Exception:
             logger.exception(
                 "Background index build failed for %s",
                 model.contentHashSha256[:12],
-                extra={"event": "background_index_failed"},
+                extra={"event": "background_index_failed", "modelHash": model.contentHashSha256},
             )
+        finally:
+            model_cache.unpin_model(model.contentHashSha256)
 
-    Thread(target=run, name="ifc-index-prepare", daemon=True).start()
+    _background_indexes.submit(model.contentHashSha256, run)
 
 
 def active_index() -> model_index.ModelIndex:
@@ -455,6 +480,8 @@ def live_model_status() -> dict:
         else None
     )
     preparing = model is not None and _prepare.is_preparing(model.contentHashSha256)
+    if model is not None and _background_indexes.contains(model.contentHashSha256):
+        preparing = not model_index.is_usable(target)
     prepare_error = _prepare.error_for(model.contentHashSha256) if model else None
     if model is None:
         hot_index_status = "idle"
