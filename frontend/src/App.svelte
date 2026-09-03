@@ -1,10 +1,15 @@
 <script lang="ts">
   import SemanticStatus from "./lib/SemanticStatus.svelte";
+  import ProjectBrowser from "./lib/ProjectBrowser.svelte";
+  import PropertiesPanel from "./lib/PropertiesPanel.svelte";
+  import WorkspaceTabs from "./lib/WorkspaceTabs.svelte";
+  import { activeDocument, activeView, emptyWorkspace } from "./lib/workspace-contracts";
+  import CacheSettings from "./lib/CacheSettings.svelte";
+  import type { SectionBoxState } from "./lib/viewer-contracts";
   import { onMount } from "svelte";
   import AppRail from "./lib/AppRail.svelte";
   import HelpDialog from "./lib/HelpDialog.svelte";
   import Icon from "./lib/Icon.svelte";
-  import InspectorDrawer from "./lib/InspectorDrawer.svelte";
   import ModelLoadDialog from "./lib/ModelLoadDialog.svelte";
   import { isOpeningModel } from "./lib/load-progress";
   import ViewCube from "./lib/ViewCube.svelte";
@@ -21,6 +26,9 @@
   let displaySettingsOpen = false;
   let boxZoomActive = false;
   let sectionPanelOpen = false;
+  let sectionBox: SectionBoxState | null = null;
+  let sectionBoxPanelOpen = false;
+  let sectionBoxPicking = false;
   let sectionMode: "surface" | "coordinate" = "surface";
   let sectionPickActive = false;
   let sectionAxis: "x" | "y" | "z" = "x";
@@ -35,7 +43,16 @@
   let fileInput: HTMLInputElement;
   let viewerHost: HTMLDivElement;
   const shell = new AppShellService();
-  let appVersion = "1.0.2";
+  let workspace = emptyWorkspace();
+  let browserOpen = false;
+  let browserWidth = 240;
+  let propertiesViewContext = false;
+  const resizeCleanups = new Set<() => void>();
+  let browserResizing = false;
+  $: workspaceDocument = activeDocument(workspace);
+  $: workspaceView = activeView(workspace);
+  $: runtimeModelKey = `${workspace.activeDocumentId ?? ""}:${shell.activeModel?.modelId ?? ""}`;
+  let appVersion = "1.0.3";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;
@@ -45,20 +62,22 @@
   let viewerProgress: ViewerProgress | null = null;
   let bridgeProgress: BridgeProgress | null = null;
   let readiness = emptyModelReadiness();
+  let activeReadiness = emptyModelReadiness();
   let fragmentMetrics: FragmentMetrics | null = null;
-  let drawerWidth = 360;
+  let drawerWidth = 300;
   let appLoadSequence = 0;
   let cancellingLoad = false;
   let gridVisible = true;
   let viewportBackground: ViewportBackground = "gray";
   let wheelZoomSpeed = 1;
+  let rotationSpeed = 1;
   let cameraOrientation: CameraOrientation = { x: 0, y: 0, z: 0, w: 1 };
   let themeTransitioning = false;
   let themeTransitionTimer: number | null = null;
 
   $: t = copy[locale];
   $: topics = helpTopics[locale];
-  $: hasModel = geometryReady(readiness);
+  $: hasModel = geometryReady(activeReadiness);
   $: themeLabel = mode === "light" ? t.themeDark : t.themeLight;
   $: viewCubeText = {
     viewCube: t.viewCube,
@@ -89,21 +108,34 @@
     let cancelled = false;
     const fallbackSettings = shell.readLocalSettings();
     applySettings(fallbackSettings);
+    const unsubscribeWorkspace = shell.subscribeWorkspace(state => {
+      workspace = state;
+      if (!state.busy) {
+        const doc = activeDocument(state);
+        activeReadiness = doc?.readiness ?? emptyModelReadiness();
+        modelStatus = doc?.filename ?? null;
+        if (doc) { viewerProgress = doc.readiness.geometry; bridgeProgress = doc.readiness.semantic; }
+        else if (!state.documents.length) { viewerProgress = null; bridgeProgress = null; }
+        errorMessage = state.error;
+      }
+    });
 
     const initializeViewer = async () => {
       const settings = await shell.initializeViewer(viewerHost, {
         onProgress(progress) {
+          if (progress.loadSequence > readiness.loadSequence) readiness = beginModelLoad(progress.loadSequence, progress.detail ?? "IFC");
           const next = applyGeometryProgress(readiness, progress);
           if (next === readiness) return;
           readiness = next;
           viewerProgress = readiness.geometry;
+          if (progress.stage === "ready") activeReadiness = readiness;
           errorMessage = progress.stage === "error" ? progress.detail ?? "Viewer error" : null;
         },
         onBridgeProgress(progress) {
+          activeReadiness = applySemanticProgress(activeReadiness, progress);
           const next = applySemanticProgress(readiness, progress);
-          if (next === readiness) return;
           readiness = next;
-          bridgeProgress = readiness.semantic;
+          bridgeProgress = hasModel ? activeReadiness.semantic : readiness.semantic;
         },
         onFragmentMetrics(metrics) {
           if (
@@ -116,6 +148,7 @@
         },
         onSelection(selection) {
           selectedElement = selection;
+          propertiesViewContext = false;
           if (selection) inspectorOpen = true;
         },
         onMultiSelectionChange(count) {
@@ -132,6 +165,11 @@
           sectionDefinition = section;
           if (section) sectionSide = section.side;
         },
+        onSectionBoxChange(box) { sectionBox = box; sectionBoxPanelOpen = Boolean(box); },
+        onSectionBoxPickActiveChange(active) { sectionBoxPicking = active; },
+        onSectionBoxCreated() { sectionBoxPanelOpen = true; inspectorOpen = true; propertiesViewContext = true; },
+        onSectionBoxEdit() { sectionBoxPanelOpen = true; inspectorOpen = true; propertiesViewContext = true; },
+        onInteractionError(message) { errorMessage = message; },
         onCameraOrientationChange(orientation) {
           cameraOrientation = orientation;
         },
@@ -145,6 +183,8 @@
 
     void initializeViewer();
     return () => {
+      unsubscribeWorkspace();
+      for (const cleanup of resizeCleanups) cleanup();
       cancelled = true;
       if (themeTransitionTimer !== null) window.clearTimeout(themeTransitionTimer);
       void shell.dispose();
@@ -157,12 +197,13 @@
     gridVisible = settings.gridVisible;
     viewportBackground = settings.viewportBackground;
     wheelZoomSpeed = settings.wheelZoomSpeed;
+    rotationSpeed = settings.rotationSpeed;
     document.documentElement.lang = locale;
     shell.applyViewerSettings(settings);
   }
 
   function currentSettings(): AppSettings {
-    return { schemaVersion: 1, locale, mode, gridVisible, viewportBackground, wheelZoomSpeed };
+    return { schemaVersion: 1, locale, mode, gridVisible, viewportBackground, wheelZoomSpeed, rotationSpeed };
   }
 
   function persistSettings(delay = 0) {
@@ -192,7 +233,7 @@
   }
 
   function bridgeText(progress: BridgeProgress | null, language: Locale): string {
-    if (!progress) return language === "vi" ? "Ngữ nghĩa: chưa bắt đầu" : "Semantics: idle";
+    if (!progress) return language === "vi" ? "INDEX: chưa bắt đầu" : "INDEX: idle";
     const labels: Record<BridgeProgress["stage"], string> = {
       idle: language === "vi" ? "chưa bắt đầu" : "idle",
       activating: language === "vi" ? "đang kích hoạt mô hình" : "activating model",
@@ -206,7 +247,7 @@
     };
     const percent = progress.progress === undefined ? "" : ` ${Math.round(progress.progress * 100)}%`;
     const detail = progress.stage === "error" && progress.detail ? ` · ${progress.detail}` : "";
-    return `${language === "vi" ? "Ngữ nghĩa" : "Semantics"}: ${labels[progress.stage]}${percent}${detail}`;
+    return `INDEX: ${labels[progress.stage]}${percent}${detail}`;
   }
 
   function switchLanguage() {
@@ -240,6 +281,12 @@
   }
 
   function handleGlobalKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape" && workspace.busy && isOpeningModel(viewerProgress)) { event.preventDefault(); void cancelIfcLoad(); return; }
+    if (event.key === "Escape" && sectionBoxPicking) {
+      event.preventDefault();
+      shell.setBoxZoomEnabled(false);
+      return;
+    }
     if (event.key === "Escape" && interactionTool !== "pan") {
       event.preventDefault();
       void quitInteractionTool();
@@ -273,10 +320,20 @@
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", stop);
       window.removeEventListener("pointercancel", stop);
+      resizeCleanups.delete(stop);
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", stop);
     window.addEventListener("pointercancel", stop);
+    resizeCleanups.add(stop);
+  }
+  function startBrowserResize(event: PointerEvent) {
+    event.preventDefault();
+    browserResizing = true;
+    const start = event.clientX, width = browserWidth;
+    const move = (e: PointerEvent) => { browserWidth = Math.min(380,Math.max(180,width+e.clientX-start)); };
+    const stop = () => { browserResizing = false; window.removeEventListener("pointermove",move); window.removeEventListener("pointerup",stop); window.removeEventListener("pointercancel",stop); resizeCleanups.delete(stop); };
+    resizeCleanups.add(stop); window.addEventListener("pointermove",move); window.addEventListener("pointerup",stop); window.addEventListener("pointercancel",stop);
   }
 
   function resizeDrawerByKeyboard(event: KeyboardEvent) {
@@ -300,6 +357,7 @@
   }
 
   function toggleSectionPanel() {
+    if (workspaceView?.type === "sectionBox") { errorMessage = "Section Plane: chuyển sang 3D View trước."; return; }
     sectionPanelOpen = !sectionPanelOpen;
     if (sectionPanelOpen) displaySettingsOpen = false;
     else shell.setSectionPickEnabled(false);
@@ -385,6 +443,20 @@
     persistSettings(160);
   }
 
+  function changeRotationSpeed(speed: number) {
+    rotationSpeed = Math.min(3, Math.max(0.25, speed));
+    shell.setRotationSpeed(rotationSpeed);
+    persistSettings(160);
+  }
+
+  function beginSectionBox() {
+    sectionPanelOpen = displaySettingsOpen = sectionBoxPanelOpen = false;
+    interactionTool = "pan";
+    inspectorOpen = true; propertiesViewContext = true;
+    void shell.beginSectionBox().catch(reportWorkspaceError);
+  }
+  function reportWorkspaceError(error: unknown) { if (!shell.isCancelledLoad(error)) errorMessage = error instanceof Error ? error.message : String(error); }
+
   async function openIfcFile(file: File) {
     if (cancellingLoad) return;
     errorMessage = null;
@@ -394,11 +466,8 @@
     }
     const sequence = ++appLoadSequence;
     readiness = beginModelLoad(sequence, file.name);
-    selectedElement = null;
-    multiSelectionCount = 0;
     viewerProgress = readiness.geometry;
-    bridgeProgress = readiness.semantic;
-    fragmentMetrics = null;
+    if (!hasModel) bridgeProgress = readiness.semantic;
     modelStatus = `${t.opening} ${file.name}`;
     try {
       await shell.load(file);
@@ -406,17 +475,18 @@
       modelStatus = file.name;
     } catch (error) {
       if (shell.isCancelledLoad(error) || sequence !== appLoadSequence) return;
-      await cancelIfcLoad();
       const message = error instanceof Error ? error.message : String(error);
       errorMessage = message;
       const progress: ViewerProgress = {
-        loadSequence: appLoadSequence,
+        loadSequence: readiness.loadSequence,
         modelHash: readiness.modelHash,
         stage: "error",
         detail: message,
       };
       readiness = applyGeometryProgress(readiness, progress);
       viewerProgress = readiness.geometry;
+      modelStatus = activeReadiness.fileName;
+      bridgeProgress = activeReadiness.semantic;
     }
   }
 
@@ -434,8 +504,8 @@
         semantic: { loadSequence: sequence, modelHash: readiness.modelHash, stage: "cancelled" } };
       viewerProgress = readiness.geometry;
       bridgeProgress = readiness.semantic;
-      selectedElement = null;
-      modelStatus = t.loadCancelled;
+      bridgeProgress = hasModel ? activeReadiness.semantic : readiness.semantic;
+      modelStatus = activeReadiness.fileName ?? t.loadCancelled;
       cancellingLoad = false;
     }
   }
@@ -489,9 +559,10 @@
   <AppRail
     text={t}
     {mode}
-    {hasModel}
+    hasModel={hasModel && !workspace.busy}
     {boxZoomActive}
     sectionActive={sectionPanelOpen || sectionPickActive || Boolean(sectionDefinition)}
+    sectionBoxActive={sectionBoxPicking || Boolean(sectionBox?.enabled)}
     {displaySettingsOpen}
     {inspectorOpen}
     {helpOpen}
@@ -500,6 +571,7 @@
     onFit={() => shell.fit()}
     onBoxZoom={toggleBoxZoom}
     onSection={toggleSectionPanel}
+    onSectionBox={beginSectionBox}
     onDisplaySettings={toggleDisplaySettings}
     onTheme={toggleTheme}
     onLanguage={switchLanguage}
@@ -509,17 +581,29 @@
 
   <section
     class:viewer-drop-active={dragActive}
+    class:browser-resizing={browserResizing}
     class="viewer-surface"
+    style={`--workspace-top: ${workspaceDocument ? 68 : 34}px; --browser-width: ${browserWidth}px; --properties-width: ${drawerWidth}px; --workspace-left: ${browserOpen ? browserWidth : 0}px; --workspace-right: ${inspectorOpen ? drawerWidth : 0}px`}
     aria-label={t.workspace}
     ondragenter={handleDragEnter}
     ondragover={handleDragOver}
     ondragleave={handleDragLeave}
     ondrop={handleDrop}
   >
+    <WorkspaceTabs state={workspace} onDocument={id => void shell.activateDocument(id).catch(reportWorkspaceError)}
+      onView={id => void shell.activateView(id).catch(reportWorkspaceError)}
+      onCloseDocument={id => void shell.closeDocument(id).catch(reportWorkspaceError)}
+      onCloseView={id => void shell.closeView(id).catch(reportWorkspaceError)} onOpen={openFilePicker} onBrowser={() => (browserOpen = !browserOpen)} />
+    {#if browserOpen}
+      <ProjectBrowser state={workspace} modelKey={runtimeModelKey} service={shell.modelData}
+        onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>void shell.selectItems(ids).catch(reportWorkspaceError)}
+        onExpanded={ids=>shell.setExpandedNodes(ids)} onClose={()=>browserOpen=false} onResize={startBrowserResize} />
+    {/if}
     <div bind:this={viewerHost} class="viewer-mount"></div>
+    {#if sectionBoxPicking}<p class="viewer-sweep-hint">{locale === "vi" ? "Section Box · Quét vùng trên Top View · Esc để hủy" : "Section Box · Drag a region in Top View · Esc to cancel"}</p>{/if}
     <ViewerToolbar
       text={t}
-      {hasModel}
+      hasModel={hasModel && !workspace.busy}
       tool={interactionTool}
       {measureMode}
       onTool={selectTool}
@@ -527,7 +611,7 @@
     />
     <div class="view-cube-host">
       <ViewCube
-        disabled={!hasModel}
+        disabled={!hasModel || workspace.busy || sectionBoxPicking}
         orientation={cameraOrientation}
         text={viewCubeText}
         onDirection={changeViewDirection}
@@ -541,6 +625,7 @@
           <h2>{t.displaySettings}</h2>
           <button aria-label={t.close} onclick={() => (displaySettingsOpen = false)}>×</button>
         </header>
+        <CacheSettings {locale} busy={isOpeningModel(viewerProgress)} loadInventory={() => shell.cacheInventory()} clearCache={scope => shell.clearCache(scope)} />
         <label class="viewer-settings__toggle">
           <input type="checkbox" checked={gridVisible} onchange={(event) => changeGridVisibility(event.currentTarget.checked)} />
           <span>{t.showGrid}</span>
@@ -556,6 +641,11 @@
             aria-label={t.wheelZoomSpeed}
             oninput={(event) => changeWheelZoomSpeed(event.currentTarget.valueAsNumber)}
           />
+        </label>
+        <label class="viewer-settings__slider">
+          <span class="viewer-settings__slider-label"><span>{t.rotationSpeed}</span><output>{rotationSpeed.toFixed(2)}×</output></span>
+          <input type="range" min="0.25" max="3" step="0.25" value={rotationSpeed}
+            aria-label={t.rotationSpeed} oninput={(event) => changeRotationSpeed(event.currentTarget.valueAsNumber)} />
         </label>
         <fieldset class="viewer-settings__backgrounds">
           <legend>{t.background}</legend>
@@ -639,27 +729,21 @@
     {/if}
     <footer class="qn-status-bar">
       <span>{progressText(viewerProgress, t) ?? modelStatus ?? t.noModel}</span>
-      <SemanticStatus progress={bridgeProgress} text={bridgeText(bridgeProgress, locale)} {locale} onRetry={() => shell.retrySemantic()} />
+      <SemanticStatus progress={bridgeProgress} text={bridgeText(bridgeProgress, locale)} {locale} onRetry={() => shell.retrySemantic().catch(reportWorkspaceError)} />
       <span title={fragmentMetrics ? `${fragmentMetrics.profile} · ${fragmentMetrics.fragmentBytes} bytes · ${Math.round(fragmentMetrics.totalMilliseconds)} ms` : undefined}>{t.modelData}: {hasModel ? `${t.modelReady} · ${modelStatus ?? ""}` : viewerProgress?.stage === "error" ? t.modelError : isOpeningModel(viewerProgress) ? t.modelLoading : t.nothingSelected}</span>
       <span>{t.element}: {multiSelectionCount ? `${multiSelectionCount} ${t.selectedElements}` : selectedElement?.name ?? selectedElement?.ifcType ?? t.nothingSelected}</span>
       <span>{t.version} {appVersion}</span>
     </footer>
 
-    <InspectorDrawer
-      text={t}
-      open={inspectorOpen}
-      width={drawerWidth}
-      {identityExpanded}
-      selection={selectedElement}
-      onClose={() => (inspectorOpen = false)}
-      onToggleIdentity={() => (identityExpanded = !identityExpanded)}
-      onResizeStart={startDrawerResize}
-      onResizeKeydown={resizeDrawerByKeyboard}
-    />
+    <PropertiesPanel open={inspectorOpen} view={workspaceView} selection={selectedElement} count={multiSelectionCount}
+      box={sectionBox} {locale} bind:preferView={propertiesViewContext} busy={workspace.busy || sectionBoxPicking} service={shell.modelData}
+      onClose={()=>inspectorOpen=false} onResizeStart={startDrawerResize} onResizeKeydown={resizeDrawerByKeyboard}
+      onBox={box=>shell.setSectionBox(box)} onDraw={()=>void shell.beginSectionBox(true).catch(reportWorkspaceError)}
+      onFit={()=>shell.fit()} onReset={()=>shell.fitSectionBox()} onDisplay={display=>shell.setBoxDisplay(display)} />
   </section>
 
   {#if viewerProgress && (isOpeningModel(viewerProgress) || cancellingLoad)}
-    <ModelLoadDialog progress={viewerProgress} fileName={readiness.fileName ?? ""} text={t} cancelling={cancellingLoad} onCancel={() => void cancelIfcLoad()} />
+    <ModelLoadDialog modal={false} progress={viewerProgress} fileName={readiness.fileName ?? ""} text={t} cancelling={cancellingLoad} onCancel={() => void cancelIfcLoad()} />
   {/if}
 
   {#if helpOpen}

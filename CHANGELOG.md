@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.3 — 2026-09-03
+
+- Add document tabs and independent view sessions for multi-IFC workspaces,
+  with transactional model switching, cancellation, rollback and cache/source recovery.
+- Create Section Box views by sweeping a rectangle in Top View. Preserve camera,
+  clipping, selection and measurements separately for each view.
+- Add Project Browser and Properties, virtualized model rows, element properties,
+  Section Box controls and smooth panel transitions. Move the toolbox beside Browser.
+- Add selection-centered orbit directly below PAN and a saved rotation-speed option.
+  Keep wheel zoom centered on the selected element and reject stale pivot queries.
+- Make model-loading progress compact and theme-aware, place measurement input near
+  the picked point, and use INDEX terminology for semantic readiness.
+- Add fragment cache cleanup with protection for active and staging models. Remove
+  the estimated memory admission limit while retaining transactional cleanup.
+- Set application, API, frontend, Windows metadata and desktop logs to 1.0.3.
+  Package the EXE locally; publish source with tag `v1.0.3` and skip Actions for this upload.
+
 ## 1.0.2 — 2026-09-03
 
 - Set the application, API, frontend, Windows executable metadata and structured

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import type { CameraSessionState } from "./workspace-contracts";
 import type { CameraOrientation, SectionPlaneDefinition, ViewerTool, ViewDirection, ViewPreset } from "./viewer-contracts";
 
 const FIT_PADDING = 1.08;
@@ -10,7 +11,7 @@ const BOX_ZOOM_PADDING = 1.05;
 const BOX_ZOOM_ANIMATION_DURATION_MS = 400;
 const CAMERA_ROTATION_DURATION_MS = 120;
 
-interface FitCameraState {
+export interface FitCameraState {
   position: THREE.Vector3;
   target: THREE.Vector3;
   up: THREE.Vector3;
@@ -21,6 +22,8 @@ interface FitCameraState {
 }
 
 interface FitAnimation {
+  id: number;
+  kind: "fit" | "view" | "boxZoom";
   startedAt: number;
   durationMs: number;
   from: FitCameraState;
@@ -33,7 +36,15 @@ interface FitAnimation {
 
 export interface ViewerCameraCallbacks {
   onOrientationChange(orientation: CameraOrientation): void;
-  onUpdate(force: boolean): void;
+  onUpdate(force: boolean, context?: CameraUpdateContext): void;
+}
+
+export interface CameraUpdateContext {
+  revision: number;
+  transitionId: number | null;
+  kind: "fit" | "view" | "boxZoom" | "controls";
+  progress: number;
+  heightRatioToTarget: number;
 }
 
 export class ViewerCamera {
@@ -41,6 +52,10 @@ export class ViewerCamera {
   private readonly controls: OrbitControls;
   private orthographicHeight = 24;
   private animation: FitAnimation | null = null;
+  private transitionSequence = 0;
+  private cameraRevision = 0;
+  private applyingState = false;
+  private animationWaiters: Array<(completed: boolean) => void> = [];
 
   constructor(
     private readonly host: HTMLElement,
@@ -71,12 +86,27 @@ export class ViewerCamera {
     this.controls.zoomSpeed = THREE.MathUtils.clamp(speed, 0.25, 3);
   }
 
+  get rotationSpeed() { return this.controls.rotateSpeed; }
+
+  setRotationSpeed(speed: number) {
+    if (Number.isFinite(speed)) this.controls.rotateSpeed = THREE.MathUtils.clamp(speed, 0.25, 3);
+  }
+
+  centerOrbit(target: THREE.Vector3) {
+    if (!target.toArray().every(Number.isFinite)) return;
+    const current = this.currentState();
+    const offset = target.clone().sub(current.target);
+    // Pan gently to the new pivot without changing scale or viewing direction.
+    this.startAnimation({ ...current, target: target.clone(), position: current.position.add(offset) }, 340);
+  }
+
   setEnabled(enabled: boolean) {
     this.controls.enabled = enabled;
   }
 
   setTool(tool: ViewerTool) {
     this.controls.enabled = true;
+    this.controls.zoomToCursor = tool !== "selectOrbit";
     this.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
     this.controls.mouseButtons.MIDDLE = tool === "multiSelect" ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
     this.controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
@@ -84,6 +114,32 @@ export class ViewerCamera {
 
   cancelAnimation() {
     this.animation = null;
+    this.finishWaiters(false);
+  }
+
+  private finishWaiters(completed: boolean) { for (const resolve of this.animationWaiters.splice(0)) resolve(completed); }
+  settled(): Promise<boolean> { return this.animation ? new Promise(resolve => this.animationWaiters.push(resolve)) : Promise.resolve(true); }
+  captureSession(): CameraSessionState {
+    const state = this.currentState();
+    return { ...state, position: { ...state.position }, target: { ...state.target }, up: { ...state.up } };
+  }
+  restoreSession(state: CameraSessionState) {
+    this.restoreState({ ...state, position: new THREE.Vector3(state.position.x,state.position.y,state.position.z),
+      target: new THREE.Vector3(state.target.x,state.target.y,state.target.z), up: new THREE.Vector3(state.up.x,state.up.y,state.up.z) });
+  }
+  fitFromOrientation(box: THREE.Box3, source: CameraSessionState) {
+    const direction = new THREE.Vector3(source.position.x-source.target.x, source.position.y-source.target.y, source.position.z-source.target.z).normalize();
+    const up = new THREE.Vector3(source.up.x, source.up.y, source.up.z);
+    const target = Math.abs(direction.y) > .999 ? this.createFitState(box, this.viewPresetVectors("iso").direction, new THREE.Vector3(0,1,0))
+      : this.createFitState(box, direction, up);
+    this.startAnimation(target, FIT_ANIMATION_DURATION_MS, true, "fit");
+  }
+
+  captureState(): FitCameraState { return this.currentState(); }
+  restoreState(state: FitCameraState) {
+    this.cancelAnimation();
+    this.applyState(state);
+    this.callbacks.onUpdate(true);
   }
 
   resize(width: number, height: number) {
@@ -99,18 +155,20 @@ export class ViewerCamera {
   fit(box: THREE.Box3, animate = true) {
     if (box.isEmpty()) return;
     const target = this.createFitState(box);
-    this.animation = null;
-    if (animate) this.startAnimation(target, FIT_ANIMATION_DURATION_MS, true);
+    this.cancelAnimation();
+    if (animate) this.startAnimation(target, FIT_ANIMATION_DURATION_MS, true, "fit");
     else {
       this.applyState(target);
       this.callbacks.onUpdate(true);
     }
   }
 
-  setView(box: THREE.Box3, preset: ViewPreset) {
+  setView(box: THREE.Box3, preset: ViewPreset, animate = true) {
     if (box.isEmpty()) return;
     const { direction, up } = this.viewPresetVectors(preset);
-    this.startAnimation(this.createFitState(box, direction, up), FIT_ANIMATION_DURATION_MS, true);
+    const state = this.createFitState(box, direction, up);
+    if (animate) this.startAnimation(state, FIT_ANIMATION_DURATION_MS, true);
+    else this.restoreState(state);
   }
 
   setViewDirection(box: THREE.Box3, value: ViewDirection) {
@@ -126,11 +184,11 @@ export class ViewerCamera {
 
   orbit(deltaAzimuth: number, deltaPolar: number) {
     if (!Number.isFinite(deltaAzimuth) || !Number.isFinite(deltaPolar)) return;
-    this.animation = null;
+    this.cancelAnimation();
     const offset = this.camera.position.clone().sub(this.controls.target);
     const spherical = new THREE.Spherical().setFromVector3(offset);
-    spherical.theta -= deltaAzimuth;
-    spherical.phi = THREE.MathUtils.clamp(spherical.phi + deltaPolar, 0.01, Math.PI - 0.01);
+    spherical.theta -= deltaAzimuth * this.rotationSpeed;
+    spherical.phi = THREE.MathUtils.clamp(spherical.phi + deltaPolar * this.rotationSpeed, 0.01, Math.PI - 0.01);
     this.camera.up.set(0, 1, 0);
     this.camera.position.copy(this.controls.target).add(offset.setFromSpherical(spherical));
     this.camera.lookAt(this.controls.target);
@@ -169,10 +227,11 @@ export class ViewerCamera {
       zoom: 1,
       near: current.near,
       far: current.far,
-    }, BOX_ZOOM_ANIMATION_DURATION_MS);
+    }, BOX_ZOOM_ANIMATION_DURATION_MS, false, "boxZoom");
   }
 
   dispose() {
+    this.cancelAnimation();
     this.controls.removeEventListener("start", this.onControlsStart);
     this.controls.removeEventListener("change", this.onControlsChanged);
     this.controls.dispose();
@@ -234,7 +293,8 @@ export class ViewerCamera {
     this.camera.far = state.far;
     this.orthographicHeight = state.effectiveHeight * state.zoom;
     this.updateProjection(Math.max(this.host.clientWidth, 1), Math.max(this.host.clientHeight, 1));
-    this.controls.update();
+    this.applyingState = true;
+    try { this.controls.update(); } finally { this.applyingState = false; }
   }
 
   private currentState(): FitCameraState {
@@ -250,7 +310,8 @@ export class ViewerCamera {
     };
   }
 
-  private startAnimation(target: FitCameraState, durationMs: number, adaptToZoomOut = false) {
+  private startAnimation(target: FitCameraState, durationMs: number, adaptToZoomOut = false, kind: FitAnimation["kind"] = "view") {
+    this.cancelAnimation();
     const current = this.currentState();
     const fromRotation = this.rotationForState(current);
     const toRotation = this.rotationForState(target);
@@ -262,6 +323,8 @@ export class ViewerCamera {
     this.camera.far = Math.max(current.far, target.far);
     this.camera.updateProjectionMatrix();
     this.animation = {
+      id: ++this.transitionSequence,
+      kind,
       startedAt: performance.now(),
       durationMs: durationMs + extraDuration + rotationRatio * CAMERA_ROTATION_DURATION_MS,
       from: current,
@@ -271,7 +334,7 @@ export class ViewerCamera {
       fromDistance: current.position.distanceTo(current.target),
       toDistance: target.position.distanceTo(target.target),
     };
-    this.callbacks.onUpdate(false);
+    this.notifyUpdate(false, this.animation, 0);
   }
 
   private rotationForState(state: FitCameraState) {
@@ -297,7 +360,11 @@ export class ViewerCamera {
     if (progress >= 1) {
       this.animation = null;
       this.applyState(animation.to);
-      this.callbacks.onUpdate(true);
+      this.notifyUpdate(true, animation, 1);
+      this.finishWaiters(true);
+    } else {
+      // Projection-only zooms do not emit OrbitControls.change.
+      this.notifyUpdate(false, animation, progress);
     }
   }
 
@@ -319,12 +386,18 @@ export class ViewerCamera {
     this.callbacks.onOrientationChange({ x, y, z, w });
   }
 
+  private notifyUpdate(force: boolean, animation: FitAnimation | null = null, progress = 1) {
+    this.callbacks.onUpdate(force, { revision: ++this.cameraRevision, transitionId: animation?.id ?? null,
+      kind: animation?.kind ?? "controls", progress,
+      heightRatioToTarget: animation ? (this.orthographicHeight / this.camera.zoom) / animation.to.effectiveHeight : 1 });
+  }
+
   private readonly onControlsChanged = () => {
     this.emitOrientation();
-    this.callbacks.onUpdate(false);
+    if (!this.animation && !this.applyingState) this.notifyUpdate(false);
   };
 
   private readonly onControlsStart = () => {
-    this.animation = null;
+    this.cancelAnimation();
   };
 }

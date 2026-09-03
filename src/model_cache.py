@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import logging
+import re
 import shutil
 import threading
 from dataclasses import dataclass
@@ -110,6 +111,10 @@ def model_source_path(model: Any) -> str:
 
 def _remove_cache_path(path: Path) -> None:
     try:
+        # Do not follow a junction/symlink out of this application's cache.
+        root = CACHE_DIR.resolve()
+        if path.is_symlink() or (hasattr(path, "is_junction") and path.is_junction()) or not path.resolve().is_relative_to(root) or path.resolve() == root:
+            return
         if path.is_dir():
             shutil.rmtree(path)
         else:
@@ -265,6 +270,54 @@ def enforce_cache_retention(active_hash: str, cancelled: threading.Event | None 
 
 def fragments_cache_path(model_hash: str) -> Path:
     return CACHE_DIR / f"{model_hash}.frag"
+
+
+def _cache_entries() -> list[Path]:
+    return sorted({path for pattern in _BUNDLE_PATTERNS for path in CACHE_DIR.glob(pattern)
+                   if re.fullmatch(r"[0-9a-f]{64}", _bundle_hash(path))})
+
+
+def _protected(model_hash: str, active_hash: str | None) -> bool:
+    if model_hash in _pins or model_hash in (active_hash, _active_retention_hash):
+        return True
+    lock = index_builder.build_lock_path_for(CACHE_DIR, model_hash)
+    if lock.exists() and not index_builder.build_lock_is_stale(lock):
+        return True
+    return any(time() - path.stat().st_mtime < _PARTIAL_MAX_AGE_SECONDS
+               for path in CACHE_DIR.glob(f"{model_hash}*.partial") if path.exists())
+
+
+def cache_inventory(active_hash: str | None = None) -> dict:
+    entries = _cache_entries()
+    sizes = {path: _path_size(path) for path in entries}
+    hashes = {_bundle_hash(path) for path in entries}
+    with _retention_lock:
+        protected = {key for key in hashes if _protected(key, active_hash)}
+    return {"totalBytes": sum(sizes.values()), "fragmentBytes": sum(size for path, size in sizes.items() if path.suffix == ".frag"),
+            "modelCount": len(hashes), "protectedModels": len(protected),
+            "keepModels": CACHE_KEEP_MODELS, "maxBytes": CACHE_MAX_BYTES}
+
+
+def clear_cache(scope: str, active_hash: str | None = None) -> dict:
+    if scope not in ("fragments", "all"):
+        raise ValueError("invalid_cache_scope")
+    freed = removed = failed = 0
+    for path in _cache_entries():
+        if scope == "fragments" and path.suffix != ".frag":
+            continue
+        with _retention_lock:
+            if _protected(_bundle_hash(path), active_hash):
+                continue
+            if path.name.endswith((".sqlite-wal", ".sqlite-shm")) and Path(str(path)[:-4]).exists():
+                continue
+            size = _path_size(path)
+            _remove_cache_path(path)
+            if path.exists():
+                failed += 1
+            else:
+                freed += size
+                removed += 1
+    return {**cache_inventory(active_hash), "freedBytes": freed, "removedFiles": removed, "failedFiles": failed}
 
 
 def cached_fragments_file(model_hash: str) -> Path:

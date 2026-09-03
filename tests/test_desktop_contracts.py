@@ -224,7 +224,7 @@ class DesktopContractTests(unittest.TestCase):
         record.operation = "index"
         payload = json.loads(JsonFormatter().format(record))
         self.assertEqual(payload["event"], "test_ready")
-        self.assertEqual(payload["appVersion"], "1.0.2")
+        self.assertEqual(payload["appVersion"], "1.0.3")
         self.assertEqual(payload["message"], "ready now")
         self.assertEqual(payload["modelHash"], "model-a")
         self.assertEqual(payload["operation"], "index")

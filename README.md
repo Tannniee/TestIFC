@@ -177,7 +177,8 @@ PyInstaller executable:
 ```
 
 The executable name and Windows version metadata come from `APP_VERSION` in
-`src\version.py`. Version 1.0.2 is written to `dist\IFC Viewer 1.0.2.exe`.
+`src\version.py`. Version 1.0.3 is written to `dist\IFC Viewer 1.0.3.exe` by default.
+Set `IFC_BUILD_DIST` to choose another output directory, such as `BUILD RELEASE`.
 Release changes are recorded in `CHANGELOG.md`. The application requires no license,
 account or sign-in; its internal API uses a per-launch session credential.
 Follow `packaging\RELEASE.md` for the real-model and artifact

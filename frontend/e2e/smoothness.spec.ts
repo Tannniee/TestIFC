@@ -69,44 +69,39 @@ test("measurement clicks preserve order and cancelled snaps cannot restore a dra
   });
 });
 
-test("latest backend activation follows any in-flight upload and skips superseded requests", async ({ page }) => {
+test("superseded upload cannot activate or stage its model", async ({ page }) => {
   const result = await page.evaluate(async () => {
-    const bridgePath = "/src/lib/viewer-bridge.ts";
+    const bridgePath = "/src/lib/model-staging.ts";
     const apiPath = "/src/lib/api.ts";
     const contractsPath = "/src/lib/viewer-contracts.ts";
-    const { ViewerBridge } = await import(bridgePath);
+    const { ModelStage } = await import(bridgePath);
     const { api } = await import(apiPath);
     const { ApiError } = await import(apiPath);
     const { LoadCancelledError } = await import(contractsPath);
     const original = { ...api };
     const calls: string[] = [];
     let finishUpload!: (value: unknown) => void;
-    let active = "A";
-    api.activateModel = async (hash: string) => {
+    let startUpload!: () => void;
+    const uploadStarted = new Promise<void>(resolve => { startUpload = resolve; });
+    api.stageModel = async (id: string, hash: string) => {
       calls.push(hash);
       if (hash === "A") throw new ApiError("not cached", 404);
-      return { contentHashSha256: hash, loadedAt: hash };
+      return { stageId: id, status: "prepared", model: { contentHashSha256: hash, loadedAt: hash } };
     };
-    api.uploadModel = () => new Promise((resolve) => { finishUpload = resolve; });
+    api.uploadModel = () => new Promise((resolve) => { finishUpload = resolve; startUpload(); });
     api.runtime = async () => ({ hasActiveModel: true, activeModelHash: "C", hotIndexStatus: "ready", coldIndexStatus: "ready" });
-    const bridge = new ViewerBridge({ onProgress: () => {} });
     const file = new File(["IFC"], "model.ifc");
-    const start = (hash: string) => bridge.prepareModel(file, hash, 1, () => {
-      if (active !== hash) throw new LoadCancelledError();
-    });
+    const controller = new AbortController();
     try {
-      const a = start("A");
-      for (let i = 0; i < 8; i++) await Promise.resolve();
-      active = "B";
-      const b = start("B");
-      active = "C";
-      const c = start("C");
+      const a = ModelStage.prepare(file, "A", controller.signal, () => {}).catch((e: Error) => e.name);
+      await uploadStarted;
+      controller.abort();
       finishUpload({ modelHash: "A" });
-      await Promise.all([a, b, c]);
+      await a;
+      await ModelStage.prepare(file, "C", new AbortController().signal, () => {});
       return calls;
     } finally {
       Object.assign(api, original);
-      bridge.cancelFragmentRequests();
     }
   });
   expect(result).toEqual(["A", "C"]);

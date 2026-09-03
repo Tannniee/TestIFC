@@ -91,7 +91,7 @@ class FoundationLifecycleTests(unittest.TestCase):
         with TemporaryDirectory() as temporary:
             path = Path(temporary) / ("a" * 64 + ".frag")
             path.write_bytes(b"data")
-            with patch.object(Path, "unlink", side_effect=PermissionError("locked")), self.assertLogs(model_cache.logger, "WARNING") as logs:
+            with patch.object(model_cache, "CACHE_DIR", Path(temporary)), patch.object(Path, "unlink", side_effect=PermissionError("locked")), self.assertLogs(model_cache.logger, "WARNING") as logs:
                 model_cache._remove_cache_path(path)
             record = logs.records[0]
             self.assertEqual(record.event, "cache_remove_failed")

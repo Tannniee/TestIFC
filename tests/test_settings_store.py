@@ -34,6 +34,7 @@ class SettingsStoreTests(unittest.TestCase):
                     "gridVisible": False,
                     "viewportBackground": "oled",
                     "wheelZoomSpeed": 2.25,
+                    "rotationSpeed": 0.5,
                     "ignored": "value",
                 }
             )
@@ -43,6 +44,7 @@ class SettingsStoreTests(unittest.TestCase):
             self.assertFalse(saved["gridVisible"])
             self.assertEqual(saved["viewportBackground"], "oled")
             self.assertEqual(saved["wheelZoomSpeed"], 2.25)
+            self.assertEqual(saved["rotationSpeed"], 0.5)
             self.assertNotIn("ignored", json.loads(path.read_text(encoding="utf-8")))
 
     def test_invalid_values_fall_back_to_defaults(self):
@@ -54,10 +56,16 @@ class SettingsStoreTests(unittest.TestCase):
                     "gridVisible": "false",
                     "viewportBackground": "blue",
                     "wheelZoomSpeed": 99,
+                    "rotationSpeed": float("nan"),
                 }
             ),
             DEFAULT_SETTINGS,
         )
+
+    def test_rotation_speed_migrates_old_settings_and_rejects_invalid_values(self):
+        self.assertEqual(normalize_settings({"locale": "en", "wheelZoomSpeed": 2})["rotationSpeed"], 1)
+        for value in (None, True, "2", 0, 4, float("inf")):
+            self.assertEqual(normalize_settings({"rotationSpeed": value})["rotationSpeed"], 1)
 
 
 if __name__ == "__main__":

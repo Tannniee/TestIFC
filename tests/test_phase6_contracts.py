@@ -29,11 +29,8 @@ class Phase6ContractTests(unittest.TestCase):
         self.assertNotEqual(FRAGMENT_CACHE_KEY_PATTERN, MODEL_HASH_PATTERN)
         self.assertIn("fragments-v", FRAGMENT_CACHE_KEY_PATTERN)
 
-    def test_ci_and_release_workflows_include_phase6_gates(self):
+    def test_ci_and_local_packaging_include_phase6_gates(self):
         ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
-        release = (ROOT / ".github" / "workflows" / "release.yml").read_text(
-            encoding="utf-8"
-        )
         for required in (
             "python -m unittest",
             "pnpm run test",
@@ -42,13 +39,9 @@ class Phase6ContractTests(unittest.TestCase):
             "pnpm run test:e2e",
         ):
             self.assertIn(required, ci)
-        self.assertIn("cmd /c BuildExe.cmd", release)
-        self.assertIn("packaging/smoke_test_package.py", release)
-        self.assertIn("test:webview2", release)
-        self.assertIn("continue-on-error: true", release)
-        self.assertIn("MicrosoftEdgeWebview2Setup.exe", release)
-        self.assertIn("Start-Process", release)
-        self.assertIn("-Wait -PassThru", release)
+        # GitHub packaging was intentionally removed; retain the local smoke gate.
+        self.assertTrue((ROOT / "BuildExe.cmd").is_file())
+        self.assertTrue((ROOT / "packaging" / "smoke_test_package.py").is_file())
         webview2_smoke = (
             ROOT / "frontend" / "e2e" / "webview2-smoke.mjs"
         ).read_text(encoding="utf-8")

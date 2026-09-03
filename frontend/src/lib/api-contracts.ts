@@ -22,6 +22,17 @@ export interface ActivateModelResponse {
   loadedAt: string;
 }
 
+export interface StageModelResponse {
+  stageId: string;
+  status: "prepared" | "committed" | "rolled_back" | "finalized";
+  model: ActivateModelResponse;
+}
+
+export interface CacheInventory {
+  totalBytes: number; fragmentBytes: number; modelCount: number; protectedModels: number;
+  keepModels: number; maxBytes: number;
+}
+
 export interface SemanticProgress {
   modelHash: string;
   attemptId: string;
@@ -40,6 +51,7 @@ export interface ModelRuntimeResponse {
   semanticProgress?: SemanticProgress | null;
   hasActiveModel: boolean;
   activeModelHash: string | null;
+  activeLoadedAt?: string | null;
   modelResident: boolean;
   preparing: boolean;
   prepareError: string | null;

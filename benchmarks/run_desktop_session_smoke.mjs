@@ -50,6 +50,14 @@ try {
   if (!results.loaded.activeModel || results.loaded.hotIndexStatus !== "ready" || results.loaded.coldIndexStatus !== "ready") throw new Error("Desktop semantic indexing did not complete");
   if (results.loaded.semanticProgress.completed !== results.loaded.semanticProgress.total) throw new Error("Final semantic progress is incomplete");
   await page.waitForFunction(() => document.querySelector(".semantic-status")?.textContent.includes("sẵn sàng"), null, { timeout: 10000 });
+  if (process.env.IFC_DESKTOP_WORKSPACE === "1") {
+    const {checkDesktopWorkspace} = await import("./workspace_desktop_checks.mjs");
+    results.workspace = await checkDesktopWorkspace(page, {modelA:process.env.IFC_E2E_MODEL_A,modelB:process.env.IFC_E2E_MODEL_B,output:out});
+  }
+  if (process.env.IFC_DESKTOP_NAVIGATION === "1") {
+    const {checkDesktopNavigation} = await import("./navigation_desktop_checks.mjs");
+    results.navigation = await checkDesktopNavigation(page);
+  }
   results.errors = errors;
   if (errors.length) throw new Error("Desktop JavaScript errors occurred");
   results.status = "passed";

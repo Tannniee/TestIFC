@@ -8,6 +8,7 @@ export interface AppSettings {
   gridVisible: boolean;
   viewportBackground: ViewportBackground;
   wheelZoomSpeed: number;
+  rotationSpeed: number;
 }
 
 interface DesktopSettingsApi {
@@ -68,6 +69,8 @@ function normalizeSettings(value: unknown): AppSettings | null {
     gridVisible: source.gridVisible,
     viewportBackground: source.viewportBackground,
     wheelZoomSpeed: source.wheelZoomSpeed,
+    rotationSpeed: typeof source.rotationSpeed === "number" && Number.isFinite(source.rotationSpeed)
+      && source.rotationSpeed >= 0.25 && source.rotationSpeed <= 3 ? source.rotationSpeed : 1,
   };
 }
 

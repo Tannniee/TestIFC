@@ -104,6 +104,26 @@ class CancelModelLoadRequest(BaseModel):
     loadedAt: str = Field(min_length=1, max_length=100)
 
 
+class StageModelRequest(BaseModel):
+    stageId: str = Field(pattern="^[0-9a-f-]{36}$")
+    modelHash: str = Field(pattern="^[0-9a-f]{64}$")
+    filename: str | None = Field(default=None, max_length=1024)
+
+
+class StageActionRequest(BaseModel):
+    action: Literal["commit", "rollback", "finalize"]
+
+
+class StageModelResponse(BaseModel):
+    stageId: str
+    status: Literal["prepared", "committed", "rolled_back", "finalized"]
+    model: ActivateModelResponse
+
+
+class CacheClearRequest(BaseModel):
+    scope: Literal["fragments", "all"] = "fragments"
+
+
 class RetrySemanticRequest(CancelModelLoadRequest):
     attemptId: str = Field(min_length=1, max_length=100)
 
@@ -126,6 +146,7 @@ class ModelRuntimeResponse(BaseModel):
     semanticProgress: SemanticProgress | None = None
     hasActiveModel: bool
     activeModelHash: str | None = None
+    activeLoadedAt: str | None = None
     modelResident: bool
     preparing: bool
     prepareError: str | None = None

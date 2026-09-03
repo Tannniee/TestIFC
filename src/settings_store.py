@@ -18,6 +18,7 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "gridVisible": True,
     "viewportBackground": "gray",
     "wheelZoomSpeed": 1.0,
+    "rotationSpeed": 1.0,
 }
 
 
@@ -32,11 +33,12 @@ def normalize_settings(value: Any) -> dict[str, Any]:
         result["gridVisible"] = source["gridVisible"]
     if source.get("viewportBackground") in {"gray", "white", "oled"}:
         result["viewportBackground"] = source["viewportBackground"]
-    speed = source.get("wheelZoomSpeed")
-    if isinstance(speed, (int, float)) and not isinstance(speed, bool):
-        speed = float(speed)
-        if math.isfinite(speed) and 0.25 <= speed <= 3.0:
-            result["wheelZoomSpeed"] = speed
+    for key in ("wheelZoomSpeed", "rotationSpeed"):
+        speed = source.get(key)
+        if isinstance(speed, (int, float)) and not isinstance(speed, bool):
+            speed = float(speed)
+            if math.isfinite(speed) and 0.25 <= speed <= 3.0:
+                result[key] = speed
     return result
 
 

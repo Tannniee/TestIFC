@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 import model_operations
+from api_contracts import StageModelRequest, StageActionRequest, StageModelResponse, CacheClearRequest
 from api_contracts import (
     ActivateModelResponse,
     CancelModelLoadRequest,
@@ -24,6 +25,7 @@ from api_contracts import (
 )
 from api_errors import error_response, model_state_error
 from fragment_service import FragmentService
+from api_routes.fragment_response import LeasedFragmentResponse
 from model_runtime import (
     HashMismatchError,
     IndexPreparingError,
@@ -44,6 +46,30 @@ def _model_error(exc: Exception):
 
 def create_model_router(fragment_service: FragmentService) -> APIRouter:
     router = APIRouter()
+
+    @router.post("/model/stage", response_model=StageModelResponse)
+    def stage_model(request: StageModelRequest):
+        try:
+            return model_operations.prepare_stage(request.stageId, request.modelHash, request.filename)
+        except FileNotFoundError:
+            return error_response(404, "model_not_cached")
+        except ValueError as error:
+            return error_response(409, str(error))
+
+    @router.post("/model/stage/{stageId}", response_model=StageModelResponse)
+    def stage_action(request: StageActionRequest, stageId: str = FastApiPath(pattern="^[0-9a-f-]{36}$")):
+        try:
+            return model_operations.transition_stage(stageId, request.action)
+        except ValueError as error:
+            return error_response(409, str(error))
+
+    @router.get("/model/cache")
+    def get_cache():
+        return model_operations.cached_storage()
+
+    @router.post("/model/cache/clear")
+    def clear_cache(request: CacheClearRequest):
+        return model_operations.cached_storage(request.scope)
 
     @router.post(
         "/load-model",
@@ -83,7 +109,7 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             path = fragment_service.cached_file(modelHash)
         except FileNotFoundError:
             return error_response(404, "fragments_not_cached")
-        return FileResponse(path, media_type="application/octet-stream")
+        return LeasedFragmentResponse(path, modelHash, fragment_service)
 
     @router.post(
         "/model/fragments/{modelHash}",

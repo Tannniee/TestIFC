@@ -2,6 +2,7 @@ import type { SemanticProgress } from "./api-contracts";
 import type { ItemData } from "@thatopen/fragments";
 import type { SelectionElement } from "./api";
 import type { FragmentMetadataProfile } from "./fragment-profile";
+import type { ViewSessionState } from "./workspace-contracts";
 
 export type ViewerStage =
   | "idle"
@@ -19,7 +20,7 @@ export type ViewportBackground = "gray" | "white" | "oled";
 export type ViewPreset = "iso" | "positiveX" | "negativeX" | "positiveY" | "negativeY" | "positiveZ" | "negativeZ";
 export type SectionSide = "positive" | "negative";
 export type ViewStep = -1 | 0 | 1;
-export type ViewerTool = "pan" | "multiSelect" | "measure";
+export type ViewerTool = "pan" | "selectOrbit" | "multiSelect" | "measure";
 export type MeasureMode = "pointToPoint" | "edge";
 
 export interface ViewDirection {
@@ -45,6 +46,12 @@ export interface SectionPlaneDefinition {
   point: Vector3Value;
   normal: Vector3Value;
   side: SectionSide;
+}
+
+export interface SectionBoxState {
+  enabled: boolean;
+  min: Vector3Value;
+  max: Vector3Value;
 }
 
 export interface MeasurementResult {
@@ -115,7 +122,13 @@ export interface ViewerCallbacks {
   onBoxZoomActiveChange(active: boolean): void;
   onSectionPickActiveChange(active: boolean): void;
   onSectionPlaneChange(section: SectionPlaneDefinition | null): void;
+  onSectionBoxChange?(box: SectionBoxState | null): void;
+  onSectionBoxPickActiveChange?(active: boolean): void;
   onCameraOrientationChange(orientation: CameraOrientation): void;
+  onSectionBoxCreated?(state: ViewSessionState): void;
+  onViewStateChange?(): void;
+  onInteractionError?(message: string): void;
+  onSectionBoxEdit?(): void;
 }
 
 export class LoadCancelledError extends Error {

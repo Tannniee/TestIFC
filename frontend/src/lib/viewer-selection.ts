@@ -83,26 +83,32 @@ export function createSelectionPayload(selection: ViewerSelection): SelectionPay
 export class ViewerHighlights {
   private single: { model: FragmentsModel; localId: number } | null = null;
   private multiple: { model: FragmentsModel; localIds: number[] } | null = null;
+  private queue: Promise<void> = Promise.resolve();
+  private run(action: () => Promise<void>) {
+    const task = this.queue.then(action); this.queue = task.catch(() => {}); return task;
+  }
+  drain() { return this.queue; }
+  get localIds() { return this.multiple?.localIds ?? (this.single ? [this.single.localId] : []); }
 
   get hasMultiple() {
     return Boolean(this.multiple?.localIds.length);
   }
 
   async clear() {
-    if (this.single) await this.single.model.resetHighlight([this.single.localId]);
-    if (this.multiple) await this.multiple.model.resetHighlight(this.multiple.localIds);
-    this.single = null;
-    this.multiple = null;
+    return this.run(async () => {
+      if (this.single) await this.single.model.resetHighlight([this.single.localId]);
+      if (this.multiple) await this.multiple.model.resetHighlight(this.multiple.localIds);
+      this.single = null;
+      this.multiple = null;
+    });
   }
 
   async setSingle(model: FragmentsModel, localId: number) {
-    await model.highlight([localId], this.material());
-    this.single = { model, localId };
+    return this.run(async () => { await model.highlight([localId], this.material()); this.single = { model, localId }; });
   }
 
   async setMultiple(model: FragmentsModel, localIds: number[]) {
-    await model.highlight(localIds, this.material());
-    this.multiple = { model, localIds: [...localIds] };
+    return this.run(async () => { await model.highlight(localIds, this.material()); this.multiple = { model, localIds: [...localIds] }; });
   }
 
   private material() {

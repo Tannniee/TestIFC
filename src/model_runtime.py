@@ -8,7 +8,7 @@ import os
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from threading import Event, Lock
+from threading import Event, Lock, RLock
 from time import monotonic
 from typing import Any, BinaryIO, Callable
 
@@ -106,7 +106,7 @@ class _PrepareState:
 
 class _ActiveModelState:
     def __init__(self) -> None:
-        self._lock = Lock()
+        self._lock = RLock()
         self._active = None
         self._ifc_file = None
         self._ifc_hash = None
@@ -140,6 +140,34 @@ class _ActiveModelState:
             model = self._active
             model_cache.pin_model(model.contentHashSha256)
             return model
+
+    def capture_optional_and_pin(self) -> ActiveModel | None:
+        with self._lock:
+            if self._active:
+                model_cache.pin_model(self._active.contentHashSha256)
+            return self._active
+
+    def replace_if_current(self, expected: ActiveModel | None, replacement: ActiveModel | None) -> bool:
+        """Commit/rollback by generation, including reopening identical IFC bytes."""
+        with self._lock:
+            if self._active != expected:
+                return False
+            if replacement is None:
+                _background_indexes.cancel()
+                self.clear()
+            else:
+                self.set(replacement)
+                try:
+                    model_cache.schedule_cache_retention(replacement.contentHashSha256)
+                    _queue_index_build(replacement)
+                except BaseException:
+                    if expected is None:
+                        self.clear()
+                    else:
+                        self.set(expected)
+                        model_cache.schedule_cache_retention(expected.contentHashSha256)
+                    raise
+            return True
 
     def get_open_file(self):
         with self._lock:
@@ -541,6 +569,7 @@ def live_model_status() -> dict:
         "semanticProgress": semantic_progress,
         "hasActiveModel": model is not None,
         "activeModelHash": model.contentHashSha256 if model else None,
+        "activeLoadedAt": model.loadedAt if model else None,
         "modelResident": _state.is_open(),
         "preparing": preparing,
         "prepareError": prepare_error,

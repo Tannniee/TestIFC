@@ -6,6 +6,22 @@ const source = await readFile(new URL("../src/lib/render-scheduler.ts", import.m
 const js = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
 const { RenderScheduler, FragmentUpdates } = await import(`data:text/javascript;base64,${Buffer.from(js).toString("base64")}`);
 
+test("camera bursts coalesce but a forced final view wakes a waiting dispatch", async () => {
+  const calls = [];
+  const updates = new FragmentUpdates(async force => { calls.push(force); }, 1000);
+  await updates.request();
+  const pending = updates.request();
+  updates.request(); updates.request();
+  assert.deepEqual(calls, [false]);
+  await updates.request(true);
+  await pending;
+  assert.deepEqual(calls, [false, true]);
+  const final = updates.request();
+  await updates.dispose();
+  await final;
+  assert.deepEqual(calls, [false, true]);
+});
+
 test("render sleeps at rest, coalesces changes, continues animation and cancels disposal", () => {
   const queue = new Map(); let next = 0; let moving = false; let draws = 0;
   const scheduler = new RenderScheduler(() => { draws++; return moving; }, cb => { queue.set(++next, cb); return next; }, id => queue.delete(id));

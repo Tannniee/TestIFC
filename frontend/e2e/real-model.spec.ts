@@ -21,6 +21,8 @@ test("real IFC reopens from fragment cache without duplicating the viewer", asyn
     { timeout: 10 * 60_000 },
   ).toBe(1);
 
+  await page.locator(".document-tabs .tab-close").click();
+  await expect(page.locator(".document-tabs [role=tab]")).toHaveCount(0);
   await input.setInputFiles(modelPath!);
   await expect.poll(
     () => page.evaluate(() => ((window as typeof window & { __ifcMetrics?: unknown[] }).__ifcMetrics?.length ?? 0)),
@@ -38,6 +40,7 @@ test("real IFC reopens from fragment cache without duplicating the viewer", asyn
   expect(metrics?.[1].cacheHit).toBe(true);
   await expect(page.locator(".viewer-mount canvas")).toHaveCount(1);
 
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus), { timeout: 60000 }).toBe("ready");
   const runtime = await page.evaluate(async () => (await fetch("/model/runtime")).json());
   expect(runtime.activeModelHash).toBe(metrics?.[1].modelHash);
   expect(runtime.hotIndexStatus).toBe("ready");

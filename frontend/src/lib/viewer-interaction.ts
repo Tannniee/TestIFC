@@ -69,6 +69,8 @@ export class ViewerInteraction {
   private snapFrame: number | null = null;
   private snapPending = false;
   private queuedSnap: { x: number; y: number } | null = null;
+  private viewEpoch = 0;
+  private clippingPlanes: THREE.Plane[] = [];
 
   constructor(
     private readonly host: HTMLElement,
@@ -150,6 +152,17 @@ export class ViewerInteraction {
     this.measurements = [];
     this.publishMeasurements();
   }
+
+  captureMeasurements(): MeasurementResult[] { return this.measurements.map(v => structuredClone(v.result)); }
+  restoreMeasurements(results: MeasurementResult[]) {
+    this.cancelTransient();
+    this.clearMeasurements();
+    this.nextMeasurementId = 1;
+    for (const result of results) this.commitMeasurement(new THREE.Vector3(result.start.x,result.start.y,result.start.z),
+      new THREE.Vector3(result.end.x,result.end.y,result.end.z), result.mode, result.id);
+  }
+  cancelTransient() { this.viewEpoch++; this.cancelSweep(); this.clearDraft(); }
+  setClippingPlanes(planes: THREE.Plane[]) { this.clippingPlanes = planes; }
 
   cancelAction() {
     if (this.sweepStart) {
@@ -244,12 +257,14 @@ export class ViewerInteraction {
     this.camera.updateMatrixWorld();
     const place = (label: HTMLDivElement, point: THREE.Vector3, center = "-50%, -140%") => {
       const projected = this.projectedPoint.copy(point).project(this.camera);
-      const visible = Number.isFinite(projected.x) && projected.z >= -1 && projected.z <= 1;
+      const visible = Number.isFinite(projected.x) && projected.z >= -1 && projected.z <= 1
+        && this.clippingPlanes.every(plane => plane.distanceToPoint(point) >= 0);
       label.hidden = !visible;
       if (!visible) return;
       label.style.transform = `translate3d(${(projected.x * .5 + .5) * width}px, ${(-projected.y * .5 + .5) * height}px, 0) translate(${center})`;
     };
     for (const visual of this.measurements) place(visual.label, visual.midpoint);
+    if (!this.measurementEntry.hidden) this.positionMeasurementEntry();
     if (this.axisGroup.visible && this.measurementStart) {
       const origin = this.measurementStart.clone().project(this.camera);
       const a = new THREE.Vector3(origin.x, origin.y, origin.z).unproject(this.camera);
@@ -272,10 +287,11 @@ export class ViewerInteraction {
     for (const label of this.axisLabels) label.remove();
     for (const child of [...this.axisGroup.children]) this.disposeObject(child as THREE.Line);
     this.axisGroup.removeFromParent();
-    this.host.classList.remove("viewer-pan-active", "viewer-multi-select-active", "viewer-measure-active");
+    this.host.classList.remove("viewer-pan-active", "viewer-select-orbit-active", "viewer-multi-select-active", "viewer-measure-active");
   }
 
   private async finishSweep(start: SweepStart, endClientX: number, endClientY: number) {
+    const epoch = this.viewEpoch;
     const model = this.callbacks.activeModel();
     if (!model) return;
     const end = this.localPoint(endClientX, endClientY);
@@ -287,7 +303,7 @@ export class ViewerInteraction {
       bottomRight: new THREE.Vector2(Math.max(start.clientX, endClientX), Math.max(start.clientY, endClientY)),
       fullyIncluded: isFullyIncludedSweep(start.clientX, endClientX),
     });
-    if (model !== this.callbacks.activeModel() || this.tool !== "multiSelect") return;
+    if (epoch !== this.viewEpoch || model !== this.callbacks.activeModel() || this.tool !== "multiSelect") return;
     this.callbacks.onMultiSelection(result);
   }
 
@@ -384,16 +400,17 @@ export class ViewerInteraction {
     this.commitMeasurement(start, point, "pointToPoint");
   }
 
-  private commitMeasurement(start: THREE.Vector3, end: THREE.Vector3, mode: MeasureMode) {
+  private commitMeasurement(start: THREE.Vector3, end: THREE.Vector3, mode: MeasureMode, id = this.nextMeasurementId++) {
     const distance = start.distanceTo(end);
     if (!Number.isFinite(distance) || distance <= Number.EPSILON) return;
     const result: MeasurementResult = {
-      id: this.nextMeasurementId++,
+      id,
       mode,
       start: { x: start.x, y: start.y, z: start.z },
       end: { x: end.x, y: end.y, z: end.z },
       distance,
     };
+    this.nextMeasurementId = Math.max(this.nextMeasurementId, id + 1);
     const label = document.createElement("div");
     label.className = "viewer-measurement-label";
     label.textContent = formatMeasurement(distance);
@@ -533,10 +550,19 @@ export class ViewerInteraction {
   }
 
   private positionMeasurementEntry() {
-    // Fixed bottom-center dock leaves the picked point and navigation controls clear.
-    this.measurementEntry.style.left = "50%";
-    this.measurementEntry.style.top = "auto";
-    this.measurementEntry.style.bottom = "18px";
+    if (!this.measurementStart) return;
+    const bounds = this.canvas.getBoundingClientRect();
+    const point = this.measurementStart.clone().project(this.camera);
+    const width = this.measurementEntry.offsetWidth || 178;
+    const height = this.measurementEntry.offsetHeight || 40;
+    const x = (point.x * .5 + .5) * bounds.width;
+    const y = (-point.y * .5 + .5) * bounds.height;
+    const left = x + 22 + width <= bounds.width - 8 ? x + 22 : x - width - 22;
+    const top = y - height - 22 >= 8 ? y - height - 22 : y + 22;
+    this.measurementEntry.style.transform = "none";
+    this.measurementEntry.style.left = `${THREE.MathUtils.clamp(left, 8, Math.max(8, bounds.width - width - 8))}px`;
+    this.measurementEntry.style.top = `${THREE.MathUtils.clamp(top, 8, Math.max(8, bounds.height - height - 8))}px`;
+    this.measurementEntry.style.bottom = "auto";
   }
 
   private createLine(points: THREE.Vector3[], color: number) {
@@ -622,6 +648,7 @@ export class ViewerInteraction {
 
   private applyHostClasses() {
     this.host.classList.toggle("viewer-pan-active", this.tool === "pan");
+    this.host.classList.toggle("viewer-select-orbit-active", this.tool === "selectOrbit");
     this.host.classList.toggle("viewer-multi-select-active", this.tool === "multiSelect");
     this.host.classList.toggle("viewer-measure-active", this.tool === "measure");
   }

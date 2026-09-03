@@ -4,9 +4,15 @@ import { markViewerCreated, markViewerDisposed } from "./lifecycle-diagnostics";
 import {
   browserFragmentMetadataProfile,
 } from "./fragment-profile";
-import { ViewerModelLoader } from "./viewer-model-loader";
+import { ViewerModelLoader, type ModelLoadOptions } from "./viewer-model-loader";
 import { FragmentUpdates, RenderScheduler } from "./render-scheduler";
-import { ViewerCamera } from "./viewer-camera";
+import { ViewerCamera, type CameraUpdateContext } from "./viewer-camera";
+import { sectionBoxFromSweep, validSectionBox } from "./viewer-clipping";
+import { ClippingController } from "./clipping-controller";
+import { SectionBoxController } from "./section-box-controller";
+import { validateViewState, type ViewSessionState, type ElementRef, type ClippingSessionState } from "./workspace-contracts";
+import { resolveViewSelection } from "./restore-selection";
+import type { SectionBoxState } from "./viewer-contracts";
 import {
   type CameraOrientation,
   type MeasureMode,
@@ -32,26 +38,48 @@ const VIEWPORT_COLORS: Record<ViewportBackground, { background: number; center: 
 };
 const FRAGMENTS_MAX_UPDATE_RATE_MS = 50;
 const BOX_ZOOM_MIN_SIZE_PX = 8;
-const SECTION_CLIP_EPSILON_RATIO = 0.00001;
-const SECTION_CLIP_EPSILON_MIN = 0.0001;
-const SECTION_CLIP_EPSILON_MAX = 0.02;
 export class ViewerService {
   private readonly scene = new THREE.Scene();
   private readonly renderer: THREE.WebGLRenderer;
   private readonly view: ViewerCamera;
+  private readonly clipping: ClippingController;
+  private selectedRefs: ElementRef[] = [];
+  private viewApplySequence = 0;
+  private inputBlocked = false;
+  private boxDisplay = { showBox: true, showHandles: true };
+  private readonly boxController: SectionBoxController;
+  private sectionCreation: { source: ViewSessionState; model: FragmentsModel; createView: boolean } | null = null;
+  private transientCleanup: Promise<void> = Promise.resolve();
   private readonly interaction: ViewerInteraction;
   private readonly boxZoomRectangle: HTMLDivElement;
   private readonly loader: ViewerModelLoader;
   private readonly scheduler = new RenderScheduler((time) => this.render(time));
+  readonly viewDiagnostics = { requests: 0, dispatches: 0, viewEvents: 0, forced: 0, forcedMilliseconds: 0,
+    latestCamera: null as CameraUpdateContext | null, reason: "initial", events: [] as Array<Record<string, unknown>> };
   private readonly fragmentUpdates = new FragmentUpdates(async (force) => {
-    // Fragments 3.4.7 throttles even forced calls. A final flush must not be lost.
+    // With no model, there can be no frame completion event after a delete RPC.
+    // Do not await the engine's global fence while restoring an empty viewport.
+    if (!this.loader.fragments.models.list.size) { this.scheduler.invalidate(); return; }
+    // This adapter owns the cadence; engine throttling must not silently drop a final view.
     const settings = this.loader.fragments.settings;
     const rate = settings.maxUpdateRate;
-    if (force) settings.maxUpdateRate = 0;
+    settings.maxUpdateRate = 0;
+    const started = performance.now();
+    this.viewDiagnostics.dispatches++;
+    if (force) this.viewDiagnostics.forced++;
+    this.recordViewEvent("dispatch", { force, reason: this.viewDiagnostics.reason, camera: this.viewDiagnostics.latestCamera });
     try { await this.loader.fragments.update(force); }
     finally { settings.maxUpdateRate = rate; }
+    if (force) this.viewDiagnostics.forcedMilliseconds += performance.now() - started;
+    this.recordViewEvent("returned", { force, milliseconds: performance.now() - started });
     this.scheduler.invalidate();
-  });
+  }, FRAGMENTS_MAX_UPDATE_RATE_MS);
+  private readonly fragmentViewUpdated = () => {
+    this.viewDiagnostics.viewEvents++;
+    // The event carries no revision; do not mislabel it as completion of the latest camera.
+    this.recordViewEvent("view-updated", {});
+    this.scheduler.invalidate();
+  };
   private cameraMoving = false;
   private settledTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly displayPixelRatio = Math.min(window.devicePixelRatio, 2);
@@ -62,13 +90,17 @@ export class ViewerService {
   private viewportBackground: ViewportBackground = "gray";
   private readonly highlights = new ViewerHighlights();
   private activeTool: ViewerTool = "pan";
+  private orbitEpoch = 0;
+  private hasSelectionOrbit = false;
   private selectionSequence = 0;
   private pointerStart: { id: number; x: number; y: number } | null = null;
   private suppressNextClick = false;
   private boxZoomEnabled = false;
   private boxZoomStart: { id: number; x: number; y: number } | null = null;
   private sectionPickEnabled = false;
-  private sectionDefinition: SectionPlaneDefinition | null = null;
+  private get sectionDefinition(): SectionPlaneDefinition | null { const s = this.clipping.capture(); return s.kind === "sectionPlane" ? s.definition : null; }
+  private get sectionBox(): SectionBoxState | null { const s = this.clipping.capture(); return s.kind === "sectionBox" ? s.box : null; }
+  private sectionBoxPicking = false;
   private disposed = false;
   constructor(
     private readonly host: HTMLElement,
@@ -77,6 +109,7 @@ export class ViewerService {
   ) {
     this.callbacks = callbacks;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    this.clipping = new ClippingController(this.renderer);
     this.renderer.setPixelRatio(this.displayPixelRatio);
     this.renderer.setClearColor(VIEWPORT_COLORS.gray.background, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -84,29 +117,41 @@ export class ViewerService {
     this.host.append(this.renderer.domElement);
     this.view = new ViewerCamera(this.host, this.renderer.domElement, {
       onOrientationChange: (orientation) => this.callbacks.onCameraOrientationChange(orientation),
-      onUpdate: (force) => this.cameraUpdated(force),
+      onUpdate: (force, context) => this.cameraUpdated(force, context),
     });
     this.loader = new ViewerModelLoader(this.camera, fragmentProfile, {
       onProgress: (value) => callbacks.onProgress(value), onBridgeProgress: (value) => callbacks.onBridgeProgress(value),
       onFragmentMetrics: (value) => callbacks.onFragmentMetrics(value),
       attach: async (model, assertCurrent) => {
-        model.onViewUpdated.add(this.scheduler.invalidate);
+        model.onViewUpdated.add(this.fragmentViewUpdated);
         model.getClippingPlanesEvent = () => this.renderer.clippingPlanes;
         this.scene.add(model.object);
         await this.alignGridToIfcElevationZero(model, assertCurrent);
         this.scheduler.invalidate();
       },
       detach: async (model) => {
-        this.view.cancelAnimation();
-        this.endCameraMotion();
         if (model) {
-          model.onViewUpdated.remove(this.scheduler.invalidate);
+          model.onViewUpdated.remove(this.fragmentViewUpdated);
           this.scene.remove(model.object);
         }
-        this.grid.position.y = -0.001;
         this.scheduler.invalidate();
-        await this.clearSelection();
       },
+      capture: () => {
+        this.view.cancelAnimation();
+        const state = this.captureViewState();
+        const gridY = this.grid.position.y;
+        return async () => {
+          this.grid.position.y = gridY;
+          await this.applyViewState(state);
+        };
+      },
+      prepareView: async (state) => {
+        this.interaction.reset();
+        await this.clearSelection();
+        this.clearClipping();
+        if (state) await this.applyViewState(state);
+      },
+      committed: () => {},
       fit: () => this.fit({ animate: false }),
       update: () => this.fragmentUpdates.request(true),
     });
@@ -120,9 +165,19 @@ export class ViewerService {
         activeModel: () => this.activeModel,
         onInvalidate: this.scheduler.invalidate,
         onMultiSelection: (result) => void this.applyMultiSelection(result?.fragments ?? null, result?.localIds ?? []),
-        onMeasurements: (measurements) => this.callbacks.onMeasurementChange(measurements),
+        onMeasurements: (measurements) => { this.callbacks.onMeasurementChange(measurements); this.callbacks.onViewStateChange?.(); },
       },
     );
+    this.boxController = new SectionBoxController(this.host, this.camera,
+      (box, force) => {
+        this.clipping.apply({ kind: "sectionBox", box });
+        this.interaction.setClippingPlanes(this.renderer.clippingPlanes);
+        this.boxController.set(box, this.boxDisplay);
+        this.callbacks.onSectionBoxChange?.(structuredClone(box));
+        if (force) this.callbacks.onViewStateChange?.();
+        this.requestFragmentUpdate(force);
+      }, enabled => this.view.setEnabled(enabled && !this.inputBlocked && !this.boxZoomEnabled),
+      () => this.callbacks.onSectionBoxEdit?.());
     this.boxZoomRectangle = document.createElement("div");
     this.boxZoomRectangle.className = "viewer-box-zoom-rectangle";
     this.boxZoomRectangle.hidden = true;
@@ -145,6 +200,9 @@ export class ViewerService {
     this.scheduler.invalidate();
     this.resize();
     markViewerCreated();
+    if (import.meta.env.DEV && new URLSearchParams(location.search).has("viewerDebug")) {
+      window.dispatchEvent(new CustomEvent("ifc-viewer-ready", { detail: this }));
+    }
   }
   private get fragments() { return this.loader.fragments; }
   private get bridge() { return this.loader.bridge; }
@@ -193,13 +251,23 @@ export class ViewerService {
   setWheelZoomSpeed(speed: number) {
     this.view.setZoomSpeed(speed);
   }
+  setRotationSpeed(speed: number) { this.view.setRotationSpeed(speed); }
   setTool(tool: ViewerTool) {
+    this.cancelSectionBox();
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
     this.view.cancelAnimation();
+    const returnToModel = tool === "pan" && (this.activeTool === "selectOrbit" || this.hasSelectionOrbit);
+    const orbitEpoch = ++this.orbitEpoch;
     this.activeTool = tool;
     this.view.setTool(tool);
     this.interaction.setTool(tool);
+    if (returnToModel && this.activeModel && !this.inputBlocked) {
+      this.hasSelectionOrbit = false;
+      this.view.centerOrbit(this.activeModel.box.getCenter(new THREE.Vector3()));
+    } else if (tool === "selectOrbit" && this.activeModel && this.selectedRefs.length === 1) {
+      void this.centerSelectionOrbit(this.activeModel, this.selectedRefs[0].localId, this.selectionSequence, orbitEpoch);
+    }
   }
   setMeasureMode(mode: MeasureMode) {
     this.interaction.setMeasureMode(mode);
@@ -219,24 +287,140 @@ export class ViewerService {
     return "pan";
   }
 
-  setBoxZoomEnabled(enabled: boolean) {
+  setBoxZoomEnabled(enabled: boolean, preserveCreation = false) {
+    if (enabled) this.orbitEpoch++;
+    if (!enabled && !preserveCreation) this.cancelSectionBox();
     if (enabled === this.boxZoomEnabled) return;
     if (enabled && this.sectionPickEnabled) this.setSectionPickEnabled(false);
     this.view.cancelAnimation();
     this.boxZoomEnabled = enabled;
-    this.view.setEnabled(!enabled);
+    this.view.setEnabled(!enabled && !this.inputBlocked);
     this.pointerStart = null;
     this.resetBoxZoomDrag();
     this.host.classList.toggle("viewer-box-zoom-active", enabled);
     this.callbacks.onBoxZoomActiveChange(enabled);
+    if (!enabled && this.sectionBoxPicking) {
+      this.sectionBoxPicking = false;
+      this.callbacks.onSectionBoxPickActiveChange?.(false);
+    }
+  }
+  get model() { return this.activeModel; }
+  get sectionBoxCreationActive() { return this.sectionCreation !== null; }
+  get modelHash() { return this.activeModel?.modelId.slice(0, 64) ?? ""; }
+  get artifactId() { return this.loader.artifactId; }
+  captureViewState(): ViewSessionState {
+    return { schemaVersion: 1, coordinateSpaceVersion: "viewer-v1", camera: this.view.captureSession(),
+      clipping: this.clipping.capture(), selection: structuredClone(this.selectedRefs),
+      measurements: this.interaction.captureMeasurements(), boxDisplay: { ...this.boxDisplay } };
+  }
+  async applyViewState(state: ViewSessionState) {
+    validateViewState(state);
+    const sequence = ++this.viewApplySequence;
+    const model = this.activeModel;
+    const check = () => { if (sequence !== this.viewApplySequence || model !== this.activeModel || this.disposed) throw new Error("View activation cancelled"); };
+    await this.cancelTransientInteraction();
+    const wasBlocked = this.inputBlocked;
+    this.setInputBlocked(true);
+    try {
+      await this.clearSelection(); check();
+      this.applyClipping(state.clipping);
+      this.boxDisplay = { ...state.boxDisplay };
+      this.boxController.set(this.sectionBox, this.boxDisplay);
+      this.view.restoreSession(state.camera);
+      this.interaction.restoreMeasurements(state.measurements);
+      if (model && state.selection.length) {
+        const ids = await resolveViewSelection(model, state.selection, this.modelHash, this.artifactId, check);
+        check(); await this.selectItems(ids, { centerOrbit: false }); check();
+      }
+      await this.fragmentUpdates.request(true); check();
+      this.scheduler.invalidate();
+    } finally { if (sequence === this.viewApplySequence) this.setInputBlocked(wasBlocked); }
+  }
+  cancelTransientInteraction() {
+    this.orbitEpoch++;
+    this.hasSelectionOrbit = false;
+    this.cancelSectionBox();
+    this.boxController?.cancel();
+    this.view.cancelAnimation();
+    this.interaction.cancelTransient();
+    this.selectionSequence++;
+    this.setBoxZoomEnabled(false);
+    this.setSectionPickEnabled(false);
+    this.pointerStart = null;
+    this.suppressNextClick = true;
+    return this.transientCleanup;
+  }
+  setInputBlocked(blocked: boolean) {
+    this.inputBlocked = blocked;
+    this.view.setEnabled(!blocked && !this.boxZoomEnabled);
+    this.boxController?.setEnabled(!blocked);
+  }
+  private applyClipping(state: ClippingSessionState) {
+    this.clipping.apply(state, this.activeModel?.box.getSize(new THREE.Vector3()).length() ?? 1);
+    this.interaction?.setClippingPlanes(this.renderer.clippingPlanes);
+    this.boxController?.set(this.sectionBox, this.boxDisplay);
+    this.callbacks.onSectionPlaneChange(this.sectionDefinition);
+    this.callbacks.onSectionBoxChange?.(this.sectionBox);
+    this.callbacks.onViewStateChange?.();
+    this.requestFragmentUpdate(true);
+  }
+
+  async beginSectionBox(createView = true) {
+    await this.cancelTransientInteraction();
+    const model = this.activeModel;
+    if (!model) return;
+    this.setTool("pan");
+    const creation = { source: this.captureViewState(), model, createView };
+    this.sectionCreation = creation;
+    this.applyClipping({ kind: "none" });
+    this.sectionBoxPicking = true;
+    this.callbacks.onSectionBoxPickActiveChange?.(true);
+    this.setInputBlocked(true);
+    this.view.setView(model.box, "positiveY", true);
+    if (!await this.view.settled() || this.sectionCreation !== creation) return;
+    this.setInputBlocked(false);
+    this.setBoxZoomEnabled(true);
+    this.sectionBoxPicking = true;
+    this.callbacks.onBoxZoomActiveChange(false);
+    this.callbacks.onSectionBoxPickActiveChange?.(true);
+  }
+  private cancelSectionBox() {
+    const creation = this.sectionCreation;
+    if (!creation) return;
+    this.sectionCreation = null;
+    this.view.cancelAnimation();
+    this.view.restoreSession(creation.source.camera);
+    this.boxDisplay = { ...creation.source.boxDisplay };
+    this.applyClipping(creation.source.clipping);
+    this.setInputBlocked(false);
+    this.sectionBoxPicking = false;
+    this.callbacks.onSectionBoxPickActiveChange?.(false);
+    this.transientCleanup = this.transientCleanup.then(async () => {
+      if (this.disposed || this.activeModel !== creation.model) return;
+      this.interaction.restoreMeasurements(creation.source.measurements);
+      await this.selectItems(creation.source.selection.map(ref => ref.localId));
+    }).catch(error => this.callbacks.onInteractionError?.(String(error)));
+  }
+
+  setSectionBox(box: SectionBoxState) {
+    if (!validSectionBox(box)) return;
+    this.applyClipping({ kind: "sectionBox", box });
+  }
+
+  fitSectionBox() {
+    if (!this.activeModel) return;
+    const box = this.activeModel.box;
+    this.setSectionBox({ enabled: true, min: { ...box.min }, max: { ...box.max } });
   }
 
   setSectionPickEnabled(enabled: boolean) {
+    if (enabled) this.orbitEpoch++;
+    if (enabled) this.cancelSectionBox();
     if (enabled === this.sectionPickEnabled) return;
     if (enabled && this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     this.view.cancelAnimation();
     this.sectionPickEnabled = enabled;
-    this.view.setEnabled(!this.boxZoomEnabled);
+    this.view.setEnabled(!this.boxZoomEnabled && !this.inputBlocked);
     this.pointerStart = null;
     this.host.classList.toggle("viewer-section-pick-active", enabled);
     this.callbacks.onSectionPickActiveChange(enabled);
@@ -248,23 +432,11 @@ export class ViewerService {
     if (!point.toArray().every(Number.isFinite) || !normal.toArray().every(Number.isFinite) || normal.lengthSq() < Number.EPSILON) return;
     normal.normalize();
     const side = definition.side;
-    const clippingNormal = side === "positive" ? normal.clone() : normal.clone().negate();
-    const modelSize = this.activeModel?.box.getSize(new THREE.Vector3()).length() ?? 1;
-    const epsilon = THREE.MathUtils.clamp(
-      modelSize * SECTION_CLIP_EPSILON_RATIO,
-      SECTION_CLIP_EPSILON_MIN,
-      SECTION_CLIP_EPSILON_MAX,
-    );
-    const clippingPoint = point.clone().addScaledVector(normal, side === "positive" ? -epsilon : epsilon);
-    const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(clippingNormal, clippingPoint);
-    this.sectionDefinition = {
+    this.applyClipping({ kind: "sectionPlane", definition: {
       point: { x: point.x, y: point.y, z: point.z },
       normal: { x: normal.x, y: normal.y, z: normal.z },
       side,
-    };
-    this.renderer.clippingPlanes = [plane];
-    this.callbacks.onSectionPlaneChange(this.sectionDefinition);
-    this.requestFragmentUpdate(true);
+    } });
   }
 
   setSectionSide(side: SectionSide) {
@@ -273,14 +445,13 @@ export class ViewerService {
   }
 
   clearSectionPlane() {
-    if (!this.sectionDefinition && this.renderer.clippingPlanes.length === 0) return;
-    this.sectionDefinition = null;
-    this.renderer.clippingPlanes = [];
-    this.callbacks.onSectionPlaneChange(null);
-    this.requestFragmentUpdate(true);
+    if (this.sectionDefinition) this.clearClipping();
   }
+  clearClipping() { this.applyClipping({ kind: "none" }); }
+  setBoxDisplay(display: { showBox: boolean; showHandles: boolean }) { this.boxDisplay = { ...display }; this.boxController.set(this.sectionBox, display); this.scheduler.invalidate(); this.callbacks.onViewStateChange?.(); }
 
   setView(preset: ViewPreset) {
+    this.orbitEpoch++;
     const model = this.activeModel;
     if (!model) return;
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
@@ -289,6 +460,7 @@ export class ViewerService {
   }
 
   setViewDirection(direction: ViewDirection) {
+    this.orbitEpoch++;
     const model = this.activeModel;
     if (!model) return;
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
@@ -297,6 +469,7 @@ export class ViewerService {
   }
 
   orbitView(deltaAzimuth: number, deltaPolar: number) {
+    this.orbitEpoch++;
     if (!this.activeModel) return;
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
@@ -304,26 +477,46 @@ export class ViewerService {
   }
 
   viewSectionPlane() {
+    this.orbitEpoch++;
     const model = this.activeModel;
     const section = this.sectionDefinition;
     if (!model || !section) return;
     this.view.viewSection(model.box, section);
   }
 
-  async load(file: File): Promise<void> {
-    if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
-    if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
-    this.clearSectionPlane();
-    this.interaction.reset();
-    await this.loader.load(file);
+  async load(file: File, options: ModelLoadOptions = {}): Promise<void> {
+    await this.cancelTransientInteraction();
+    await this.highlights.drain();
+    await this.loader.load(file, options);
+  }
+  async closeModel() {
+    await this.cancelTransientInteraction();
+    const model = this.model, state = this.captureViewState();
+    try {
+      await this.clearSelection(); this.interaction.reset();
+      await this.loader.closeModel(); this.clearClipping(); this.scheduler.invalidate();
+    } catch (error) {
+      if (model && this.model === model && this.fragments.models.list.has(model.modelId)) await this.applyViewState(state);
+      throw error;
+    }
   }
 
   fit({ animate = true }: { animate?: boolean } = {}) {
+    this.orbitEpoch++;
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
     const model = this.activeModel;
     if (!model) return;
-    this.view.fit(model.box, animate);
+    this.view.fit(this.fitBounds(), animate);
+  }
+  private fitBounds() {
+    const bounds = this.activeModel?.box.clone() ?? new THREE.Box3();
+    const box = this.sectionBox;
+    if (box?.enabled) {
+      const clipped = bounds.clone().intersect(new THREE.Box3(new THREE.Vector3(box.min.x,box.min.y,box.min.z), new THREE.Vector3(box.max.x,box.max.y,box.max.z)));
+      if (!clipped.isEmpty()) return clipped;
+    }
+    return bounds;
   }
 
   async clearSelection() {
@@ -331,15 +524,21 @@ export class ViewerService {
     await this.highlights.clear();
     this.scheduler.invalidate();
     if (selectionSequence !== this.selectionSequence) return;
+    this.selectedRefs = [];
     this.callbacks.onSelection(null);
     this.callbacks.onMultiSelectionChange(0);
     await this.bridge.clearSelection(() => selectionSequence === this.selectionSequence);
   }
 
   async retrySemantic() { await this.bridge.retrySemantic(); }
+  get needsModelRecovery() { return this.loader.needsRecovery; }
+  async recoverModel(check: () => void) {
+    const state = this.captureViewState();
+    await this.loader.recover(); check();
+    await this.applyViewState(state);
+  }
 
   async cancelLoad() {
-    this.interaction.reset();
     await this.loader.cancelLoad();
   }
 
@@ -356,6 +555,7 @@ export class ViewerService {
     this.renderer.domElement.removeEventListener("pointercancel", this.onPointerCancel, true);
     this.renderer.domElement.removeEventListener("click", this.onClick);
     this.view.dispose();
+    this.boxController.dispose();
     this.interaction.dispose();
     try {
       await this.fragmentUpdates.dispose();
@@ -415,14 +615,23 @@ export class ViewerService {
     }
   }
 
-  private requestFragmentUpdate(force = false) {
+  private recordViewEvent(type: string, data: Record<string, unknown>) {
+    const events = this.viewDiagnostics.events;
+    events.push({ type, at: performance.now(), ...data });
+    if (events.length > 240) events.splice(0, events.length - 240);
+  }
+
+  private requestFragmentUpdate(force = false, reason = "scene") {
     this.scheduler.invalidate();
     if (!this.loader || this.disposed) return;
+    this.viewDiagnostics.requests++;
+    this.viewDiagnostics.reason = reason;
     void this.fragmentUpdates.request(force).catch((error) => console.warn("Fragment view update failed", error));
   }
 
-  private cameraUpdated(force: boolean) {
+  private cameraUpdated(force: boolean, context?: CameraUpdateContext) {
     if (this.disposed) return;
+    this.viewDiagnostics.latestCamera = context ?? null;
     const model = this.loader?.activeModel;
     if (!force && model) {
       if (!this.cameraMoving) {
@@ -436,11 +645,11 @@ export class ViewerService {
       if (this.settledTimer !== null) clearTimeout(this.settledTimer);
       this.settledTimer = setTimeout(() => {
         this.endCameraMotion();
-        this.requestFragmentUpdate(true);
+        this.requestFragmentUpdate(true, "settle");
       }, 160);
     }
     if (force) this.endCameraMotion();
-    this.requestFragmentUpdate(force);
+    this.requestFragmentUpdate(force, context?.kind ?? "camera");
   }
 
   private endCameraMotion() {
@@ -456,10 +665,19 @@ export class ViewerService {
     const opacity = 0.34 * THREE.MathUtils.smoothstep(this.camera.zoom, 0.08, 0.65);
     for (const material of this.gridMaterials) material.opacity = opacity;
     this.renderer.render(this.scene, this.camera);
+    this.boxController.update();
+    if (this.boxController.visible) {
+      const autoClear = this.renderer.autoClear;
+      this.renderer.autoClear = false;
+      try { this.renderer.clearDepth(); this.clipping.overlay(() => this.renderer.render(this.boxController.scene, this.camera)); }
+      finally { this.renderer.autoClear = autoClear; }
+    }
     return moving;
   };
 
   private readonly onPointerDown = (event: PointerEvent) => {
+    if (this.inputBlocked) { event.stopImmediatePropagation(); return; }
+    this.orbitEpoch++;
     if (this.boxZoomEnabled) {
       this.startBoxZoomDrag(event);
       return;
@@ -529,9 +747,34 @@ export class ViewerService {
     const width = Math.abs(end.x - start.x);
     const height = Math.abs(end.y - start.y);
     this.suppressNextClick = true;
-    this.setBoxZoomEnabled(false);
+    const sectionBox = this.sectionBoxPicking;
+    if (sectionBox && (width < BOX_ZOOM_MIN_SIZE_PX || height < BOX_ZOOM_MIN_SIZE_PX)) { this.resetBoxZoomDrag(); return; }
+    this.setBoxZoomEnabled(false, true);
     if (width >= BOX_ZOOM_MIN_SIZE_PX && height >= BOX_ZOOM_MIN_SIZE_PX) {
-      this.zoomToViewportBox(left, top, width, height);
+      if (sectionBox && this.activeModel) {
+        this.camera.updateMatrixWorld(true);
+        const box = sectionBoxFromSweep(this.camera, this.activeModel.box, { left, top, width, height },
+          this.renderer.domElement.clientWidth, this.renderer.domElement.clientHeight);
+        const bounds = new THREE.Box3(new THREE.Vector3(box.min.x,box.min.y,box.min.z),new THREE.Vector3(box.max.x,box.max.y,box.max.z));
+        if (!bounds.intersectsBox(this.activeModel.box)) {
+          this.setBoxZoomEnabled(true); this.sectionBoxPicking = true; this.callbacks.onSectionBoxPickActiveChange?.(true);
+          this.callbacks.onInteractionError?.("Vùng quét nằm ngoài mô hình. Hãy chọn lại."); return;
+        }
+        const creation = this.sectionCreation;
+        if (!creation) { this.setSectionBox(box); return; }
+        this.boxDisplay = { showBox: true, showHandles: true };
+        this.setSectionBox(box); this.setInputBlocked(true);
+        this.sectionBoxPicking = true; this.callbacks.onSectionBoxPickActiveChange?.(true);
+        this.view.fitFromOrientation(this.fitBounds(), creation.source.camera);
+        this.transientCleanup = (async () => {
+          if (!await this.view.settled() || this.sectionCreation !== creation) return;
+          if (creation.createView) { await this.clearSelection(); if (this.sectionCreation !== creation) return; this.interaction.clearMeasurements(); }
+          this.sectionCreation = null; this.sectionBoxPicking = false; this.setInputBlocked(false);
+          this.callbacks.onSectionBoxPickActiveChange?.(false);
+          if (creation.createView) this.callbacks.onSectionBoxCreated?.(this.captureViewState());
+          else this.callbacks.onViewStateChange?.();
+        })().catch(error => { this.cancelSectionBox(); this.callbacks.onInteractionError?.(String(error)); });
+      } else this.zoomToViewportBox(left, top, width, height);
     }
   }
 
@@ -586,6 +829,7 @@ export class ViewerService {
   }
 
   private readonly onClick = (event: MouseEvent) => {
+    if (this.inputBlocked) return;
     if (event.button !== 0) return;
     if (this.suppressNextClick) {
       this.suppressNextClick = false;
@@ -602,6 +846,7 @@ export class ViewerService {
   private async pick(event: MouseEvent) {
     if (!this.activeModel) return;
     const selectionSequence = ++this.selectionSequence;
+    const orbitEpoch = this.orbitEpoch;
     const activeModel = this.activeModel;
     // FragmentsModels converts viewport coordinates to NDC internally.
     const mouse = new THREE.Vector2(event.clientX, event.clientY);
@@ -631,7 +876,10 @@ export class ViewerService {
       guid,
     );
     this.callbacks.onSelection(selection);
-    await this.bridge.publishSelection(selection);
+    this.selectedRefs = [{ modelHash: this.modelHash, artifactId: this.artifactId, localId: hit.localId, globalId: guid }];
+    this.callbacks.onViewStateChange?.();
+    await this.centerSelectionOrbit(activeModel, hit.localId, selectionSequence, orbitEpoch);
+    await this.bridge.publishSelection(selection, () => selectionSequence === this.selectionSequence && hit.fragments === this.activeModel);
   }
 
   private async applyMultiSelection(model: FragmentsModel | null, localIds: number[]) {
@@ -646,7 +894,51 @@ export class ViewerService {
       if (selectionSequence !== this.selectionSequence || model !== this.activeModel) return;
     }
     this.callbacks.onMultiSelectionChange(localIds.length);
+    const guids = model && localIds.length ? await model.getGuidsByLocalIds(localIds) : [];
+    if (selectionSequence !== this.selectionSequence || (model && model !== this.activeModel)) return;
+    this.selectedRefs = localIds.map((localId, i) => ({ modelHash: this.modelHash, artifactId: this.artifactId, localId, globalId: guids[i] ?? null }));
+    this.callbacks.onViewStateChange?.();
     await this.bridge.clearSelection(() => selectionSequence === this.selectionSequence);
+  }
+
+  async selectItems(localIds: number[], { centerOrbit = true } = {}) {
+    const model = this.activeModel;
+    if (!model || !localIds.length) { await this.clearSelection(); return; }
+    const ids = [...new Set(localIds)];
+    if (ids.length !== 1) { await this.applyMultiSelection(model, ids); return; }
+    const sequence = ++this.selectionSequence;
+    const orbitEpoch = this.orbitEpoch;
+    await this.highlights.clear();
+    if (sequence !== this.selectionSequence || model !== this.activeModel) return;
+    await this.highlights.setSingle(model, ids[0]);
+    const [item = null] = await model.getItemsData(ids);
+    const [guid = null] = await model.getGuidsByLocalIds(ids);
+    if (sequence !== this.selectionSequence || model !== this.activeModel) return;
+    const selection = createViewerSelection(model.modelId, this.activeModelName, ids[0], item, guid);
+    this.selectedRefs = [{ modelHash: this.modelHash, artifactId: this.artifactId, localId: ids[0], globalId: guid }];
+    this.callbacks.onMultiSelectionChange(0);
+    this.callbacks.onSelection(selection);
+    this.callbacks.onViewStateChange?.();
+    this.scheduler.invalidate();
+    if (centerOrbit) await this.centerSelectionOrbit(model, ids[0], sequence, orbitEpoch);
+    await this.bridge.publishSelection(selection, () => sequence === this.selectionSequence && model === this.activeModel);
+  }
+
+  private async centerSelectionOrbit(model: FragmentsModel, localId: number | null, sequence: number, epoch: number) {
+    const current = () => !this.disposed && !this.inputBlocked && this.activeTool === "selectOrbit"
+      && model === this.activeModel && sequence === this.selectionSequence && epoch === this.orbitEpoch;
+    if (localId === null || !current()) return;
+    try {
+      // Fragments returns world-space bounds, including the model's transform.
+      const bounds = await model.getMergedBox([localId]);
+      if (!current() || bounds.isEmpty()) return;
+      const center = bounds.getCenter(new THREE.Vector3());
+      if (!center.toArray().every(Number.isFinite)) return;
+      this.hasSelectionOrbit = true;
+      this.view.centerOrbit(center);
+    } catch (error) {
+      if (current()) this.callbacks.onInteractionError?.(`Không thể đặt tâm xoay: ${String(error)}`);
+    }
   }
 
 }

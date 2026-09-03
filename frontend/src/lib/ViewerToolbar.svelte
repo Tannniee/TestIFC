@@ -10,8 +10,9 @@
   export let onTool: (tool: ViewerTool) => void;
   export let onMeasureMode: (mode: MeasureMode) => void;
 
-  const tools: { id: ViewerTool; icon: "pan" | "multiSelect" | "measure" }[] = [
+  const tools: { id: ViewerTool; icon: "pan" | "pointer" | "multiSelect" | "measure" }[] = [
     { id: "pan", icon: "pan" },
+    { id: "selectOrbit", icon: "pointer" },
     { id: "multiSelect", icon: "multiSelect" },
     { id: "measure", icon: "measure" },
   ];
@@ -35,6 +36,10 @@
 
   {#if tool === "multiSelect"}
     <p class="viewer-toolbar__navigation-hint">{text.multiSelectHint}</p>
+  {/if}
+
+  {#if tool === "selectOrbit"}
+    <p class="viewer-toolbar__navigation-hint">{text.selectOrbitHint}</p>
   {/if}
 
   {#if tool === "measure"}

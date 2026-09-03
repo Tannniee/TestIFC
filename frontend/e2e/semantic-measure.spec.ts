@@ -4,11 +4,12 @@ import { mkdir } from "node:fs/promises";
 test.beforeEach(async ({ page }) => {
   await page.route("**/health", route => route.fulfill({ json: { ok: true } }));
   await page.route("**/selection", route => route.fulfill({ json: { ok: true } }));
-  await page.goto("/");
+  await page.addInitScript(() => window.addEventListener("ifc-viewer-ready", (event: any) => { (window as any).__viewer = event.detail; }));
+  await page.goto("/?viewerDebug=1");
   await expect(page.locator(".viewer-mount canvas")).toHaveCount(1);
 });
 
-test("fixed measurement dock, selectable units, signed axis snapping and current-frame labels", async ({ page }) => {
+test("measurement entry follows its point, with units, signed axis snapping and current-frame labels", async ({ page }) => {
   await page.evaluate(async () => {
     const interactionPath = "/src/lib/viewer-interaction.ts";
     const threePath = "/node_modules/three/build/three.module.js";
@@ -74,6 +75,10 @@ test("fixed measurement dock, selectable units, signed axis snapping and current
   await page.mouse.move(220, 160); await page.mouse.move(680, 390);
   expect(await dock.boundingBox()).toEqual(before);
   expect(before!.width).toBeLessThan(220);
+  expect(before!.x).toBeGreaterThan(90 + 350);
+  expect(before!.x).toBeLessThan(90 + 400);
+  expect(before!.y + before!.height).toBeLessThan(100 + 230);
+  expect(before!.y + before!.height).toBeGreaterThan(100 + 180);
   const unitWidth = await unit.evaluate(e => e.clientWidth);
   expect(unitWidth).toBeGreaterThanOrEqual(50);
   await expect(host.locator(".viewer-measurement-axis-label:not([hidden])")).toHaveCount(3);
@@ -102,8 +107,8 @@ test("fixed measurement dock, selectable units, signed axis snapping and current
 
 test("semantic status shows stalled work, retries repeatedly, then completes", async ({ page }) => {
   await page.evaluate(async () => {
-    const viewerPath = "/src/lib/viewer.ts", apiPath = "/src/lib/api.ts";
-    const { ViewerService } = await import(viewerPath); const { api } = await import(apiPath);
+    const apiPath = "/src/lib/api.ts";
+    const { api } = await import(apiPath);
     const hash = "a".repeat(64);
     let retries = 0;
     const runtime = () => ({ hasActiveModel: true, activeModelHash: hash, hotIndexStatus: "ready",
@@ -117,13 +122,11 @@ test("semantic status shows stalled work, retries repeatedly, then completes", a
       retries++;
     };
     (window as any).__semanticRetries = () => retries;
-    ViewerService.prototype.load = function(file: File) {
-      const sequence = ++this.loader.loadSequence;
-      this.callbacks.onProgress({ loadSequence: sequence, modelHash: hash, stage: "ready" });
-      return this.bridge.prepareModel(file, hash, sequence, () => {});
-    };
+    const viewer = (window as any).__viewer;
+    const sequence = ++viewer.loader.loadSequence;
+    viewer.callbacks.onProgress({ loadSequence: sequence, modelHash: hash, stage: "ready" });
+    void viewer.bridge.watchModel(new File(["IFC"], "semantic.ifc"), hash, sequence, { contentHashSha256: hash, loadedAt: "activation" });
   });
-  await page.locator('input[type="file"]').setInputFiles({ name: "semantic.ifc", mimeType: "application/octet-stream", buffer: Buffer.from("IFC") });
   const status = page.locator(".semantic-status");
   await expect(status).toContainText("128 / 500");
   await expect(status).toContainText("IfcBeam");
@@ -154,7 +157,7 @@ test("Retry after a transport failure resumes monitoring without restarting heal
     api.retrySemantic = async () => { restarts++; };
     api.cancelModelLoad = async () => {};
     const bridge = new ViewerBridge({ onProgress: (p: any) => stages.push(p.stage) });
-    await bridge.prepareModel(new File(["IFC"], "a.ifc"), "A", 1, () => {});
+    await bridge.watchModel(new File(["IFC"], "a.ifc"), "A", 1, { contentHashSha256: "A", loadedAt: "a" });
     await bridge.retrySemantic();
     for (let i = 0; i < 10; i++) await Promise.resolve();
     await bridge.cancelModelRequests();

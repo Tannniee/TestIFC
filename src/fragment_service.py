@@ -5,11 +5,21 @@ from __future__ import annotations
 from asyncio import to_thread
 from collections.abc import AsyncIterable
 from pathlib import Path
+from contextlib import contextmanager
 
 import model_cache
 
 
 class FragmentService:
+    @contextmanager
+    def lease_download(self, model_hash: str):
+        bundle_hash = model_hash.partition(".fragments-v")[0]
+        model_cache.pin_model(bundle_hash)
+        try:
+            yield
+        finally:
+            model_cache.unpin_model(bundle_hash)
+
     def cached_file(self, model_hash: str) -> Path:
         return model_cache.cached_fragments_file(model_hash)
 

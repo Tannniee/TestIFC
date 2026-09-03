@@ -2,21 +2,25 @@ import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 
 test.beforeEach(async ({ page }) => {
-  await page.route("**/health", (route) => route.fulfill({ json: { ok: true, appVersion: "1.0.2" } }));
+  await page.route("**/health", (route) => route.fulfill({ json: { ok: true, appVersion: "1.0.3" } }));
   await page.route("**/selection", (route) => route.fulfill({ json: { ok: true } }));
-  await page.goto("/");
+  await page.addInitScript(() => window.addEventListener("ifc-viewer-ready", (event: any) => { (window as any).__viewer = event.detail; }));
+  await page.goto("/?viewerDebug=1");
   await expect(page.locator(".viewer-mount canvas")).toHaveCount(1);
 });
 
 test("two progress bars show real phases, reset on reopen, and cancel via button or Escape", async ({ page }) => {
   await page.evaluate(async () => {
-    const path = "/src/lib/viewer.ts";
-    const { ViewerService } = await import(path);
-    ViewerService.prototype.load = function (file: File) {
+    const { LoadCancelledError } = await import(/* @vite-ignore */ "/src/lib/viewer-contracts.ts");
+    const viewer = (window as any).__viewer;
+    let rejectLoad: ((error: Error) => void) | null = null;
+    const cancel = viewer.cancelLoad.bind(viewer);
+    viewer.cancelLoad = () => { rejectLoad?.(new LoadCancelledError()); rejectLoad = null; return cancel(); };
+    viewer.load = function (file: File) {
       const sequence = ++this.loader.loadSequence;
       this.loader.publishProgress(sequence, { modelHash: "a", stage: "converting", progress: .675, phase: "attributes", category: "IfcBeam", entitiesProcessed: 1248, detail: file.name });
       (window as any).setLoadPhase = (progress: object) => this.loader.publishProgress(sequence, { modelHash: "a", detail: file.name, ...progress });
-      return new Promise(() => {});
+      return new Promise((_,reject) => { rejectLoad = reject; });
     };
   });
   const input = page.locator('input[type="file"]');
@@ -79,34 +83,35 @@ test("XHR upload is storage-only and AbortSignal rejects before and during trans
   expect(before).toBe("AbortError");
 });
 
-test("cancel waits for in-flight activation then cleans only its own generation before next model", async ({ page }) => {
+test("cancel waits for stage reply and rolls back that exact ticket without activating it", async ({ page }) => {
   const calls = await page.evaluate(async () => {
-    const bridgePath = "/src/lib/viewer-bridge.ts";
+    const bridgePath = "/src/lib/model-staging.ts";
     const apiPath = "/src/lib/api.ts";
-    const { ViewerBridge } = await import(bridgePath);
+    const { ModelStage } = await import(bridgePath);
     const { api } = await import(apiPath);
     const saved = { ...api };
     const calls: string[] = [];
     let finish!: (value: object) => void;
-    api.activateModel = async (hash: string) => {
-      calls.push(`activate:${hash}`);
-      return hash === "A" ? new Promise((resolve) => { finish = resolve; }) : { contentHashSha256: hash, loadedAt: "new" };
+    let ticket = "";
+    api.stageModel = async (id: string, hash: string) => {
+      ticket = id;
+      calls.push(`stage:${hash}`);
+      return new Promise((resolve) => { finish = resolve; });
     };
-    api.cancelModelLoad = async (model: any) => { calls.push(`cancel:${model.contentHashSha256}:${model.loadedAt}`); };
+    api.stageAction = async (id: string, action: string) => { calls.push(`${action}:${id === ticket}`); };
     api.runtime = async () => ({ hasActiveModel: true, activeModelHash: "B", hotIndexStatus: "ready", coldIndexStatus: "ready" });
-    const bridge = new ViewerBridge({ onProgress: () => {} });
+    const controller = new AbortController();
     try {
       const file = new File(["IFC"], "a.ifc");
-      const a = bridge.prepareModel(file, "A", 1, () => {});
+      const a = ModelStage.prepare(file, "A", controller.signal, () => {}).catch((e: Error) => e.name);
       for (let i = 0; i < 10; i++) await Promise.resolve();
-      const stopped = bridge.cancelModelRequests();
-      const b = bridge.prepareModel(file, "B", 2, () => {});
-      finish({ contentHashSha256: "A", loadedAt: "old" });
-      await Promise.all([a, stopped, b]);
+      controller.abort();
+      finish({ stageId: ticket, model: { contentHashSha256: "A", loadedAt: "old" } });
+      await a;
       return calls;
     } finally { Object.assign(api, saved); }
   });
-  expect(calls).toEqual(["activate:A", "cancel:A:old", "activate:B"]);
+  expect(calls).toEqual(["stage:A", "rollback:true"]);
 });
 
 test("real IFC conversion cancels and the same file can open again", async ({ page }) => {
@@ -117,10 +122,9 @@ test("real IFC conversion cancels and the same file can open again", async ({ pa
   await page.route("**/model/fragments/*", (route) => route.request().method() === "GET"
     ? route.fulfill({ status: 404, json: { error: "fragments_not_cached" } }) : route.continue());
   await page.evaluate(async () => {
-    const path = "/src/lib/ifc-converter.ts";
-    const { IfcConverter } = await import(path);
-    const convert = IfcConverter.prototype.convert;
-    IfcConverter.prototype.convert = function (...args: any[]) {
+    const converter = (window as any).__viewer.loader.converter;
+    const convert = converter.convert;
+    converter.convert = function (...args: any[]) {
       (window as any).conversionStarted = true;
       return convert.apply(this, args);
     };
@@ -128,13 +132,14 @@ test("real IFC conversion cancels and the same file can open again", async ({ pa
     window.addEventListener("ifc-fragment-metrics", (event) => (window as any).loadMetrics.push((event as CustomEvent).detail));
   });
   const input = page.locator('input[type="file"]');
+  const previousHash = await page.evaluate(async () => (await (await fetch("/model/runtime")).json()).activeModelHash);
   await input.setInputFiles(modelPath!);
   await expect.poll(() => page.evaluate(() => (window as any).conversionStarted)).toBe(true);
   await page.getByRole("dialog").getByRole("button", { name: "Hủy", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator(".viewer-empty-state")).toContainText("Đã hủy");
   expect(await page.evaluate(() => (window as any).loadMetrics.length)).toBe(0);
-  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).hasActiveModel)).toBe(false);
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).activeModelHash)).toBe(previousHash);
   await page.unroute("**/model/fragments/*");
   await input.setInputFiles(modelPath!);
   await expect.poll(() => page.evaluate(() => (window as any).loadMetrics.length), { timeout: 120_000 }).toBe(1);

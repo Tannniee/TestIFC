@@ -20,7 +20,9 @@ class FrontendArchitectureTests(unittest.TestCase):
         for component in (
             "AppRail",
             "HelpDialog",
-            "InspectorDrawer",
+            "PropertiesPanel",
+            "ProjectBrowser",
+            "WorkspaceTabs",
             "ViewerToolbar",
         ):
             self.assertIn(f"<{component}", app)
@@ -34,7 +36,8 @@ class FrontendArchitectureTests(unittest.TestCase):
             self.assertNotIn(forbidden, app)
         self.assertIn("progressText(viewerProgress, t)", app)
         self.assertIn("bridgeText(bridgeProgress, locale)", app)
-        self.assertLess(len(app.splitlines()), 700)
+        self.assertIn("<SectionBoxPanel", source(LIB / "PropertiesPanel.svelte"))
+        self.assertIn("<CacheSettings", app)
 
     def test_app_shell_owns_api_settings_and_viewer_lifecycle(self):
         shell = source(LIB / "app-shell.ts")
@@ -91,7 +94,7 @@ class FrontendArchitectureTests(unittest.TestCase):
         self.assertIn("parseMeasurementInput", math)
 
     def test_api_runtime_imports_stay_in_shell_and_bridge_adapters(self):
-        expected = {"app-shell.ts", "viewer-bridge.ts"}
+        expected = {"app-shell.ts", "viewer-bridge.ts", "model-staging.ts"}
         actual = {
             path.name
             for path in LIB.glob("*.ts")

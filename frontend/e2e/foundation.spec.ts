@@ -3,7 +3,8 @@ import { expect, test } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.route("**/health", route => route.fulfill({ json: { ok: true } }));
   await page.route("**/selection", route => route.fulfill({ json: { ok: true } }));
-  await page.goto("/");
+  await page.addInitScript(() => window.addEventListener("ifc-viewer-ready", (event: any) => { (window as any).__fragmentViewer = event.detail; }));
+  await page.goto("/?viewerDebug=1");
   await expect(page.locator(".viewer-mount canvas")).toHaveCount(1);
 });
 
@@ -104,11 +105,19 @@ test("real IFC cancelled at fragment attachment cannot restore its model and reo
   const model = process.env.IFC_E2E_MODEL_PATH;
   test.skip(!model, "Set IFC_E2E_MODEL_PATH for the fragment attachment cancellation gate");
   await page.evaluate(async () => {
-    const path = "/src/lib/viewer.ts";
-    const { ViewerService } = await import(path);
-    const original = ViewerService.prototype.load;
-    ViewerService.prototype.load = function(file: File) {
-      ViewerService.prototype.load = original;
+    const viewer = (window as any).__fragmentViewer;
+    (window as any).__cancelTrace = [];
+    for (const name of ["applyViewState", "clearSelection"]) {
+      const originalStep = viewer[name].bind(viewer);
+      viewer[name] = async (...args: any[]) => {
+        (window as any).__cancelTrace.push(`${name}:start`);
+        try { return await originalStep(...args); }
+        finally { (window as any).__cancelTrace.push(`${name}:end`); }
+      };
+    }
+    const original = viewer.load;
+    viewer.load = function(file: File, options: any) {
+      viewer.load = original;
       (window as any).__fragmentViewer = this;
       const fragments = this.loader.fragments;
       const load = fragments.load.bind(fragments);
@@ -119,16 +128,22 @@ test("real IFC cancelled at fragment attachment cannot restore its model and reo
         await new Promise(resolve => { (window as any).__releaseAttachment = resolve; });
         return loaded;
       };
-      return original.call(this, file).finally(() => { (window as any).__oldLoadSettled = true; });
+      return original.call(this, file, options).finally(() => { (window as any).__oldLoadSettled = true; });
     };
   });
   const input = page.locator('input[type="file"]');
   await input.setInputFiles(model!);
-  await page.waitForFunction(() => (window as any).__attachmentReady, { timeout: 60000 });
+  await page.waitForFunction(() => (window as any).__attachmentReady, undefined, { timeout: 60000 });
   await page.getByRole("dialog").getByRole("button", { name: "Hủy", exact: true }).click();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.evaluate(() => (window as any).__releaseAttachment());
-  await page.waitForFunction(() => (window as any).__oldLoadSettled);
+  try { await page.waitForFunction(() => (window as any).__oldLoadSettled, undefined, { timeout: 15000 }); }
+  catch (error) {
+    console.log(await page.evaluate(() => ({ trace: (window as any).__cancelTrace,
+      events: (window as any).__fragmentViewer.viewDiagnostics.events.slice(-10),
+      models: (window as any).__fragmentViewer.loader.fragments.models.list.size })));
+    throw error;
+  }
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   const disposed = await page.evaluate(() => {
     const viewer = (window as any).__fragmentViewer;
     return { model: viewer.hasModel, fragments: viewer.loader.fragments.models.list.size };

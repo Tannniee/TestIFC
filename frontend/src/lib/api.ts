@@ -3,6 +3,8 @@ import {
   API_ENDPOINTS,
   apiPath,
   type ActivateModelResponse,
+  type StageModelResponse,
+  type CacheInventory,
   type FragmentStoredResponse,
   type HealthResponse,
   type LoadModelResponse,
@@ -105,6 +107,18 @@ export const api = {
       { method: API_ENDPOINTS.activateModel.method },
     );
   },
+  stageModel(stageId: string, modelHash: string, filename: string) {
+    return requestJson<StageModelResponse>("/model/stage", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stageId, modelHash, filename }), signal: AbortSignal.timeout(120000) });
+  },
+  stageAction(stageId: string, action: "commit" | "rollback" | "finalize") {
+    return requestJson<StageModelResponse>(`/model/stage/${stageId}`, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }), signal: AbortSignal.timeout(15000) });
+  },
+  cacheInventory: () => requestJson<CacheInventory>("/model/cache"),
+  clearCache: (scope: "fragments" | "all") => requestJson<CacheInventory & { freedBytes: number; failedFiles: number }>("/model/cache/clear", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope }),
+  }),
   retrySemantic(model: ActivateModelResponse, attemptId: string) {
     return requestJson<{ ok: boolean }>(API_ENDPOINTS.retrySemantic.path, {
       method: "POST", headers: { "Content-Type": "application/json" },

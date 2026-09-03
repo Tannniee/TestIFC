@@ -30,11 +30,14 @@ export class FragmentUpdates {
   private force = false;
   private running: Promise<void> | null = null;
   private disposed = false;
-  constructor(private readonly update: (force: boolean) => Promise<void>) {}
+  private lastDispatch = -Infinity;
+  private wake: (() => void) | null = null;
+  constructor(private readonly update: (force: boolean) => Promise<void>, private readonly intervalMs = 0) {}
   request(force = false): Promise<void> {
     if (this.disposed) return Promise.resolve();
     this.pending = true;
     this.force ||= force;
+    if (force) this.wake?.();
     if (!this.running) this.running = this.drain().finally(() => {
       this.running = null;
       if (this.pending && !this.disposed) return this.request();
@@ -43,14 +46,22 @@ export class FragmentUpdates {
   }
   private async drain() {
     while (this.pending && !this.disposed) {
+      const delay = this.intervalMs - (performance.now() - this.lastDispatch);
+      if (!this.force && delay > 0) await new Promise<void>(resolve => {
+        const timer = setTimeout(() => { this.wake = null; resolve(); }, delay);
+        this.wake = () => { clearTimeout(timer); this.wake = null; resolve(); };
+      });
+      if (this.disposed) break;
       const force = this.force;
       this.pending = this.force = false;
+      this.lastDispatch = performance.now();
       await this.update(force);
     }
   }
   async dispose() {
     this.disposed = true;
     this.pending = false;
+    this.wake?.();
     await this.running;
   }
 }

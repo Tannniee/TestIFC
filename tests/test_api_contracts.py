@@ -36,7 +36,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["service"], "ifc-selection-bridge")
-        self.assertEqual(payload["appVersion"], "1.0.2")
+        self.assertEqual(payload["appVersion"], "1.0.3")
         self.assertFalse(payload["hasSelection"])
 
     async def test_semantic_retry_rejects_stale_activation_and_duplicate_attempt(self):
@@ -140,6 +140,10 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             "/health": {"get"},
             "/selection": {"get", "post", "delete"},
             "/load-model": {"post"},
+            "/model/stage": {"post"},
+            "/model/stage/{stageId}": {"post"},
+            "/model/cache": {"get"},
+            "/model/cache/clear": {"post"},
             "/model/fragments/{modelHash}": {"get", "post"},
             "/model/activate/{modelHash}": {"post"},
             "/model/cancel-load": {"post"},

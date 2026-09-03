@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let name: "folder" | "fit" | "zoomBox" | "section" | "moon" | "sun" | "globe" | "panel" | "settings" | "help" | "close" | "pan" | "multiSelect" | "measure" | "point" | "edge" | "trash";
+  export let name: "folder" | "fit" | "zoomBox" | "section" | "sectionBox" | "moon" | "sun" | "globe" | "panel" | "settings" | "help" | "close" | "pan" | "pointer" | "multiSelect" | "measure" | "point" | "edge" | "trash";
   export let size = 20;
 </script>
 
@@ -25,6 +25,8 @@
   {:else if name === "section"}
     <path d="M4 6.5 12 3l8 3.5-8 3.5zM4 12l8 3.5 8-3.5M4 17.5 12 21l8-3.5" />
     <path d="M12 10v5.5" />
+  {:else if name === "sectionBox"}
+    <path d="m4 7 8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10" stroke-dasharray="3 2" />
   {:else if name === "moon"}
     <path d="M20.5 14.2A8.4 8.4 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z" />
   {:else if name === "sun"}
@@ -39,6 +41,8 @@
     <circle cx="12" cy="12" r="9" /><path d="M9.8 9a2.4 2.4 0 1 1 3.5 2.1c-.8.4-1.3 1-1.3 1.9M12 17h.01" />
   {:else if name === "pan"}
     <path d="M8.5 11V6.5a1.5 1.5 0 0 1 3 0V10M11.5 9V5.5a1.5 1.5 0 0 1 3 0V10M14.5 9V7a1.5 1.5 0 0 1 3 0v5M8.5 9.5V9a1.5 1.5 0 0 0-3 0v4.2c0 4.3 2.7 7.3 6.8 7.3h.9c4.2 0 6.8-2.8 6.8-7V10a1.5 1.5 0 0 0-2.5-1.1" />
+  {:else if name === "pointer"}
+    <path d="m8 8 4.3 12 2.2-5.5L20 12.3zM5 5 3 3M8 4V2M4 8H2M12 5l1.5-1.5M5 12l-1.5 1.5" />
   {:else if name === "multiSelect"}
     <rect x="4" y="4" width="7" height="7" rx="1" /><rect x="13" y="13" width="7" height="7" rx="1" /><path d="M14 4h6v6M4 14v6h6" stroke-dasharray="2 2" />
   {:else if name === "measure"}

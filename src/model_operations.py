@@ -10,6 +10,9 @@ from ifc_elements import (
     extract_element_by_express_id,
 )
 from model_cache import cached_model_file
+import model_cache
+import model_runtime
+import model_transactions
 from model_runtime import (
     cancel_active_load,
     lease_active_model,
@@ -54,6 +57,20 @@ def register_external_model(path: str, expected_hash: str) -> dict[str, Any]:
 
 def runtime_status() -> dict[str, Any]:
     return live_model_status()
+
+
+def prepare_stage(stage_id: str, model_hash: str, filename: str | None) -> dict:
+    return model_transactions.prepare(stage_id, model_hash, filename)
+
+
+def transition_stage(stage_id: str, action: str) -> dict:
+    return model_transactions.transition(stage_id, action)
+
+
+def cached_storage(scope: str | None = None) -> dict:
+    model = model_runtime._state.get_or_none()
+    active_hash = model.contentHashSha256 if model else None
+    return model_cache.cache_inventory(active_hash) if scope is None else model_cache.clear_cache(scope, active_hash)
 
 
 def model_tree() -> dict[str, Any]:
