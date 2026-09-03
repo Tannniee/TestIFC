@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from threading import Event, Lock
 from time import monotonic
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Callable
 
 import ifcopenshell
 
@@ -19,6 +19,9 @@ import index_builder
 import model_cache
 import model_index
 from background_tasks import LatestTaskRunner
+from index_progress import IndexProgress
+
+_index_progress = IndexProgress()
 
 
 LIVE_MODEL_MAX_BYTES = int(os.environ.get("IFC_LIVE_MODEL_MAX_BYTES") or 268_435_456)
@@ -170,6 +173,30 @@ class _ActiveModelState:
             self._ifc_file = None
             self._ifc_hash = None
 
+    def retry_index(self, model_hash: str, loaded_at: str, attempt_id: str) -> bool:
+        with self._lock:
+            model = self._active
+            if model is None or model.contentHashSha256 != model_hash or model.loadedAt != loaded_at:
+                return False
+            progress = _index_progress.snapshot(model_hash)
+            if progress is None or progress["attemptId"] != attempt_id:
+                return False
+            if not progress["stalled"] and progress["status"] != "error":
+                return False
+            _background_indexes.cancel()
+            _queue_index_build(model)
+            return True
+
+    def cancel_load(self, model_hash: str, loaded_at: str, cancel: Callable[[], None]) -> bool:
+        with self._lock:
+            if self._active is None or (self._active.contentHashSha256, self._active.loadedAt) != (model_hash, loaded_at):
+                return False
+            cancel()
+            self._active = None
+            self._ifc_file = None
+            self._ifc_hash = None
+            return True
+
     def clear_if(self, model_hash: str) -> None:
         with self._lock:
             if self._active is not None and self._active.contentHashSha256 == model_hash:
@@ -291,11 +318,13 @@ def materialize_model_stream(
     reader: BinaryIO,
     original_filename: str | None,
     background: bool = False,
+    *, activate: bool = True,
 ) -> dict:
     cached = model_cache.store_model_stream(reader, pin_for_activation=True)
     try:
         model = _active_model(cached, original_filename)
-        (_activate_in_background if background else _activate)(model)
+        if activate:
+            (_activate_in_background if background else _activate)(model)
         return asdict(model)
     finally:
         model_cache.unpin_model(cached.content_hash)
@@ -336,7 +365,7 @@ def _activate(model: ActiveModel) -> None:
     _run_build(model, target)
 
 
-def _run_build(model: ActiveModel, target, cancelled: Event | None = None) -> None:
+def _run_build(model: ActiveModel, target, cancelled: Event | None = None, attempt: str | None = None) -> None:
     model_cache.ensure_cache_dir()
     try:
         index_builder.prepare_model(
@@ -345,6 +374,7 @@ def _run_build(model: ActiveModel, target, cancelled: Event | None = None) -> No
             str(model_cache.CACHE_DIR),
             cancelled=cancelled.is_set if cancelled else lambda: False,
             on_hot_ready=lambda: _prepare.end(model.contentHashSha256),
+            on_progress=(lambda event: _index_progress.update(attempt, event)) if attempt else None,
         )
         if not model_index.is_usable(target):
             raise RuntimeError(
@@ -412,9 +442,18 @@ def open_model_session(
 def _activate_in_background(model: ActiveModel) -> None:
     _state.set(model)
     model_cache.schedule_cache_retention(model.contentHashSha256)
+    _queue_index_build(model)
+
+
+def _queue_index_build(model: ActiveModel) -> None:
+    current = _index_progress.snapshot(model.contentHashSha256)
+    if current and current["status"] == "running" and _background_indexes.contains(model.contentHashSha256):
+        return
+    attempt = _index_progress.begin(model.contentHashSha256)
     target = model_index.index_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
     if model_index.is_complete(target):
         _background_indexes.cancel()
+        _index_progress.update(attempt, {"phase": "ready", "status": "ready"})
         _prepare.clear_error(model.contentHashSha256)
         return
     _prepare.clear_error(model.contentHashSha256)
@@ -424,13 +463,15 @@ def _activate_in_background(model: ActiveModel) -> None:
         try:
             if not _prepare.begin(model.contentHashSha256):
                 return
-            _run_build(model, target, cancelled)
+            _run_build(model, target, cancelled, attempt)
+            _index_progress.update(attempt, {"phase": "ready", "status": "ready"})
         except index_builder.BuildCancelled:
             logger.info(
                 "Index build superseded by a newer model",
                 extra={"event": "background_index_cancelled", "modelHash": model.contentHashSha256},
             )
-        except Exception:
+        except Exception as error:
+            _index_progress.update(attempt, {"status": "error", "error": str(error)})
             logger.exception(
                 "Background index build failed for %s",
                 model.contentHashSha256[:12],
@@ -479,27 +520,34 @@ def live_model_status() -> dict:
         if model
         else None
     )
+    semantic_progress = _index_progress.snapshot(model.contentHashSha256) if model else None
     preparing = model is not None and _prepare.is_preparing(model.contentHashSha256)
-    if model is not None and _background_indexes.contains(model.contentHashSha256):
+    if semantic_progress and semantic_progress["status"] == "running":
+        preparing = semantic_progress["phase"] not in ("cold", "ready")
+    elif model is not None and _background_indexes.contains(model.contentHashSha256):
         preparing = not model_index.is_usable(target)
     prepare_error = _prepare.error_for(model.contentHashSha256) if model else None
     if model is None:
         hot_index_status = "idle"
     elif preparing:
         hot_index_status = "indexing"
+    elif semantic_progress and semantic_progress["phase"] in ("cold", "ready"):
+        hot_index_status = "ready"
     elif prepare_error:
         hot_index_status = "error"
     else:
         hot_index_status = "ready"
     return {
+        "semanticProgress": semantic_progress,
         "hasActiveModel": model is not None,
         "activeModelHash": model.contentHashSha256 if model else None,
         "modelResident": _state.is_open(),
         "preparing": preparing,
         "prepareError": prepare_error,
         "hotIndexStatus": hot_index_status,
-        "coldIndexStatus": model_index.cold_status(target) if target else "not_configured",
-        "coldIndexError": model_index.cold_error(target) if target else None,
+        "coldIndexStatus": ("indexing" if semantic_progress["status"] == "running" else semantic_progress["status"])
+            if semantic_progress else (model_index.cold_status(target) if target else "not_configured"),
+        "coldIndexError": semantic_progress.get("error") if semantic_progress else (model_index.cold_error(target) if target else None),
         "storeBacked": model is not None
         and index_builder.store_is_usable(
             index_builder.store_path_for(model_cache.CACHE_DIR, model.contentHashSha256)
@@ -508,6 +556,11 @@ def live_model_status() -> dict:
         "liveModelMaxBytes": LIVE_MODEL_MAX_BYTES,
         "idleSeconds": LIVE_MODEL_IDLE_SECONDS,
     }
+
+
+def cancel_active_load(model_hash: str, loaded_at: str) -> bool:
+    """Cancel only the exact activation owned by the caller, including same-hash reloads."""
+    return _state.cancel_load(model_hash, loaded_at, _background_indexes.cancel)
 
 
 def should_open_for_geometry() -> bool:
@@ -529,3 +582,7 @@ def should_open_ref_for_geometry(ref: ModelRef) -> bool:
 
 
 _should_open_for_geometry = should_open_for_geometry
+
+
+def retry_semantic_index(model_hash: str, loaded_at: str, attempt_id: str) -> bool:
+    return _state.retry_index(model_hash, loaded_at, attempt_id)

@@ -46,8 +46,8 @@ class FrontendArchitectureTests(unittest.TestCase):
     def test_viewer_service_delegates_external_concerns(self):
         viewer = source(LIB / "viewer.ts")
         for collaborator in (
-            'from "./ifc-converter"',
-            'from "./viewer-bridge"',
+            'from "./viewer-model-loader"',
+            'from "./render-scheduler"',
             'from "./viewer-camera"',
             'from "./viewer-contracts"',
             'from "./viewer-selection"',
@@ -55,7 +55,8 @@ class FrontendArchitectureTests(unittest.TestCase):
             self.assertIn(collaborator, viewer)
         for forbidden in ('from "./api"', "new Worker", "crypto.subtle"):
             self.assertNotIn(forbidden, viewer)
-        self.assertLess(len(viewer.splitlines()), 700)
+        self.assertIn('from "./read-model-file"', source(LIB / "viewer-model-loader.ts"))
+        self.assertNotIn("new FileReader", viewer)
 
     def test_interaction_tools_use_fragment_spatial_apis(self):
         interaction = source(LIB / "viewer-interaction.ts")

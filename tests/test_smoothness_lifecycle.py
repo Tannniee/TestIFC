@@ -93,7 +93,7 @@ class SmoothnessLifecycleTests(unittest.TestCase):
     def test_hot_publication_does_not_release_the_process_before_cold_finishes(self):
         with TemporaryDirectory() as temporary:
             process = Mock()
-            process.is_alive.side_effect = [True, True, False, False]
+            process.is_alive.side_effect = [True, True, False, False, False]
             process.exitcode = 0
             context = Mock()
             context.Process.return_value = process
@@ -116,6 +116,7 @@ class SmoothnessLifecycleTests(unittest.TestCase):
             process = Mock()
             process.start.side_effect = stop.set
             process.is_alive.return_value = True
+            process.terminate.side_effect = lambda: setattr(process.is_alive, "return_value", False)
             context = Mock()
             context.Process.return_value = process
             with patch.object(index_builder.multiprocessing, "get_context", return_value=context):

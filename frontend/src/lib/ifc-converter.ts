@@ -1,10 +1,12 @@
 import { LoadCancelledError } from "./viewer-contracts";
 import type { FragmentMetadataProfile } from "./fragment-profile";
+import type { ProgressData } from "@thatopen/fragments";
 
 interface WorkerProgressMessage {
   type: "progress";
   id: number;
   progress: number;
+  detail?: ProgressData;
 }
 
 interface WorkerDoneMessage {
@@ -29,37 +31,39 @@ export class IfcConverter {
     id: number;
     resolve(value: Uint8Array): void;
     reject(reason: unknown): void;
-    onProgress(progress: number): void;
+    onProgress(progress: number, detail?: ProgressData): void;
   } | null = null;
 
-  constructor(private readonly profile: FragmentMetadataProfile) {
-    this.startWorker();
-  }
+  constructor(private readonly profile: FragmentMetadataProfile) {}
 
-  convert(bytes: ArrayBuffer, onProgress: (progress: number) => void): Promise<Uint8Array> {
+  convert(bytes: ArrayBuffer, onProgress: (progress: number, detail?: ProgressData) => void): Promise<Uint8Array> {
     if (this.disposed) return Promise.reject(new LoadCancelledError());
     this.cancel();
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
       this.pending = { id, resolve, reject, onProgress };
-      this.worker?.postMessage({ id, bytes, profile: this.profile }, [bytes]);
+      try {
+        this.startWorker();
+        this.worker!.postMessage({ id, bytes, profile: this.profile }, [bytes]);
+      } catch (error) {
+        this.pending = null;
+        this.stopWorker();
+        reject(error);
+      }
     });
   }
 
   cancel() {
-    if (!this.pending) return;
-    this.pending.reject(new LoadCancelledError());
+    this.pending?.reject(new LoadCancelledError());
     this.pending = null;
-    this.worker?.terminate();
-    this.startWorker();
+    this.stopWorker();
   }
 
   dispose() {
     this.disposed = true;
     this.pending?.reject(new LoadCancelledError());
     this.pending = null;
-    this.worker?.terminate();
-    this.worker = null;
+    this.stopWorker();
   }
 
   private startWorker() {
@@ -74,22 +78,23 @@ export class IfcConverter {
     const pending = this.pending;
     if (!pending || event.data.id !== pending.id) return;
     if (event.data.type === "progress") {
-      pending.onProgress(event.data.progress);
+      pending.onProgress(event.data.progress, event.data.detail);
       return;
     }
     this.pending = null;
+    this.stopWorker();
     if (event.data.type === "done") pending.resolve(event.data.fragments);
     else pending.reject(new Error(event.data.message));
   };
 
   private readonly onWorkerError = (event: ErrorEvent) => {
     this.rejectPending(new Error(event.message || "IFC conversion worker failed"));
-    this.restartWorker();
+    this.stopWorker();
   };
 
   private readonly onMessageError = () => {
     this.rejectPending(new Error("IFC conversion worker returned unreadable data"));
-    this.restartWorker();
+    this.stopWorker();
   };
 
   private rejectPending(error: Error) {
@@ -98,10 +103,14 @@ export class IfcConverter {
     pending?.reject(error);
   }
 
-  private restartWorker() {
-    this.worker?.terminate();
+  private stopWorker() {
+    const worker = this.worker;
     this.worker = null;
-    this.startWorker();
+    if (!worker) return;
+    worker.removeEventListener("message", this.onMessage);
+    worker.removeEventListener("error", this.onWorkerError);
+    worker.removeEventListener("messageerror", this.onMessageError);
+    worker.terminate();
   }
 }
 

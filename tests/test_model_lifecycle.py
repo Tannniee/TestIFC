@@ -235,7 +235,7 @@ class ModelLifecycleTests(unittest.TestCase):
             active_hash = "a" * 64
             (cache_dir / f"{building_hash}.ifc").write_bytes(b"building")
             (cache_dir / f"{active_hash}.ifc").write_bytes(b"active")
-            (cache_dir / f"{building_hash}.semantic-v3.lock").write_text("pid=1")
+            (cache_dir / f"{building_hash}.semantic-v3.lock").write_text(f"pid={os.getpid()}")
             with (
                 patch.object(model_cache, "CACHE_DIR", cache_dir),
                 patch.object(model_cache, "CACHE_KEEP_MODELS", 1),

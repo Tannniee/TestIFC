@@ -24,6 +24,7 @@ test("measurement clicks preserve order and cancelled snaps cannot restore a dra
     const scene = new THREE.Scene();
     const interaction = new ViewerInteraction(host, canvas, scene, new THREE.PerspectiveCamera(), {
       activeModel: () => model,
+      onInvalidate: () => {},
       onMultiSelection: () => {},
       onMeasurements: (value: typeof measurements) => { measurements = value; },
     });
@@ -75,12 +76,17 @@ test("latest backend activation follows any in-flight upload and skips supersede
     const contractsPath = "/src/lib/viewer-contracts.ts";
     const { ViewerBridge } = await import(bridgePath);
     const { api } = await import(apiPath);
+    const { ApiError } = await import(apiPath);
     const { LoadCancelledError } = await import(contractsPath);
     const original = { ...api };
     const calls: string[] = [];
     let finishUpload!: (value: unknown) => void;
     let active = "A";
-    api.tryActivateModel = async (hash: string) => { calls.push(hash); return hash !== "A"; };
+    api.activateModel = async (hash: string) => {
+      calls.push(hash);
+      if (hash === "A") throw new ApiError("not cached", 404);
+      return { contentHashSha256: hash, loadedAt: hash };
+    };
     api.uploadModel = () => new Promise((resolve) => { finishUpload = resolve; });
     api.runtime = async () => ({ hasActiveModel: true, activeModelHash: "C", hotIndexStatus: "ready", coldIndexStatus: "ready" });
     const bridge = new ViewerBridge({ onProgress: () => {} });

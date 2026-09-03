@@ -22,7 +22,8 @@ provide a supported interactive desktop session. Enforce step 9 against the
 packaged executable on an interactive Windows release machine before distribution.
 
 The active package name comes from `src/version.py`. The application has no license
-gate, authentication endpoint, login UI, credential, or build-mode switch.
+gate, licensing endpoint, login UI, or build-mode switch. Its internal loopback
+API uses a per-launch session credential supplied by the desktop bridge.
 
 Current mass policy resolves authored weight, authored volume, supported analytic
 geometry, Geometry Iterator mesh volume, and section-text fallback in that order.

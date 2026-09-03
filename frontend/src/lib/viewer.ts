@@ -1,26 +1,19 @@
-import { FragmentsModels, type FragmentsModel } from "@thatopen/fragments";
+import { type FragmentsModel } from "@thatopen/fragments";
 import * as THREE from "three";
-import { IfcConverter, sha256Hex } from "./ifc-converter";
-import { fragmentArrayBuffer } from "./fragment-buffer";
 import { markViewerCreated, markViewerDisposed } from "./lifecycle-diagnostics";
 import {
   browserFragmentMetadataProfile,
-  fragmentCacheKey,
-  type FragmentMetadataProfile,
 } from "./fragment-profile";
-import { ViewerBridge } from "./viewer-bridge";
+import { ViewerModelLoader } from "./viewer-model-loader";
+import { FragmentUpdates, RenderScheduler } from "./render-scheduler";
 import { ViewerCamera } from "./viewer-camera";
 import {
-  LoadCancelledError,
-  type BridgeProgress,
   type CameraOrientation,
-  type FragmentMetrics,
   type MeasureMode,
   type SectionPlaneDefinition,
   type SectionSide,
   type ViewDirection,
   type ViewerCallbacks,
-  type ViewerProgress,
   type ViewerSelection,
   type ViewerTool,
   type ViewportBackground,
@@ -37,7 +30,7 @@ const VIEWPORT_COLORS: Record<ViewportBackground, { background: number; center: 
   white: { background: 0xffffff, center: 0x7a8790, grid: 0xc6cdd2 },
   oled: { background: 0x000000, center: 0x53636d, grid: 0x202a30 },
 };
-const FRAGMENTS_MAX_UPDATE_RATE_MS = 16;
+const FRAGMENTS_MAX_UPDATE_RATE_MS = 50;
 const BOX_ZOOM_MIN_SIZE_PX = 8;
 const SECTION_CLIP_EPSILON_RATIO = 0.00001;
 const SECTION_CLIP_EPSILON_MIN = 0.0001;
@@ -48,23 +41,28 @@ export class ViewerService {
   private readonly view: ViewerCamera;
   private readonly interaction: ViewerInteraction;
   private readonly boxZoomRectangle: HTMLDivElement;
-  private readonly fragments = new FragmentsModels("/vendor/fragments/worker.mjs", { maxWorkers: 2 });
-  private readonly converter: IfcConverter;
-  private readonly fragmentProfile: FragmentMetadataProfile;
-  private readonly bridge: ViewerBridge;
+  private readonly loader: ViewerModelLoader;
+  private readonly scheduler = new RenderScheduler((time) => this.render(time));
+  private readonly fragmentUpdates = new FragmentUpdates(async (force) => {
+    // Fragments 3.4.7 throttles even forced calls. A final flush must not be lost.
+    const settings = this.loader.fragments.settings;
+    const rate = settings.maxUpdateRate;
+    if (force) settings.maxUpdateRate = 0;
+    try { await this.loader.fragments.update(force); }
+    finally { settings.maxUpdateRate = rate; }
+    this.scheduler.invalidate();
+  });
+  private cameraMoving = false;
+  private settledTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly displayPixelRatio = Math.min(window.devicePixelRatio, 2);
   private readonly resizeObserver: ResizeObserver;
   private readonly callbacks: ViewerCallbacks;
-  private readonly models = new Map<string, FragmentsModel>();
   private grid: THREE.GridHelper;
   private gridMaterials: THREE.Material[] = [];
   private viewportBackground: ViewportBackground = "gray";
-  private activeModel: FragmentsModel | null = null;
-  private activeModelName = "";
   private readonly highlights = new ViewerHighlights();
   private activeTool: ViewerTool = "pan";
-  private loadSequence = 0;
   private selectionSequence = 0;
-  private loadingModelId: string | null = null;
   private pointerStart: { id: number; x: number; y: number } | null = null;
   private suppressNextClick = false;
   private boxZoomEnabled = false;
@@ -78,22 +76,41 @@ export class ViewerService {
     fragmentProfile = browserFragmentMetadataProfile(),
   ) {
     this.callbacks = callbacks;
-    this.fragmentProfile = fragmentProfile;
-    this.converter = new IfcConverter(fragmentProfile);
-    this.bridge = new ViewerBridge({
-      onProgress: (progress) => this.publishBridge(progress.loadSequence, progress),
-    });
-    this.fragments.settings.maxUpdateRate = FRAGMENTS_MAX_UPDATE_RATE_MS;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(this.displayPixelRatio);
     this.renderer.setClearColor(VIEWPORT_COLORS.gray.background, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.domElement.setAttribute("aria-label", "IFC 3D viewport");
     this.host.append(this.renderer.domElement);
     this.view = new ViewerCamera(this.host, this.renderer.domElement, {
       onOrientationChange: (orientation) => this.callbacks.onCameraOrientationChange(orientation),
-      onUpdate: (force) => void this.fragments.update(force),
+      onUpdate: (force) => this.cameraUpdated(force),
     });
+    this.loader = new ViewerModelLoader(this.camera, fragmentProfile, {
+      onProgress: (value) => callbacks.onProgress(value), onBridgeProgress: (value) => callbacks.onBridgeProgress(value),
+      onFragmentMetrics: (value) => callbacks.onFragmentMetrics(value),
+      attach: async (model, assertCurrent) => {
+        model.onViewUpdated.add(this.scheduler.invalidate);
+        model.getClippingPlanesEvent = () => this.renderer.clippingPlanes;
+        this.scene.add(model.object);
+        await this.alignGridToIfcElevationZero(model, assertCurrent);
+        this.scheduler.invalidate();
+      },
+      detach: async (model) => {
+        this.view.cancelAnimation();
+        this.endCameraMotion();
+        if (model) {
+          model.onViewUpdated.remove(this.scheduler.invalidate);
+          this.scene.remove(model.object);
+        }
+        this.grid.position.y = -0.001;
+        this.scheduler.invalidate();
+        await this.clearSelection();
+      },
+      fit: () => this.fit({ animate: false }),
+      update: () => this.fragmentUpdates.request(true),
+    });
+    this.fragments.settings.maxUpdateRate = FRAGMENTS_MAX_UPDATE_RATE_MS;
     this.interaction = new ViewerInteraction(
       this.host,
       this.renderer.domElement,
@@ -101,6 +118,7 @@ export class ViewerService {
       this.camera,
       {
         activeModel: () => this.activeModel,
+        onInvalidate: this.scheduler.invalidate,
         onMultiSelection: (result) => void this.applyMultiSelection(result?.fragments ?? null, result?.localIds ?? []),
         onMeasurements: (measurements) => this.callbacks.onMeasurementChange(measurements),
       },
@@ -124,10 +142,14 @@ export class ViewerService {
     this.renderer.domElement.addEventListener("pointerup", this.onPointerUp, true);
     this.renderer.domElement.addEventListener("pointercancel", this.onPointerCancel, true);
     this.renderer.domElement.addEventListener("click", this.onClick);
-    this.renderer.setAnimationLoop(this.render);
+    this.scheduler.invalidate();
     this.resize();
     markViewerCreated();
   }
+  private get fragments() { return this.loader.fragments; }
+  private get bridge() { return this.loader.bridge; }
+  private get activeModel() { return this.loader.activeModel; }
+  private get activeModelName() { return this.loader.activeModelName; }
   private get camera() {
     return this.view.camera;
   }
@@ -151,6 +173,7 @@ export class ViewerService {
   }
   setGridVisible(visible: boolean) {
     this.grid.visible = visible;
+    this.scheduler.invalidate();
   }
   setBackground(background: ViewportBackground) {
     if (background === this.viewportBackground) return;
@@ -163,7 +186,9 @@ export class ViewerService {
     this.grid = this.createGrid(background);
     this.grid.position.y = elevation;
     this.grid.visible = visible;
+    this.scheduler.invalidate();
     this.scene.add(this.grid);
+    this.scheduler.invalidate();
   }
   setWheelZoomSpeed(speed: number) {
     this.view.setZoomSpeed(speed);
@@ -239,7 +264,7 @@ export class ViewerService {
     };
     this.renderer.clippingPlanes = [plane];
     this.callbacks.onSectionPlaneChange(this.sectionDefinition);
-    void this.fragments.update(true);
+    this.requestFragmentUpdate(true);
   }
 
   setSectionSide(side: SectionSide) {
@@ -252,7 +277,7 @@ export class ViewerService {
     this.sectionDefinition = null;
     this.renderer.clippingPlanes = [];
     this.callbacks.onSectionPlaneChange(null);
-    void this.fragments.update(true);
+    this.requestFragmentUpdate(true);
   }
 
   setView(preset: ViewPreset) {
@@ -286,105 +311,11 @@ export class ViewerService {
   }
 
   async load(file: File): Promise<void> {
-    const loadStarted = performance.now();
     if (this.boxZoomEnabled) this.setBoxZoomEnabled(false);
     if (this.sectionPickEnabled) this.setSectionPickEnabled(false);
     this.clearSectionPlane();
     this.interaction.reset();
-    const sequence = ++this.loadSequence;
-    this.bridge.cancelFragmentRequests();
-    this.selectionSequence++;
-    this.converter.cancel();
-    if (this.loadingModelId) this.fragments.abort(this.loadingModelId);
-    await this.clearModel();
-    this.assertCurrent(sequence);
-    this.publishProgress(sequence, { modelHash: null, stage: "reading", detail: file.name });
-    const ifcBuffer = await file.arrayBuffer();
-    const ifcBytes = ifcBuffer.byteLength;
-    this.assertCurrent(sequence);
-    const modelHash = await sha256Hex(ifcBuffer);
-    this.assertCurrent(sequence);
-    void this.bridge.prepareModel(
-      file,
-      modelHash,
-      sequence,
-      () => this.assertCurrent(sequence),
-    );
-    this.publishProgress(sequence, { modelHash, stage: "cache", detail: file.name });
-    const cacheKey = fragmentCacheKey(modelHash, this.fragmentProfile);
-    let fragmentBuffer: ArrayBuffer | null = null;
-    let cacheHit = false;
-    let conversionMilliseconds = 0;
-    try {
-      fragmentBuffer = await this.bridge.fragments(cacheKey);
-      cacheHit = fragmentBuffer !== null;
-    } catch (error) {
-      console.warn(`Fragments cache: ${this.errorText(error)}`);
-    }
-    this.assertCurrent(sequence);
-    if (!fragmentBuffer) {
-      this.publishProgress(sequence, { modelHash, stage: "converting", progress: 0, detail: file.name });
-      const conversionStarted = performance.now();
-      const converted = await this.converter.convert(ifcBuffer, (progress) => {
-        this.publishProgress(sequence, { modelHash, stage: "converting", progress, detail: file.name });
-      });
-      conversionMilliseconds = performance.now() - conversionStarted;
-      this.assertCurrent(sequence);
-      fragmentBuffer = fragmentArrayBuffer(converted);
-      // fetch snapshots the body before Fragments transfers/detaches the buffer.
-      this.bridge.cacheFragments(
-        cacheKey,
-        converted,
-        () => sequence === this.loadSequence && !this.disposed,
-      );
-    }
-
-    const fragmentBytes = fragmentBuffer.byteLength;
-    this.publishProgress(sequence, { modelHash, stage: "loading", progress: 0, detail: file.name });
-    const modelId = `${modelHash}-${sequence}`;
-    this.loadingModelId = modelId;
-    let model: FragmentsModel;
-    const fragmentLoadStarted = performance.now();
-    let fragmentLoadMilliseconds = 0;
-    try {
-      model = await this.fragments.load(fragmentBuffer, {
-        modelId,
-        camera: this.camera,
-        onProgress: ({ progress }) => this.publishProgress(sequence, { modelHash, stage: "loading", progress, detail: file.name }),
-      });
-    } catch (error) {
-      if (sequence !== this.loadSequence || this.disposed) throw new LoadCancelledError();
-      throw error;
-    } finally {
-      if (this.loadingModelId === modelId) this.loadingModelId = null;
-    }
-    fragmentLoadMilliseconds = performance.now() - fragmentLoadStarted;
-    if (sequence !== this.loadSequence || this.disposed) {
-      await this.fragments.disposeModel(model.modelId);
-      throw new LoadCancelledError();
-    }
-    this.models.set(model.modelId, model);
-    this.scene.add(model.object);
-    this.activeModel = model;
-    this.activeModelName = file.name;
-    await this.alignGridToIfcElevationZero(model);
-    this.assertCurrent(sequence);
-    await this.fragments.update(true);
-    this.assertCurrent(sequence);
-    this.fit({ animate: false });
-    const metrics: FragmentMetrics = {
-      loadSequence: sequence,
-      modelHash,
-      profile: this.fragmentProfile,
-      cacheHit,
-      ifcBytes,
-      fragmentBytes,
-      conversionMilliseconds,
-      fragmentLoadMilliseconds,
-      totalMilliseconds: performance.now() - loadStarted,
-    };
-    this.publishProgress(sequence, { modelHash, stage: "ready", progress: 1, detail: this.activeModelName });
-    this.callbacks.onFragmentMetrics(metrics);
+    await this.loader.load(file);
   }
 
   fit({ animate = true }: { animate?: boolean } = {}) {
@@ -398,17 +329,26 @@ export class ViewerService {
   async clearSelection() {
     const selectionSequence = ++this.selectionSequence;
     await this.highlights.clear();
+    this.scheduler.invalidate();
     if (selectionSequence !== this.selectionSequence) return;
     this.callbacks.onSelection(null);
     this.callbacks.onMultiSelectionChange(0);
     await this.bridge.clearSelection(() => selectionSequence === this.selectionSequence);
   }
 
+  async retrySemantic() { await this.bridge.retrySemantic(); }
+
+  async cancelLoad() {
+    this.interaction.reset();
+    await this.loader.cancelLoad();
+  }
+
   async dispose() {
     if (this.disposed) return;
     this.disposed = true;
     this.view.cancelAnimation();
-    this.renderer.setAnimationLoop(null);
+    this.scheduler.dispose();
+    this.endCameraMotion();
     this.resizeObserver.disconnect();
     this.renderer.domElement.removeEventListener("pointerdown", this.onPointerDown, true);
     this.renderer.domElement.removeEventListener("pointermove", this.onPointerMove, true);
@@ -417,16 +357,20 @@ export class ViewerService {
     this.renderer.domElement.removeEventListener("click", this.onClick);
     this.view.dispose();
     this.interaction.dispose();
-    this.converter.dispose();
-    this.bridge.cancelFragmentRequests();
-    await this.fragments.dispose();
-    this.host.classList.remove("viewer-box-zoom-active");
-    this.host.classList.remove("viewer-section-pick-active");
-    this.boxZoomRectangle.remove();
-    this.disposeGrid(this.grid);
-    this.renderer.dispose();
-    this.renderer.domElement.remove();
-    markViewerDisposed();
+    try {
+      await this.fragmentUpdates.dispose();
+    } finally {
+      try {
+        await this.loader.dispose();
+      } finally {
+        this.host.classList.remove("viewer-box-zoom-active", "viewer-section-pick-active");
+        this.boxZoomRectangle.remove();
+        this.disposeGrid(this.grid);
+        this.renderer.dispose();
+        this.renderer.domElement.remove();
+        markViewerDisposed();
+      }
+    }
   }
 
   private resize() {
@@ -434,6 +378,7 @@ export class ViewerService {
     const height = Math.max(this.host.clientHeight, 1);
     this.renderer.setSize(width, height, false);
     this.view.resize(width, height);
+    this.requestFragmentUpdate(true);
   }
 
   private createGrid(background: ViewportBackground): THREE.GridHelper {
@@ -455,25 +400,63 @@ export class ViewerService {
     for (const material of materials) material.dispose();
   }
 
-  private async alignGridToIfcElevationZero(model: FragmentsModel) {
+  private async alignGridToIfcElevationZero(model: FragmentsModel, assertCurrent: () => void) {
     try {
       const coordinationMatrix = await model.getCoordinationMatrix();
+      assertCurrent();
       const viewerOrigin = new THREE.Vector3().applyMatrix4(coordinationMatrix);
       model.object.updateWorldMatrix(true, false);
       viewerOrigin.applyMatrix4(model.object.matrixWorld);
       if (!Number.isFinite(viewerOrigin.y)) throw new Error("Invalid IFC coordination matrix");
       this.grid.position.y = viewerOrigin.y - 0.001;
     } catch {
+      assertCurrent();
       this.grid.position.y = (model.box.isEmpty() ? 0 : model.box.min.y) - 0.001;
     }
   }
 
+  private requestFragmentUpdate(force = false) {
+    this.scheduler.invalidate();
+    if (!this.loader || this.disposed) return;
+    void this.fragmentUpdates.request(force).catch((error) => console.warn("Fragment view update failed", error));
+  }
+
+  private cameraUpdated(force: boolean) {
+    if (this.disposed) return;
+    const model = this.loader?.activeModel;
+    if (!force && model) {
+      if (!this.cameraMoving) {
+        this.cameraMoving = true;
+        // Dense scenes spend substantial GPU time on pixels during navigation.
+        // Keep all geometry; restore full display resolution when damping ends.
+        if (this.renderer.info.render.triangles > 2_000_000) {
+          this.renderer.setPixelRatio(Math.min(this.displayPixelRatio, 0.75));
+        }
+      }
+      if (this.settledTimer !== null) clearTimeout(this.settledTimer);
+      this.settledTimer = setTimeout(() => {
+        this.endCameraMotion();
+        this.requestFragmentUpdate(true);
+      }, 160);
+    }
+    if (force) this.endCameraMotion();
+    this.requestFragmentUpdate(force);
+  }
+
+  private endCameraMotion() {
+    if (this.settledTimer !== null) clearTimeout(this.settledTimer);
+    this.settledTimer = null;
+    if (this.cameraMoving) this.renderer.setPixelRatio(this.displayPixelRatio);
+    this.cameraMoving = false;
+  }
+
   private readonly render = (time: number) => {
-    this.view.render(time);
+    const moving = this.view.render(time);
     this.interaction.updateOverlay();
     const opacity = 0.34 * THREE.MathUtils.smoothstep(this.camera.zoom, 0.08, 0.65);
     for (const material of this.gridMaterials) material.opacity = opacity;
     this.renderer.render(this.scene, this.camera);
+    return moving;
   };
 
   private readonly onPointerDown = (event: PointerEvent) => {
@@ -630,8 +613,10 @@ export class ViewerService {
     }
 
     await this.highlights.clear();
+    this.scheduler.invalidate();
     if (selectionSequence !== this.selectionSequence) return;
     await this.highlights.setSingle(hit.fragments, hit.localId);
+    this.scheduler.invalidate();
     if (selectionSequence !== this.selectionSequence) return;
     this.callbacks.onMultiSelectionChange(0);
 
@@ -652,46 +637,16 @@ export class ViewerService {
   private async applyMultiSelection(model: FragmentsModel | null, localIds: number[]) {
     const selectionSequence = ++this.selectionSequence;
     await this.highlights.clear();
+    this.scheduler.invalidate();
     if (selectionSequence !== this.selectionSequence) return;
     this.callbacks.onSelection(null);
     if (model && localIds.length) {
       await this.highlights.setMultiple(model, localIds);
+      this.scheduler.invalidate();
       if (selectionSequence !== this.selectionSequence || model !== this.activeModel) return;
     }
     this.callbacks.onMultiSelectionChange(localIds.length);
     await this.bridge.clearSelection(() => selectionSequence === this.selectionSequence);
   }
 
-  private async clearModel() {
-    this.view.cancelAnimation();
-    await this.clearSelection();
-    if (!this.activeModel) return;
-    const modelId = this.activeModel.modelId;
-    this.activeModel = null;
-    this.activeModelName = "";
-    await this.fragments.disposeModel(modelId);
-    this.models.delete(modelId);
-    this.grid.position.y = -0.001;
-  }
-
-  private assertCurrent(sequence: number) {
-    if (sequence !== this.loadSequence || this.disposed) throw new LoadCancelledError();
-  }
-
-  private publishProgress(
-    sequence: number,
-    progress: Omit<ViewerProgress, "loadSequence">,
-  ) {
-    if (sequence === this.loadSequence && !this.disposed) {
-      this.callbacks.onProgress({ ...progress, loadSequence: sequence });
-    }
-  }
-
-  private publishBridge(sequence: number, progress: BridgeProgress) {
-    if (sequence === this.loadSequence && !this.disposed) this.callbacks.onBridgeProgress(progress);
-  }
-
-  private errorText(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
-  }
 }

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from threading import Lock, Thread
+from threading import Event, Lock, Thread
 from contextlib import AbstractContextManager
 from typing import Any, Callable, Sequence
 
@@ -108,11 +108,15 @@ class ModelTakeoffJob:
         self._result: dict[str, Any] | None = None
         self._error = ""
         self._model_hash = ""
+        self._thread: Thread | None = None
+        self._cancelled = Event()
+        self._closed = False
 
     def start(self, table: DensityTable, tolerance: float) -> bool:
         with self._lock:
-            if self._status in ("starting", "running"):
+            if self._closed or self._status in ("starting", "running"):
                 return False
+            self._cancelled.clear()
             self._status = "starting"
             self._done = 0
             self._total = 0
@@ -131,14 +135,20 @@ class ModelTakeoffJob:
             self._status = "running"
             self._model_hash = lease.ref.model_hash
             try:
-                Thread(
+                if self._closed:
+                    lease.release()
+                    self._status = "idle"
+                    return False
+                self._thread = Thread(
                     target=self._run,
                     args=(table, tolerance, lease),
                     name="model-takeoff",
                     daemon=True,
-                ).start()
+                )
+                self._thread.start()
             except BaseException:
                 lease.release()
+                self._thread = None
                 self._status = "idle"
                 self._model_hash = ""
                 raise
@@ -167,9 +177,26 @@ class ModelTakeoffJob:
             self._result = result
 
     def _advance(self, done: int, total: int) -> None:
+        if self._cancelled.is_set():
+            raise RuntimeError("Model takeoff cancelled during shutdown")
         with self._lock:
             self._done = done
             self._total = total
+
+    def reopen(self) -> None:
+        with self._lock:
+            if self._thread is not None and self._thread.is_alive():
+                raise RuntimeError("Model takeoff has not stopped")
+            self._closed = False
+
+    def shutdown(self, timeout: float = 5.0) -> bool:
+        with self._lock:
+            self._closed = True
+            self._cancelled.set()
+            thread = self._thread
+        if thread is not None:
+            thread.join(timeout)
+        return thread is None or not thread.is_alive()
 
     def progress(self) -> dict[str, Any]:
         with self._lock:

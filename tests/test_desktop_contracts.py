@@ -70,7 +70,7 @@ class DesktopContractTests(unittest.TestCase):
             )
             self.assertEqual(host.select_port(), 8123)
             host._requested_port = None
-            self.assertGreater(host.select_port(), 0)
+            self.assertEqual(host.select_port(), 0)
             host._requested_port = "70000"
             with self.assertRaisesRegex(ValueError, "between 1 and 65535"):
                 host.select_port()
@@ -117,7 +117,8 @@ class DesktopContractTests(unittest.TestCase):
                 self.should_exit = False
                 self.force_exit = False
 
-            def run(self) -> None:
+            def run(self, *, sockets) -> None:
+                self.socket_address = sockets[0].getsockname()
                 calls.append("run")
 
         with TemporaryDirectory() as temporary:
@@ -223,7 +224,7 @@ class DesktopContractTests(unittest.TestCase):
         record.operation = "index"
         payload = json.loads(JsonFormatter().format(record))
         self.assertEqual(payload["event"], "test_ready")
-        self.assertEqual(payload["appVersion"], "1.0.1")
+        self.assertEqual(payload["appVersion"], "1.0.2")
         self.assertEqual(payload["message"], "ready now")
         self.assertEqual(payload["modelHash"], "model-a")
         self.assertEqual(payload["operation"], "index")

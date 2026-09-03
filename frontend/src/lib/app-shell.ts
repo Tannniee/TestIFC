@@ -81,6 +81,8 @@ export class AppShellService {
     }, delay);
   }
 
+  async retrySemantic() { await this.viewer?.retrySemantic(); }
+
   health(): Promise<HealthResponse> {
     return api.health();
   }
@@ -91,6 +93,10 @@ export class AppShellService {
 
   load(file: File) {
     return this.viewer?.load(file) ?? Promise.resolve();
+  }
+
+  cancelLoad() {
+    return this.viewer?.cancelLoad() ?? Promise.resolve();
   }
 
   fit() {

@@ -14,9 +14,12 @@ class LatestTaskRunner:
         self._pending: tuple[str, Callable[[Event], None]] | None = None
         self._running: tuple[str, Event] | None = None
         self._thread: Thread | None = None
+        self._closed = False
 
     def submit(self, key: str, work: Callable[[Event], None]) -> None:
         with self._condition:
+            if self._closed:
+                raise RuntimeError(f"{self._name} is shut down")
             if self._running and self._running[0] == key and not self._running[1].is_set():
                 self._pending = None
                 return
@@ -25,7 +28,27 @@ class LatestTaskRunner:
             self._pending = (key, work)
             if self._thread is None:
                 self._thread = Thread(target=self._drain, name=self._name, daemon=True)
-                self._thread.start()
+                try:
+                    self._thread.start()
+                except BaseException:
+                    self._thread = None
+                    self._pending = None
+                    self._condition.notify_all()
+                    raise
+
+    def reopen(self) -> None:
+        with self._condition:
+            if self._thread is not None:
+                raise RuntimeError(f"{self._name} still has a running task")
+            self._closed = False
+
+    def shutdown(self, timeout: float = 5.0) -> bool:
+        with self._condition:
+            self._closed = True
+            self._pending = None
+            if self._running:
+                self._running[1].set()
+        return self.wait_idle(timeout)
 
     def cancel(self) -> None:
         with self._condition:
@@ -62,6 +85,16 @@ class LatestTaskRunner:
                 logging.getLogger("ifc_viewer.backend.background").exception(
                     "Background task failed", extra={"event": "background_task_failed", "operation": self._name}
                 )
+            except BaseException:
+                with self._condition:
+                    self._pending = None
+                    self._running = None
+                    self._thread = None
+                    self._closed = True
+                    self._condition.notify_all()
+                raise
             finally:
                 with self._condition:
-                    self._running = None
+                    # Do not clear a newly reopened runner after a fatal task.
+                    if self._running == (key, cancelled):
+                        self._running = None

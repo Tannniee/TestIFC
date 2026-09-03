@@ -11,6 +11,7 @@ export interface AppSettings {
 }
 
 interface DesktopSettingsApi {
+  get_api_session(): Promise<{ token: string }>;
   load_settings(): Promise<unknown>;
   save_settings(settings: AppSettings): Promise<unknown>;
 }

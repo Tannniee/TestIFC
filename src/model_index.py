@@ -8,6 +8,7 @@ import re
 import sqlite3
 from contextlib import closing
 from pathlib import Path
+from time import monotonic
 from typing import Any, Callable, Iterable, Literal
 
 import ifcopenshell
@@ -63,7 +64,7 @@ def _meta(path: Path, key: str) -> str | None:
     if not path.exists():
         return None
     try:
-        with closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as connection:
+        with closing(sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True, timeout=0.75)) as connection:
             row = connection.execute(
                 "SELECT value FROM meta WHERE key = ?", (key,)
             ).fetchone()
@@ -85,8 +86,10 @@ def is_complete(path: Path) -> bool:
 
 
 def recover_interrupted_build(path: Path) -> None:
+    """Run only after the owned writer has exited, while holding its build lock."""
     with closing(sqlite3.connect(path)) as connection:
         connection.execute("SELECT value FROM meta LIMIT 1").fetchone()
+        connection.execute("PRAGMA wal_checkpoint(PASSIVE)")
 
 
 def cold_status(path: Path) -> IndexStatus:
@@ -142,6 +145,7 @@ def build_hot(
     model_hash: str,
     build_record: Callable[[Any], dict],
     child_ids: Callable[[Any], Iterable[int]],
+    *, on_progress: Callable[[int, int | None, str | None], None] = lambda *_: None,
 ) -> int:
     """Atomically publish the minimum index required by tree/search/selection."""
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -203,6 +207,7 @@ def build_hot(
                 [(express_id, child) for child in child_ids(entity)],
             )
             rows += 1
+            on_progress(rows, None, ifc_type)
         connection.executemany(
             "INSERT INTO tree_root (express_id, ordinal) VALUES (?, ?)",
             [(root.id(), ordinal) for ordinal, root in enumerate(ifc_file.by_type("IfcProject"))],
@@ -211,7 +216,19 @@ def build_hot(
         connection.commit()
     finally:
         connection.close()
+    if target.exists():
+        with target.open("rb") as existing:
+            wal_header = existing.read(20)[18:20] == b"\x02\x02"
+        if wal_header or Path(str(target) + "-wal").exists():
+            # Never separate a previous database from its committed WAL. Refuse
+            # replacement if a reader still owns the old generation.
+            with closing(sqlite3.connect(target, timeout=0.75)) as previous:
+                if previous.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()[0]:
+                    raise RuntimeError("Previous semantic index is still in use; retry after its readers finish")
+                if previous.execute("PRAGMA journal_mode=DELETE").fetchone()[0] != "delete":
+                    raise RuntimeError("Previous semantic WAL could not be closed")
     os.replace(staging, target)
+    on_progress(rows, rows, None)
     return rows
 
 
@@ -219,43 +236,80 @@ def build_cold(
     ifc_file: ifcopenshell.file,
     target: Path,
     build_record: Callable[[Any], dict],
+    *, on_progress: Callable[[int, int | None, str | None], None] = lambda *_: None,
 ) -> int:
-    """Populate Psets, quantities, and other expensive semantic records."""
+    """Extract outside write transactions; commit bounded, resumable batches."""
     if not is_usable(target):
         raise ValueError(f"hot semantic index is not usable: {target}")
     connection = sqlite3.connect(target)
     try:
+        # This is the only writable connection while the build lock is held.
+        # Keep checkpoints on this same connection; API readers are read-only.
+        if connection.execute("PRAGMA journal_mode=WAL").fetchone()[0] != "wal":
+            raise RuntimeError("Semantic index cache does not support WAL")
+        connection.execute("PRAGMA synchronous=NORMAL")
+        connection.execute("PRAGMA wal_autocheckpoint=1000")
+        connection.execute("PRAGMA journal_size_limit=16777216")
         _set_meta(connection, "cold_status", "indexing")
         connection.execute("DELETE FROM meta WHERE key = 'cold_error'")
         connection.commit()
-        rows = 0
-        seen = set()
+        total = connection.execute("SELECT COUNT(*) FROM element").fetchone()[0]
+        completed = {row[0] for row in connection.execute("SELECT express_id FROM element_cold")}
+        rows = len(completed)
+        on_progress(rows, total, None)
+        pending = []
+        pending_bytes = 0
+        batch_started = monotonic()
+
+        def flush():
+            nonlocal pending_bytes, batch_started
+            if not pending:
+                return
+            try:
+                for express_id, encoded, classification in pending:
+                    connection.execute(
+                        "INSERT INTO element_cold (express_id, record_json) VALUES (?, ?)",
+                        (express_id, encoded),
+                    )
+                    hot = connection.execute(
+                        "SELECT name, description, object_type, type_name FROM element WHERE express_id = ?",
+                        (express_id,),
+                    ).fetchone()
+                    if hot is not None:
+                        connection.execute(
+                            "INSERT OR REPLACE INTO element_fts "
+                            "(rowid, name, description, object_type, type_name, classification) "
+                            "VALUES (?, ?, ?, ?, ?, ?)",
+                            (express_id, *hot, classification),
+                        )
+                _set_meta(connection, "cold_completed", str(rows))
+                connection.commit()
+            except BaseException:
+                connection.rollback()
+                raise
+            pending.clear()
+            pending_bytes = 0
+            batch_started = monotonic()
+
+        seen = set(completed)
         for entity in _indexed_entities(ifc_file):
             express_id = entity.id()
             if express_id in seen:
                 continue
             seen.add(express_id)
+            # No write transaction is held while the native extractor runs.
             record = build_record(entity)
-            connection.execute(
-                "INSERT INTO element_cold (express_id, record_json) VALUES (?, ?) "
-                "ON CONFLICT(express_id) DO UPDATE SET record_json = excluded.record_json",
-                (express_id, json.dumps(record, ensure_ascii=False, default=str)),
-            )
-            hot = connection.execute(
-                "SELECT name, description, object_type, type_name "
-                "FROM element WHERE express_id = ?",
-                (express_id,),
-            ).fetchone()
-            if hot is not None:
-                connection.execute(
-                    "INSERT OR REPLACE INTO element_fts "
-                    "(rowid, name, description, object_type, type_name, classification) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (express_id, *hot, _classification_text(record)),
-                )
+            encoded = json.dumps(record, ensure_ascii=False, default=str)
+            pending.append((express_id, encoded, _classification_text(record)))
+            pending_bytes += len(encoded.encode("utf-8"))
             rows += 1
+            if len(pending) >= 128 or pending_bytes >= 4 * 1024 * 1024 or monotonic() - batch_started >= 0.5:
+                flush()
+            on_progress(rows, total, str(record.get("ifcType") or entity.is_a()))
+        flush()
         _set_meta(connection, "cold_status", "ready")
         connection.commit()
+        connection.execute("PRAGMA wal_checkpoint(PASSIVE)")
         return rows
     except BaseException as error:
         connection.rollback()
@@ -300,7 +354,7 @@ class ModelIndex:
         return cold_status(self._path)
 
     def _query(self, sql: str, params=()):
-        with closing(sqlite3.connect(f"file:{self._path}?mode=ro", uri=True)) as connection:
+        with closing(sqlite3.connect(self._path.resolve().as_uri() + "?mode=ro", uri=True, timeout=0.75)) as connection:
             return connection.execute(sql, params).fetchall()
 
     @staticmethod

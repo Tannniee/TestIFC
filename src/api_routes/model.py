@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from api_contracts import RetrySemanticRequest
+from model_runtime import retry_semantic_index
+
 import logging
 
 from fastapi import APIRouter, File, Request, UploadFile
@@ -12,6 +15,7 @@ from starlette.concurrency import run_in_threadpool
 import model_operations
 from api_contracts import (
     ActivateModelResponse,
+    CancelModelLoadRequest,
     ErrorResponse,
     FragmentStoredResponse,
     LoadModelResponse,
@@ -45,12 +49,13 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
         "/load-model",
         response_model=LoadModelResponse,
     )
-    async def load_model(file: UploadFile = File(...)):
+    async def load_model(file: UploadFile = File(...), storeOnly: bool = False):
         try:
             loaded = await run_in_threadpool(
                 model_operations.materialize_uploaded_model,
                 file.file,
                 file.filename,
+                store_only=storeOnly,
             )
             return LoadModelResponse(
                 modelHash=loaded.model_hash,
@@ -116,6 +121,10 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             return error_response(404, "model_not_cached")
         return {"ok": True, **info}
 
+    @router.post("/model/cancel-load")
+    def cancel_model_load(request: CancelModelLoadRequest):
+        return {"ok": True, "cancelled": model_operations.cancel_active_load(request.modelHash, request.loadedAt)}
+
     @router.post(
         "/register-model",
         response_model=None,
@@ -133,8 +142,14 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             return error_response(409, str(exc))
         return {"ok": True, **info}
 
+    @router.post("/model/retry-semantic")
+    def retry_semantic(request: RetrySemanticRequest):
+        if not retry_semantic_index(request.modelHash, request.loadedAt, request.attemptId):
+            return JSONResponse(status_code=409, content={"error": "semantic_attempt_changed_or_not_retryable"})
+        return {"ok": True}
+
     @router.get("/model/runtime", response_model=ModelRuntimeResponse)
-    async def get_model_runtime():
+    def get_model_runtime():
         return model_operations.runtime_status()
 
     @router.get(

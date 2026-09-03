@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import logging
 import shutil
 import threading
 from dataclasses import dataclass
@@ -31,7 +32,7 @@ def cache_max_bytes(raw: str | None) -> int:
 CACHE_KEEP_MODELS = cache_keep_models(os.environ.get("IFC_CACHE_KEEP_MODELS"))
 CACHE_MAX_BYTES = cache_max_bytes(os.environ.get("IFC_CACHE_MAX_BYTES"))
 
-_BUNDLE_PATTERNS = ("*.ifc", "*.frag", "*.sqlite", "*.rdb")
+_BUNDLE_PATTERNS = ("*.ifc", "*.frag", "*.sqlite", "*.sqlite-wal", "*.sqlite-shm", "*.rdb")
 _PARTIAL_PATTERNS = (
     "*.ifc.partial",
     "*.frag.partial",
@@ -47,6 +48,7 @@ _pins: dict[str, int] = {}
 _active_retention_hash: str | None = None
 _retention_jobs = LatestTaskRunner("ifc-cache-retention")
 CACHE_RETENTION_DELAY_SECONDS = 30.0
+logger = logging.getLogger("ifc_viewer.backend.cache")
 
 
 def schedule_cache_retention(active_hash: str) -> None:
@@ -109,13 +111,18 @@ def model_source_path(model: Any) -> str:
 def _remove_cache_path(path: Path) -> None:
     try:
         if path.is_dir():
-            shutil.rmtree(path, ignore_errors=True)
+            shutil.rmtree(path)
         else:
             path.unlink()
     except FileNotFoundError:
         return
-    except Exception:
+    except OSError:
+        logger.warning("Cache removal failed", exc_info=True,
+            extra={"event": "cache_remove_failed", "operation": "retention",
+                   "cachePath": str(path), "modelHash": _bundle_hash(path)})
         return
+    logger.info("Cache entry removed", extra={"event": "cache_removed",
+        "operation": "retention", "cachePath": str(path), "modelHash": _bundle_hash(path)})
 
 
 def _bundle_hash(path: Path) -> str:
@@ -145,7 +152,11 @@ def _path_size(path: Path) -> int:
                 if child.is_file()
             )
         return path.stat().st_size
+    except FileNotFoundError:
+        return 0
     except OSError:
+        logger.warning("Cache size unavailable", exc_info=True,
+            extra={"event": "cache_stat_failed", "operation": "retention", "cachePath": str(path)})
         return 0
 
 
@@ -160,6 +171,13 @@ def enforce_cache_retention(active_hash: str, cancelled: threading.Event | None 
             if stopped() or (model_hash is not None and (
                 model_hash in _pins or model_hash in (active_hash, _active_retention_hash)
             )):
+                return
+            if model_hash is not None:
+                build_lock = index_builder.build_lock_path_for(CACHE_DIR, model_hash)
+                if build_lock.exists() and not index_builder.build_lock_is_stale(build_lock):
+                    return
+            if path.name.endswith((".sqlite-wal", ".sqlite-shm")) and Path(str(path)[:-4]).exists():
+                # A failed database deletion must retain its committed WAL.
                 return
             _remove_cache_path(path)
 
@@ -198,10 +216,7 @@ def enforce_cache_retention(active_hash: str, cancelled: threading.Event | None 
     for path in CACHE_DIR.glob(_BUILD_LOCK_PATTERN):
         if stopped():
             return
-        try:
-            stale = time() - path.stat().st_mtime >= index_builder._BUILD_LOCK_MAX_AGE_SECONDS
-        except OSError:
-            stale = False
+        stale = index_builder.build_lock_is_stale(path)
         if stale:
             remove_if_unprotected(path, _bundle_hash(path))
         else:

@@ -44,6 +44,7 @@ class ServerHost:
         self._mounted = False
         self._readiness_installed = False
         self.port: int | None = None
+        self._socket: socket.socket | None = None
 
     @property
     def base_url(self) -> str:
@@ -75,9 +76,7 @@ class ServerHost:
             if not 1 <= port <= 65535:
                 raise ValueError("IFC_VIEWER_PORT must be between 1 and 65535")
             return port
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
-            probe.bind((self._host, 0))
-            return int(probe.getsockname()[1])
+        return 0  # The OS selects a port on the socket passed directly to Uvicorn.
 
     def start(self, timeout_s: float = 15.0) -> str:
         if self._thread is not None:
@@ -86,20 +85,36 @@ class ServerHost:
         # routes in insertion order, so a later readiness route is unreachable.
         self._install_readiness_route()
         self.mount_spa()
-        self.port = self.select_port()
-        config = uvicorn.Config(
-            self._app,
-            host=self._host,
-            port=self.port,
-            log_level="warning",
-        )
-        self._server = NoSignalServer(config)
-        self._thread = threading.Thread(
-            target=self._run,
-            name="ifc-bridge",
-            daemon=True,
-        )
-        self._thread.start()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+            sock.bind((self._host, self.select_port()))
+            sock.listen(socket.SOMAXCONN)
+            self.port = int(sock.getsockname()[1])
+            self._socket = sock
+        except BaseException:
+            sock.close()
+            raise
+        try:
+            config = uvicorn.Config(
+                self._app,
+                host=self._host,
+                port=self.port,
+                log_level="warning",
+            )
+            self._server = NoSignalServer(config)
+            self._thread = threading.Thread(
+                target=self._run,
+                name="ifc-bridge",
+                daemon=True,
+            )
+            self._thread.start()
+        except BaseException:
+            self._socket.close()
+            self._socket = None
+            self._thread = self._server = None
+            raise
         if not self.wait_until_ready(timeout_s):
             self.stop()
             raise SystemExit(f"Bridge did not come up on {self.base_url} within timeout.")
@@ -122,7 +137,7 @@ class ServerHost:
             threading.Event().wait(0.1)
         return False
 
-    def stop(self, timeout_s: float = 5.0) -> None:
+    def stop(self, timeout_s: float = 15.0) -> None:
         server = self._server
         thread = self._thread
         if server is None or thread is None:
@@ -132,6 +147,9 @@ class ServerHost:
         if thread.is_alive():
             server.force_exit = True
             thread.join(1.0)
+        if thread.is_alive():
+            self._logger.error("Desktop bridge did not stop", extra={"event": "server_stop_timeout"})
+            raise RuntimeError("Desktop bridge did not stop within the shutdown timeout")
         self._server = None
         self._thread = None
         self._logger.info(
@@ -142,12 +160,16 @@ class ServerHost:
     def _run(self) -> None:
         try:
             assert self._server is not None
-            self._server.run()
+            self._server.run(sockets=[self._socket])
         except Exception:
             self._logger.exception(
                 "Desktop bridge failed",
                 extra={"event": "server_failed"},
             )
+        finally:
+            if self._socket is not None:
+                self._socket.close()
+                self._socket = None
 
     def _install_readiness_route(self) -> None:
         if self._readiness_installed:

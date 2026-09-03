@@ -25,7 +25,7 @@ class JsonFormatter(logging.Formatter):
             "message": record.getMessage(),
             "appVersion": APP_VERSION,
         }
-        for key in ("modelHash", "expressId", "globalId", "ifcClass", "operation"):
+        for key in ("modelHash", "expressId", "globalId", "ifcClass", "operation", "cachePath", "bytes", "reason"):
             value = getattr(record, key, None)
             if value is not None:
                 payload[key] = value

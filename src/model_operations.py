@@ -11,6 +11,7 @@ from ifc_elements import (
 )
 from model_cache import cached_model_file
 from model_runtime import (
+    cancel_active_load,
     lease_active_model,
     live_model_status,
     materialize_model_stream,
@@ -31,8 +32,10 @@ class MaterializedModel:
 def materialize_uploaded_model(
     reader: BinaryIO,
     original_filename: str | None,
+    *, store_only: bool = False,
 ) -> MaterializedModel:
-    info = materialize_model_stream(reader, original_filename, True)
+    info = (materialize_model_stream(reader, original_filename, True, activate=False)
+            if store_only else materialize_model_stream(reader, original_filename, True))
     return MaterializedModel(
         model_hash=info["contentHashSha256"],
         original_filename=info["originalFilename"],

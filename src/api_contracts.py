@@ -99,7 +99,31 @@ class ActivateModelResponse(BaseModel):
     loadedAt: str
 
 
+class CancelModelLoadRequest(BaseModel):
+    modelHash: str = Field(pattern="^[0-9a-f]{64}$")
+    loadedAt: str = Field(min_length=1, max_length=100)
+
+
+class RetrySemanticRequest(CancelModelLoadRequest):
+    attemptId: str = Field(min_length=1, max_length=100)
+
+
+class SemanticProgress(BaseModel):
+    modelHash: str
+    attemptId: str
+    phase: str
+    completed: int
+    total: int | None = None
+    category: str | None = None
+    status: Literal["running", "ready", "error"]
+    error: str | None = None
+    idleSeconds: float
+    stallAfterSeconds: float
+    stalled: bool
+
+
 class ModelRuntimeResponse(BaseModel):
+    semanticProgress: SemanticProgress | None = None
     hasActiveModel: bool
     activeModelHash: str | None = None
     modelResident: bool

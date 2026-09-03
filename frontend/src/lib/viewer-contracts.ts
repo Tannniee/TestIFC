@@ -1,3 +1,4 @@
+import type { SemanticProgress } from "./api-contracts";
 import type { ItemData } from "@thatopen/fragments";
 import type { SelectionElement } from "./api";
 import type { FragmentMetadataProfile } from "./fragment-profile";
@@ -6,8 +7,11 @@ export type ViewerStage =
   | "idle"
   | "cache"
   | "reading"
+  | "hashing"
   | "converting"
   | "loading"
+  | "finalizing"
+  | "cancelled"
   | "ready"
   | "error";
 
@@ -57,6 +61,9 @@ export interface ViewerProgress {
   stage: ViewerStage;
   progress?: number;
   detail?: string;
+  phase?: "conversion" | "geometries" | "attributes" | "relations" | "decompressing" | "parsing" | "generating" | "done";
+  entitiesProcessed?: number;
+  category?: string;
 }
 
 export interface ViewerSelection extends SelectionElement {
@@ -66,15 +73,19 @@ export interface ViewerSelection extends SelectionElement {
 }
 
 export type BridgeStage =
+  | "stalled"
   | "idle"
   | "activating"
   | "uploading"
   | "indexing_hot"
   | "indexing_cold"
+  | "cancelled"
   | "ready"
   | "error";
 
 export interface BridgeProgress {
+  semantic?: SemanticProgress | null;
+  canRetry?: boolean;
   loadSequence: number;
   modelHash: string | null;
   stage: BridgeStage;

@@ -1,5 +1,6 @@
 import { chromium } from "../frontend/node_modules/@playwright/test/index.mjs";
 import { spawn } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { createWriteStream } from "node:fs";
 import { readFile, writeFile, mkdir, stat } from "node:fs/promises";
 import path from "node:path";
@@ -18,6 +19,7 @@ const limit = (promise, ms, label) => {
   return Promise.race([promise, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`${label} exceeded ${ms} ms`)), ms); })]).finally(() => clearTimeout(timer));
 };
 const children = [];
+const apiSession = randomBytes(32).toString("hex");
 let browser;
 let currentModel = "setup";
 const phaseFile = path.join(output, "phase.json");
@@ -35,7 +37,7 @@ async function phase(name, page) {
   if (page) await limit(page.evaluate((name) => { window.__bench.phase = name; }, name), 30_000, "set phase");
 }
 function launch(command, args, name, env = {}) {
-  const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env }, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
+  const child = spawn(command, args, { cwd: root, env: { ...process.env, IFC_API_SESSION_TOKEN: apiSession, ...env }, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
   const log = createWriteStream(path.join(output, `${name}.log`));
   child.stdout.pipe(log); child.stderr.pipe(log);
   child.on("error", (error) => console.error(name, error.message));
@@ -284,7 +286,7 @@ try {
       entry.final = await snapshot(page);
       await page.screenshot({ path: path.join(output, `${model.id}-loaded.png`) });
       await phase("unload", page);
-      await page.evaluate(async () => { await window.__benchViewer.clearModel(); });
+      await page.evaluate(async () => { await window.__benchViewer.cancelLoad(); });
       const cdp = await context.newCDPSession(page);
       await cdp.send("HeapProfiler.collectGarbage");
       await delay(3000);

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any
+from urllib.parse import urlsplit
 
 import taskbar
 from settings_store import SettingsStore
@@ -79,9 +80,24 @@ class DesktopApi:
     def __init__(self, taskbar_bridge: TaskbarBridge, settings_bridge: SettingsBridge) -> None:
         self._taskbar = taskbar_bridge
         self._settings = settings_bridge
+        self._window: Any | None = None
+        self._api_session: tuple[str, str] | None = None
 
     def attach(self, window: Any | None) -> None:
+        self._window = window
         self._taskbar.attach(window)
+
+    def _configure_api_session(self, origin: str, token: str) -> None:
+        self._api_session = (origin, token)
+
+    def get_api_session(self) -> dict[str, str]:
+        if self._window is None or self._api_session is None:
+            raise RuntimeError("Desktop session is not ready")
+        origin, token = self._api_session
+        current = urlsplit(self._window.get_current_url())
+        if f"{current.scheme}://{current.netloc}" != origin or current.path not in ("", "/", "/index.html"):
+            raise PermissionError("Desktop session is restricted to the viewer window")
+        return {"token": token}
 
     def taskbar_progress(self, ratio: float) -> bool:
         return self._taskbar.progress(ratio)

@@ -53,6 +53,7 @@ def main() -> None:
 
     try:
         base_url = server.start()
+        desktop_api._configure_api_session(base_url, app.state.api_session.secret)
         logger.info(
             "Desktop window is starting",
             extra={"event": "app_starting"},

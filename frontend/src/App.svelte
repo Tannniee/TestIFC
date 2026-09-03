@@ -1,9 +1,12 @@
 <script lang="ts">
+  import SemanticStatus from "./lib/SemanticStatus.svelte";
   import { onMount } from "svelte";
   import AppRail from "./lib/AppRail.svelte";
   import HelpDialog from "./lib/HelpDialog.svelte";
   import Icon from "./lib/Icon.svelte";
   import InspectorDrawer from "./lib/InspectorDrawer.svelte";
+  import ModelLoadDialog from "./lib/ModelLoadDialog.svelte";
+  import { isOpeningModel } from "./lib/load-progress";
   import ViewCube from "./lib/ViewCube.svelte";
   import ViewerToolbar from "./lib/ViewerToolbar.svelte";
   import { AppShellService, type AppSettings, type BridgeProgress, type CameraOrientation, type FragmentMetrics, type MeasureMode, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewerTool, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
@@ -32,7 +35,7 @@
   let fileInput: HTMLInputElement;
   let viewerHost: HTMLDivElement;
   const shell = new AppShellService();
-  let appVersion = "1.0.1";
+  let appVersion = "1.0.2";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;
@@ -45,6 +48,7 @@
   let fragmentMetrics: FragmentMetrics | null = null;
   let drawerWidth = 360;
   let appLoadSequence = 0;
+  let cancellingLoad = false;
   let gridVisible = true;
   let viewportBackground: ViewportBackground = "gray";
   let wheelZoomSpeed = 1;
@@ -172,8 +176,11 @@
       idle: text.noModel,
       cache: text.cache,
       reading: text.opening,
+      hashing: text.loadHash,
       converting: text.converting,
       loading: text.loading,
+      finalizing: text.loadFinalize,
+      cancelled: text.loadCancelled,
       ready: text.ready,
       error: "Error",
     };
@@ -191,7 +198,9 @@
       activating: language === "vi" ? "đang kích hoạt mô hình" : "activating model",
       uploading: language === "vi" ? "đang nhận file" : "receiving file",
       indexing_hot: language === "vi" ? "đang lập chỉ mục chính" : "building hot index",
+      stalled: language === "vi" ? "chưa có tiến triển" : "no recent progress",
       indexing_cold: language === "vi" ? "đang lập chỉ mục chi tiết" : "building detail index",
+      cancelled: language === "vi" ? "đã hủy" : "cancelled",
       ready: language === "vi" ? "sẵn sàng" : "ready",
       error: language === "vi" ? "có lỗi" : "error",
     };
@@ -377,6 +386,7 @@
   }
 
   async function openIfcFile(file: File) {
+    if (cancellingLoad) return;
     errorMessage = null;
     if (!/\.ifc$/i.test(file.name)) {
       errorMessage = t.unsupported;
@@ -396,16 +406,37 @@
       modelStatus = file.name;
     } catch (error) {
       if (shell.isCancelledLoad(error) || sequence !== appLoadSequence) return;
+      await cancelIfcLoad();
       const message = error instanceof Error ? error.message : String(error);
       errorMessage = message;
       const progress: ViewerProgress = {
-        loadSequence: sequence,
+        loadSequence: appLoadSequence,
         modelHash: readiness.modelHash,
         stage: "error",
         detail: message,
       };
       readiness = applyGeometryProgress(readiness, progress);
       viewerProgress = readiness.geometry;
+    }
+  }
+
+  async function cancelIfcLoad() {
+    if (cancellingLoad) return;
+    cancellingLoad = true;
+    const sequence = ++appLoadSequence;
+    try {
+      await shell.cancelLoad();
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : String(error);
+    } finally {
+      readiness = { ...readiness, loadSequence: sequence,
+        geometry: { loadSequence: sequence, modelHash: readiness.modelHash, stage: "cancelled" },
+        semantic: { loadSequence: sequence, modelHash: readiness.modelHash, stage: "cancelled" } };
+      viewerProgress = readiness.geometry;
+      bridgeProgress = readiness.semantic;
+      selectedElement = null;
+      modelStatus = t.loadCancelled;
+      cancellingLoad = false;
     }
   }
 
@@ -601,15 +632,15 @@
         <strong>{t.dropIfc}</strong>
       </div>
     {/if}
-    {#if !hasModel || errorMessage}
+    {#if (!hasModel || errorMessage) && !isOpeningModel(viewerProgress) && !cancellingLoad}
       <div class:viewer-empty-state-error={Boolean(errorMessage)} class="viewer-empty-state">
         <p>{errorMessage ?? progressText(viewerProgress, t) ?? modelStatus ?? t.empty}</p>
       </div>
     {/if}
     <footer class="qn-status-bar">
       <span>{progressText(viewerProgress, t) ?? modelStatus ?? t.noModel}</span>
-      <span title={bridgeProgress?.detail}>{bridgeText(bridgeProgress, locale)}</span>
-      <span title={fragmentMetrics ? `${fragmentMetrics.profile} · ${fragmentMetrics.fragmentBytes} bytes · ${Math.round(fragmentMetrics.totalMilliseconds)} ms` : undefined}>{t.modelData}: {hasModel ? `${t.modelReady} · ${modelStatus ?? ""}` : viewerProgress?.stage === "error" ? t.modelError : viewerProgress ? t.modelLoading : t.nothingSelected}</span>
+      <SemanticStatus progress={bridgeProgress} text={bridgeText(bridgeProgress, locale)} {locale} onRetry={() => shell.retrySemantic()} />
+      <span title={fragmentMetrics ? `${fragmentMetrics.profile} · ${fragmentMetrics.fragmentBytes} bytes · ${Math.round(fragmentMetrics.totalMilliseconds)} ms` : undefined}>{t.modelData}: {hasModel ? `${t.modelReady} · ${modelStatus ?? ""}` : viewerProgress?.stage === "error" ? t.modelError : isOpeningModel(viewerProgress) ? t.modelLoading : t.nothingSelected}</span>
       <span>{t.element}: {multiSelectionCount ? `${multiSelectionCount} ${t.selectedElements}` : selectedElement?.name ?? selectedElement?.ifcType ?? t.nothingSelected}</span>
       <span>{t.version} {appVersion}</span>
     </footer>
@@ -626,6 +657,10 @@
       onResizeKeydown={resizeDrawerByKeyboard}
     />
   </section>
+
+  {#if viewerProgress && (isOpeningModel(viewerProgress) || cancellingLoad)}
+    <ModelLoadDialog progress={viewerProgress} fileName={readiness.fileName ?? ""} text={t} cancelling={cancellingLoad} onCancel={() => void cancelIfcLoad()} />
+  {/if}
 
   {#if helpOpen}
     <HelpDialog

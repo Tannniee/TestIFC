@@ -92,7 +92,8 @@ export class ViewerCamera {
 
   render(time: number) {
     this.advanceAnimation(time);
-    this.controls.update();
+    const changed = this.controls.update();
+    return changed || this.animation !== null;
   }
 
   fit(box: THREE.Box3, animate = true) {
@@ -270,6 +271,7 @@ export class ViewerCamera {
       fromDistance: current.position.distanceTo(current.target),
       toDistance: target.position.distanceTo(target.target),
     };
+    this.callbacks.onUpdate(false);
   }
 
   private rotationForState(state: FitCameraState) {

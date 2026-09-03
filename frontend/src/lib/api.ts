@@ -1,3 +1,4 @@
+import { sessionFetch, sessionToken } from "./session-transport";
 import {
   API_ENDPOINTS,
   apiPath,
@@ -53,7 +54,7 @@ function responseMessage(status: number, statusText: string, body: string): stri
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await sessionFetch(url, init);
   if (!response.ok) {
     const body = await response.text();
     throw new ApiError(responseMessage(response.status, response.statusText, body), response.status, body);
@@ -68,12 +69,20 @@ export const api = {
     body.append("file", file, file.name);
     return requestJson<LoadModelResponse>(API_ENDPOINTS.loadModel.path, { method: API_ENDPOINTS.loadModel.method, body });
   },
-  uploadModel(file: File, onProgress: (progress: number) => void): Promise<LoadModelResponse> {
+  async uploadModel(file: File, onProgress: (progress: number) => void, signal?: AbortSignal): Promise<LoadModelResponse> {
+    if (signal?.aborted) throw new DOMException("Upload cancelled", "AbortError");
+    const token = await sessionToken();
     return new Promise((resolve, reject) => {
+      if (signal?.aborted) { reject(new DOMException("Upload cancelled", "AbortError")); return; }
       const body = new FormData();
       body.append("file", file, file.name);
       const request = new XMLHttpRequest();
-      request.open(API_ENDPOINTS.loadModel.method, API_ENDPOINTS.loadModel.path);
+      request.open(API_ENDPOINTS.loadModel.method, `${API_ENDPOINTS.loadModel.path}?storeOnly=true`);
+      if (token) request.setRequestHeader("X-IFC-Session", token);
+      const abort = () => request.abort();
+      signal?.addEventListener("abort", abort, { once: true });
+      request.addEventListener("loadend", () => signal?.removeEventListener("abort", abort));
+      request.addEventListener("abort", () => reject(new DOMException("Upload cancelled", "AbortError")));
       request.responseType = "json";
       request.upload.addEventListener("progress", (event) => {
         if (event.lengthComputable) onProgress(event.loaded / event.total);
@@ -96,8 +105,20 @@ export const api = {
       { method: API_ENDPOINTS.activateModel.method },
     );
   },
+  retrySemantic(model: ActivateModelResponse, attemptId: string) {
+    return requestJson<{ ok: boolean }>(API_ENDPOINTS.retrySemantic.path, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modelHash: model.contentHashSha256, loadedAt: model.loadedAt, attemptId }),
+    });
+  },
+  cancelModelLoad(model: ActivateModelResponse) {
+    return requestJson<{ ok: boolean; cancelled: boolean }>(API_ENDPOINTS.cancelModelLoad.path, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modelHash: model.contentHashSha256, loadedAt: model.loadedAt }),
+    });
+  },
   async tryActivateModel(modelHash: string): Promise<boolean> {
-    const response = await fetch(apiPath(API_ENDPOINTS.activateModel, { modelHash }), {
+    const response = await sessionFetch(apiPath(API_ENDPOINTS.activateModel, { modelHash }), {
       method: API_ENDPOINTS.activateModel.method,
     });
     if (response.status === 404) return false;
@@ -107,9 +128,9 @@ export const api = {
     }
     return true;
   },
-  runtime: () => requestJson<ModelRuntimeResponse>(API_ENDPOINTS.modelRuntime.path),
+  runtime: (signal?: AbortSignal) => requestJson<ModelRuntimeResponse>(API_ENDPOINTS.modelRuntime.path, { signal }),
   async getFragments(modelHash: string, signal?: AbortSignal): Promise<ArrayBuffer | null> {
-    const response = await fetch(apiPath(API_ENDPOINTS.getFragments, { modelHash }), { signal });
+    const response = await sessionFetch(apiPath(API_ENDPOINTS.getFragments, { modelHash }), { signal });
     if (response.status === 404) return null;
     if (!response.ok) {
       const body = await response.text();
@@ -118,7 +139,7 @@ export const api = {
     return response.arrayBuffer();
   },
   async putFragments(modelHash: string, fragments: Uint8Array, signal?: AbortSignal): Promise<void> {
-    const response = await fetch(apiPath(API_ENDPOINTS.putFragments, { modelHash }), {
+    const response = await sessionFetch(apiPath(API_ENDPOINTS.putFragments, { modelHash }), {
       method: API_ENDPOINTS.putFragments.method,
       headers: { "Content-Type": "application/octet-stream" },
       body: fragments as unknown as BodyInit,

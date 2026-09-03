@@ -22,7 +22,22 @@ export interface ActivateModelResponse {
   loadedAt: string;
 }
 
+export interface SemanticProgress {
+  modelHash: string;
+  attemptId: string;
+  phase: string;
+  completed: number;
+  total: number | null;
+  category: string | null;
+  status: "running" | "ready" | "error";
+  error: string | null;
+  idleSeconds: number;
+  stallAfterSeconds: number;
+  stalled: boolean;
+}
+
 export interface ModelRuntimeResponse {
+  semanticProgress?: SemanticProgress | null;
   hasActiveModel: boolean;
   activeModelHash: string | null;
   modelResident: boolean;
@@ -99,6 +114,8 @@ export const API_ENDPOINTS = {
   health: { method: "GET", path: "/health" },
   loadModel: { method: "POST", path: "/load-model" },
   activateModel: { method: "POST", path: "/model/activate/{modelHash}" },
+  cancelModelLoad: { method: "POST", path: "/model/cancel-load" },
+  retrySemantic: { method: "POST", path: "/model/retry-semantic" },
   modelRuntime: { method: "GET", path: "/model/runtime" },
   getFragments: { method: "GET", path: "/model/fragments/{modelHash}" },
   putFragments: { method: "POST", path: "/model/fragments/{modelHash}" },

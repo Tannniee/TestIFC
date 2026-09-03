@@ -23,7 +23,8 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         transport = httpx.ASGITransport(app=app_module.app)
         self.client = httpx.AsyncClient(
             transport=transport,
-            base_url="http://testclient",
+            base_url="http://127.0.0.1",
+            headers={"X-IFC-Session": app_module.app.state.api_session.secret},
         )
 
     async def asyncTearDown(self):
@@ -35,8 +36,26 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["service"], "ifc-selection-bridge")
-        self.assertEqual(payload["appVersion"], "1.0.1")
+        self.assertEqual(payload["appVersion"], "1.0.2")
         self.assertFalse(payload["hasSelection"])
+
+    async def test_semantic_retry_rejects_stale_activation_and_duplicate_attempt(self):
+        import model_runtime
+        from index_progress import IndexProgress
+        from unittest.mock import Mock
+        state = model_runtime._ActiveModelState()
+        model_hash = "a" * 64
+        state.set(model_runtime.ActiveModel("probe.ifc", model_hash, "probe.ifc", 1, "current"))
+        progress = IndexProgress()
+        attempt = progress.begin(model_hash)
+        progress.update(attempt, {"phase": "cold", "status": "error", "error": "probe"})
+        body = {"modelHash": model_hash, "loadedAt": "old", "attemptId": attempt}
+        with patch.object(model_runtime, "_state", state), patch.object(model_runtime, "_index_progress", progress), patch.object(model_runtime, "_background_indexes", Mock()), patch.object(model_runtime, "_queue_index_build", side_effect=lambda _: progress.begin(model_hash)) as queue:
+            self.assertEqual((await self.client.post("/model/retry-semantic", json=body)).status_code, 409)
+            body["loadedAt"] = "current"
+            self.assertEqual((await self.client.post("/model/retry-semantic", json=body)).status_code, 200)
+            self.assertEqual((await self.client.post("/model/retry-semantic", json=body)).status_code, 409)
+            queue.assert_called_once()
 
     async def test_runtime_exposes_separate_semantic_readiness(self):
         response = await self.client.get("/model/runtime")
@@ -123,6 +142,8 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             "/load-model": {"post"},
             "/model/fragments/{modelHash}": {"get", "post"},
             "/model/activate/{modelHash}": {"post"},
+            "/model/cancel-load": {"post"},
+            "/model/retry-semantic": {"post"},
             "/register-model": {"post"},
             "/model/runtime": {"get"},
             "/model/tree": {"get"},

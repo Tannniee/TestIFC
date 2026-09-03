@@ -5,12 +5,12 @@ import {
   type RectangleRaycastResult,
 } from "@thatopen/fragments";
 import * as THREE from "three";
+import { MEASURE_AXES, snapMeasurementAxis } from "./measurement-axis";
 import type { MeasureMode, MeasurementResult, ViewerTool } from "./viewer-contracts";
 import {
   formatMeasurement,
   isFullyIncludedSweep,
   measurementInputToMeters,
-  measurementMidpoint,
   parseMeasurementInput,
   pointAtDistance,
   type MeasurementUnit,
@@ -31,10 +31,12 @@ interface MeasurementVisual {
   line: THREE.Line;
   points: THREE.Points;
   label: HTMLDivElement;
+  midpoint: THREE.Vector3;
 }
 
 export interface ViewerInteractionCallbacks {
   activeModel(): FragmentsModel | null;
+  onInvalidate(): void;
   onMultiSelection(result: RectangleRaycastResult | null): void;
   onMeasurements(measurements: MeasurementResult[]): void;
 }
@@ -53,6 +55,10 @@ export class ViewerInteraction {
   private snapPoint: THREE.Points | null = null;
   private snapEdge: THREE.Line | null = null;
   private fixedDistance: number | null = null;
+  private readonly axisGroup = new THREE.Group();
+  private readonly axisLabels: HTMLDivElement[] = [];
+  private axisLength = 1;
+  private readonly projectedPoint = new THREE.Vector3();
   private lastPointer = { clientX: 0, clientY: 0 };
   private measurements: MeasurementVisual[] = [];
   private nextMeasurementId = 1;
@@ -96,6 +102,25 @@ export class ViewerInteraction {
     enterHint.textContent = "Enter";
     this.measurementEntry.append(this.measurementInput, this.measurementUnit, enterHint);
     this.host.append(this.measurementEntry);
+    for (const axis of MEASURE_AXES) {
+      const label = document.createElement("div");
+      label.className = "viewer-measurement-axis-label";
+      label.textContent = axis.name;
+      label.style.color = `#${axis.color.toString(16).padStart(6, "0")}`;
+      label.hidden = true;
+      this.host.append(label);
+      this.axisLabels.push(label);
+      const line = this.createLine([axis.direction.clone().negate(), axis.direction], axis.color);
+      this.axisGroup.add(line);
+    }
+    this.axisGroup.visible = false;
+    this.scene.add(this.axisGroup);
+    this.measurementInput.addEventListener("focus", () => this.unlockNumericEntry());
+    this.measurementUnit.addEventListener("change", () => {
+      if (this.fixedDistance !== null) {
+        this.measurementInput.value = String(this.measurementUnit.value === "mm" ? this.fixedDistance * 1000 : this.fixedDistance);
+      }
+    });
     this.measurementInput.addEventListener("input", () => this.measurementEntry.classList.remove("viewer-measurement-entry--invalid"));
     window.addEventListener("keydown", this.onMeasurementKeyDown, true);
     this.applyHostClasses();
@@ -163,7 +188,6 @@ export class ViewerInteraction {
 
   handlePointerMove(event: PointerEvent): boolean {
     this.lastPointer = { clientX: event.clientX, clientY: event.clientY };
-    if (!this.measurementEntry.hidden) this.positionMeasurementEntry();
     const start = this.sweepStart;
     if (start?.pointerId === event.pointerId) {
       event.preventDefault();
@@ -173,6 +197,7 @@ export class ViewerInteraction {
       return true;
     }
     if (this.tool !== "measure") return false;
+    if (event.buttons !== 0) return false;
     this.scheduleSnapPreview(event.clientX, event.clientY);
     return true;
   }
@@ -198,8 +223,8 @@ export class ViewerInteraction {
     if (this.tool !== "measure" || event.button !== 0) return false;
     this.lastPointer = { clientX: event.clientX, clientY: event.clientY };
     if (this.measureMode === "pointToPoint" && !this.measurementEntry.hidden && this.fixedDistance === null) {
-      this.measurementInput.focus();
-      return true;
+      this.confirmNumericEntry();
+      if (this.fixedDistance === null) { this.measurementInput.focus(); return true; }
     }
     const epoch = this.measurementEpoch;
     this.pendingMeasurements++;
@@ -214,16 +239,25 @@ export class ViewerInteraction {
   updateOverlay() {
     const width = Math.max(this.canvas.clientWidth, 1);
     const height = Math.max(this.canvas.clientHeight, 1);
-    for (const visual of this.measurements) {
-      const midpoint = measurementMidpoint(visual.result);
-      const projected = new THREE.Vector3(midpoint.x, midpoint.y, midpoint.z).project(this.camera);
-      if (projected.z < -1 || projected.z > 1) {
-        visual.label.hidden = true;
-        continue;
-      }
-      visual.label.style.left = `${(projected.x * 0.5 + 0.5) * width}px`;
-      visual.label.style.top = `${(-projected.y * 0.5 + 0.5) * height}px`;
-      visual.label.hidden = false;
+    // OrbitControls changes position/quaternion before WebGLRenderer updates matrices.
+    // Project labels against that same current frame, never the previous camera matrix.
+    this.camera.updateMatrixWorld();
+    const place = (label: HTMLDivElement, point: THREE.Vector3, center = "-50%, -140%") => {
+      const projected = this.projectedPoint.copy(point).project(this.camera);
+      const visible = Number.isFinite(projected.x) && projected.z >= -1 && projected.z <= 1;
+      label.hidden = !visible;
+      if (!visible) return;
+      label.style.transform = `translate3d(${(projected.x * .5 + .5) * width}px, ${(-projected.y * .5 + .5) * height}px, 0) translate(${center})`;
+    };
+    for (const visual of this.measurements) place(visual.label, visual.midpoint);
+    if (this.axisGroup.visible && this.measurementStart) {
+      const origin = this.measurementStart.clone().project(this.camera);
+      const a = new THREE.Vector3(origin.x, origin.y, origin.z).unproject(this.camera);
+      const b = new THREE.Vector3(origin.x + 2 * 90 / width, origin.y, origin.z).unproject(this.camera);
+      this.axisLength = Math.max(a.distanceTo(b), 1e-6);
+      this.axisGroup.position.copy(this.measurementStart);
+      this.axisGroup.scale.setScalar(this.axisLength);
+      MEASURE_AXES.forEach((axis, i) => place(this.axisLabels[i], this.measurementStart!.clone().addScaledVector(axis.direction, this.axisLength), "-50%, -50%"));
     }
   }
 
@@ -235,6 +269,9 @@ export class ViewerInteraction {
     this.measurements = [];
     this.sweepRectangle.remove();
     this.measurementEntry.remove();
+    for (const label of this.axisLabels) label.remove();
+    for (const child of [...this.axisGroup.children]) this.disposeObject(child as THREE.Line);
+    this.axisGroup.removeFromParent();
     this.host.classList.remove("viewer-pan-active", "viewer-multi-select-active", "viewer-measure-active");
   }
 
@@ -308,6 +345,12 @@ export class ViewerInteraction {
   }
 
   private async snapAt(model: FragmentsModel, clientX: number, clientY: number, mode: MeasureMode) {
+    if (mode === "pointToPoint" && this.measurementStart && this.fixedDistance !== null) {
+      this.camera.updateMatrixWorld();
+      const bounds = this.canvas.getBoundingClientRect();
+      const axis = snapMeasurementAxis(this.measurementStart, this.axisLength, this.camera, bounds.width, bounds.height, clientX - bounds.left, clientY - bounds.top);
+      if (axis) return { point: axis.point, snappingClass: SnappingClass.LINE } as RaycastResult;
+    }
     const snappingClasses = mode === "edge"
       ? [SnappingClass.LINE]
       : [SnappingClass.POINT, SnappingClass.LINE, SnappingClass.FACE];
@@ -333,6 +376,7 @@ export class ViewerInteraction {
       this.disposeObject(this.draftPoint);
       this.draftPoint = this.createPoints([this.measurementStart], 0xffb020, 10);
       this.scene.add(this.draftPoint);
+      this.callbacks.onInvalidate();
       return;
     }
     const start = this.measurementStart;
@@ -360,8 +404,10 @@ export class ViewerInteraction {
       line: this.createLine([start, end], 0xffb020),
       points: this.createPoints([start, end], 0xffb020, 9),
       label,
+      midpoint: new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5),
     };
     this.scene.add(visual.line, visual.points);
+    this.callbacks.onInvalidate();
     this.measurements.push(visual);
     this.publishMeasurements();
   }
@@ -385,6 +431,7 @@ export class ViewerInteraction {
     }
     this.snapPoint = this.createPoints([previewPoint], 0x32d6ff, 11);
     this.scene.add(this.snapPoint);
+    this.callbacks.onInvalidate();
     if (this.measurementStart) {
       this.draftLine = this.createLine([this.measurementStart, previewPoint], 0xffb020);
       this.scene.add(this.draftLine);
@@ -411,7 +458,7 @@ export class ViewerInteraction {
       }
       return;
     }
-    if (this.fixedDistance === null && /^[0-9]$/.test(event.key)) {
+    if (/^[0-9]$/.test(event.key) && !(event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement || (event.target as HTMLElement)?.isContentEditable)) {
       event.preventDefault();
       event.stopImmediatePropagation();
       this.openMeasurementEntry(event.key);
@@ -426,6 +473,8 @@ export class ViewerInteraction {
     this.measurementInput.value = seed;
     this.measurementEntry.hidden = false;
     this.measurementEntry.classList.remove("viewer-measurement-entry--invalid", "viewer-measurement-entry--locked");
+    this.axisGroup.visible = true;
+    this.callbacks.onInvalidate();
     this.positionMeasurementEntry();
     this.measurementInput.focus();
     this.measurementInput.setSelectionRange(seed.length, seed.length);
@@ -445,10 +494,22 @@ export class ViewerInteraction {
     this.measurementInput.value = String(parsed.distance);
     this.measurementUnit.value = parsed.unit;
     this.measurementInput.readOnly = true;
-    this.measurementUnit.disabled = true;
+    this.measurementUnit.disabled = false;
+    this.axisGroup.visible = true;
+    this.callbacks.onInvalidate();
     this.measurementEntry.classList.add("viewer-measurement-entry--locked");
     this.measurementEntry.classList.remove("viewer-measurement-entry--invalid");
     this.measurementInput.blur();
+    this.measurementUnit.blur();
+    this.scheduleSnapPreview(this.lastPointer.clientX, this.lastPointer.clientY);
+  }
+
+  private unlockNumericEntry() {
+    if (this.fixedDistance === null) return;
+    this.measurementEpoch++;
+    this.fixedDistance = null;
+    this.measurementInput.readOnly = false;
+    this.measurementEntry.classList.remove("viewer-measurement-entry--locked");
   }
 
   private cancelNumericEntry() {
@@ -462,6 +523,9 @@ export class ViewerInteraction {
 
   private hideMeasurementEntry() {
     this.measurementEntry.hidden = true;
+    this.axisGroup.visible = false;
+    for (const label of this.axisLabels) label.hidden = true;
+    this.callbacks.onInvalidate();
     this.measurementEntry.classList.remove("viewer-measurement-entry--invalid", "viewer-measurement-entry--locked");
     this.measurementInput.readOnly = false;
     this.measurementUnit.disabled = false;
@@ -469,11 +533,10 @@ export class ViewerInteraction {
   }
 
   private positionMeasurementEntry() {
-    const bounds = this.canvas.getBoundingClientRect();
-    const left = THREE.MathUtils.clamp(this.lastPointer.clientX - bounds.left + 14, 8, Math.max(bounds.width - 190, 8));
-    const top = THREE.MathUtils.clamp(this.lastPointer.clientY - bounds.top + 14, 8, Math.max(bounds.height - 48, 8));
-    this.measurementEntry.style.left = `${left}px`;
-    this.measurementEntry.style.top = `${top}px`;
+    // Fixed bottom-center dock leaves the picked point and navigation controls clear.
+    this.measurementEntry.style.left = "50%";
+    this.measurementEntry.style.top = "auto";
+    this.measurementEntry.style.bottom = "18px";
   }
 
   private createLine(points: THREE.Vector3[], color: number) {
@@ -525,7 +588,8 @@ export class ViewerInteraction {
 
   private disposeObject(object: THREE.Line | THREE.Points | null) {
     if (!object) return;
-    this.scene.remove(object);
+    object.removeFromParent();
+    this.callbacks.onInvalidate();
     object.geometry.dispose();
     (object.material as THREE.Material).dispose();
   }

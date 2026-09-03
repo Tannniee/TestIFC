@@ -47,8 +47,10 @@ The frontend follows the same composition boundary:
 
 - `frontend/src/lib/app-shell.ts` owns settings, viewer lifecycle, and commands.
 - `App.svelte` composes the rail, dialogs, inspector, and viewer workspace.
-- `viewer.ts` coordinates rendering through focused camera, bridge, conversion,
-  selection, and contract modules.
+- `viewer.ts` coordinates the camera, selection and render-on-demand scheduler.
+- `viewer-model-loader.ts` owns file reads, conversion, fragment models and
+  backend preparation. Conversion workers are created on demand and terminated
+  after completion, cancellation or failure.
 - `viewcube-math.ts` owns the pure ViewCube geometry, naming, and orientation math.
 - `api-contracts.ts` is the typed frontend endpoint manifest. Contract tests compare
   it with the backend OpenAPI document, and Vite derives its proxy prefixes from it.
@@ -132,6 +134,38 @@ Build the frontend once, then start the integrated desktop host:
 ```
 
 Set `IFC_VIEWER_PORT` only when an isolated instance must run beside another copy.
+The desktop keeps its bound socket through server startup, so an automatically
+selected port cannot be taken between selection and startup.
+
+Each desktop launch creates an internal API session. The viewer receives its
+credential through the desktop bridge; API calls require `X-IFC-Session` and
+validate loopback Host and browser Origin. Credentials are not written into the
+frontend bundle, URLs, settings or logs.
+
+For browser development, generate `IFC_API_SESSION_TOKEN` (at least 32 ASCII
+characters) in the parent environment and pass the same value to Uvicorn and
+Vite. Vite reads this server-only variable and injects the header for requests
+from its own origin. Do not use a `VITE_` variable for the credential. The
+integrated desktop generates and transfers its own session automatically.
+
+`benchmarks/run_foundation_smoke.mjs` creates a temporary shared session for the
+live backend and browser tests. `benchmarks/run_desktop_session_smoke.mjs` tests
+the source desktop and built frontend with isolated settings and a real IFC;
+neither command builds an executable. Render comparison against a Git revision
+uses `benchmarks/run_render_navigation.mjs` and existing local fragment caches.
+
+## Semantic progress and measurements
+
+Semantic indexing reports its phase and record counts in the footer. If work
+stops advancing, Retry cancels the owned worker and resumes committed cold-index
+batches. Cold indexing uses SQLite WAL with one writer/checkpointer and short
+read-only queries. Keep the model cache on a local filesystem.
+
+For a fixed-distance measurement, pick the first point and type a distance.
+The compact input stays at the bottom of the viewport; choose mm or m, then
+press Enter or click a direction. Snap to the red X, green Y or blue Z axis
+(either sign), or a second model point. Click the number to edit it; Escape
+clears the fixed distance while retaining the first point.
 
 ## Package
 
@@ -143,9 +177,10 @@ PyInstaller executable:
 ```
 
 The executable name and Windows version metadata come from `APP_VERSION` in
-`src\version.py`. Version 1.0.1 is written to `dist\IFC Viewer 1.0.1.exe`.
-Release changes are recorded in `CHANGELOG.md`. The application contains no licensing or
-authentication layer. Follow `packaging\RELEASE.md` for the real-model and artifact
+`src\version.py`. Version 1.0.2 is written to `dist\IFC Viewer 1.0.2.exe`.
+Release changes are recorded in `CHANGELOG.md`. The application requires no license,
+account or sign-in; its internal API uses a per-launch session credential.
+Follow `packaging\RELEASE.md` for the real-model and artifact
 gates.
 
 ## Historical material
