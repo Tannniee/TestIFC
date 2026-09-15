@@ -10,6 +10,7 @@ import { ViewerBridge } from "./viewer-bridge";
 import { ModelStage } from "./model-staging";
 import type { ViewSessionState } from "./workspace-contracts";
 import { LoadCancelledError, type BridgeProgress, type ViewerProgress, type FragmentMetrics } from "./viewer-contracts";
+import { requireSupportedIfcSize } from "./model-limits";
 
 interface LoaderCallbacks {
   onProgress(progress: ViewerProgress): void;
@@ -83,6 +84,7 @@ export class ViewerModelLoader {
   }
 
   private async loadCurrent(file: File, sequence: number, signal: AbortSignal, options: ModelLoadOptions): Promise<void> {
+    requireSupportedIfcSize(file.size);
     if (this.cleanupFailure) throw this.cleanupFailure;
     const loadStarted = performance.now();
     const previous = this.activeModel;

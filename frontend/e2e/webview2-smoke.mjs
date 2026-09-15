@@ -1,5 +1,5 @@
 import { chromium } from "@playwright/test";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -31,6 +31,7 @@ const userDataDir = await mkdtemp(path.join(tmpdir(), "ifc-viewer-webview2-"));
 const child = spawn(executable, [], {
   env: {
     ...process.env,
+    IFC_MODEL_CACHE_DIR: path.join(userDataDir, "model-cache"),
     WEBVIEW2_USER_DATA_FOLDER: userDataDir,
     WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:
       `--remote-debugging-port=${cdpPort} --enable-unsafe-swiftshader --no-first-run`,
@@ -73,9 +74,36 @@ try {
   if (canvasCount !== 1) throw new Error(`Expected one viewer canvas, found ${canvasCount}`);
   const health = await page.evaluate(async () => (await fetch("/health")).json());
   if (health?.ok !== true) throw new Error("Packaged WebView2 could not reach the local bridge");
+  if (process.env.IFC_E2E_MODEL_PATH) {
+    await page.evaluate(() => {
+      window.__packageMetrics = [];
+      window.addEventListener("ifc-fragment-metrics", e => window.__packageMetrics.push(e.detail));
+    });
+    await page.locator('input[type="file"]').setInputFiles(process.env.IFC_E2E_MODEL_PATH);
+    await page.waitForFunction(() => window.__packageMetrics.length === 1, null, { timeout: 120000 });
+    await page.waitForFunction(async () => {
+      const { token } = await window.pywebview.api.get_api_session();
+      const state = await (await fetch('/model/runtime', { headers: { 'X-IFC-Session': token } })).json();
+      return state.hotIndexStatus === 'ready' && state.coldIndexStatus === 'ready';
+    }, null, { timeout: 120000 });
+    process.stdout.write("packaged real IFC geometry and semantic index passed\n");
+  }
   process.stdout.write("packaged WebView2 CDP smoke test passed\n");
 } finally {
+  // PyInstaller one-file launches a child GUI process. Close only this process tree.
+  if (child.exitCode === null && child.pid) {
+    const script = `$owned = @(${child.pid}); $all = Get-CimInstance Win32_Process; do { $next = @($all | Where-Object { $_.ParentProcessId -in $owned -and $_.ProcessId -notin $owned } | ForEach-Object { $_.ProcessId }); $owned += $next } while ($next.Count); foreach ($id in $owned) { $p = Get-Process -Id $id -ErrorAction SilentlyContinue; if ($p -and $p.MainWindowHandle -ne 0) { $null = $p.CloseMainWindow() } }`;
+    spawnSync('powershell.exe', ['-NoProfile', '-Command', script], { windowsHide: true, timeout: 15000 });
+    for (let i = 0; i < 50 && child.exitCode === null; i++) await new Promise(resolve => setTimeout(resolve, 200));
+    if (child.exitCode === null) {
+      spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true });
+      process.exitCode = 1;
+      process.stderr.write("Packaged application did not close gracefully\n");
+    } else {
+      process.stdout.write(`packaged graceful exit: ${child.exitCode}\n`);
+      if (child.exitCode !== 0) process.exitCode = 1;
+    }
+  }
   await browser?.close().catch(() => undefined);
-  if (child.exitCode === null) child.kill();
   await rm(userDataDir, { recursive: true, force: true }).catch(() => undefined);
 }

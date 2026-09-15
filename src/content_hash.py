@@ -11,6 +11,12 @@ from typing import BinaryIO
 _CHUNK_BYTES = 8_388_608
 
 
+class ContentTooLargeError(ValueError):
+    def __init__(self, max_bytes: int):
+        self.max_bytes = max_bytes
+        super().__init__(f"content exceeds {max_bytes} bytes")
+
+
 def sha256_hex(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -23,11 +29,13 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def copy_and_hash(reader: BinaryIO, target: Path) -> tuple[str, int]:
+def copy_and_hash(reader: BinaryIO, target: Path, *, max_bytes: int | None = None) -> tuple[str, int]:
     digest = hashlib.sha256()
     written = 0
     with target.open("wb") as sink:
         while chunk := reader.read(_CHUNK_BYTES):
+            if max_bytes is not None and written + len(chunk) > max_bytes:
+                raise ContentTooLargeError(max_bytes)
             digest.update(chunk)
             sink.write(chunk)
             written += len(chunk)

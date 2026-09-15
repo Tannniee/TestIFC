@@ -36,11 +36,11 @@ def _compute_mass_kg(
 ) -> float | None:
     if not units.has_mass_unit:
         return None
-    density = ifcopenshell.util.element.get_element_mass_density(element)
-    if density is None:
-        return None
     volume = _find_quantity(quantities, "NetVolume", "GrossVolume")
     if volume is None:
+        return None
+    density = ifcopenshell.util.element.get_element_mass_density(element)
+    if density is None:
         return None
     return ifc_units.mass_to_kilograms(density * volume, units.mass_scale)
 

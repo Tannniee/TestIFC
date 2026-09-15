@@ -1,5 +1,6 @@
 """Serve the current backend and cancel owned work when its stop file appears."""
 import multiprocessing
+import os
 from pathlib import Path
 import sys
 from threading import Thread
@@ -12,6 +13,8 @@ def main():
     import uvicorn
     import model_cache
     import model_runtime
+    if os.environ.get("IFC_BENCH_DISABLE_SEMANTIC") == "1":
+        model_runtime._queue_index_build = lambda _model: None
     server = uvicorn.Server(uvicorn.Config("app:app", host="127.0.0.1", port=int(sys.argv[1]), log_level="warning"))
 
     def stop():

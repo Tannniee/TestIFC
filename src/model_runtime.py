@@ -17,6 +17,7 @@ import ifcopenshell
 import facts_cache
 import index_builder
 import model_cache
+from model_limits import ModelTooLargeError
 import model_index
 from background_tasks import LatestTaskRunner
 from index_progress import IndexProgress
@@ -371,6 +372,8 @@ def register_model(path: str, expected_hash: str, background: bool = False) -> d
     try:
         try:
             cached = model_cache.validate_model_file(path, expected_hash)
+        except ModelTooLargeError:
+            raise
         except ValueError as error:
             raise HashMismatchError(str(error)) from error
         model = _active_model(cached, cached.path.name)

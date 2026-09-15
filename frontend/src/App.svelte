@@ -17,6 +17,7 @@
   import { AppShellService, type AppSettings, type BridgeProgress, type CameraOrientation, type FragmentMetrics, type MeasureMode, type SectionPlaneDefinition, type SectionSide, type ViewDirection, type ViewerProgress, type ViewerSelection, type ViewerTool, type ViewportBackground, type ViewPreset } from "./lib/app-shell";
   import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
   import { applyGeometryProgress, applySemanticProgress, beginModelLoad, emptyModelReadiness, geometryReady } from "./lib/model-readiness";
+  import { MAX_IFC_BYTES } from "./lib/model-limits";
 
   const sectionAxes = ["x", "y", "z"] as const;
 
@@ -464,6 +465,10 @@
       errorMessage = t.unsupported;
       return;
     }
+    if (file.size > MAX_IFC_BYTES) {
+      errorMessage = `${t.ifcTooLarge} (${(file.size / 1024 ** 3).toFixed(2)} GiB)`;
+      return;
+    }
     const sequence = ++appLoadSequence;
     readiness = beginModelLoad(sequence, file.name);
     viewerProgress = readiness.geometry;
@@ -723,7 +728,7 @@
       </div>
     {/if}
     {#if (!hasModel || errorMessage) && !isOpeningModel(viewerProgress) && !cancellingLoad}
-      <div class:viewer-empty-state-error={Boolean(errorMessage)} class="viewer-empty-state">
+      <div class:viewer-empty-state-error={Boolean(errorMessage)} class="viewer-empty-state" role={errorMessage ? "alert" : undefined}>
         <p>{errorMessage ?? progressText(viewerProgress, t) ?? modelStatus ?? t.empty}</p>
       </div>
     {/if}

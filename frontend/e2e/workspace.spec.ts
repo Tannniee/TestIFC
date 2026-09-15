@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+import { MAX_IFC_BYTES } from "../src/lib/model-limits";
 
 const modelA = process.env.IFC_E2E_MODEL_A;
 const modelB = process.env.IFC_E2E_MODEL_B;
@@ -24,6 +26,18 @@ async function openModel(page: import("@playwright/test").Page, path: string) {
   await expect.poll(() => page.evaluate(() => (window as any).loadResult), {timeout:60000}).toBe("ready");
   await expect(page.locator(".view-tabs button[role=tab]").first()).toBeEnabled();
 }
+
+test("IFC larger than 1 GiB is rejected before WebIFC starts", async ({page}, testInfo) => {
+  const source = testInfo.outputPath("oversize.ifc");
+  const handle = await import("node:fs/promises").then(fs => fs.open(source, "w"));
+  try { await handle.truncate(MAX_IFC_BYTES + 1); }
+  finally { await handle.close(); }
+  await workspacePage(page);
+  await page.locator('input[type="file"]').setInputFiles(source);
+  await expect(page.getByRole("alert")).toContainText("WebIFC");
+  await expect(page.getByRole("alert")).toContainText("1.00 GiB");
+  expect(await page.evaluate(() => (window as any).loadResult)).toBe("idle");
+});
 
 test("multi IFC restores A/B state, deduplicates content, recovers deleted cache and closes the last backend model", async ({page}, testInfo) => {
   test.skip(!modelA || !modelB, "Set two private IFC paths"); test.setTimeout(180000);
@@ -194,18 +208,20 @@ for (const profile of ["attributes", "minimum"]) test(`Browser and Properties pr
 test("real duplicate and missing GUIDs retain exact-artifact selection and are skipped safely after an artifact change", async ({page}) => {
   const fixture = process.env.IFC_E2E_IDENTITY_MODEL;
   test.skip(!fixture); test.setTimeout(90000);
+  const identity = JSON.parse(await readFile(fixture!.replace(/\.ifc$/i, '.identity.json'), 'utf8'));
+  const edgeIds: number[] = [...identity.duplicateIds, identity.missingId];
   await workspacePage(page); await openModel(page, fixture!);
-  const result = await page.evaluate(async () => {
+  const result = await page.evaluate(async (edgeIds) => {
     const v = (window as any).viewer, model = v.model;
     const ids = await model.getItemsIdsWithGeometry();
-    const [unique] = ids.filter((id:number) => ![58,103,119].includes(id));
-    await v.selectItems([58,103,119,unique]);
+    const [unique] = ids.filter((id:number) => !edgeIds.includes(id));
+    await v.selectItems([...edgeIds,unique]);
     const original = v.captureViewState(); await v.clearSelection(); await v.applyViewState(original);
     const exact = v.captureViewState();
     const rebuilt = structuredClone(original); rebuilt.selection.forEach((ref:any) => ref.artifactId = "different-artifact");
     await v.applyViewState(rebuilt);
-    return {original,exact,remapped:v.captureViewState().selection,unique,guids:await model.getGuidsByLocalIds([58,103,119])};
-  });
+    return {original,exact,remapped:v.captureViewState().selection,unique,guids:await model.getGuidsByLocalIds(edgeIds)};
+  }, edgeIds);
   expect(result.guids[0]).toBe(result.guids[1]); expect(result.guids[2]).toBeNull();
   expect(result.exact).toEqual(result.original);
   expect(result.remapped.map((ref:any) => ref.localId)).toEqual([result.unique]);
@@ -380,7 +396,10 @@ test("Section Box creates an independent view, returns to 3D and cancels without
   await expect.poll(() => page.evaluate(() => JSON.stringify((window as any).viewer.captureViewState()))).toBe(source);
   await page.getByRole("tab", { name: "Section Box 1", exact: true }).click();
   await expect.poll(() => page.evaluate(() => JSON.stringify((window as any).viewer.captureViewState().clipping))).toBe(savedBox);
-  const handle = page.locator('[data-section-face="x-max"]'); const handleBox = await handle.boundingBox();
+  await page.evaluate(async () => { await (window as any).viewer.view.settled(); });
+  const handle = page.locator('[data-section-face="x-max"]');
+  await expect(handle).toBeVisible();
+  const handleBox = await handle.boundingBox();
   await page.mouse.move(handleBox!.x+14,handleBox!.y+14); await page.mouse.down();
   await page.mouse.move(handleBox!.x+54,handleBox!.y+14,{steps:5});
   await page.keyboard.press("Escape"); await page.mouse.up();

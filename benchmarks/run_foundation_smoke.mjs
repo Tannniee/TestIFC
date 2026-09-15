@@ -22,7 +22,7 @@ try {
   if ((await fetch(`${env.IFC_BRIDGE_URL}/selection`)).status !== 401) throw new Error("Anonymous API request was accepted");
   if ((await fetch(`${env.IFC_BRIDGE_URL}/selection`, { headers: { "X-IFC-Session": token } })).status !== 200) throw new Error("Authenticated API request failed");
   if ((await fetch(`${env.IFC_BRIDGE_URL}/selection`, { headers: { "X-IFC-Session": token, Origin: "https://evil.example" } })).status !== 403) throw new Error("Foreign Origin was accepted");
-  const tests = spawn(process.execPath, ["node_modules/@playwright/test/cli.js", "test"], {
+  const tests = spawn(process.execPath, ["node_modules/@playwright/test/cli.js", "test", ...process.argv.slice(2)], {
     cwd: path.join(root, "frontend"), windowsHide: true, stdio: "inherit", env: { ...env, IFC_E2E_MODEL_PATH: process.env.IFC_E2E_MODEL_PATH || path.join(root, "benchmarks/results/watchlist-browser-cache/845122873cfe408fbf537841dcdfc17f8b1d0e365a171abc8585ef7a2861eeac.ifc") },
   });
   const code = await new Promise((resolve, reject) => { tests.once("error", reject); tests.once("exit", resolve); });

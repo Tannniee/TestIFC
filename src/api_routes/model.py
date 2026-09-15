@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from api_contracts import RetrySemanticRequest
 from model_runtime import retry_semantic_index
+from model_limits import ModelTooLargeError
 
 import logging
 
@@ -53,6 +54,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             return model_operations.prepare_stage(request.stageId, request.modelHash, request.filename)
         except FileNotFoundError:
             return error_response(404, "model_not_cached")
+        except ModelTooLargeError:
+            return error_response(413, "ifc_file_exceeds_1_gib_limit")
         except ValueError as error:
             return error_response(409, str(error))
 
@@ -88,6 +91,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
                 originalFilename=loaded.original_filename,
                 sizeBytes=loaded.size_bytes,
             )
+        except ModelTooLargeError:
+            return error_response(413, "ifc_file_exceeds_1_gib_limit")
         except Exception:
             logger.exception(
                 "Model upload materialization failed",
@@ -145,6 +150,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             )
         except (FileNotFoundError, HashMismatchError):
             return error_response(404, "model_not_cached")
+        except ModelTooLargeError:
+            return error_response(413, "ifc_file_exceeds_1_gib_limit")
         return {"ok": True, **info}
 
     @router.post("/model/cancel-load")
@@ -166,6 +173,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             return error_response(404, str(exc))
         except HashMismatchError as exc:
             return error_response(409, str(exc))
+        except ModelTooLargeError:
+            return error_response(413, "ifc_file_exceeds_1_gib_limit")
         return {"ok": True, **info}
 
     @router.post("/model/retry-semantic")

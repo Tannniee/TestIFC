@@ -98,6 +98,22 @@ class TransactionTests(unittest.TestCase):
         with self.assertRaises(tx.TransactionConflict): tx.transition("b", "commit")
         self.assertEqual(runtime._state.get(), self.a)
 
+    def test_same_size_staged_mutation_cannot_commit(self):
+        tx.prepare("b", self.b.contentHashSha256, "B.ifc")
+        Path(self.b.path).write_bytes(b"C")
+        with self.assertRaises(tx.TransactionConflict): tx.transition("b", "commit")
+        self.assertEqual(runtime._state.get(), self.a)
+
+    def test_retention_recency_marker_does_not_invalidate_staged_file(self):
+        tx.prepare("b", self.b.contentHashSha256, "B.ifc")
+        path = Path(self.b.path)
+        modified = path.stat().st_mtime_ns
+        cache.enforce_cache_retention(self.a.contentHashSha256)
+        self.assertEqual(path.stat().st_mtime_ns, modified)
+        self.assertTrue((cache.CACHE_DIR / f"{self.b.contentHashSha256}.access").exists())
+        tx.transition("b", "commit")
+        self.assertEqual(runtime._state.get().contentHashSha256, self.b.contentHashSha256)
+
     def test_commit_side_effect_failure_restores_active_state(self):
         tx.prepare("b", self.b.contentHashSha256, "B.ifc")
         with patch.object(runtime, "_queue_index_build", side_effect=RuntimeError("queue failed")):

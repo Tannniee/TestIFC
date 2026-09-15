@@ -26,7 +26,9 @@ src/.model_cache/
 test-fixtures/
 ui_reference_cache/
 benchmarks/corpus.local.json
+benchmarks/corpus.audit-*.json
 benchmarks/results/
+*.exe.zip
 
 # Recovery material is preserved locally but is not part of the maintained app.
 archive/

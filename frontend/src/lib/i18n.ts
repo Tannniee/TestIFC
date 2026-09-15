@@ -107,6 +107,7 @@ export const copy = {
     ready: "Đã mở",
     selecting: "Đang đọc cấu kiện…",
     unsupported: "Bản phục hồi hiện chỉ hỗ trợ file .ifc.",
+    ifcTooLarge: "Không thể mở file IFC lớn hơn 1 GiB. Đây là giới hạn của WebIFC; hãy chia nhỏ mô hình trước khi mở.",
     modelLoading: "đang mở",
     modelReady: "sẵn sàng",
     modelError: "lỗi",
@@ -209,6 +210,7 @@ export const copy = {
     ready: "Opened",
     selecting: "Reading element data…",
     unsupported: "The recovered build currently supports .ifc files only.",
+    ifcTooLarge: "IFC files larger than 1 GiB cannot be opened. This is a WebIFC limit; split the model before opening it.",
     modelLoading: "opening",
     modelReady: "ready",
     modelError: "error",
@@ -229,7 +231,7 @@ export const helpTopics: Record<Locale, HelpTopic[]> = {
         "Chờ thanh tiến trình chạy xong.",
         "Mô hình hiện ra là bấm chọn được.",
       ],
-      note: "File lớn mở lâu và tốn RAM. Nên đóng bớt chương trình khác trước.",
+      note: "File lớn hơn 1 GiB không thể mở do giới hạn WebIFC. Hãy chia nhỏ mô hình trước khi mở.",
     },
     {
       group: "Bắt đầu",
@@ -264,7 +266,7 @@ export const helpTopics: Record<Locale, HelpTopic[]> = {
       title: "Open an IFC model",
       intro: "The file stays on your computer and is not uploaded elsewhere.",
       steps: ["Click Open IFC file in the left rail or drag an .ifc file into the viewport.", "Choose or drop an .ifc file.", "Wait for processing to finish.", "Click elements once the model appears."],
-      note: "Large files take longer and use more memory. Close other heavy programs first.",
+      note: "Files larger than 1 GiB cannot be opened because of a WebIFC limit. Split the model before opening it.",
     },
     {
       group: "Getting started",

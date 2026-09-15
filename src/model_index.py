@@ -8,7 +8,7 @@ import re
 import sqlite3
 from contextlib import closing
 from pathlib import Path
-from time import monotonic
+from time import monotonic, sleep
 from typing import Any, Callable, Iterable, Literal
 
 import ifcopenshell
@@ -87,9 +87,19 @@ def is_complete(path: Path) -> bool:
 
 def recover_interrupted_build(path: Path) -> None:
     """Run only after the owned writer has exited, while holding its build lock."""
-    with closing(sqlite3.connect(path)) as connection:
-        connection.execute("SELECT value FROM meta LIMIT 1").fetchone()
-        connection.execute("PRAGMA wal_checkpoint(PASSIVE)")
+    for attempt in range(6):
+        try:
+            with closing(sqlite3.connect(path)) as connection:
+                connection.execute("SELECT value FROM meta LIMIT 1").fetchone()
+                connection.execute("PRAGMA wal_checkpoint(PASSIVE)")
+            return
+        except sqlite3.OperationalError as error:
+            # Windows may retain a crashed process's mapped WAL handles briefly.
+            # Reopen the connection; never delete WAL or hide other I/O failures.
+            if (os.name != "nt" or attempt == 5
+                    or getattr(error, "sqlite_errorcode", None) != sqlite3.SQLITE_IOERR_TRUNCATE):
+                raise
+            sleep(0.02 * (attempt + 1))
 
 
 def cold_status(path: Path) -> IndexStatus:
@@ -266,22 +276,23 @@ def build_cold(
             if not pending:
                 return
             try:
-                for express_id, encoded, classification in pending:
-                    connection.execute(
-                        "INSERT INTO element_cold (express_id, record_json) VALUES (?, ?)",
-                        (express_id, encoded),
-                    )
-                    hot = connection.execute(
-                        "SELECT name, description, object_type, type_name FROM element WHERE express_id = ?",
-                        (express_id,),
-                    ).fetchone()
-                    if hot is not None:
-                        connection.execute(
-                            "INSERT OR REPLACE INTO element_fts "
-                            "(rowid, name, description, object_type, type_name, classification) "
-                            "VALUES (?, ?, ?, ?, ?, ?)",
-                            (express_id, *hot, classification),
-                        )
+                ids = [item[0] for item in pending]
+                placeholders = ','.join('?' for _ in ids)
+                hot_rows = dict((row[0], row[1:]) for row in connection.execute(
+                    "SELECT express_id, name, description, object_type, type_name "
+                    f"FROM element WHERE express_id IN ({placeholders})", ids,
+                ))
+                connection.executemany(
+                    "INSERT INTO element_cold (express_id, record_json) VALUES (?, ?)",
+                    ((express_id, encoded) for express_id, encoded, _ in pending),
+                )
+                connection.executemany(
+                    "INSERT OR REPLACE INTO element_fts "
+                    "(rowid, name, description, object_type, type_name, classification) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    ((express_id, *hot_rows[express_id], classification)
+                     for express_id, _, classification in pending if express_id in hot_rows),
+                )
                 _set_meta(connection, "cold_completed", str(rows))
                 connection.commit()
             except BaseException:

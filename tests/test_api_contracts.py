@@ -14,6 +14,8 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 import app as app_module
+import model_operations
+from model_limits import ModelTooLargeError
 
 
 class ApiContractTests(unittest.IsolatedAsyncioTestCase):
@@ -129,6 +131,19 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["error"], "empty_fragments_body")
+
+    async def test_oversize_model_upload_has_a_stable_client_error(self):
+        with patch.object(
+            model_operations,
+            "materialize_uploaded_model",
+            side_effect=ModelTooLargeError(),
+        ):
+            response = await self.client.post(
+                "/load-model",
+                files={"file": ("large.ifc", b"IFC", "application/octet-stream")},
+            )
+        self.assertEqual(response.status_code, 413)
+        self.assertEqual(response.json()["error"], "ifc_file_exceeds_1_gib_limit")
 
     async def test_openapi_preserves_the_complete_bridge_surface(self):
         paths = (await self.client.get("/openapi.json")).json()["paths"]

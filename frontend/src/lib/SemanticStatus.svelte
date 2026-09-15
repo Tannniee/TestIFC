@@ -27,7 +27,7 @@
 </div>
 
 <style>
-  .semantic-status { display:flex; align-items:center; gap:8px; min-width:0; flex:1; max-width:540px; padding:5px 0; }
+  .semantic-status { display:flex; align-items:center; gap:8px; min-width:120px; flex:1 0 120px; max-width:540px; padding:5px 0; }
   .semantic-status__text { min-width:0; flex:1; display:grid; gap:3px; }
   span, small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   small { font-size:10px; opacity:.85; }

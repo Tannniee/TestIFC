@@ -110,6 +110,7 @@ test("clicking IFC sets the item pivot, PAN restores model pivot, and stale pick
   const pan = page.getByRole("button", { name: "PAN - xoay và dịch khung nhìn", exact: true });
   expect(await page.locator(".viewer-toolbar__button").nth(1).getAttribute("aria-label")).toBe("Chọn cấu kiện làm tâm xoay");
   await orbit.click();
+  await page.evaluate(async () => { await (window as any).viewer.view.settled(); });
   const picked = await page.evaluate(async () => {
     const THREE = await import(/* @vite-ignore */ "/node_modules/.vite/deps/three.js");
     const v = (window as any).viewer, model = v.model, canvas = v.renderer.domElement;
@@ -117,7 +118,9 @@ test("clicking IFC sets the item pivot, PAN restores model pivot, and stale pick
     const ids = await model.getItemsIdsWithGeometry();
     for (const id of ids.slice(0, 40)) {
       const bounds = await model.getMergedBox([id]); const p = bounds.getCenter(v.camera.position.clone()).project(v.camera);
-      const x = rect.x + (p.x + 1) * rect.width / 2, y = rect.y + (1-p.y) * rect.height / 2;
+      // Probe the same integer CSS pixel delivered by the mouse click event.
+      const x = Math.round(rect.x + (p.x + 1) * rect.width / 2);
+      const y = Math.round(rect.y + (1-p.y) * rect.height / 2);
       if (document.elementFromPoint(x, y) !== canvas) continue;
       const hit = await model.raycast({ camera: v.camera, mouse: new THREE.Vector2(x, y), dom: canvas });
       if (!hit) continue;
@@ -131,18 +134,21 @@ test("clicking IFC sets the item pivot, PAN restores model pivot, and stale pick
   await expect.poll(() => page.evaluate(() => (window as any).viewer.hasSelectionOrbit)).toBe(true);
   await page.evaluate(async () => { await (window as any).viewer.view.settled(); });
   const selected = await page.evaluate(() => (window as any).viewer.captureViewState().camera);
-  expect(selected.target).toEqual(picked.center);
+  const expectPoint = (actual: any, expected: any) => {
+    for (const axis of ["x", "y", "z"]) expect(actual[axis]).toBeCloseTo(expected[axis], 10);
+  };
+  expectPoint(selected.target, picked.center);
   expect(selected.effectiveHeight).toBeCloseTo(picked.before.effectiveHeight, 8);
   const viewport = (await page.locator(".viewer-mount canvas").boundingBox())!;
   await page.mouse.move(viewport.x + viewport.width * 0.3, viewport.y + viewport.height * 0.3);
   await page.mouse.wheel(0, -180);
   await expect.poll(() => page.evaluate(() => (window as any).viewer.captureViewState().camera.effectiveHeight)).toBeLessThan(selected.effectiveHeight);
-  expect(await page.evaluate(() => (window as any).viewer.captureViewState().camera.target)).toEqual(picked.center);
+  expectPoint(await page.evaluate(() => (window as any).viewer.captureViewState().camera.target), picked.center);
   await page.evaluate(() => (window as any).viewer.orbitView(0.15, 0.08));
-  expect(await page.evaluate(() => (window as any).viewer.captureViewState().camera.target)).toEqual(picked.center);
+  expectPoint(await page.evaluate(() => (window as any).viewer.captureViewState().camera.target), picked.center);
   await pan.click(); await page.evaluate(async () => { await (window as any).viewer.view.settled(); });
   const modelPivot = await page.evaluate(() => { const v = (window as any).viewer; return { actual: v.captureViewState().camera.target, expected: {...v.model.box.getCenter(v.camera.position.clone())} }; });
-  expect(modelPivot.actual).toEqual(modelPivot.expected);
+  expectPoint(modelPivot.actual, modelPivot.expected);
   await orbit.click(); await page.evaluate(async () => { await (window as any).viewer.view.settled(); });
   const restored = await page.evaluate(async () => {
     const v = (window as any).viewer;
@@ -161,7 +167,7 @@ test("clicking IFC sets the item pivot, PAN restores model pivot, and stale pick
   await pan.click();
   await page.evaluate(async () => { const root = window as any; root.releasePivot(); await root.pendingPick; root.viewer.model.getMergedBox = root.originalBoxes; await root.viewer.view.settled(); });
   const race = await page.evaluate(() => { const v = (window as any).viewer; return { actual: v.captureViewState().camera.target, expected: {...v.model.box.getCenter(v.camera.position.clone())} }; });
-  expect(race.actual).toEqual(race.expected);
+  expectPoint(race.actual, race.expected);
   // Fit is a newer navigation intent even if the orbit tool stays selected.
   await page.evaluate(() => {
     const root = window as any, v = root.viewer;

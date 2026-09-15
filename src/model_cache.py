@@ -14,7 +14,8 @@ from typing import Any, BinaryIO
 
 import index_builder
 from background_tasks import LatestTaskRunner
-from content_hash import copy_and_hash, sha256_file
+from content_hash import ContentTooLargeError, copy_and_hash, sha256_file
+from model_limits import MAX_IFC_BYTES, ModelTooLargeError, require_supported_ifc_size
 
 
 CACHE_DIR = Path(
@@ -33,7 +34,7 @@ def cache_max_bytes(raw: str | None) -> int:
 CACHE_KEEP_MODELS = cache_keep_models(os.environ.get("IFC_CACHE_KEEP_MODELS"))
 CACHE_MAX_BYTES = cache_max_bytes(os.environ.get("IFC_CACHE_MAX_BYTES"))
 
-_BUNDLE_PATTERNS = ("*.ifc", "*.frag", "*.sqlite", "*.sqlite-wal", "*.sqlite-shm", "*.rdb")
+_BUNDLE_PATTERNS = ("*.ifc", "*.frag", "*.sqlite", "*.sqlite-wal", "*.sqlite-shm", "*.rdb", "*.access")
 _PARTIAL_PATTERNS = (
     "*.ifc.partial",
     "*.frag.partial",
@@ -227,11 +228,13 @@ def enforce_cache_retention(active_hash: str, cancelled: threading.Event | None 
         else:
             protected.add(_bundle_hash(path))
     for model_hash in protected:
-        for path in bundles.get(model_hash, []):
-            try:
-                os.utime(path)
-            except OSError:
-                continue
+        if model_hash not in bundles:
+            continue
+        marker = CACHE_DIR / f"{model_hash}.access"
+        try:
+            marker.touch()
+        except OSError:
+            continue
 
     def recency(model_hash: str) -> float:
         times = []
@@ -358,9 +361,12 @@ def store_model_stream(reader: BinaryIO, *, pin_for_activation: bool = False) ->
         f"incoming-{threading.get_ident()}-{monotonic_ns()}.ifc.partial"
     )
     try:
-        model_hash, size = copy_and_hash(reader, staging)
+        model_hash, size = copy_and_hash(reader, staging, max_bytes=MAX_IFC_BYTES)
         if size == 0:
             raise ValueError("empty model body")
+    except ContentTooLargeError as error:
+        staging.unlink(missing_ok=True)
+        raise ModelTooLargeError() from error
     except BaseException:
         staging.unlink(missing_ok=True)
         raise
@@ -391,6 +397,7 @@ def validate_model_file(path: str, expected_hash: str) -> CachedModel:
     model_path = Path(path)
     if not model_path.exists():
         raise FileNotFoundError(f"model path not found: {path}")
+    require_supported_ifc_size(model_path.stat().st_size)
     actual = sha256_file(model_path)
     if actual != expected_hash:
         raise ValueError(f"hash mismatch for {path}: expected {expected_hash} got {actual}")

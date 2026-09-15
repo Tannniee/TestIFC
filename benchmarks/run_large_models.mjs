@@ -12,7 +12,12 @@ const python = path.join(root, ".venv/Scripts/python.exe");
 const backendPort = Number(process.env.IFC_BENCH_PORT || 8140);
 const frontendPort = backendPort + 1;
 const semanticTimeoutMs = Number(process.env.IFC_BENCH_SEMANTIC_TIMEOUT_MS || 20 * 60_000);
-const url = `http://127.0.0.1:${frontendPort}`;
+const fragmentProfile = process.env.IFC_BENCH_FRAGMENT_PROFILE;
+if (fragmentProfile && !["full", "attributes", "minimum"].includes(fragmentProfile)) {
+  throw new Error(`Invalid IFC_BENCH_FRAGMENT_PROFILE: ${fragmentProfile}`);
+}
+const coldOnly = process.env.IFC_BENCH_COLD_ONLY === "1";
+const url = `http://127.0.0.1:${frontendPort}${fragmentProfile ? `?fragmentProfile=${fragmentProfile}` : ""}`;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const limit = (promise, ms, label) => {
   let timer;
@@ -27,7 +32,8 @@ await mkdir(output, { recursive: true });
 if (await stat(path.join(output, "resources.jsonl")).catch(() => null)) {
   throw new Error("Choose a fresh IFC_BENCH_OUTPUT directory to avoid mixing cache and resource samples from different runs");
 }
-const manifest = JSON.parse(await readFile(path.join(root, "benchmarks/corpus.local.json"), "utf8"));
+const manifestPath = path.resolve(process.env.IFC_BENCH_MANIFEST || path.join(root, "benchmarks/corpus.local.json"));
+const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 const filter = process.env.IFC_BENCH_MODELS?.split(",");
 const models = manifest.models.filter((model) => !filter || filter.includes(model.id));
 const results = { startedAt: new Date().toISOString(), viewport: { width: 1440, height: 900 }, models: [] };
@@ -218,6 +224,34 @@ try {
       entry.webglRenderer = gpuRenderer;
       console.log(JSON.stringify({ model: model.id, sizeBytes: entry.sizeBytes, renderer: gpuRenderer }));
       await loadModel(page, model, "cold-load");
+      entry.propertyProbe = await page.evaluate(async () => {
+        const model = window.__benchViewer.model;
+        const [localId] = await model.getItemsIdsWithGeometry();
+        const relationNames = ["IsDefinedBy", "IsTypedBy", "HasProperties", "Quantities"];
+        const relations = Object.fromEntries(relationNames.map((name) => [name, { attributes: true, relations: true }]));
+        const [item] = await model.getItemsData([localId], {
+          attributesDefault: true,
+          relationsDefault: { attributes: false, relations: false },
+          relations,
+        });
+        const values = [];
+        const seen = new Set();
+        const visit = (value, path, depth) => {
+          if (!value || typeof value !== "object" || depth > 5 || seen.has(value)) return;
+          seen.add(value);
+          for (const [key, child] of Object.entries(value)) {
+            const next = `${path}.${key}`;
+            if (Array.isArray(child)) child.forEach((entry, index) => visit(entry, `${next}[${index}]`, depth + 1));
+            else if (child && typeof child === "object" && "value" in child) values.push(`${next}=${String(child.value)}`);
+            else visit(child, next, depth + 1);
+          }
+        };
+        visit(item, "item", 0);
+        values.sort();
+        const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(values)));
+        return { localId, values: values.length, entries: values,
+          sha256: [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("") };
+      });
       await navigation(page, "orbit", "left");
       await navigation(page, "pan", "right");
       await navigation(page, "zoom", null);
@@ -260,12 +294,19 @@ try {
       await page.evaluate(() => window.__benchViewer.clearSectionPlane());
       entry.cold = await snapshot(page);
       await writeFile(path.join(output, `${model.id}.json`), JSON.stringify(entry, null, 2));
+      if (coldOnly) {
+        entry.status = "passed";
+        continue;
+      }
       await phase("semantic-wait", page);
       const semanticDeadline = Date.now() + semanticTimeoutMs;
       let nextSemanticLog = 0;
       for (; Date.now() < semanticDeadline;) {
         await guard();
-        const status = await (await fetch(`http://127.0.0.1:${backendPort}/model/runtime`, { signal: AbortSignal.timeout(20_000) })).json();
+        const status = await (await fetch(`http://127.0.0.1:${backendPort}/model/runtime`, {
+          headers: { "X-IFC-Session": apiSession },
+          signal: AbortSignal.timeout(20_000),
+        })).json();
         entry.runtime = status;
         const expectedHash = entry.cold.runs[0].metrics.modelHash;
         if (status.activeModelHash !== expectedHash) throw new Error("Semantic active model hash does not match loaded geometry");

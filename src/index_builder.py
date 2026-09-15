@@ -12,11 +12,12 @@ from time import monotonic, sleep, time
 from typing import Callable
 
 import model_index
+from model_limits import MAX_IFC_BYTES
 from index_writer import process_alive, writer_lease
 
 _POLL_SECONDS = 0.5
 _BUILD_LOCK_MAX_AGE_SECONDS = 2 * 60 * 60
-STORE_MIN_BYTES = int(os.environ.get("IFC_STORE_MIN_BYTES") or 268_435_456)
+STORE_MIN_BYTES = int(os.environ.get("IFC_STORE_MIN_BYTES") or MAX_IFC_BYTES + 1)
 _build_slot = Lock()
 
 
