@@ -1,7 +1,6 @@
 import type { SemanticProgress } from "./api-contracts";
-import type { ItemData } from "@thatopen/fragments";
+import type { ItemData } from "./viewer-native-types";
 import type { SelectionElement } from "./api";
-import type { FragmentMetadataProfile } from "./fragment-profile";
 import type { ViewSessionState } from "./workspace-contracts";
 
 export type ViewerStage =
@@ -70,6 +69,7 @@ export interface ViewerProgress {
   detail?: string;
   phase?: "conversion" | "geometries" | "attributes" | "relations" | "decompressing" | "parsing" | "generating" | "done";
   entitiesProcessed?: number;
+  recoveredFaces?: number;
   category?: string;
 }
 
@@ -103,7 +103,8 @@ export interface BridgeProgress {
 export interface FragmentMetrics {
   loadSequence: number;
   modelHash: string;
-  profile: FragmentMetadataProfile;
+  profile: "engine-v2";
+  engine?: "engine-v2";
   cacheHit: boolean;
   ifcBytes: number;
   fragmentBytes: number;

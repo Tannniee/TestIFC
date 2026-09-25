@@ -1,4 +1,5 @@
-import type { FragmentsModel, ItemData, SpatialTreeItem } from "@thatopen/fragments";
+import type { ItemData, SpatialTreeItem } from "./viewer-native-types";
+import type { ViewerModel } from "./viewer-model-contract";
 
 export interface BrowserNode { id: string; localId: number | null; label: string; children: BrowserNode[] }
 export interface PropertyGroup { name: string; rows: Array<{ name: string; value: string }> }
@@ -6,11 +7,11 @@ const yieldUI = () => new Promise<void>(resolve => setTimeout(resolve, 0));
 const attr = (item: ItemData, name: string) => { const value = item[name]; return value && !Array.isArray(value) ? value.value : null; };
 
 export class ModelDataService {
-  private owner: FragmentsModel | null = null;
+  private owner: ViewerModel | null = null;
   private tree: Promise<BrowserNode[]> | null = null;
   private properties = new Map<string, Promise<PropertyGroup[]>>();
   private names = new Map<number, string>();
-  constructor(private readonly active: () => FragmentsModel | null) {}
+  constructor(private readonly active: () => ViewerModel | null) {}
   private model() {
     const model = this.active();
     if (model !== this.owner) { this.clear(); this.owner = model; }
@@ -18,13 +19,13 @@ export class ModelDataService {
     return model;
   }
   clear() { this.owner = null; this.tree = null; this.properties.clear(); this.names.clear(); }
-  private check(model: FragmentsModel) { if (model !== this.active()) throw new Error("Model query cancelled"); }
+  private check(model: ViewerModel) { if (model !== this.active()) throw new Error("Model query cancelled"); }
   getTree(): Promise<BrowserNode[]> {
     const model = this.model();
     if (!this.tree) this.tree = this.buildTree(model).catch(error => { if (this.owner === model) this.tree = null; throw error; });
     return this.tree;
   }
-  private async buildTree(model: FragmentsModel): Promise<BrowserNode[]> {
+  private async buildTree(model: ViewerModel): Promise<BrowserNode[]> {
     const structure = await model.getSpatialStructure(); this.check(model);
     const root: BrowserNode[] = [];
     const contained = new Set<number>();

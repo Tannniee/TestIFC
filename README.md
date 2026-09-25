@@ -48,9 +48,10 @@ The frontend follows the same composition boundary:
 - `frontend/src/lib/app-shell.ts` owns settings, viewer lifecycle, and commands.
 - `App.svelte` composes the rail, dialogs, inspector, and viewer workspace.
 - `viewer.ts` coordinates the camera, selection and render-on-demand scheduler.
-- `viewer-model-loader.ts` owns file reads, conversion, fragment models and
-  backend preparation. Conversion workers are created on demand and terminated
-  after completion, cancellation or failure.
+- `viewer-model-loader.ts` stages IFC uploads and Engine V2 artifacts, then
+  activates the native model transactionally. Engine V2 handles files up to
+  2,000,000,000 bytes; unsupported geometry is reported instead of displayed
+  incompletely.
 - `viewcube-math.ts` owns the pure ViewCube geometry, naming, and orientation math.
 - `api-contracts.ts` is the typed frontend endpoint manifest. Contract tests compare
   it with the backend OpenAPI document, and Vite derives its proxy prefixes from it.
@@ -111,9 +112,8 @@ semantic-index preparation, and search timings as JSON under
 `benchmarks/results/`. The local corpus and generated results are ignored by Git;
 no private IFC model is committed to this repository.
 
-For fragment metadata A/B testing, follow
-`benchmarks/fragment-ab.md`. The `full` profile remains the default until the
-lighter profiles pass the real-model feature matrix.
+Historical fragment metadata A/B results remain in `benchmarks/fragment-ab.md`.
+Version 1.0.4 uses Engine V2 for model geometry.
 
 Semantic DB v2, facts-cache versioning, and take-off schema v6 are documented in
 `benchmarks/phase4-5.md`.
@@ -177,7 +177,7 @@ PyInstaller executable:
 ```
 
 The executable name and Windows version metadata come from `APP_VERSION` in
-`src\version.py`. Version 1.0.3 is written to `dist\IFC Viewer 1.0.3.exe` by default.
+`src\version.py`. Version 1.0.4 is written to `dist\IFC Viewer 1.0.4.exe` by default.
 Set `IFC_BUILD_DIST` to choose another output directory, such as `BUILD RELEASE`.
 Release changes are recorded in `CHANGELOG.md`. The application requires no license,
 account or sign-in; its internal API uses a per-launch session credential.

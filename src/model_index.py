@@ -396,6 +396,30 @@ class ModelIndex:
             raise LookupError(f"Element with express id {express_id} not found")
         return self._record(rows[0])
 
+    def records_by_express_ids(self, express_ids: list[int]) -> dict[int, dict]:
+        if not express_ids:
+            return {}
+        placeholders = ",".join("?" for _ in express_ids)
+        rows = self._query(
+            "SELECT e.express_id, e.record_json, c.record_json FROM element e "
+            "LEFT JOIN element_cold c ON c.express_id = e.express_id "
+            f"WHERE e.express_id IN ({placeholders})",
+            tuple(express_ids),
+        )
+        return {int(row[0]): self._record(row[1:]) for row in rows}
+
+    def records_by_global_ids(self, global_ids: list[str]) -> dict[str, dict]:
+        if not global_ids:
+            return {}
+        placeholders = ",".join("?" for _ in global_ids)
+        rows = self._query(
+            "SELECT e.global_id, e.record_json, c.record_json FROM element e "
+            "LEFT JOIN element_cold c ON c.express_id = e.express_id "
+            f"WHERE e.global_id IN ({placeholders})",
+            tuple(global_ids),
+        )
+        return {str(row[0]): self._record(row[1:]) for row in rows}
+
     def summary(self, express_id: int) -> dict | None:
         rows = self._query(
             "SELECT global_id, express_id, ifc_type, name, object_type FROM element WHERE express_id = ?",

@@ -21,6 +21,7 @@ from model_runtime import (
     open_model_session,
     register_model,
 )
+from model_limits import require_supported_ifc_size
 from mass_facts import MaterialUse, survey_materials
 from model_query import get_model_tree, search_model
 
@@ -46,9 +47,28 @@ def materialize_uploaded_model(
     )
 
 
+def materialize_local_model(path: str) -> MaterializedModel:
+    """Copy a desktop-picked IFC directly into the managed cache."""
+    from pathlib import Path
+
+    source = Path(path)
+    require_supported_ifc_size(source.stat().st_size)
+    with source.open("rb") as reader:
+        info = materialize_model_stream(reader, source.name, True, activate=False)
+    return MaterializedModel(
+        model_hash=info["contentHashSha256"],
+        original_filename=info["originalFilename"],
+        size_bytes=info["sizeBytes"],
+    )
+
+
 def activate_cached_model(model_hash: str) -> dict[str, Any]:
     path = cached_model_file(model_hash)
     return register_model(str(path), model_hash, True)
+
+
+def cached_model_source(model_hash: str):
+    return cached_model_file(model_hash)
 
 
 def register_external_model(path: str, expected_hash: str) -> dict[str, Any]:
@@ -63,8 +83,8 @@ def prepare_stage(stage_id: str, model_hash: str, filename: str | None) -> dict:
     return model_transactions.prepare(stage_id, model_hash, filename)
 
 
-def transition_stage(stage_id: str, action: str) -> dict:
-    return model_transactions.transition(stage_id, action)
+def transition_stage(stage_id: str, action: str, semantic_mode: str | None = None) -> dict:
+    return model_transactions.transition(stage_id, action, semantic_mode)
 
 
 def cached_storage(scope: str | None = None) -> dict:
@@ -95,6 +115,20 @@ def element_by_express_id(express_id: int) -> dict[str, Any]:
 def element_by_global_id(global_id: str) -> dict[str, Any]:
     with lease_active_model() as lease:
         return extract_element(lease, global_id)
+
+
+def element_records(local_ids: list[int], global_ids: list[str]) -> dict[str, Any]:
+    if len(local_ids) + len(global_ids) > 500:
+        raise ValueError("too_many_element_ids")
+    with lease_active_model() as lease:
+        local = lease.index.records_by_express_ids(local_ids)
+        global_ = lease.index.records_by_global_ids(global_ids)
+        return {
+            "localIds": local_ids,
+            "globalIds": global_ids,
+            "byLocalId": [local.get(value) for value in local_ids],
+            "byGlobalId": [global_.get(value) for value in global_ids],
+        }
 
 
 def active_model_materials() -> tuple[MaterialUse, ...]:

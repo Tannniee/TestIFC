@@ -1,6 +1,7 @@
 import { api, type ActivateModelResponse } from "./api";
 import { isLoadCancelledError, LoadCancelledError, type BridgeProgress, type ViewerSelection } from "./viewer-contracts";
 import { createSelectionPayload } from "./viewer-selection";
+import type { ModelSource } from "./model-source";
 
 const wait = (milliseconds: number) => new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
 // Preserve write ordering across viewer remounts in the same window as well.
@@ -21,6 +22,10 @@ export class ViewerBridge {
   setSelectionWritesEnabled(enabled: boolean) { this.selectionWritesEnabled = enabled; }
 
   constructor(private readonly callbacks: ViewerBridgeCallbacks) {}
+
+  uploadModel(file: File, onProgress: (value: number) => void, signal: AbortSignal) {
+    return api.uploadModel(file, onProgress, signal);
+  }
 
   cancelFragmentRequests() {
     this.fragmentRequests.abort();
@@ -53,6 +58,8 @@ export class ViewerBridge {
     return api.getFragments(modelHash, this.fragmentRequests.signal);
   }
 
+  source(modelHash: string, signal?: AbortSignal) { return api.modelSource(modelHash, signal); }
+
   cacheFragments(modelHash: string, fragments: Uint8Array, isCurrent: () => boolean) {
     void api.putFragments(modelHash, fragments, this.fragmentRequests.signal).catch((error) => {
       if (isCurrent()) console.warn(`Fragments cache: ${this.errorText(error)}`);
@@ -80,7 +87,7 @@ export class ViewerBridge {
   }
 
   async watchModel(
-    file: File,
+    file: ModelSource,
     modelHash: string,
     loadSequence: number,
     activated: ActivateModelResponse,
@@ -119,6 +126,10 @@ export class ViewerBridge {
         while (true) {
           const runtime = await readRuntime(watchSignal);
           if (runtime.prepareError || runtime.coldIndexStatus === "error") throw new Error(runtime.prepareError ?? runtime.coldIndexError ?? "Detailed semantic indexing failed");
+          if (runtime.semanticMode === "native" && runtime.coldIndexStatus === "not_configured") {
+            publish({ stage: "ready", detail: file.name, semantic: null, canRetry: false });
+            return;
+          }
           if (runtime.hotIndexStatus === "ready" && runtime.coldIndexStatus === "ready") {
             publish({ stage: "ready", detail: file.name, semantic: latestSemantic, canRetry: false });
             return;

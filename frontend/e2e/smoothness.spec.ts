@@ -74,10 +74,12 @@ test("superseded upload cannot activate or stage its model", async ({ page }) =>
     const bridgePath = "/src/lib/model-staging.ts";
     const apiPath = "/src/lib/api.ts";
     const contractsPath = "/src/lib/viewer-contracts.ts";
+    const sourcePath = "/src/lib/model-source.ts";
     const { ModelStage } = await import(bridgePath);
     const { api } = await import(apiPath);
     const { ApiError } = await import(apiPath);
     const { LoadCancelledError } = await import(contractsPath);
+    const { browserModelSource } = await import(sourcePath);
     const original = { ...api };
     const calls: string[] = [];
     let finishUpload!: (value: unknown) => void;
@@ -91,14 +93,15 @@ test("superseded upload cannot activate or stage its model", async ({ page }) =>
     api.uploadModel = () => new Promise((resolve) => { finishUpload = resolve; startUpload(); });
     api.runtime = async () => ({ hasActiveModel: true, activeModelHash: "C", hotIndexStatus: "ready", coldIndexStatus: "ready" });
     const file = new File(["IFC"], "model.ifc");
+    const source = browserModelSource(file);
     const controller = new AbortController();
     try {
-      const a = ModelStage.prepare(file, "A", controller.signal, () => {}).catch((e: Error) => e.name);
+      const a = ModelStage.prepare(source, "A", controller.signal, () => {}).catch((e: Error) => e.name);
       await uploadStarted;
       controller.abort();
       finishUpload({ modelHash: "A" });
       await a;
-      await ModelStage.prepare(file, "C", new AbortController().signal, () => {});
+      await ModelStage.prepare(source, "C", new AbortController().signal, () => {});
       return calls;
     } finally {
       Object.assign(api, original);

@@ -107,10 +107,12 @@ export const copy = {
     ready: "Đã mở",
     selecting: "Đang đọc cấu kiện…",
     unsupported: "Bản phục hồi hiện chỉ hỗ trợ file .ifc.",
-    ifcTooLarge: "Không thể mở file IFC lớn hơn 1 GiB. Đây là giới hạn của WebIFC; hãy chia nhỏ mô hình trước khi mở.",
+    ifcTooLarge: "Engine V2 hiện hỗ trợ file IFC tối đa 2 GB.",
     modelLoading: "đang mở",
     modelReady: "sẵn sàng",
     modelError: "lỗi",
+    recoveredIfcFaces: "mặt IFC đã phục hồi",
+    recoveredIfcFacesHint: "Mô hình có mặt IFC khai báo đường bao không hợp lệ. Kiểm tra hình học trước khi dùng số liệu đo bóc.",
   },
   en: {
     rail: "App actions",
@@ -210,10 +212,12 @@ export const copy = {
     ready: "Opened",
     selecting: "Reading element data…",
     unsupported: "The recovered build currently supports .ifc files only.",
-    ifcTooLarge: "IFC files larger than 1 GiB cannot be opened. This is a WebIFC limit; split the model before opening it.",
+    ifcTooLarge: "Engine V2 currently supports IFC files up to 2 GB.",
     modelLoading: "opening",
     modelReady: "ready",
     modelError: "error",
+    recoveredIfcFaces: "IFC faces recovered",
+    recoveredIfcFacesHint: "Some IFC faces have invalid boundaries. Check the geometry before using quantities or measurements.",
   },
 } as const;
 
@@ -231,7 +235,7 @@ export const helpTopics: Record<Locale, HelpTopic[]> = {
         "Chờ thanh tiến trình chạy xong.",
         "Mô hình hiện ra là bấm chọn được.",
       ],
-      note: "File lớn hơn 1 GiB không thể mở do giới hạn WebIFC. Hãy chia nhỏ mô hình trước khi mở.",
+      note: "File từ trên 1 GiB đến 2 GB được mở bằng Engine V2. Các tiết diện chưa được Engine V2 hỗ trợ sẽ báo lỗi rõ ràng.",
     },
     {
       group: "Bắt đầu",
@@ -266,7 +270,7 @@ export const helpTopics: Record<Locale, HelpTopic[]> = {
       title: "Open an IFC model",
       intro: "The file stays on your computer and is not uploaded elsewhere.",
       steps: ["Click Open IFC file in the left rail or drag an .ifc file into the viewport.", "Choose or drop an .ifc file.", "Wait for processing to finish.", "Click elements once the model appears."],
-      note: "Files larger than 1 GiB cannot be opened because of a WebIFC limit. Split the model before opening it.",
+      note: "Files above 1 GiB and up to 2 GB use Engine V2. Unsupported geometry is reported as an error.",
     },
     {
       group: "Getting started",

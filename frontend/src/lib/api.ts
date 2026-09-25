@@ -6,9 +6,12 @@ import {
   type StageModelResponse,
   type CacheInventory,
   type FragmentStoredResponse,
+  type EngineV2JobResponse,
   type HealthResponse,
   type LoadModelResponse,
   type ModelRuntimeResponse,
+  type ModelTreeResponse,
+  type ElementsResponse,
   type SelectionPayload,
   type SelectionResponse,
 } from "./api-contracts";
@@ -16,6 +19,7 @@ import {
 export type {
   ActivateModelResponse,
   FragmentStoredResponse,
+  EngineV2JobResponse,
   HealthResponse,
   LoadModelResponse,
   ModelRuntimeResponse,
@@ -111,9 +115,9 @@ export const api = {
     return requestJson<StageModelResponse>("/model/stage", { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ stageId, modelHash, filename }), signal: AbortSignal.timeout(120000) });
   },
-  stageAction(stageId: string, action: "commit" | "rollback" | "finalize") {
+  stageAction(stageId: string, action: "commit" | "rollback" | "finalize", semanticMode?: "legacy" | "native") {
     return requestJson<StageModelResponse>(`/model/stage/${stageId}`, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action }), signal: AbortSignal.timeout(15000) });
+      body: JSON.stringify({ action, semanticMode }), signal: AbortSignal.timeout(15000) });
   },
   cacheInventory: () => requestJson<CacheInventory>("/model/cache"),
   clearCache: (scope: "fragments" | "all") => requestJson<CacheInventory & { freedBytes: number; failedFiles: number }>("/model/cache/clear", {
@@ -143,6 +147,24 @@ export const api = {
     return true;
   },
   runtime: (signal?: AbortSignal) => requestJson<ModelRuntimeResponse>(API_ENDPOINTS.modelRuntime.path, { signal }),
+  modelTree(signal?: AbortSignal) {
+    return requestJson<ModelTreeResponse>(API_ENDPOINTS.modelTree.path, { signal });
+  },
+  modelElements(localIds: number[] = [], globalIds: string[] = [], signal?: AbortSignal) {
+    return requestJson<ElementsResponse>(API_ENDPOINTS.modelElements.path, {
+      method: API_ENDPOINTS.modelElements.method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ localIds, globalIds }), signal,
+    });
+  },
+  async modelSource(modelHash: string, signal?: AbortSignal): Promise<ArrayBuffer> {
+    const response = await sessionFetch(apiPath(API_ENDPOINTS.modelSource, { modelHash }), { signal });
+    if (!response.ok) {
+      const body = await response.text();
+      throw new ApiError(responseMessage(response.status, response.statusText, body), response.status, body);
+    }
+    return response.arrayBuffer();
+  },
   async getFragments(modelHash: string, signal?: AbortSignal): Promise<ArrayBuffer | null> {
     const response = await sessionFetch(apiPath(API_ENDPOINTS.getFragments, { modelHash }), { signal });
     if (response.status === 404) return null;
@@ -164,6 +186,48 @@ export const api = {
       throw new ApiError(responseMessage(response.status, response.statusText, body), response.status, body);
     }
     await response.json() as FragmentStoredResponse;
+  },
+  prepareEngineV2(modelHash: string) {
+    return requestJson<EngineV2JobResponse>(apiPath(API_ENDPOINTS.prepareEngineV2, { modelHash }), {
+      method: API_ENDPOINTS.prepareEngineV2.method,
+    });
+  },
+  engineV2Job(jobId: string, signal?: AbortSignal) {
+    return requestJson<EngineV2JobResponse>(apiPath(API_ENDPOINTS.engineV2Job, { jobId }), { signal });
+  },
+  cancelEngineV2Job(jobId: string) {
+    return requestJson<EngineV2JobResponse>(apiPath(API_ENDPOINTS.cancelEngineV2Job, { jobId }), {
+      method: API_ENDPOINTS.cancelEngineV2Job.method,
+    });
+  },
+  engineV2Manifest(artifactKey: string, signal?: AbortSignal) {
+    return requestJson<unknown>(apiPath(API_ENDPOINTS.engineV2Manifest, { artifactKey }), { signal });
+  },
+  async engineV2Chunk(artifactKey: string, file: string, signal?: AbortSignal): Promise<ArrayBuffer> {
+    const response = await sessionFetch(apiPath(API_ENDPOINTS.engineV2Chunk, { artifactKey, file }), { signal });
+    if (!response.ok) {
+      const body = await response.text();
+      throw new ApiError(responseMessage(response.status, response.statusText, body), response.status, body);
+    }
+    return response.arrayBuffer();
+  },
+  async engineV2ChunkRange(artifactKey: string, file: string, offset: number, length: number, signal?: AbortSignal): Promise<ArrayBuffer> {
+    if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length <= 0) {
+      throw new Error("Engine V2 chunk range is invalid");
+    }
+    const end = offset + length - 1;
+    const response = await sessionFetch(apiPath(API_ENDPOINTS.engineV2Chunk, { artifactKey, file }), {
+      headers: { Range: `bytes=${offset}-${end}` }, signal,
+    });
+    if (response.status !== 206) {
+      const body = await response.text();
+      throw new ApiError(responseMessage(response.status, response.statusText, body || "range_not_honored"), response.status, body);
+    }
+    const contentRange = response.headers.get("Content-Range");
+    if (!contentRange?.startsWith(`bytes ${offset}-${end}/`)) throw new Error("Engine V2 chunk returned an invalid Content-Range");
+    const result = await response.arrayBuffer();
+    if (result.byteLength !== length) throw new Error("Engine V2 chunk range is truncated");
+    return result;
   },
   setSelection(selection: SelectionPayload) {
     return requestJson<SelectionResponse>(API_ENDPOINTS.setSelection.path, {

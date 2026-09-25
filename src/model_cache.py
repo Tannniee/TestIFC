@@ -34,17 +34,21 @@ def cache_max_bytes(raw: str | None) -> int:
 CACHE_KEEP_MODELS = cache_keep_models(os.environ.get("IFC_CACHE_KEEP_MODELS"))
 CACHE_MAX_BYTES = cache_max_bytes(os.environ.get("IFC_CACHE_MAX_BYTES"))
 
-_BUNDLE_PATTERNS = ("*.ifc", "*.frag", "*.sqlite", "*.sqlite-wal", "*.sqlite-shm", "*.rdb", "*.access")
+_BUNDLE_PATTERNS = (
+    "*.ifc", "*.frag", "*.sqlite", "*.sqlite-wal", "*.sqlite-shm", "*.rdb", "*.access",
+    "*.engine-v2-*",
+)
 _PARTIAL_PATTERNS = (
     "*.ifc.partial",
     "*.frag.partial",
     "*.frag.*.partial",
     "*.sqlite.partial",
     "*.rdb.partial",
+    "*.engine-v2-*.partial",
 )
 _PARTIAL_MAX_AGE_SECONDS = 24 * 60 * 60
 _BUILD_LOCK_PATTERN = "*.semantic-v*.lock"
-_VERSIONED_BUNDLE_MARKERS = (".fragments-v", ".semantic-v", ".facts-v")
+_VERSIONED_BUNDLE_MARKERS = (".fragments-v", ".semantic-v", ".facts-v", ".engine-v2-")
 _retention_lock = threading.RLock()
 _pins: dict[str, int] = {}
 _active_retention_hash: str | None = None
@@ -205,6 +209,8 @@ def enforce_cache_retention(active_hash: str, cancelled: threading.Event | None 
     bundles: dict[str, list[Path]] = {}
     for pattern in _BUNDLE_PATTERNS:
         for path in CACHE_DIR.glob(pattern):
+            if path.name.endswith(".partial"):
+                continue
             if stopped():
                 return
             bundles.setdefault(_bundle_hash(path), []).append(path)
@@ -277,7 +283,8 @@ def fragments_cache_path(model_hash: str) -> Path:
 
 def _cache_entries() -> list[Path]:
     return sorted({path for pattern in _BUNDLE_PATTERNS for path in CACHE_DIR.glob(pattern)
-                   if re.fullmatch(r"[0-9a-f]{64}", _bundle_hash(path))})
+                   if not path.name.endswith(".partial")
+                   and re.fullmatch(r"[0-9a-f]{64}", _bundle_hash(path))})
 
 
 def _protected(model_hash: str, active_hash: str | None) -> bool:
@@ -297,6 +304,7 @@ def cache_inventory(active_hash: str | None = None) -> dict:
     with _retention_lock:
         protected = {key for key in hashes if _protected(key, active_hash)}
     return {"totalBytes": sum(sizes.values()), "fragmentBytes": sum(size for path, size in sizes.items() if path.suffix == ".frag"),
+            "engineV2Bytes": sum(size for path, size in sizes.items() if ".engine-v2-" in path.name),
             "modelCount": len(hashes), "protectedModels": len(protected),
             "keepModels": CACHE_KEEP_MODELS, "maxBytes": CACHE_MAX_BYTES}
 

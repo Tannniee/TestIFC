@@ -1,23 +1,20 @@
-import { FragmentsModels, type FragmentsModel } from "@thatopen/fragments";
-import type * as THREE from "three";
 import type { ActivateModelResponse } from "./api";
-import { IfcConverter, sha256Hex } from "./ifc-converter";
-import { fragmentArrayBuffer } from "./fragment-buffer";
-import { readModelFile } from "./read-model-file";
 import { ModelSourceError } from "./model-source-error";
-import { fragmentCacheKey, type FragmentMetadataProfile } from "./fragment-profile";
 import { ViewerBridge } from "./viewer-bridge";
 import { ModelStage } from "./model-staging";
 import type { ViewSessionState } from "./workspace-contracts";
 import { LoadCancelledError, type BridgeProgress, type ViewerProgress, type FragmentMetrics } from "./viewer-contracts";
 import { requireSupportedIfcSize } from "./model-limits";
+import type { ViewerModel } from "./viewer-model-contract";
+import type { ModelSource } from "./model-source";
+import { loadEngineV2Model } from "./engine-v2/load-artifact";
 
 interface LoaderCallbacks {
   onProgress(progress: ViewerProgress): void;
   onBridgeProgress(progress: BridgeProgress): void;
   onFragmentMetrics(metrics: FragmentMetrics): void;
-  attach(model: FragmentsModel, assertCurrent: () => void): Promise<void>;
-  detach(model: FragmentsModel | null): Promise<void>;
+  attach(model: ViewerModel, assertCurrent: () => void): Promise<void>;
+  detach(model: ViewerModel | null): Promise<void>;
   capture(): () => Promise<void>;
   prepareView(state?: ViewSessionState): Promise<void>;
   committed(): void;
@@ -25,7 +22,8 @@ interface LoaderCallbacks {
   update(): Promise<void>;
 }
 interface ActiveSession {
-  file: File; hash: string; sequence: number; activation: ActivateModelResponse;
+  source: ModelSource; hash: string; sequence: number; activation: ActivateModelResponse;
+  recoveredFaces: number;
 }
 export interface ModelLoadOptions {
   hash?: string;
@@ -35,29 +33,22 @@ export interface ModelLoadOptions {
 
 /** One active model plus one staging operation; newer requests drain older cleanup. */
 export class ViewerModelLoader {
-  readonly fragments = new FragmentsModels("/vendor/fragments/worker.mjs", { maxWorkers: 2 });
   readonly bridge: ViewerBridge;
-  private readonly converter: IfcConverter;
   private loadSequence = 0;
   private fileRequest = new AbortController();
-  private loadingModelId: string | null = null;
   private disposed = false;
   private queue: Promise<void> = Promise.resolve();
   private cleanupFailure: Error | null = null;
   private pendingRollback: ModelStage | null = null;
-  private pendingDisposals = new Set<FragmentsModel>();
+  private pendingDisposals = new Set<ViewerModel>();
   get needsRecovery() { return this.cleanupFailure !== null; }
   private activeSession: ActiveSession | null = null;
-  activeModel: FragmentsModel | null = null;
+  activeModel: ViewerModel | null = null;
   activeModelName = "";
   artifactId = "";
   get identity() { return this.activeSession; }
 
-  constructor(private readonly camera: THREE.OrthographicCamera, private readonly fragmentProfile: FragmentMetadataProfile,
-    private readonly callbacks: LoaderCallbacks) {
-    this.converter = new IfcConverter(fragmentProfile);
-    // A and B are alternative documents, not federated models sharing A's origin.
-    this.fragments.settings.autoCoordinate = false;
+  constructor(private readonly callbacks: LoaderCallbacks) {
     this.bridge = new ViewerBridge({ onProgress: progress => {
       if (!this.disposed && (progress.loadSequence === this.loadSequence || progress.loadSequence === this.activeSession?.sequence)) {
         callbacks.onBridgeProgress(progress);
@@ -67,24 +58,22 @@ export class ViewerModelLoader {
 
   private abortPending() {
     this.fileRequest.abort();
-    this.converter.cancel();
     this.bridge.cancelFragmentRequests();
-    if (this.loadingModelId) this.fragments.abort(this.loadingModelId);
   }
 
-  load(file: File, options: ModelLoadOptions = {}): Promise<void> {
+  load(source: ModelSource, options: ModelLoadOptions = {}): Promise<void> {
     if (this.disposed) return Promise.reject(new LoadCancelledError());
     const sequence = ++this.loadSequence;
     this.abortPending();
     const controller = new AbortController();
     this.fileRequest = controller;
-    const task = this.queue.then(() => this.loadCurrent(file, sequence, controller.signal, options));
+    const task = this.queue.then(() => this.loadCurrent(source, sequence, controller.signal, options));
     this.queue = task.catch(() => {});
     return task;
   }
 
-  private async loadCurrent(file: File, sequence: number, signal: AbortSignal, options: ModelLoadOptions): Promise<void> {
-    requireSupportedIfcSize(file.size);
+  private async loadCurrent(source: ModelSource, sequence: number, signal: AbortSignal, options: ModelLoadOptions): Promise<void> {
+    requireSupportedIfcSize(source.size);
     if (this.cleanupFailure) throw this.cleanupFailure;
     const loadStarted = performance.now();
     const previous = this.activeModel;
@@ -92,79 +81,96 @@ export class ViewerModelLoader {
     const previousName = this.activeModelName;
     const previousArtifact = this.artifactId;
     let stage: ModelStage | null = null;
-    let model: FragmentsModel | null = null;
+    let model: ViewerModel | null = null;
     let restore: (() => Promise<void>) | null = null;
     let committed = false;
     const check = () => this.assertCurrent(sequence);
     try {
       check();
-      this.publishProgress(sequence, { modelHash: null, stage: "reading", detail: file.name });
-      let ifcBuffer = options.hash ? null : await readModelFile(file, signal, progress =>
-        this.publishProgress(sequence, { modelHash: null, stage: "reading", progress, detail: file.name }));
-      check();
-      const ifcBytes = file.size;
-      if (!options.hash) this.publishProgress(sequence, { modelHash: null, stage: "hashing", detail: file.name });
-      const modelHash = options.hash ?? await sha256Hex(ifcBuffer!);
+      let uploadedHash: string | null = null;
+      if (!options.hash && !source.modelHash) {
+        if (!source.file) throw new ModelSourceError("unavailable");
+        this.callbacks.onBridgeProgress({ loadSequence: sequence, modelHash: null, stage: "uploading", detail: source.name });
+        const uploaded = await this.bridge.uploadModel(source.file, progress => this.callbacks.onBridgeProgress({
+          loadSequence: sequence, modelHash: null, stage: "uploading", progress, detail: source.name,
+        }), signal);
+        check();
+        if (uploaded.sizeBytes !== source.size) throw new ModelSourceError("changed");
+        uploadedHash = uploaded.modelHash;
+        source.modelHash = uploadedHash;
+      }
+      const ifcBytes = source.size;
+      const modelHash = options.hash ?? source.modelHash ?? uploadedHash!;
       check();
       const viewState = options.state ?? options.identified?.(modelHash);
       if (options.identified && previousSession?.hash === modelHash) {
         this.activeSession = { ...previousSession, sequence };
         this.watchActive();
-        this.publishProgress(sequence, { modelHash, stage: "ready", progress: 1, detail: previousName });
+        this.publishProgress(sequence, { modelHash, stage: "ready", progress: 1, detail: previousName,
+          recoveredFaces: previousSession.recoveredFaces });
         return;
       }
-      stage = await ModelStage.prepare(file, modelHash, signal, progress => this.callbacks.onBridgeProgress({
-        loadSequence: sequence, modelHash, stage: "uploading", progress, detail: file.name,
+      stage = await ModelStage.prepare(source, modelHash, signal, progress => this.callbacks.onBridgeProgress({
+        loadSequence: sequence, modelHash, stage: "uploading", progress, detail: source.name,
       }));
       check();
-      this.publishProgress(sequence, { modelHash, stage: "cache", detail: file.name });
-      const cacheKey = fragmentCacheKey(modelHash, this.fragmentProfile);
-      let fragmentBuffer = await this.bridge.fragments(cacheKey);
-      const cacheHit = fragmentBuffer !== null;
-      let conversionMilliseconds = 0;
-      check();
-      if (!fragmentBuffer) {
-        if (!ifcBuffer) {
-          ifcBuffer = await readModelFile(file, signal, () => {}); check();
-          if (await sha256Hex(ifcBuffer) !== modelHash) throw new ModelSourceError("changed");
-          check();
-        }
-        this.publishProgress(sequence, { modelHash, stage: "converting", progress: 0, detail: file.name });
-        const started = performance.now();
-        const converted = await this.converter.convert(ifcBuffer, (progress, data) => {
-          this.publishProgress(sequence, { modelHash, stage: "converting", progress, detail: file.name,
-            phase: data?.process, entitiesProcessed: data?.entitiesProcessed, category: data?.class });
-        });
-        conversionMilliseconds = performance.now() - started;
-        check();
-        fragmentBuffer = fragmentArrayBuffer(converted);
-        this.bridge.cacheFragments(cacheKey, converted, () => sequence === this.loadSequence && !this.disposed);
-      }
-      const fragmentBytes = fragmentBuffer.byteLength;
-      const artifactId = `${cacheKey}:${await sha256Hex(fragmentBuffer)}`;
-      check();
-      this.publishProgress(sequence, { modelHash, stage: "loading", progress: 0, detail: file.name });
-      restore = this.callbacks.capture();
-      if (previous) previous.frozen = true;
       const modelId = `${modelHash}-${sequence}`;
-      this.loadingModelId = modelId;
-      const started = performance.now();
-      try {
-        model = await this.fragments.load(fragmentBuffer, { modelId, camera: this.camera,
-          onProgress: ({ progress, stage: phase }) => this.publishProgress(sequence, { modelHash, stage: "loading", progress, phase, detail: file.name }) });
-      } finally { this.loadingModelId = null; }
-      const fragmentLoadMilliseconds = performance.now() - started;
-      check();
-      model.object.visible = false;
-      model.frozen = true;
-      this.publishProgress(sequence, { modelHash, stage: "finalizing", detail: file.name });
-      await this.callbacks.attach(model, check);
+      let cacheHit = false;
+      let conversionMilliseconds = 0;
+      let fragmentLoadMilliseconds = 0;
+      let fragmentBytes = 0;
+      let recoveredFaces = 0;
+      let artifactId = "";
+      const profile: FragmentMetrics["profile"] = "engine-v2";
+      let attached = false;
+
+      {
+        try {
+          this.publishProgress(sequence, { modelHash, stage: "converting", detail: source.name, phase: "conversion", category: "Engine V2" });
+          const loaded = await loadEngineV2Model(modelId, modelHash, signal, (progress, phase) => {
+            this.publishProgress(sequence, { modelHash, stage: "loading", progress, phase: "generating", category: phase, detail: source.name });
+          });
+          check();
+          model = loaded.model;
+          cacheHit = loaded.cacheHit;
+          conversionMilliseconds = loaded.conversionMilliseconds;
+          fragmentLoadMilliseconds = loaded.artifactLoadMilliseconds;
+          fragmentBytes = loaded.artifactBytes;
+          recoveredFaces = loaded.recoveredDisjointFaces;
+          artifactId = `engine-v2:${loaded.artifactKey}`;
+          restore = this.callbacks.capture();
+          if (previous) previous.frozen = true;
+          model.object.visible = false;
+          model.frozen = true;
+          // attach() mutates the scene before its async elevation alignment.
+          // Mark it first so a failure during alignment still detaches the candidate.
+          attached = true;
+          await this.callbacks.attach(model, check);
+          const primeStarted = performance.now();
+          await loaded.model.prime(signal);
+          fragmentLoadMilliseconds += performance.now() - primeStarted;
+          check();
+        } catch (error) {
+          const failed = model;
+          model = null;
+          if (failed) {
+            if (attached) await this.callbacks.detach(failed);
+            await failed.dispose();
+          }
+          attached = false;
+          if (previous) { previous.object.visible = true; previous.frozen = false; }
+          await restore?.(); restore = null;
+          throw error;
+        }
+      }
+
+      this.publishProgress(sequence, { modelHash, stage: "finalizing", detail: source.name });
       check();
       this.bridge.stopWatching();
-      const activation = await stage.commit();
+      const activation = await stage.commit("native");
       check();
       this.activeModel = model;
-      this.activeModelName = file.name;
+      this.activeModelName = source.name;
       this.artifactId = artifactId;
       if (previous) previous.object.visible = false;
       model.object.visible = true;
@@ -173,12 +179,12 @@ export class ViewerModelLoader {
       if (!viewState) this.callbacks.fit();
       await this.callbacks.update();
       check();
-      this.activeSession = { file, hash: modelHash, sequence, activation: activation.model };
+      this.activeSession = { source, hash: modelHash, sequence, activation: activation.model, recoveredFaces };
       committed = true;
       this.callbacks.committed();
       this.watchActive();
-      this.publishProgress(sequence, { modelHash, stage: "ready", progress: 1, detail: file.name });
-      this.callbacks.onFragmentMetrics({ loadSequence: sequence, modelHash, profile: this.fragmentProfile, cacheHit,
+      this.publishProgress(sequence, { modelHash, stage: "ready", progress: 1, detail: source.name, recoveredFaces });
+      this.callbacks.onFragmentMetrics({ loadSequence: sequence, modelHash, profile, engine: model.engine, cacheHit,
         ifcBytes, fragmentBytes, conversionMilliseconds, fragmentLoadMilliseconds, totalMilliseconds: performance.now() - loadStarted });
       try { await stage.finalize(); } catch (error) { console.warn("Model lease finalization will expire automatically", error); }
     } catch (error) {
@@ -218,12 +224,12 @@ export class ViewerModelLoader {
     }
   }
 
-  private async disposeRetired(model: FragmentsModel) {
+  private async disposeRetired(model: ViewerModel) {
     this.pendingDisposals.add(model);
     model.object.visible = false; model.frozen = true;
     try {
       await this.callbacks.detach(model);
-      await this.fragments.disposeModel(model.modelId);
+      await model.dispose();
       this.pendingDisposals.delete(model);
     } catch (cause) {
       this.recordCleanupFailure(new Error("Chưa dọn xong model cũ. Bấm Thử lại trước khi chuyển document.", { cause }));
@@ -255,9 +261,9 @@ export class ViewerModelLoader {
           check();
           if (!ModelStage.isConflict(error) || !this.activeSession) throw error;
           const session = this.activeSession;
-          const recovery = await ModelStage.prepare(session.file, session.hash, controller.signal, () => {});
+          const recovery = await ModelStage.prepare(session.source, session.hash, controller.signal, () => {});
           try {
-            check(); const committed = await recovery.commit(); check();
+            check(); const committed = await recovery.commit(session.activation.semanticMode); check();
             this.activeSession = { ...session, activation: committed.model };
           } catch (failure) { await recovery.rollback(); throw failure; }
           // Finalize only releases leases; it cannot replace another generation.
@@ -283,7 +289,7 @@ export class ViewerModelLoader {
   private watchActive() {
     const session = this.activeSession;
     if (!session || this.disposed) return;
-    void this.bridge.watchModel(session.file, session.hash, session.sequence, session.activation);
+    void this.bridge.watchModel(session.source, session.hash, session.sequence, session.activation);
   }
 
   async cancelLoad() {
@@ -311,7 +317,10 @@ export class ViewerModelLoader {
     const model = this.activeModel, session = this.activeSession;
     if (session) await this.bridge.closeActiveModel(session.activation);
     this.bridge.stopWatching();
-    if (model) { await this.callbacks.detach(model); await this.fragments.disposeModel(model.modelId); }
+    if (model) {
+      await this.callbacks.detach(model);
+      await model.dispose();
+    }
     this.activeModel = null; this.activeSession = null; this.activeModelName = ""; this.artifactId = "";
   }
 
@@ -320,13 +329,13 @@ export class ViewerModelLoader {
     this.disposed = true;
     try { await this.cancelLoad(); }
     finally {
-      this.converter.dispose();
       try { await this.bridge.cancelModelRequests(); }
       finally {
-        await this.callbacks.detach(this.activeModel);
+        const active = this.activeModel;
+        await this.callbacks.detach(active);
         this.activeModel = null;
         this.activeSession = null;
-        await this.fragments.dispose();
+        await active?.dispose();
       }
     }
   }

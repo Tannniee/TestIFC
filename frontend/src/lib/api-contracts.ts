@@ -20,6 +20,7 @@ export interface ActivateModelResponse {
   originalFilename: string | null;
   sizeBytes: number;
   loadedAt: string;
+  semanticMode: "legacy" | "native";
 }
 
 export interface StageModelResponse {
@@ -29,8 +30,18 @@ export interface StageModelResponse {
 }
 
 export interface CacheInventory {
-  totalBytes: number; fragmentBytes: number; modelCount: number; protectedModels: number;
+  totalBytes: number; fragmentBytes: number; engineV2Bytes: number; modelCount: number; protectedModels: number;
   keepModels: number; maxBytes: number;
+}
+
+export interface EngineV2JobResponse {
+  jobId: string;
+  modelHash: string;
+  artifactKey: string;
+  state: "queued" | "running" | "ready" | "error" | "cancelled";
+  phase: string;
+  ready: boolean;
+  error: string | null;
 }
 
 export interface SemanticProgress {
@@ -52,6 +63,7 @@ export interface ModelRuntimeResponse {
   hasActiveModel: boolean;
   activeModelHash: string | null;
   activeLoadedAt?: string | null;
+  semanticMode: "legacy" | "native" | null;
   modelResident: boolean;
   preparing: boolean;
   prepareError: string | null;
@@ -103,6 +115,25 @@ export interface FragmentStoredResponse {
   sizeBytes: number;
 }
 
+export interface ModelTreeNode {
+  globalId: string | null;
+  expressId: number;
+  ifcType: string;
+  name: string | null;
+  objectType: string | null;
+  children: ModelTreeNode[];
+}
+
+export interface ModelTreeResponse { ok: boolean; roots: ModelTreeNode[]; rootCount: number }
+export type ElementRecord = Record<string, unknown> & {
+  globalId?: string | null; expressId?: number; ifcType?: string; name?: string | null;
+  objectType?: string | null; description?: string | null;
+};
+export interface ElementsResponse {
+  localIds: number[]; globalIds: string[];
+  byLocalId: Array<ElementRecord | null>; byGlobalId: Array<ElementRecord | null>;
+}
+
 export type ApiMethod = "GET" | "POST" | "DELETE";
 
 export interface ApiEndpoint {
@@ -129,8 +160,16 @@ export const API_ENDPOINTS = {
   cancelModelLoad: { method: "POST", path: "/model/cancel-load" },
   retrySemantic: { method: "POST", path: "/model/retry-semantic" },
   modelRuntime: { method: "GET", path: "/model/runtime" },
+  modelSource: { method: "GET", path: "/model/source/{modelHash}" },
+  modelTree: { method: "GET", path: "/model/tree" },
+  modelElements: { method: "POST", path: "/model/elements" },
   getFragments: { method: "GET", path: "/model/fragments/{modelHash}" },
   putFragments: { method: "POST", path: "/model/fragments/{modelHash}" },
+  prepareEngineV2: { method: "POST", path: "/model/engine-v2/{modelHash}/prepare" },
+  engineV2Job: { method: "GET", path: "/model/engine-v2/jobs/{jobId}" },
+  cancelEngineV2Job: { method: "DELETE", path: "/model/engine-v2/jobs/{jobId}" },
+  engineV2Manifest: { method: "GET", path: "/model/engine-v2/artifacts/{artifactKey}/manifest" },
+  engineV2Chunk: { method: "GET", path: "/model/engine-v2/artifacts/{artifactKey}/chunks/{file}" },
   setSelection: { method: "POST", path: "/selection" },
   clearSelection: { method: "DELETE", path: "/selection" },
 } as const satisfies Record<string, ApiEndpoint>;

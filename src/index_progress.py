@@ -40,3 +40,8 @@ class IndexProgress:
         value["stallAfterSeconds"] = limit
         value["stalled"] = value["status"] == "running" and age >= limit
         return value
+
+    def clear(self, model_hash):
+        with self._lock:
+            if self._value is not None and self._value["modelHash"] == model_hash:
+                self._value = None

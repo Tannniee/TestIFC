@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist",
       emptyOutDir: true,
-      // web-ifc and the fragments worker are intentionally shipped as local bundles.
+      // Native artifact pages are loaded on demand by Engine V2.
       chunkSizeWarningLimit: 5000,
     },
     server: {

@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 import model_operations
-from api_contracts import StageModelRequest, StageActionRequest, StageModelResponse, CacheClearRequest
+from api_contracts import StageModelRequest, StageActionRequest, StageModelResponse, CacheClearRequest, ElementsRequest
 from api_contracts import (
     ActivateModelResponse,
     CancelModelLoadRequest,
@@ -54,15 +54,17 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             return model_operations.prepare_stage(request.stageId, request.modelHash, request.filename)
         except FileNotFoundError:
             return error_response(404, "model_not_cached")
-        except ModelTooLargeError:
-            return error_response(413, "ifc_file_exceeds_1_gib_limit")
+        except ModelTooLargeError as error:
+            return error_response(413, str(error))
         except ValueError as error:
             return error_response(409, str(error))
 
     @router.post("/model/stage/{stageId}", response_model=StageModelResponse)
     def stage_action(request: StageActionRequest, stageId: str = FastApiPath(pattern="^[0-9a-f-]{36}$")):
         try:
-            return model_operations.transition_stage(stageId, request.action)
+            return model_operations.transition_stage(stageId, request.action, request.semanticMode)
+        except ModelTooLargeError as error:
+            return error_response(413, str(error))
         except ValueError as error:
             return error_response(409, str(error))
 
@@ -73,6 +75,14 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.post("/model/cache/clear")
     def clear_cache(request: CacheClearRequest):
         return model_operations.cached_storage(request.scope)
+
+    @router.get("/model/source/{modelHash}", response_model=None)
+    def get_model_source(modelHash: str = FastApiPath(pattern=MODEL_HASH_PATTERN)):
+        try:
+            path = model_operations.cached_model_source(modelHash)
+        except FileNotFoundError:
+            return error_response(404, "model_not_cached")
+        return FileResponse(path, media_type="application/octet-stream", filename=f"{modelHash}.ifc")
 
     @router.post(
         "/load-model",
@@ -91,8 +101,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
                 originalFilename=loaded.original_filename,
                 sizeBytes=loaded.size_bytes,
             )
-        except ModelTooLargeError:
-            return error_response(413, "ifc_file_exceeds_1_gib_limit")
+        except ModelTooLargeError as error:
+            return error_response(413, str(error))
         except Exception:
             logger.exception(
                 "Model upload materialization failed",
@@ -150,8 +160,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             )
         except (FileNotFoundError, HashMismatchError):
             return error_response(404, "model_not_cached")
-        except ModelTooLargeError:
-            return error_response(413, "ifc_file_exceeds_1_gib_limit")
+        except ModelTooLargeError as error:
+            return error_response(413, str(error))
         return {"ok": True, **info}
 
     @router.post("/model/cancel-load")
@@ -173,8 +183,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             return error_response(404, str(exc))
         except HashMismatchError as exc:
             return error_response(409, str(exc))
-        except ModelTooLargeError:
-            return error_response(413, "ifc_file_exceeds_1_gib_limit")
+        except ModelTooLargeError as error:
+            return error_response(413, str(error))
         return {"ok": True, **info}
 
     @router.post("/model/retry-semantic")
@@ -228,6 +238,18 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
                 status_code=500,
                 content=ErrorResponse(error="model_search_failed").model_dump(),
             )
+
+    @router.post("/model/elements", response_model=None)
+    def get_elements(request: ElementsRequest):
+        try:
+            return model_operations.element_records(request.localIds, request.globalIds)
+        except ValueError as exc:
+            return error_response(422, str(exc))
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("Model element batch failed", extra={"event": "model_element_batch_failed"})
+            return error_response(500, "model_element_batch_failed")
 
     @router.get(
         "/element/by-express-id/{expressId}",

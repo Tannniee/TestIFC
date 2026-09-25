@@ -41,6 +41,7 @@ analysis = Analysis(
         (str(ROOT / "frontend" / "dist"), "frontend/dist"),
         (str(ROOT / "backend" / "reference_data"), "backend/reference_data"),
         (str(ROOT / "desktop" / "assets" / "app_icon.ico"), "desktop/assets"),
+        (str(ROOT / "engine_v2" / "publish" / "win-x64"), "engine_v2/worker"),
     ],
     hiddenimports=ifc_hidden + webview_hidden,
     hookspath=[],

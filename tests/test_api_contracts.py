@@ -38,7 +38,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["service"], "ifc-selection-bridge")
-        self.assertEqual(payload["appVersion"], "1.0.3")
+        self.assertEqual(payload["appVersion"], "1.0.4")
         self.assertFalse(payload["hasSelection"])
 
     async def test_semantic_retry_rejects_stale_activation_and_duplicate_attempt(self):
@@ -71,6 +71,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         if not payload["hasActiveModel"]:
             self.assertIsNone(payload["activeModelHash"])
             self.assertEqual(payload["hotIndexStatus"], "idle")
+            self.assertIsNone(payload["semanticMode"])
 
     async def test_selection_round_trip(self):
         selection = {
@@ -143,7 +144,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
                 files={"file": ("large.ifc", b"IFC", "application/octet-stream")},
             )
         self.assertEqual(response.status_code, 413)
-        self.assertEqual(response.json()["error"], "ifc_file_exceeds_1_gib_limit")
+        self.assertEqual(response.json()["error"], "ifc_file_exceeds_2_gb_limit")
 
     async def test_openapi_preserves_the_complete_bridge_surface(self):
         paths = (await self.client.get("/openapi.json")).json()["paths"]
@@ -159,7 +160,13 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             "/model/stage/{stageId}": {"post"},
             "/model/cache": {"get"},
             "/model/cache/clear": {"post"},
+            "/model/source/{modelHash}": {"get"},
+            "/model/elements": {"post"},
             "/model/fragments/{modelHash}": {"get", "post"},
+            "/model/engine-v2/{modelHash}/prepare": {"post"},
+            "/model/engine-v2/jobs/{jobId}": {"get", "delete"},
+            "/model/engine-v2/artifacts/{artifactKey}/manifest": {"get"},
+            "/model/engine-v2/artifacts/{artifactKey}/chunks/{file}": {"get"},
             "/model/activate/{modelHash}": {"post"},
             "/model/cancel-load": {"post"},
             "/model/retry-semantic": {"post"},

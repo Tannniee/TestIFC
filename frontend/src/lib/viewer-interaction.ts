@@ -1,12 +1,10 @@
 import {
   SnappingClass,
-  type FragmentsModel,
-  type RaycastResult,
-  type RectangleRaycastResult,
-} from "@thatopen/fragments";
+} from "./viewer-native-types";
 import * as THREE from "three";
 import { MEASURE_AXES, snapMeasurementAxis } from "./measurement-axis";
 import type { MeasureMode, MeasurementResult, ViewerTool } from "./viewer-contracts";
+import type { ViewerModel, ViewerRaycastResult, ViewerRectangleRaycastResult } from "./viewer-model-contract";
 import {
   formatMeasurement,
   isFullyIncludedSweep,
@@ -35,9 +33,9 @@ interface MeasurementVisual {
 }
 
 export interface ViewerInteractionCallbacks {
-  activeModel(): FragmentsModel | null;
+  activeModel(): ViewerModel | null;
   onInvalidate(): void;
-  onMultiSelection(result: RectangleRaycastResult | null): void;
+  onMultiSelection(result: ViewerRectangleRaycastResult | null): void;
   onMeasurements(measurements: MeasurementResult[]): void;
 }
 
@@ -360,12 +358,12 @@ export class ViewerInteraction {
     this.acceptMeasurementPoint(hit.point);
   }
 
-  private async snapAt(model: FragmentsModel, clientX: number, clientY: number, mode: MeasureMode) {
+  private async snapAt(model: ViewerModel, clientX: number, clientY: number, mode: MeasureMode) {
     if (mode === "pointToPoint" && this.measurementStart && this.fixedDistance !== null) {
       this.camera.updateMatrixWorld();
       const bounds = this.canvas.getBoundingClientRect();
       const axis = snapMeasurementAxis(this.measurementStart, this.axisLength, this.camera, bounds.width, bounds.height, clientX - bounds.left, clientY - bounds.top);
-      if (axis) return { point: axis.point, snappingClass: SnappingClass.LINE } as RaycastResult;
+      if (axis) return { point: axis.point, snappingClass: SnappingClass.LINE } as ViewerRaycastResult;
     }
     const snappingClasses = mode === "edge"
       ? [SnappingClass.LINE]
@@ -380,7 +378,7 @@ export class ViewerInteraction {
     return [...hits].sort((left, right) => this.snapPriority(left) - this.snapPriority(right))[0];
   }
 
-  private snapPriority(hit: RaycastResult) {
+  private snapPriority(hit: ViewerRaycastResult) {
     const snapClass = hit.snappingClass;
     const classPriority = snapClass === SnappingClass.POINT ? 0 : snapClass === SnappingClass.LINE ? 1 : 2;
     return classPriority * 1_000_000 + (hit.rayDistance ?? 0);
@@ -429,7 +427,7 @@ export class ViewerInteraction {
     this.publishMeasurements();
   }
 
-  private drawSnapPreview(hit: RaycastResult | null) {
+  private drawSnapPreview(hit: ViewerRaycastResult | null) {
     this.disposeObject(this.snapPoint);
     this.disposeObject(this.snapEdge);
     this.disposeObject(this.draftLine);

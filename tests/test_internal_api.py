@@ -22,7 +22,10 @@ class InternalApiTests(unittest.IsolatedAsyncioTestCase):
         for path, methods in schema["paths"].items():
             if path == "/health":
                 continue
-            url = path.replace("{modelHash}", "a" * 64).replace("{globalId}", "anything")
+            url = (path.replace("{modelHash}", "a" * 64)
+                   .replace("{artifactKey}", "a" * 64 + ".engine-v2-m5-p2-e0.8.9-p6.2")
+                   .replace("{jobId}", "b" * 32).replace("{file}", "positions.ifcv2")
+                   .replace("{globalId}", "anything"))
             for method in methods:
                 response = await self.client.request(method, url)
                 self.assertEqual(response.status_code, 401, (method, path))

@@ -42,8 +42,8 @@ class FoundationLifecycleTests(unittest.TestCase):
 
     def test_reaper_is_owned_by_each_lifespan(self):
         async def run():
-            owners = [LatestTaskRunner(f"lifespan-{i}") for i in range(3)]
-            app = SimpleNamespace(state=SimpleNamespace(model_takeoff_job=owners[2]))
+            owners = [LatestTaskRunner(f"lifespan-{i}") for i in range(4)]
+            app = SimpleNamespace(state=SimpleNamespace(model_takeoff_job=owners[2], engine_v2_jobs=owners[3]))
             with patch.object(app_lifecycle.model_runtime, "_background_indexes", owners[0]), patch.object(model_cache, "_retention_jobs", owners[1]):
                 for _ in range(2):
                     async with app_lifecycle.backend_lifespan(app):

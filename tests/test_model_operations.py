@@ -4,6 +4,7 @@ import sys
 import unittest
 from contextlib import nullcontext
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 
@@ -47,6 +48,19 @@ class ModelOperationsTests(unittest.TestCase):
         self.assertEqual(result.original_filename, "sample.ifc")
         self.assertEqual(result.size_bytes, 123)
         materialize.assert_called_once_with(reader, "sample.ifc", True)
+
+    def test_materialize_local_model_copies_without_activating(self):
+        info = {"contentHashSha256": "d" * 64, "originalFilename": "picked.ifc", "sizeBytes": 3}
+        with TemporaryDirectory() as temporary:
+            source = Path(temporary) / "picked.ifc"
+            source.write_bytes(b"IFC")
+            with patch.object(model_operations, "materialize_model_stream", return_value=info) as materialize:
+                result = model_operations.materialize_local_model(str(source))
+
+        self.assertEqual(result.model_hash, "d" * 64)
+        self.assertEqual(result.size_bytes, 3)
+        self.assertEqual(materialize.call_args.args[1:], ("picked.ifc", True))
+        self.assertEqual(materialize.call_args.kwargs, {"activate": False})
 
     def test_activate_cached_model_resolves_the_cached_path(self):
         model_hash = "b" * 64
@@ -147,6 +161,17 @@ class ModelOperationsTests(unittest.TestCase):
             index=self.Lease.index,
         )
         extract.assert_called_once_with(unittest.mock.ANY, "GUID-1")
+
+    def test_element_records_preserve_requested_order_and_missing_values(self):
+        class Index:
+            def records_by_express_ids(self, _ids): return {2: {"expressId": 2}}
+            def records_by_global_ids(self, _ids): return {"G1": {"globalId": "G1"}}
+        lease = self.Lease()
+        lease.index = Index()
+        with patch.object(model_operations, "lease_active_model", return_value=lease):
+            result = model_operations.element_records([9, 2], ["G1", "missing"])
+        self.assertEqual(result["byLocalId"], [None, {"expressId": 2}])
+        self.assertEqual(result["byGlobalId"], [{"globalId": "G1"}, None])
 
 
 if __name__ == "__main__":

@@ -13,11 +13,20 @@ const backendPort = Number(process.env.IFC_BENCH_PORT || 8140);
 const frontendPort = backendPort + 1;
 const semanticTimeoutMs = Number(process.env.IFC_BENCH_SEMANTIC_TIMEOUT_MS || 20 * 60_000);
 const fragmentProfile = process.env.IFC_BENCH_FRAGMENT_PROFILE;
+const viewerEngine = process.env.IFC_BENCH_ENGINE;
 if (fragmentProfile && !["full", "attributes", "minimum"].includes(fragmentProfile)) {
   throw new Error(`Invalid IFC_BENCH_FRAGMENT_PROFILE: ${fragmentProfile}`);
 }
+if (viewerEngine && !["webifc", "auto", "engine-v2"].includes(viewerEngine)) {
+  throw new Error(`Invalid IFC_BENCH_ENGINE: ${viewerEngine}`);
+}
 const coldOnly = process.env.IFC_BENCH_COLD_ONLY === "1";
-const url = `http://127.0.0.1:${frontendPort}${fragmentProfile ? `?fragmentProfile=${fragmentProfile}` : ""}`;
+const skipPropertyProbe = process.env.IFC_BENCH_SKIP_PROPERTY === "1";
+const cacheDir = process.env.IFC_BENCH_CACHE_DIR || path.join(output, "cache");
+const viewerUrl = new URL(`http://127.0.0.1:${frontendPort}`);
+if (fragmentProfile) viewerUrl.searchParams.set("fragmentProfile", fragmentProfile);
+if (viewerEngine) viewerUrl.searchParams.set("ifcEngine", viewerEngine);
+const url = viewerUrl.href;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const limit = (promise, ms, label) => {
   let timer;
@@ -93,7 +102,7 @@ async function instrument(page) {
       document.addEventListener(type, (event) => { if (event.target instanceof HTMLCanvasElement) b.pendingInputs.push({ phase: b.phase, at: event.timeStamp }); }, true);
     }
     const original = ViewerService.prototype.load;
-    ViewerService.prototype.load = function(file) {
+    ViewerService.prototype.load = function(file, ...args) {
       window.__benchViewer = this;
       const run = { name: file.name, started: performance.now(), stages: [], bridge: [], done: false, error: null };
       b.runs.push(run); b.current = run;
@@ -129,7 +138,7 @@ async function instrument(page) {
           }
         };
       }
-      return original.call(this, file).then(() => { run.done = true; run.completedMs = performance.now() - run.started; }, (error) => {
+      return original.call(this, file, ...args).then(() => { run.done = true; run.completedMs = performance.now() - run.started; }, (error) => {
         run.done = true; run.error = String(error); run.completedMs = performance.now() - run.started; throw error;
       });
     };
@@ -193,7 +202,7 @@ async function snapshot(page) {
 try {
   await phase("setup");
   const backend = launch(python, ["benchmarks/serve_benchmark.py", String(backendPort), path.join(output, "backend.stop")], "backend", {
-    IFC_MODEL_CACHE_DIR: path.join(output, "cache"), IFC_CACHE_KEEP_MODELS: "8", IFC_CACHE_MAX_BYTES: String(80 * 1024 ** 3),
+    IFC_MODEL_CACHE_DIR: cacheDir, IFC_CACHE_KEEP_MODELS: "8", IFC_CACHE_MAX_BYTES: String(80 * 1024 ** 3),
   });
   backend.stdin.end();
   const vite = launch(process.execPath, ["frontend/node_modules/vite/bin/vite.js", "frontend", "--host", "127.0.0.1", "--port", String(frontendPort), "--strictPort"], "vite", { IFC_BRIDGE_URL: `http://127.0.0.1:${backendPort}` });
@@ -224,7 +233,21 @@ try {
       entry.webglRenderer = gpuRenderer;
       console.log(JSON.stringify({ model: model.id, sizeBytes: entry.sizeBytes, renderer: gpuRenderer }));
       await loadModel(page, model, "cold-load");
-      entry.propertyProbe = await page.evaluate(async () => {
+      entry.semanticCoreProbe = viewerEngine === "engine-v2" ? await page.evaluate(async () => {
+        const model = window.__benchViewer.model;
+        const [localId] = await model.getItemsIdsWithGeometry();
+        const [item] = await model.getItemsData([localId]);
+        const [guid] = await model.getGuidsByLocalIds([localId]);
+        const tree = await model.getSpatialStructure();
+        return {
+          localId,
+          guid,
+          name: item?.Name?.value ?? null,
+          category: item?._category?.value ?? null,
+          roots: tree.children?.length ?? 0,
+        };
+      }) : { skipped: true };
+      entry.propertyProbe = skipPropertyProbe ? { skipped: true } : await page.evaluate(async () => {
         const model = window.__benchViewer.model;
         const [localId] = await model.getItemsIdsWithGeometry();
         const relationNames = ["IsDefinedBy", "IsTypedBy", "HasProperties", "Quantities"];
@@ -259,8 +282,38 @@ try {
       await delay(1500);
       await phase("select", page);
       const box = await page.locator(".viewer-mount canvas").boundingBox();
-      let hitPoint = null;
-      for (const [fx, fy] of [[0.5, 0.5], [0.4, 0.5], [0.6, 0.5], [0.5, 0.4], [0.5, 0.6], [0.3, 0.4], [0.7, 0.6]]) {
+      const raycastProbe = await page.evaluate(async () => {
+        const viewer = window.__benchViewer, model = viewer.model, dom = viewer.renderer.domElement;
+        const vector = (x, y) => ({ x, y,
+          clone() { return vector(this.x, this.y); },
+          subScalar(value) { this.x -= value; this.y -= value; return this; },
+          addScalar(value) { this.x += value; this.y += value; return this; },
+        });
+        const bounds = dom.getBoundingClientRect();
+        for (let row = 1; row < 20; row++) for (let column = 1; column < 20; column++) {
+          const x = bounds.left + bounds.width * column / 20, y = bounds.top + bounds.height * row / 20;
+          const mouse = vector(x, y);
+          const hit = await model.raycast({ camera: viewer.camera, mouse, dom });
+          if (hit) {
+            const [edge] = await model.raycastWithSnapping({ camera: viewer.camera, mouse, dom, snappingClasses: [1] }) ?? [];
+            return { x, y, localId: hit.localId, edgeSnap: Boolean(edge?.snappedEdgeP1 && edge?.snappedEdgeP2) };
+          }
+        }
+        return null;
+      });
+      entry.raycastProbe = raycastProbe;
+      let hitPoint = raycastProbe ? { x: raycastProbe.x, y: raycastProbe.y } : null;
+      if (hitPoint) {
+        const before = await page.evaluate(() => window.__bench.selectionEvents.length);
+        const at = Date.now();
+        await page.mouse.click(hitPoint.x, hitPoint.y);
+        for (let i = 0; i < 30; i++) {
+          await delay(100);
+          const event = await limit(page.evaluate(() => ({ count: window.__bench.selectionEvents.length, last: window.__bench.selectionEvents.at(-1) })), 30_000, "selection");
+          if (event.count > before) { if (event.last.hit) entry.selectionResponseMs = Date.now() - at; else hitPoint = null; break; }
+        }
+      }
+      if (!hitPoint) for (const [fx, fy] of [[0.5, 0.5], [0.4, 0.5], [0.6, 0.5], [0.5, 0.4], [0.5, 0.6], [0.3, 0.4], [0.7, 0.6]]) {
         const before = await page.evaluate(() => window.__bench.selectionEvents.length);
         const at = Date.now();
         const point = { x: box.x + box.width * fx, y: box.y + box.height * fy };
@@ -327,7 +380,7 @@ try {
       entry.final = await snapshot(page);
       await page.screenshot({ path: path.join(output, `${model.id}-loaded.png`) });
       await phase("unload", page);
-      await page.evaluate(async () => { await window.__benchViewer.cancelLoad(); });
+      await page.evaluate(async () => { await window.__benchViewer.closeModel(); });
       const cdp = await context.newCDPSession(page);
       await cdp.send("HeapProfiler.collectGarbage");
       await delay(3000);

@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import model_cache as cache
 import model_runtime as runtime
 import model_transactions as tx
+import model_limits
 from fragment_service import FragmentService
 
 
@@ -51,6 +52,22 @@ class TransactionTests(unittest.TestCase):
         tx.transition("b", "rollback")
         self.assertEqual(runtime._state.get(), self.a)
         self.assertFalse(cache.pinned_model_hashes())
+
+    def test_native_core_commit_defers_legacy_semantic_index(self):
+        tx.prepare("b", self.b.contentHashSha256, "B.ifc")
+        result = tx.transition("b", "commit", "native")
+        self.assertEqual(result["model"]["semanticMode"], "native")
+        self.assertEqual(runtime._state.get().semanticMode, "native")
+        runtime._queue_index_build.assert_not_called()
+
+    def test_large_model_rejects_legacy_commit_but_can_commit_native(self):
+        tx.prepare("b", self.b.contentHashSha256, "B.ifc")
+        with patch.object(model_limits, "ONE_GIB_BYTES", 0):
+            with self.assertRaisesRegex(model_limits.ModelTooLargeError, "large_model_requires_engine_v2"):
+                tx.transition("b", "commit", "legacy")
+            self.assertEqual(runtime._state.get(), self.a)
+            result = tx.transition("b", "commit", "native")
+        self.assertEqual(result["model"]["semanticMode"], "native")
 
     def test_same_hash_stale_ticket_cannot_replace_new_generation(self):
         tx.prepare("first", self.a.contentHashSha256, "A.ifc")

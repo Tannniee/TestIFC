@@ -17,7 +17,7 @@ import ifcopenshell
 import facts_cache
 import index_builder
 import model_cache
-from model_limits import ModelTooLargeError
+from model_limits import ModelTooLargeError, require_legacy_ifc_size
 import model_index
 from background_tasks import LatestTaskRunner
 from index_progress import IndexProgress
@@ -37,6 +37,7 @@ class ActiveModel:
     originalFilename: str | None
     sizeBytes: int
     loadedAt: str
+    semanticMode: str = "legacy"
 
 
 @dataclass(frozen=True, slots=True)
@@ -160,7 +161,14 @@ class _ActiveModelState:
                 self.set(replacement)
                 try:
                     model_cache.schedule_cache_retention(replacement.contentHashSha256)
-                    _queue_index_build(replacement)
+                    if replacement.semanticMode == "native":
+                        _background_indexes.cancel()
+                        target = model_index.index_path_for(model_cache.CACHE_DIR, replacement.contentHashSha256)
+                        if not model_index.is_usable(target):
+                            _index_progress.clear(replacement.contentHashSha256)
+                            _prepare.end(replacement.contentHashSha256)
+                    else:
+                        _queue_index_build(replacement)
                 except BaseException:
                     if expected is None:
                         self.clear()
@@ -333,13 +341,14 @@ def model_source_path(model: ActiveModel) -> str:
     return model_cache.model_source_path(model)
 
 
-def _active_model(cached: model_cache.CachedModel, original_filename: str | None) -> ActiveModel:
+def _active_model(cached: model_cache.CachedModel, original_filename: str | None, semantic_mode: str = "legacy") -> ActiveModel:
     return ActiveModel(
         path=str(cached.path),
         contentHashSha256=cached.content_hash,
         originalFilename=original_filename,
         sizeBytes=cached.size_bytes,
         loadedAt=now_utc(),
+        semanticMode=semantic_mode,
     )
 
 
@@ -384,6 +393,7 @@ def register_model(path: str, expected_hash: str, background: bool = False) -> d
 
 
 def _activate(model: ActiveModel) -> None:
+    require_legacy_ifc_size(model.sizeBytes)
     _state.set(model)
     model_cache.schedule_cache_retention(model.contentHashSha256)
     _background_indexes.cancel()
@@ -471,6 +481,7 @@ def open_model_session(
 
 
 def _activate_in_background(model: ActiveModel) -> None:
+    require_legacy_ifc_size(model.sizeBytes)
     _state.set(model)
     model_cache.schedule_cache_retention(model.contentHashSha256)
     _queue_index_build(model)
@@ -573,6 +584,7 @@ def live_model_status() -> dict:
         "hasActiveModel": model is not None,
         "activeModelHash": model.contentHashSha256 if model else None,
         "activeLoadedAt": model.loadedAt if model else None,
+        "semanticMode": model.semanticMode if model else None,
         "modelResident": _state.is_open(),
         "preparing": preparing,
         "prepareError": prepare_error,

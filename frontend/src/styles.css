@@ -87,6 +87,7 @@
   .qn-rail-divider { width: 32px; height: 1px; margin: 4px 0; background: var(--border-subtle); }
   .qn-status-bar { min-height: 32px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--overlay-surface); color: var(--overlay-text); font-size: var(--font-size-sm); transition: color 320ms ease, background-color 320ms ease; }
   .qn-status-bar span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qn-status-bar .qn-recovery-warning { flex: 0 0 auto; color: var(--state-warning); }
   .qn-drawer { width: 360px; height: 100%; position: absolute; top: 0; right: 0; z-index: 20; display: flex; flex-direction: column; color: var(--text-primary); background: var(--surface-elevated); box-shadow: var(--shadow-drawer); transform: translateX(100%); transition: transform var(--motion-base) var(--easing-standard), color 320ms ease, background-color 320ms ease, box-shadow 320ms ease; }
   .qn-drawer-open { transform: translateX(0); }
   .qn-drawer-handle { width: 8px; position: absolute; inset: 0 auto 0 -4px; border: 0; background: transparent; cursor: ew-resize; }

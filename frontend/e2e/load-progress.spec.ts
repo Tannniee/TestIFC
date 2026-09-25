@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 
 test.beforeEach(async ({ page }) => {
-  await page.route("**/health", (route) => route.fulfill({ json: { ok: true, appVersion: "1.0.3" } }));
+  await page.route("**/health", (route) => route.fulfill({ json: { ok: true, appVersion: "1.0.4" } }));
   await page.route("**/selection", (route) => route.fulfill({ json: { ok: true } }));
   await page.addInitScript(() => window.addEventListener("ifc-viewer-ready", (event: any) => { (window as any).__viewer = event.detail; }));
   await page.goto("/?viewerDebug=1");
@@ -114,19 +114,17 @@ test("cancel waits for stage reply and rolls back that exact ticket without acti
   expect(calls).toEqual(["stage:A", "rollback:true"]);
 });
 
-test("real IFC conversion cancels and the same file can open again", async ({ page }) => {
+test("real IFC native artifact load cancels and the same file can open again", async ({ page }) => {
   test.setTimeout(180_000);
   const modelPath = process.env.IFC_E2E_MODEL_PATH;
   test.skip(!modelPath, "Set IFC_E2E_MODEL_PATH for the real conversion cancellation gate");
-  // Force conversion while keeping the user's source/cache untouched.
-  await page.route("**/model/fragments/*", (route) => route.request().method() === "GET"
-    ? route.fulfill({ status: 404, json: { error: "fragments_not_cached" } }) : route.continue());
   await page.evaluate(async () => {
-    const converter = (window as any).__viewer.loader.converter;
-    const convert = converter.convert;
-    converter.convert = function (...args: any[]) {
+    const { api } = await import(/* @vite-ignore */ "/src/lib/api.ts");
+    (window as any).originalManifest = api.engineV2Manifest;
+    api.engineV2Manifest = (_key: string, signal: AbortSignal) => {
       (window as any).conversionStarted = true;
-      return convert.apply(this, args);
+      return new Promise((_, reject) => signal.addEventListener("abort",
+        () => reject(new DOMException("cancelled", "AbortError")), { once: true }));
     };
     (window as any).loadMetrics = [];
     window.addEventListener("ifc-fragment-metrics", (event) => (window as any).loadMetrics.push((event as CustomEvent).detail));
@@ -140,7 +138,10 @@ test("real IFC conversion cancels and the same file can open again", async ({ pa
   await expect(page.locator(".viewer-empty-state")).toContainText("Đã hủy");
   expect(await page.evaluate(() => (window as any).loadMetrics.length)).toBe(0);
   await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).activeModelHash)).toBe(previousHash);
-  await page.unroute("**/model/fragments/*");
+  await page.evaluate(async () => {
+    const { api } = await import(/* @vite-ignore */ "/src/lib/api.ts");
+    api.engineV2Manifest = (window as any).originalManifest;
+  });
   await input.setInputFiles(modelPath!);
   await expect.poll(() => page.evaluate(() => (window as any).loadMetrics.length), { timeout: 120_000 }).toBe(1);
   await expect(page.getByRole("dialog")).toHaveCount(0);

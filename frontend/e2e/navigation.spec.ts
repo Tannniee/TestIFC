@@ -156,7 +156,12 @@ test("clicking IFC sets the item pivot, PAN restores model pivot, and stale pick
     await v.applyViewState(state); await v.view.settled();
     return { expected: state.camera, actual: v.captureViewState().camera };
   });
-  expect(restored.actual).toEqual(restored.expected);
+  expectPoint(restored.actual.position, restored.expected.position);
+  expectPoint(restored.actual.target, restored.expected.target);
+  expectPoint(restored.actual.up, restored.expected.up);
+  expect(restored.actual.effectiveHeight).toBeCloseTo(restored.expected.effectiveHeight, 8);
+  expect(restored.actual.near).toBeCloseTo(restored.expected.near, 8);
+  expect(restored.actual.far).toBeCloseTo(restored.expected.far, 8);
   await page.evaluate(() => {
     const root = window as any, v = root.viewer, model = v.model;
     root.originalBoxes = model.getMergedBox.bind(model);

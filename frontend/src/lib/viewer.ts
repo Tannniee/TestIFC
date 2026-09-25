@@ -1,9 +1,5 @@
-import { type FragmentsModel } from "@thatopen/fragments";
 import * as THREE from "three";
 import { markViewerCreated, markViewerDisposed } from "./lifecycle-diagnostics";
-import {
-  browserFragmentMetadataProfile,
-} from "./fragment-profile";
 import { ViewerModelLoader, type ModelLoadOptions } from "./viewer-model-loader";
 import { FragmentUpdates, RenderScheduler } from "./render-scheduler";
 import { ViewerCamera, type CameraUpdateContext } from "./viewer-camera";
@@ -27,6 +23,8 @@ import {
 } from "./viewer-contracts";
 import { createViewerSelection, ViewerHighlights } from "./viewer-selection";
 import { ViewerInteraction } from "./viewer-interaction";
+import type { ViewerModel } from "./viewer-model-contract";
+import type { ModelSource } from "./model-source";
 
 export { isLoadCancelledError, LoadCancelledError } from "./viewer-contracts";
 export type * from "./viewer-contracts";
@@ -48,7 +46,7 @@ export class ViewerService {
   private inputBlocked = false;
   private boxDisplay = { showBox: true, showHandles: true };
   private readonly boxController: SectionBoxController;
-  private sectionCreation: { source: ViewSessionState; model: FragmentsModel; createView: boolean } | null = null;
+  private sectionCreation: { source: ViewSessionState; model: ViewerModel; createView: boolean } | null = null;
   private transientCleanup: Promise<void> = Promise.resolve();
   private readonly interaction: ViewerInteraction;
   private readonly boxZoomRectangle: HTMLDivElement;
@@ -57,19 +55,21 @@ export class ViewerService {
   readonly viewDiagnostics = { requests: 0, dispatches: 0, viewEvents: 0, forced: 0, forcedMilliseconds: 0,
     latestCamera: null as CameraUpdateContext | null, reason: "initial", events: [] as Array<Record<string, unknown>> };
   private readonly fragmentUpdates = new FragmentUpdates(async (force) => {
+    const activeModel = this.loader.activeModel;
     // With no model, there can be no frame completion event after a delete RPC.
     // Do not await the engine's global fence while restoring an empty viewport.
-    if (!this.loader.fragments.models.list.size) { this.scheduler.invalidate(); return; }
+    if (!activeModel) { this.scheduler.invalidate(); return; }
     // This adapter owns the cadence; engine throttling must not silently drop a final view.
-    const settings = this.loader.fragments.settings;
-    const rate = settings.maxUpdateRate;
-    settings.maxUpdateRate = 0;
     const started = performance.now();
     this.viewDiagnostics.dispatches++;
     if (force) this.viewDiagnostics.forced++;
     this.recordViewEvent("dispatch", { force, reason: this.viewDiagnostics.reason, camera: this.viewDiagnostics.latestCamera });
-    try { await this.loader.fragments.update(force); }
-    finally { settings.maxUpdateRate = rate; }
+    if (activeModel.update) {
+      try { await activeModel.update(this.camera); }
+      catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) throw error;
+      }
+    }
     if (force) this.viewDiagnostics.forcedMilliseconds += performance.now() - started;
     this.recordViewEvent("returned", { force, milliseconds: performance.now() - started });
     this.scheduler.invalidate();
@@ -105,7 +105,6 @@ export class ViewerService {
   constructor(
     private readonly host: HTMLElement,
     callbacks: ViewerCallbacks,
-    fragmentProfile = browserFragmentMetadataProfile(),
   ) {
     this.callbacks = callbacks;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -119,7 +118,7 @@ export class ViewerService {
       onOrientationChange: (orientation) => this.callbacks.onCameraOrientationChange(orientation),
       onUpdate: (force, context) => this.cameraUpdated(force, context),
     });
-    this.loader = new ViewerModelLoader(this.camera, fragmentProfile, {
+    this.loader = new ViewerModelLoader({
       onProgress: (value) => callbacks.onProgress(value), onBridgeProgress: (value) => callbacks.onBridgeProgress(value),
       onFragmentMetrics: (value) => callbacks.onFragmentMetrics(value),
       attach: async (model, assertCurrent) => {
@@ -155,7 +154,6 @@ export class ViewerService {
       fit: () => this.fit({ animate: false }),
       update: () => this.fragmentUpdates.request(true),
     });
-    this.fragments.settings.maxUpdateRate = FRAGMENTS_MAX_UPDATE_RATE_MS;
     this.interaction = new ViewerInteraction(
       this.host,
       this.renderer.domElement,
@@ -204,7 +202,6 @@ export class ViewerService {
       window.dispatchEvent(new CustomEvent("ifc-viewer-ready", { detail: this }));
     }
   }
-  private get fragments() { return this.loader.fragments; }
   private get bridge() { return this.loader.bridge; }
   private get activeModel() { return this.loader.activeModel; }
   private get activeModelName() { return this.loader.activeModelName; }
@@ -484,7 +481,7 @@ export class ViewerService {
     this.view.viewSection(model.box, section);
   }
 
-  async load(file: File, options: ModelLoadOptions = {}): Promise<void> {
+  async load(file: ModelSource, options: ModelLoadOptions = {}): Promise<void> {
     await this.cancelTransientInteraction();
     await this.highlights.drain();
     await this.loader.load(file, options);
@@ -496,7 +493,7 @@ export class ViewerService {
       await this.clearSelection(); this.interaction.reset();
       await this.loader.closeModel(); this.clearClipping(); this.scheduler.invalidate();
     } catch (error) {
-      if (model && this.model === model && this.fragments.models.list.has(model.modelId)) await this.applyViewState(state);
+      if (model && this.model === model) await this.applyViewState(state);
       throw error;
     }
   }
@@ -600,7 +597,7 @@ export class ViewerService {
     for (const material of materials) material.dispose();
   }
 
-  private async alignGridToIfcElevationZero(model: FragmentsModel, assertCurrent: () => void) {
+  private async alignGridToIfcElevationZero(model: ViewerModel, assertCurrent: () => void) {
     try {
       const coordinationMatrix = await model.getCoordinationMatrix();
       assertCurrent();
@@ -624,6 +621,7 @@ export class ViewerService {
   private requestFragmentUpdate(force = false, reason = "scene") {
     this.scheduler.invalidate();
     if (!this.loader || this.disposed) return;
+    this.loader.activeModel?.cancelUpdate?.();
     this.viewDiagnostics.requests++;
     this.viewDiagnostics.reason = reason;
     void this.fragmentUpdates.request(force).catch((error) => console.warn("Fragment view update failed", error));
@@ -848,7 +846,7 @@ export class ViewerService {
     const selectionSequence = ++this.selectionSequence;
     const orbitEpoch = this.orbitEpoch;
     const activeModel = this.activeModel;
-    // FragmentsModels converts viewport coordinates to NDC internally.
+    // The model adapter converts viewport coordinates to its raycast space.
     const mouse = new THREE.Vector2(event.clientX, event.clientY);
     const hit = await activeModel.raycast({ camera: this.camera, mouse, dom: this.renderer.domElement });
     if (selectionSequence !== this.selectionSequence || activeModel !== this.activeModel) return;
@@ -882,7 +880,7 @@ export class ViewerService {
     await this.bridge.publishSelection(selection, () => selectionSequence === this.selectionSequence && hit.fragments === this.activeModel);
   }
 
-  private async applyMultiSelection(model: FragmentsModel | null, localIds: number[]) {
+  private async applyMultiSelection(model: ViewerModel | null, localIds: number[]) {
     const selectionSequence = ++this.selectionSequence;
     await this.highlights.clear();
     this.scheduler.invalidate();
@@ -924,7 +922,7 @@ export class ViewerService {
     await this.bridge.publishSelection(selection, () => sequence === this.selectionSequence && model === this.activeModel);
   }
 
-  private async centerSelectionOrbit(model: FragmentsModel, localId: number | null, sequence: number, epoch: number) {
+  private async centerSelectionOrbit(model: ViewerModel, localId: number | null, sequence: number, epoch: number) {
     const current = () => !this.disposed && !this.inputBlocked && this.activeTool === "selectOrbit"
       && model === this.activeModel && sequence === this.selectionSequence && epoch === this.orbitEpoch;
     if (localId === null || !current()) return;

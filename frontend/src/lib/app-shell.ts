@@ -1,5 +1,5 @@
 import { api, type HealthResponse } from "./api";
-import { loadDesktopSettings, saveDesktopSettings, type AppSettings } from "./settings";
+import { chooseDesktopIfcFile, loadDesktopSettings, saveDesktopSettings, type AppSettings } from "./settings";
 import { ViewerService } from "./viewer";
 import { WorkspaceManager } from "./workspace-manager";
 import { ModelDataService } from "./model-data-service";
@@ -16,6 +16,7 @@ import type {
   ViewportBackground,
   ViewPreset,
 } from "./viewer-contracts";
+import type { ModelSource } from "./model-source";
 
 export type { AppSettings } from "./settings";
 export type {
@@ -119,6 +120,7 @@ export class AppShellService {
   async retrySemantic() { await this.workspace?.retrySemantic(); }
   cacheInventory() { return api.cacheInventory(); }
   clearCache(scope: "fragments" | "all") { return api.clearCache(scope); }
+  chooseIfcFile() { return chooseDesktopIfcFile(); }
 
   health(): Promise<HealthResponse> {
     return api.health();
@@ -128,8 +130,8 @@ export class AppShellService {
     return isLoadCancelledError(error);
   }
 
-  load(file: File) {
-    return this.workspace?.openDocument(file) ?? Promise.resolve();
+  load(source: File | ModelSource) {
+    return this.workspace?.openDocument(source) ?? Promise.resolve();
   }
 
   cancelLoad() {

@@ -8,15 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@thatopen/fragments':
-        specifier: 3.4.7
-        version: 3.4.7(three@0.185.0)(web-ifc@0.0.77)
       three:
         specifier: 0.185.0
         version: 0.185.0
-      web-ifc:
-        specifier: 0.0.77
-        version: 0.0.77
     devDependencies:
       '@playwright/test':
         specifier: 1.62.0
@@ -184,13 +178,6 @@ packages:
       svelte: ^5.46.4
       vite: ^8.0.0-beta.7 || ^8.0.0
 
-  '@thatopen/fragments@3.4.7':
-    resolution: {integrity: sha512-tGuS7LVf0BkN5qQISG3VAGeMyqiZYwkvcHGYZ+eA5emr+v8aIjEKZvM/eYrGhJKUv/eZ+N5qeevEftfcmoBc+g==}
-    engines: {node: '>=20.11.0'}
-    peerDependencies:
-      three: '>=0.182.0'
-      web-ifc: '>=0.0.77'
-
   '@tweenjs/tween.js@23.1.3':
     resolution: {integrity: sha512-vJmvvwFxYuGnF2axRtPYocag6Clbb5YS7kLL+SO/TeVFzHqDIWrNKYtcsPMibjDx9O+bu+psAy9NKfWklassUA==}
 
@@ -241,9 +228,6 @@ packages:
   devalue@5.9.1:
     resolution: {integrity: sha512-+17vil3EVQRzvtDJSFuTWEb8XJRvXqAiV3qZyQWD398QeXUa6CxsUyMdD1fxzEhUrd4FojitFz7lhIHBTlV4fw==}
 
-  earcut@3.2.3:
-    resolution: {integrity: sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q==}
-
   esm-env@1.2.2:
     resolution: {integrity: sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==}
 
@@ -266,9 +250,6 @@ packages:
 
   fflate@0.8.3:
     resolution: {integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==}
-
-  flatbuffers@25.2.10:
-    resolution: {integrity: sha512-7JlN9ZvLDG1McO3kbX0k4v+SUAg48L1rIwEvN6ZQl/eCtgJz9UylTMzE9wrmYrcorgxm3CX/3T/w5VAub99UUw==}
 
   fsevents@2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
@@ -360,10 +341,6 @@ packages:
   locate-character@3.0.0:
     resolution: {integrity: sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA==}
 
-  lru-cache@11.1.0:
-    resolution: {integrity: sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==}
-    engines: {node: 20 || >=22}
-
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
@@ -385,9 +362,6 @@ packages:
   obug@2.1.4:
     resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
     engines: {node: '>=12.20.0'}
-
-  pako@2.1.0:
-    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -502,9 +476,6 @@ packages:
       vite:
         optional: true
 
-  web-ifc@0.0.77:
-    resolution: {integrity: sha512-VzQ0W/Iiqbidxn1ECUvz6qJ6p2sXBVNcOsUOBCETzy77psAH6yFLKQm74aXabkx3JH4OvFVHe8k1qS6+Z2zl1w==}
-
   zimmerframe@1.1.4:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
 
@@ -599,15 +570,6 @@ snapshots:
       vite: 8.2.2
       vitefu: 1.1.3(vite@8.2.2)
 
-  '@thatopen/fragments@3.4.7(three@0.185.0)(web-ifc@0.0.77)':
-    dependencies:
-      earcut: 3.2.3
-      flatbuffers: 25.2.10
-      lru-cache: 11.1.0
-      pako: 2.1.0
-      three: 0.185.0
-      web-ifc: 0.0.77
-
   '@tweenjs/tween.js@23.1.3': {}
 
   '@types/estree@1.0.9': {}
@@ -645,8 +607,6 @@ snapshots:
 
   devalue@5.9.1: {}
 
-  earcut@3.2.3: {}
-
   esm-env@1.2.2: {}
 
   esrap@2.3.6:
@@ -658,8 +618,6 @@ snapshots:
       picomatch: 4.0.7
 
   fflate@0.8.3: {}
-
-  flatbuffers@25.2.10: {}
 
   fsevents@2.3.2:
     optional: true
@@ -722,8 +680,6 @@ snapshots:
 
   locate-character@3.0.0: {}
 
-  lru-cache@11.1.0: {}
-
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -739,8 +695,6 @@ snapshots:
   nanoid@3.3.18: {}
 
   obug@2.1.4: {}
-
-  pako@2.1.0: {}
 
   picocolors@1.1.1: {}
 
@@ -845,7 +799,5 @@ snapshots:
   vitefu@1.1.3(vite@8.2.2):
     optionalDependencies:
       vite: 8.2.2
-
-  web-ifc@0.0.77: {}
 
   zimmerframe@1.1.4: {}

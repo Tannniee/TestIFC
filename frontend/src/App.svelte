@@ -18,6 +18,7 @@
   import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
   import { applyGeometryProgress, applySemanticProgress, beginModelLoad, emptyModelReadiness, geometryReady } from "./lib/model-readiness";
   import { MAX_IFC_BYTES } from "./lib/model-limits";
+  import { normalizeModelSource, type ModelSource } from "./lib/model-source";
 
   const sectionAxes = ["x", "y", "z"] as const;
 
@@ -53,7 +54,7 @@
   $: workspaceDocument = activeDocument(workspace);
   $: workspaceView = activeView(workspace);
   $: runtimeModelKey = `${workspace.activeDocumentId ?? ""}:${shell.activeModel?.modelId ?? ""}`;
-  let appVersion = "1.0.3";
+  let appVersion = "1.0.4";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;
@@ -269,8 +270,15 @@
     }, 340);
   }
 
-  function openFilePicker() {
-    fileInput.click();
+  async function openFilePicker() {
+    try {
+      const source = await shell.chooseIfcFile();
+      if (source === undefined) fileInput.click();
+      else if (source) await openIfcFile(source);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      errorMessage = message.includes("ifc_file_exceeds_2_gb_limit") ? t.ifcTooLarge : message;
+    }
   }
 
   function openHelp() {
@@ -458,26 +466,27 @@
   }
   function reportWorkspaceError(error: unknown) { if (!shell.isCancelledLoad(error)) errorMessage = error instanceof Error ? error.message : String(error); }
 
-  async function openIfcFile(file: File) {
+  async function openIfcFile(input: File | ModelSource) {
+    const source = normalizeModelSource(input);
     if (cancellingLoad) return;
     errorMessage = null;
-    if (!/\.ifc$/i.test(file.name)) {
+    if (!/\.ifc$/i.test(source.name)) {
       errorMessage = t.unsupported;
       return;
     }
-    if (file.size > MAX_IFC_BYTES) {
-      errorMessage = `${t.ifcTooLarge} (${(file.size / 1024 ** 3).toFixed(2)} GiB)`;
+    if (source.size > MAX_IFC_BYTES) {
+      errorMessage = `${t.ifcTooLarge} (${(source.size / 1e9).toFixed(2)} GB)`;
       return;
     }
     const sequence = ++appLoadSequence;
-    readiness = beginModelLoad(sequence, file.name);
+    readiness = beginModelLoad(sequence, source.name);
     viewerProgress = readiness.geometry;
     if (!hasModel) bridgeProgress = readiness.semantic;
-    modelStatus = `${t.opening} ${file.name}`;
+    modelStatus = `${t.opening} ${source.name}`;
     try {
-      await shell.load(file);
+      await shell.load(source);
       if (sequence !== appLoadSequence) return;
-      modelStatus = file.name;
+      modelStatus = source.name;
     } catch (error) {
       if (shell.isCancelledLoad(error) || sequence !== appLoadSequence) return;
       const message = error instanceof Error ? error.message : String(error);
@@ -734,6 +743,9 @@
     {/if}
     <footer class="qn-status-bar">
       <span>{progressText(viewerProgress, t) ?? modelStatus ?? t.noModel}</span>
+      {#if viewerProgress?.stage === "ready" && viewerProgress.recoveredFaces}
+        <span class="qn-recovery-warning" role="status" title={t.recoveredIfcFacesHint}>⚠ {viewerProgress.recoveredFaces} {t.recoveredIfcFaces}</span>
+      {/if}
       <SemanticStatus progress={bridgeProgress} text={bridgeText(bridgeProgress, locale)} {locale} onRetry={() => shell.retrySemantic().catch(reportWorkspaceError)} />
       <span title={fragmentMetrics ? `${fragmentMetrics.profile} · ${fragmentMetrics.fragmentBytes} bytes · ${Math.round(fragmentMetrics.totalMilliseconds)} ms` : undefined}>{t.modelData}: {hasModel ? `${t.modelReady} · ${modelStatus ?? ""}` : viewerProgress?.stage === "error" ? t.modelError : isOpeningModel(viewerProgress) ? t.modelLoading : t.nothingSelected}</span>
       <span>{t.element}: {multiSelectionCount ? `${multiSelectionCount} ${t.selectedElements}` : selectedElement?.name ?? selectedElement?.ifcType ?? t.nothingSelected}</span>

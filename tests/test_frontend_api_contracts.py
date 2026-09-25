@@ -66,6 +66,7 @@ class FrontendApiContractTests(unittest.TestCase):
             "SelectionPayload": "SelectionPayload",
             "SelectionResponse": "SelectionResponse",
             "FragmentStoredResponse": "FragmentStoredResponse",
+            "EngineV2JobResponse": "EngineV2JobResponse",
         }
         schemas = self.openapi["components"]["schemas"]
         for typescript_name, openapi_name in schema_pairs.items():

@@ -3,11 +3,12 @@ import { emptyModelReadiness } from "./model-readiness";
 import type { ViewerService } from "./viewer";
 import { LoadCancelledError, type ViewerProgress, type BridgeProgress } from "./viewer-contracts";
 import { ModelSourceError } from "./model-source-error";
+import { normalizeModelSource, type ModelSource } from "./model-source";
 
 /** Session ownership lives here; the viewer owns only the active rendering resources. */
 export class WorkspaceManager {
   private state = emptyWorkspace();
-  private sources = new Map<string, File>();
+  private sources = new Map<string, ModelSource>();
   private listeners = new Set<(state: WorkspaceState) => void>();
   private queue: Promise<void> = Promise.resolve();
   private revision = 0;
@@ -61,17 +62,18 @@ export class WorkspaceManager {
     this.queue = task.catch(() => {});
     return task;
   }
-  openDocument(file: File) {
+  openDocument(input: File | ModelSource) {
+    const source = normalizeModelSource(input);
     return this.run(async check => {
-      await this.viewer.load(file, { identified: hash => {
+      await this.viewer.load(source, { identified: hash => {
         check();
         let doc = this.state.documents.find(d => d.modelHash === hash);
         if (!doc) {
-          doc = { id: hash, modelHash: hash, filename: file.name, activeViewId: "", views: [],
+          doc = { id: hash, modelHash: hash, filename: source.name, activeViewId: "", views: [],
             readiness: emptyModelReadiness(), expandedNodes: [], error: null };
           this.state.documents.push(doc);
         }
-        this.sources.set(doc.id, file);
+        this.sources.set(doc.id, source);
         this.state.requestedDocumentId = doc.id; doc.error = null; doc.sourceIssue = null; this.emit();
         return doc.views.find(v => v.id === doc.activeViewId)?.state;
       } });
@@ -90,9 +92,9 @@ export class WorkspaceManager {
   }
   private async loadDocument(doc: DocumentSession) {
     this.state.requestedDocumentId = doc.id; doc.error = null; this.emit();
-    const file = this.sources.get(doc.id);
-    if (!file) throw new ModelSourceError("unavailable");
-    await this.viewer.load(file, { hash: doc.modelHash, state: doc.views.find(v => v.id === doc.activeViewId)?.state });
+    const source = this.sources.get(doc.id);
+    if (!source) throw new ModelSourceError("unavailable");
+    await this.viewer.load(source, { hash: doc.modelHash, state: doc.views.find(v => v.id === doc.activeViewId)?.state });
     this.adoptLoaded();
   }
   activateDocument(id: string) {

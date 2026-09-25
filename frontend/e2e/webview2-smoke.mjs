@@ -7,6 +7,8 @@ import path from "node:path";
 
 const executable = process.env.IFC_VIEWER_EXE;
 if (!executable) throw new Error("IFC_VIEWER_EXE must point to the packaged application");
+const semanticTimeoutMs = Number(process.env.IFC_E2E_SEMANTIC_TIMEOUT_MS || 120000);
+const geometryTimeoutMs = Number(process.env.IFC_E2E_GEOMETRY_TIMEOUT_MS || 120000);
 
 async function reserveFreePort() {
   const server = createServer();
@@ -55,12 +57,29 @@ async function waitForCdp(timeoutMs = 60_000) {
   throw new Error(`WebView2 CDP did not become ready: ${lastError ?? "timeout"}`);
 }
 
+async function setLocalInputFile(page, filePath) {
+  // Playwright's remote-CDP adapter serializes files and rejects payloads over
+  // 50 MB. WebView2 and the test runner share this Windows host, so let CDP
+  // assign the local path without copying the IFC through the protocol.
+  const session = await page.context().newCDPSession(page);
+  const { root } = await session.send("DOM.getDocument", { depth: 1 });
+  const { nodeId } = await session.send("DOM.querySelector", { nodeId: root.nodeId, selector: 'input[type="file"]' });
+  if (!nodeId) throw new Error("Packaged viewer file input was not found");
+  await session.send("DOM.setFileInputFiles", { nodeId, files: [path.resolve(filePath)] });
+  await session.detach();
+  // CDP assigns a local path without a Playwright upload. Explicitly notify
+  // Svelte's file input handler after the assignment.
+  await page.evaluate(() => document.querySelector('input[type="file"]')
+    ?.dispatchEvent(new Event("change", { bubbles: true })));
+}
+
 let browser;
 try {
   await waitForCdp();
   browser = await chromium.connectOverCDP(cdpUrl);
   const page = browser.contexts().flatMap((context) => context.pages())[0];
   if (!page) throw new Error("WebView2 did not expose an application page");
+  await page.waitForURL((url) => url.protocol === "http:" || url.protocol === "https:", { timeout: 60_000 });
   const diagnostics = [];
   page.on("console", (message) => diagnostics.push(`console.${message.type()}: ${message.text()}`));
   page.on("pageerror", (error) => diagnostics.push(`pageerror: ${error.message}`));
@@ -79,14 +98,28 @@ try {
       window.__packageMetrics = [];
       window.addEventListener("ifc-fragment-metrics", e => window.__packageMetrics.push(e.detail));
     });
-    await page.locator('input[type="file"]').setInputFiles(process.env.IFC_E2E_MODEL_PATH);
-    await page.waitForFunction(() => window.__packageMetrics.length === 1, null, { timeout: 120000 });
+    await setLocalInputFile(page, process.env.IFC_E2E_MODEL_PATH);
+    await page.waitForFunction(() => window.__packageMetrics.length === 1, null, { timeout: geometryTimeoutMs });
+    if (process.env.IFC_E2E_PRINT_METRICS === "1") {
+      const metrics = await page.evaluate(() => window.__packageMetrics[0]);
+      process.stdout.write(`packaged load metrics: ${JSON.stringify(metrics)}\n`);
+    }
     await page.waitForFunction(async () => {
       const { token } = await window.pywebview.api.get_api_session();
       const state = await (await fetch('/model/runtime', { headers: { 'X-IFC-Session': token } })).json();
+      if (state.semanticMode === 'native') {
+        return state.hotIndexStatus === 'ready' && state.coldIndexStatus === 'not_configured';
+      }
       return state.hotIndexStatus === 'ready' && state.coldIndexStatus === 'ready';
-    }, null, { timeout: 120000 });
-    process.stdout.write("packaged real IFC geometry and semantic index passed\n");
+    }, null, { timeout: semanticTimeoutMs });
+    const runtime = await page.evaluate(async () => {
+      const { token } = await window.pywebview.api.get_api_session();
+      return (await fetch('/model/runtime', { headers: { 'X-IFC-Session': token } })).json();
+    });
+    if (process.env.IFC_E2E_SCREENSHOT) {
+      await page.screenshot({ path: process.env.IFC_E2E_SCREENSHOT });
+    }
+    process.stdout.write(`packaged real IFC geometry and ${runtime.semanticMode} semantics passed\n`);
   }
   process.stdout.write("packaged WebView2 CDP smoke test passed\n");
 } finally {
@@ -105,5 +138,9 @@ try {
     }
   }
   await browser?.close().catch(() => undefined);
+  if (path.dirname(path.resolve(userDataDir)) !== path.resolve(tmpdir()) ||
+      !path.basename(userDataDir).startsWith("ifc-viewer-webview2-")) {
+    throw new Error(`Refusing to remove an unexpected WebView2 test directory: ${userDataDir}`);
+  }
   await rm(userDataDir, { recursive: true, force: true }).catch(() => undefined);
 }

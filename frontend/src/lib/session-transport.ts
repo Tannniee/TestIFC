@@ -28,8 +28,7 @@ export function sessionToken(): Promise<string | null> {
 }
 
 export async function sessionFetch(url: string, init?: RequestInit): Promise<Response> {
-  // Construct synchronously: Fragments may transfer/detach the original buffer
-  // while the desktop credential is still arriving.
+  // Construct synchronously so the body is fixed before the desktop credential arrives.
   const request = new Request(new URL(url, window.location.href), init);
   const token = await sessionToken();
   if (token) request.headers.set("X-IFC-Session", token);

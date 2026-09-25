@@ -35,7 +35,7 @@ class SelectionMeta(BaseModel):
 
 class SelectionPayload(BaseModel):
     schemaVersion: int = SCHEMA_VERSION
-    source: str = "thatopen"
+    source: str = "engine-v2"
     model: ModelRef = Field(default_factory=ModelRef)
     element: ElementRef = Field(default_factory=ElementRef)
     selection: SelectionMeta
@@ -97,6 +97,7 @@ class ActivateModelResponse(BaseModel):
     originalFilename: str | None = None
     sizeBytes: int
     loadedAt: str
+    semanticMode: Literal["legacy", "native"] = "legacy"
 
 
 class CancelModelLoadRequest(BaseModel):
@@ -112,6 +113,7 @@ class StageModelRequest(BaseModel):
 
 class StageActionRequest(BaseModel):
     action: Literal["commit", "rollback", "finalize"]
+    semanticMode: Literal["legacy", "native"] | None = None
 
 
 class StageModelResponse(BaseModel):
@@ -126,6 +128,11 @@ class CacheClearRequest(BaseModel):
 
 class RetrySemanticRequest(CancelModelLoadRequest):
     attemptId: str = Field(min_length=1, max_length=100)
+
+
+class ElementsRequest(BaseModel):
+    localIds: list[int] = Field(default_factory=list, max_length=500)
+    globalIds: list[str] = Field(default_factory=list, max_length=500)
 
 
 class SemanticProgress(BaseModel):
@@ -147,6 +154,7 @@ class ModelRuntimeResponse(BaseModel):
     hasActiveModel: bool
     activeModelHash: str | None = None
     activeLoadedAt: str | None = None
+    semanticMode: Literal["legacy", "native"] | None = None
     modelResident: bool
     preparing: bool
     prepareError: str | None = None
@@ -163,6 +171,16 @@ class FragmentStoredResponse(BaseModel):
     ok: bool = True
     modelHash: str
     sizeBytes: int
+
+
+class EngineV2JobResponse(BaseModel):
+    jobId: str
+    modelHash: str
+    artifactKey: str
+    state: Literal["queued", "running", "ready", "error", "cancelled"]
+    phase: str
+    ready: bool
+    error: str | None = None
 
 
 class RegisterModelRequest(BaseModel):

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -14,6 +15,19 @@ def source(path: Path) -> str:
 
 
 class FrontendArchitectureTests(unittest.TestCase):
+    def test_webifc_and_fragments_are_absent_from_viewer_dependencies(self):
+        package = json.loads(source(ROOT / "frontend" / "package.json"))
+        dependencies = package.get("dependencies", {})
+        self.assertNotIn("web-ifc", dependencies)
+        self.assertNotIn("@thatopen/fragments", dependencies)
+        lockfile = source(ROOT / "frontend" / "pnpm-lock.yaml")
+        self.assertNotIn("web-ifc@", lockfile)
+        self.assertNotIn("@thatopen/fragments", lockfile)
+        for path in FRONTEND.rglob("*.ts"):
+            self.assertNotIn('from "@thatopen/fragments"', source(path), str(path))
+        self.assertFalse((ROOT / "frontend" / "public" / "vendor" / "web-ifc").exists())
+        self.assertFalse((ROOT / "frontend" / "public" / "vendor" / "fragments").exists())
+
     def test_app_uses_the_shell_boundary_and_extracted_components(self):
         app = source(FRONTEND / "App.svelte")
         self.assertIn('from "./lib/app-shell"', app)
@@ -58,7 +72,8 @@ class FrontendArchitectureTests(unittest.TestCase):
             self.assertIn(collaborator, viewer)
         for forbidden in ('from "./api"', "new Worker", "crypto.subtle"):
             self.assertNotIn(forbidden, viewer)
-        self.assertIn('from "./read-model-file"', source(LIB / "viewer-model-loader.ts"))
+        self.assertIn('from "./engine-v2/load-artifact"', source(LIB / "viewer-model-loader.ts"))
+        self.assertNotIn('from "./read-model-file"', source(LIB / "viewer-model-loader.ts"))
         self.assertNotIn("new FileReader", viewer)
 
     def test_interaction_tools_use_fragment_spatial_apis(self):
@@ -110,6 +125,15 @@ class FrontendArchitectureTests(unittest.TestCase):
         settings = source(LIB / "settings.ts")
         self.assertIn('from "./viewer-contracts"', settings)
         self.assertNotIn('from "./viewer"', settings)
+
+    def test_viewer_features_depend_on_the_renderer_neutral_model_contract(self):
+        for filename in ("viewer.ts", "viewer-selection.ts", "viewer-interaction.ts", "model-data-service.ts"):
+            content = source(LIB / filename)
+            self.assertNotRegex(content, r"\bFragmentsModel\b", filename)
+        self.assertIn('from "./viewer-model-contract"', source(LIB / "viewer.ts"))
+        self.assertIn('from "./engine-v2/load-artifact"', source(LIB / "viewer-model-loader.ts"))
+        self.assertNotIn("@thatopen/fragments", source(LIB / "viewer-model-loader.ts"))
+        self.assertNotIn("ifc-converter", source(LIB / "viewer-model-loader.ts"))
 
     def test_viewcube_keeps_math_outside_the_svelte_component(self):
         component = source(LIB / "ViewCube.svelte")

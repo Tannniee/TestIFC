@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
 import taskbar
+import webview
 from settings_store import SettingsStore
 
 
@@ -77,9 +80,15 @@ class SettingsBridge:
 class DesktopApi:
     """Stable JavaScript API composed from focused desktop bridges."""
 
-    def __init__(self, taskbar_bridge: TaskbarBridge, settings_bridge: SettingsBridge) -> None:
+    def __init__(
+        self,
+        taskbar_bridge: TaskbarBridge,
+        settings_bridge: SettingsBridge | None,
+        model_materializer: Callable[[str], Any] | None = None,
+    ) -> None:
         self._taskbar = taskbar_bridge
         self._settings = settings_bridge
+        self._model_materializer = model_materializer
         self._window: Any | None = None
         self._api_session: tuple[str, str] | None = None
 
@@ -91,13 +100,44 @@ class DesktopApi:
         self._api_session = (origin, token)
 
     def get_api_session(self) -> dict[str, str]:
+        origin, token = self._viewer_session()
+        return {"token": token}
+
+    def _viewer_session(self) -> tuple[str, str]:
         if self._window is None or self._api_session is None:
             raise RuntimeError("Desktop session is not ready")
         origin, token = self._api_session
         current = urlsplit(self._window.get_current_url())
         if f"{current.scheme}://{current.netloc}" != origin or current.path not in ("", "/", "/index.html"):
             raise PermissionError("Desktop session is restricted to the viewer window")
-        return {"token": token}
+        return origin, token
+
+    def choose_ifc_file(self) -> dict[str, Any] | None:
+        """Pick and cache an IFC without routing its bytes through JavaScript."""
+        self._viewer_session()
+        if self._model_materializer is None:
+            raise RuntimeError("Desktop model materializer is unavailable")
+        selected = self._window.create_file_dialog(
+            webview.FileDialog.OPEN,
+            allow_multiple=False,
+            file_types=("IFC models (*.ifc)",),
+        )
+        if not selected:
+            return None
+        path = Path(selected[0] if isinstance(selected, (list, tuple)) else selected)
+        if path.suffix.lower() != ".ifc":
+            raise ValueError("unsupported_model_file")
+        self._taskbar.indeterminate()
+        try:
+            model = self._model_materializer(str(path))
+        finally:
+            self._taskbar.clear()
+        return {
+            "name": model.original_filename or path.name,
+            "size": model.size_bytes,
+            "modelHash": model.model_hash,
+            "origin": "desktop",
+        }
 
     def taskbar_progress(self, ratio: float) -> bool:
         return self._taskbar.progress(ratio)
@@ -112,7 +152,9 @@ class DesktopApi:
         return self._taskbar.clear()
 
     def load_settings(self) -> dict | None:
-        return self._settings.load()
+        return self._settings.load() if self._settings else None
 
     def save_settings(self, settings: dict) -> dict:
+        if self._settings is None:
+            raise RuntimeError("Desktop settings store is unavailable")
         return self._settings.save(settings)

@@ -209,6 +209,22 @@ class DesktopContractTests(unittest.TestCase):
             self.assertFalse(api.taskbar_clear())
             self.assertFalse(api.taskbar_progress(0.5))
 
+    def test_desktop_picker_materializes_without_exposing_the_path(self):
+        picked = r"C:\models\bridge.ifc"
+        model = types.SimpleNamespace(original_filename="bridge.ifc", size_bytes=123, model_hash="a" * 64)
+        materialized = []
+        api = DesktopApi(TaskbarBridge(logger()), None, lambda path: materialized.append(path) or model)
+        api._configure_api_session("http://127.0.0.1:8001", "s" * 32)
+        api.attach(types.SimpleNamespace(
+            get_current_url=lambda: "http://127.0.0.1:8001/",
+            create_file_dialog=lambda *_args, **_kwargs: (picked,),
+            native=None,
+        ))
+        selected = api.choose_ifc_file()
+        self.assertEqual(materialized, [picked])
+        self.assertEqual(selected, {"name": "bridge.ifc", "size": 123, "modelHash": "a" * 64, "origin": "desktop"})
+        self.assertNotIn("path", selected)
+
     def test_structured_logging_writes_json_lines(self):
         record = logging.LogRecord(
             "desktop-test",
@@ -224,7 +240,7 @@ class DesktopContractTests(unittest.TestCase):
         record.operation = "index"
         payload = json.loads(JsonFormatter().format(record))
         self.assertEqual(payload["event"], "test_ready")
-        self.assertEqual(payload["appVersion"], "1.0.3")
+        self.assertEqual(payload["appVersion"], "1.0.4")
         self.assertEqual(payload["message"], "ready now")
         self.assertEqual(payload["modelHash"], "model-a")
         self.assertEqual(payload["operation"], "index")

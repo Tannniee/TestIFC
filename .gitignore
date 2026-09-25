@@ -19,6 +19,9 @@ dist/
 build-*/
 dist-*/
 /BUILD RELEASE/
+/engine_v2/**/bin/
+/engine_v2/**/obj/
+/engine_v2/publish/
 *.log
 
 # Runtime and model data
