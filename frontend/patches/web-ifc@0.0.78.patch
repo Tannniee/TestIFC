@@ -1,0 +1,48 @@
+diff --git a/web-ifc-api-iife.js b/web-ifc-api-iife.js
+index 7eca644d43455cd683f2d3f4b10247b698440e25..1eca2902f8ddc828ea53679eaf11452d1b8b1de0 100644
+--- a/web-ifc-api-iife.js
++++ b/web-ifc-api-iife.js
+@@ -73508,7 +73508,10 @@ Originally allocated`);
+      * @param applyLinearScalingFactor Whether to apply the model's linear scaling factor to the geometry (default: true)
+      */
+     StreamMeshes(modelID, expressIDs, meshCallback, applyLinearScalingFactor = true) {
+-      this.wasmModule.StreamMeshes(modelID, expressIDs, meshCallback, applyLinearScalingFactor);
++      if (applyLinearScalingFactor !== true) {
++      throw new Error("web-ifc 0.0.78 StreamMeshes WASM binding cannot disable linear scaling");
++    }
++    this.wasmModule.StreamMeshes(modelID, expressIDs, meshCallback);
+     }
+     /**
+      * Streams all meshes of a model
+diff --git a/web-ifc-api-node.js b/web-ifc-api-node.js
+index 8995748c27bbb26878c6dee7838459679d44c62c..bd3ea0ce2876538c2085546dffad9ebf39948c9f 100644
+--- a/web-ifc-api-node.js
++++ b/web-ifc-api-node.js
+@@ -73070,7 +73070,10 @@ var IfcAPI2 = class {
+    * @param applyLinearScalingFactor Whether to apply the model's linear scaling factor to the geometry (default: true)
+    */
+   StreamMeshes(modelID, expressIDs, meshCallback, applyLinearScalingFactor = true) {
+-    this.wasmModule.StreamMeshes(modelID, expressIDs, meshCallback, applyLinearScalingFactor);
++    if (applyLinearScalingFactor !== true) {
++      throw new Error("web-ifc 0.0.78 StreamMeshes WASM binding cannot disable linear scaling");
++    }
++    this.wasmModule.StreamMeshes(modelID, expressIDs, meshCallback);
+   }
+   /**
+    * Streams all meshes of a model
+diff --git a/web-ifc-api.js b/web-ifc-api.js
+index abd81b0afc6b766c6926dcc1a8b1012ab7984767..ccc843deb1de888c860aef04cde75b4478fd6d35 100644
+--- a/web-ifc-api.js
++++ b/web-ifc-api.js
+@@ -72307,7 +72307,10 @@ var IfcAPI2 = class {
+    * @param applyLinearScalingFactor Whether to apply the model's linear scaling factor to the geometry (default: true)
+    */
+   StreamMeshes(modelID, expressIDs, meshCallback, applyLinearScalingFactor = true) {
+-    this.wasmModule.StreamMeshes(modelID, expressIDs, meshCallback, applyLinearScalingFactor);
++    if (applyLinearScalingFactor !== true) {
++      throw new Error("web-ifc 0.0.78 StreamMeshes WASM binding cannot disable linear scaling");
++    }
++    this.wasmModule.StreamMeshes(modelID, expressIDs, meshCallback);
+   }
+   /**
+    * Streams all meshes of a model

@@ -34,6 +34,6 @@ test("query profile wins and full remains the safe default", () => {
 test("fragment cache identity includes format version and profile", () => {
   assert.equal(
     fragmentCacheKey("abc", "attributes"),
-    "abc.fragments-v2-attributes",
+    "abc.fragments-v3-attributes",
   );
 });
