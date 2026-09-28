@@ -41,6 +41,17 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(payload["appVersion"], "1.0.3")
         self.assertFalse(payload["hasSelection"])
 
+    async def test_georeference_endpoint_is_bound_to_a_model_hash(self):
+        model_hash = "a" * 64
+        record = {"modelHash": model_hash, "status": "unavailable",
+                  "source": None, "reason": "coordinate_operation_missing"}
+        with patch.object(model_operations, "model_georeference", return_value=record) as lookup:
+            response = await self.client.get(f"/model/georeference?modelHash={model_hash}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), record)
+        lookup.assert_called_once_with(model_hash)
+        self.assertEqual((await self.client.get("/model/georeference?modelHash=bad")).status_code, 422)
+
     async def test_semantic_retry_rejects_stale_activation_and_duplicate_attempt(self):
         import model_runtime
         from index_progress import IndexProgress
@@ -178,6 +189,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             "/model/retry-semantic": {"post"},
             "/register-model": {"post"},
             "/model/runtime": {"get"},
+            "/model/georeference": {"get"},
             "/model/tree": {"get"},
             "/model/search": {"get"},
             "/element/by-express-id/{expressId}": {"get"},

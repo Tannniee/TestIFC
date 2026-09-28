@@ -27,6 +27,13 @@ test("Properties displays indexed IFC Psets, Qto, and material for a selected el
   expect(response.body.coldStatus).toBe("ready");
   expect(response.body.element.properties).toHaveProperty("Pset_Phase3Benchmark");
   expect(response.body.element.quantities).toHaveProperty("Qto_BeamBaseQuantities");
+  const georeference = await page.evaluate(async ({ modelHash }) => {
+    const request = await fetch(`/model/georeference?modelHash=${modelHash}`);
+    return { status: request.status, body: await request.json() };
+  }, selected);
+  expect(georeference.status).toBe(200);
+  expect(georeference.body).toMatchObject({ modelHash: selected.modelHash,
+    status: "unavailable", reason: "coordinate_operation_missing" });
 
   const panel = page.getByRole("complementary", { name: "Properties" });
   await panel.getByRole("button", { name: "Psets / Quantities" }).click();

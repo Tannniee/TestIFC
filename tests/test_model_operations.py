@@ -165,6 +165,19 @@ class ModelOperationsTests(unittest.TestCase):
             with self.assertRaises(model_operations.ActiveModelChangedError):
                 model_operations.bim_element_by_express_id(42, "b" * 64)
 
+    def test_georeference_reads_index_for_matching_active_model(self):
+        index = type("Index", (), {"georeference": lambda self: {
+            "status": "unavailable", "source": None, "reason": "coordinate_operation_missing",
+        }})()
+        lease = self.Lease()
+        lease.index = index
+        with patch.object(model_operations, "lease_active_model", return_value=lease):
+            result = model_operations.model_georeference("a" * 64)
+            self.assertEqual(result["modelHash"], "a" * 64)
+            self.assertEqual(result["reason"], "coordinate_operation_missing")
+            with self.assertRaises(model_operations.ActiveModelChangedError):
+                model_operations.model_georeference("b" * 64)
+
 
 if __name__ == "__main__":
     unittest.main()

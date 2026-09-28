@@ -24,6 +24,7 @@ only configures middleware, creates shared state, and composes the application.
 adapters. The IFC foundation is split into four services:
 
 - `src/ifc_units.py`: unit resolution and quantity normalization.
+- `src/ifc_georeference.py`: read-only projected CRS and map conversion metadata.
 - `src/model_cache.py`: persistent IFC, fragment, index, and store cache paths.
 - `src/model_runtime.py`: active-model lifecycle, index preparation, and live IFC access.
 - `src/ifc_elements.py`: semantic records and optional element geometry.

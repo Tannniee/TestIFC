@@ -109,6 +109,19 @@ export interface BimElementResponse {
   element: import("./bim-properties").BimElementRecord;
 }
 
+export interface ModelGeoreferenceResponse {
+  modelHash: string;
+  status: "projected" | "unavailable";
+  source: "ifc" | null;
+  reason?: string;
+  crsName?: string;
+  mapUnit?: string | null;
+  origin?: { eastings: number; northings: number; height: number };
+  mapConversion?: { eastings: number; northings: number; height: number;
+    xAxisAbscissa: number; xAxisOrdinate: number; scale: number;
+    factorX: number; factorY: number; factorZ: number };
+}
+
 export type ApiMethod = "GET" | "POST" | "DELETE";
 
 export interface ApiEndpoint {
@@ -135,6 +148,7 @@ export const API_ENDPOINTS = {
   cancelModelLoad: { method: "POST", path: "/model/cancel-load" },
   retrySemantic: { method: "POST", path: "/model/retry-semantic" },
   modelRuntime: { method: "GET", path: "/model/runtime" },
+  modelGeoreference: { method: "GET", path: "/model/georeference" },
   bimElement: { method: "GET", path: "/element/by-express-id/{expressId}/bim" },
   getFragments: { method: "GET", path: "/model/fragments/{modelHash}" },
   putFragments: { method: "POST", path: "/model/fragments/{modelHash}" },

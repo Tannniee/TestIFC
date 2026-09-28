@@ -13,8 +13,10 @@ from typing import Any, Callable, Iterable, Literal
 
 import ifcopenshell
 
+from ifc_georeference import inspect_georeference
+
 INDEX_SCHEMA_VERSION = 3
-EXTRACTOR_VERSION = 2
+EXTRACTOR_VERSION = 3
 INDEXED_TYPES = ("IfcProject", "IfcProduct", "IfcTypeProduct")
 IndexStatus = Literal["not_configured", "indexing", "ready", "error"]
 
@@ -174,6 +176,7 @@ def build_hot(
                 ("cold_status", "indexing"),
             ],
         )
+        _set_meta(connection, "georeference", json.dumps(inspect_georeference(ifc_file)))
         seen = set()
         rows = 0
         for entity in _indexed_entities(ifc_file):
@@ -363,6 +366,11 @@ class ModelIndex:
     @property
     def cold_status(self) -> IndexStatus:
         return cold_status(self._path)
+
+    def georeference(self) -> dict[str, Any]:
+        rows = self._query("SELECT value FROM meta WHERE key = 'georeference'")
+        return json.loads(rows[0][0]) if rows else {"status": "unavailable", "source": None,
+                                                  "reason": "not_indexed"}
 
     def _query(self, sql: str, params=()):
         with closing(sqlite3.connect(self._path.resolve().as_uri() + "?mode=ro", uri=True, timeout=0.75)) as connection:

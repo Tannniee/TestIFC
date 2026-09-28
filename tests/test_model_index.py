@@ -32,12 +32,14 @@ class Entity:
 
 
 class IfcFile:
+    schema = "IFC4"
+
     def __init__(self):
         self.project = Entity(1, "IfcProject", "P1", "Project")
         self.wall = Entity(2, "IfcWall", "W2", "Wall B", "Basic")
         self.door = Entity(3, "IfcDoor", "D3", "Door A")
 
-    def by_type(self, type_name):
+    def by_type(self, type_name, include_subtypes=True):
         if type_name == "IfcProject":
             return [self.project]
         if type_name == "IfcProduct":

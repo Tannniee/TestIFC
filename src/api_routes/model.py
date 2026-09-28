@@ -187,6 +187,18 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     def get_model_runtime():
         return model_operations.runtime_status()
 
+    @router.get("/model/georeference", response_model=None)
+    def get_model_georeference(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
+        try:
+            return model_operations.model_georeference(modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("IFC georeference query failed", extra={"event": "georeference_failed"})
+            return error_response(500, "georeference_failed")
+
     @router.get(
         "/model/tree",
         response_model=None,

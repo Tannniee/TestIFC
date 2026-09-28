@@ -108,6 +108,14 @@ def bim_element_by_express_id(express_id: int, model_hash: str) -> dict[str, Any
         }
 
 
+def model_georeference(model_hash: str) -> dict[str, Any]:
+    """Return indexed IFC map metadata bound to the active model hash."""
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, **lease.index.georeference()}
+
+
 def element_by_global_id(global_id: str) -> dict[str, Any]:
     with lease_active_model() as lease:
         return extract_element(lease, global_id)

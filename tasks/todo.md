@@ -6,7 +6,7 @@
 - [x] B2: Trích xuất và hiển thị nhóm/hệ thống IFC.
 - [ ] B3: Lập chỉ mục Pset/Qto có thể tìm theo tên và giá trị.
 - [ ] B4: API và giao diện lọc Pset/Qto.
-- [ ] C1: Đọc và phân loại IFC georeference; fixture và test.
+- [x] C1: Đọc và phân loại IFC georeference; fixture và test.
 - [ ] C2: Lưu manual anchor theo model hash.
 - [ ] C3: Hiển thị marker/footprint trên bản đồ, kiểm tra WebView2.
 - [ ] C4: Đặt mô hình 3D có kiểm chứng tọa độ và hiệu năng.

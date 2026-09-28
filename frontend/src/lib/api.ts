@@ -10,6 +10,7 @@ import {
   type HealthResponse,
   type LoadModelResponse,
   type ModelRuntimeResponse,
+  type ModelGeoreferenceResponse,
   type SelectionPayload,
   type SelectionResponse,
 } from "./api-contracts";
@@ -144,6 +145,12 @@ export const api = {
     return true;
   },
   runtime: (signal?: AbortSignal) => requestJson<ModelRuntimeResponse>(API_ENDPOINTS.modelRuntime.path, { signal }),
+  modelGeoreference(modelHash: string, signal?: AbortSignal) {
+    return requestJson<ModelGeoreferenceResponse>(
+      `${API_ENDPOINTS.modelGeoreference.path}?${new URLSearchParams({ modelHash })}`,
+      { signal },
+    );
+  },
   bimElement(expressId: number, modelHash: string) {
     const path = apiPath(API_ENDPOINTS.bimElement, { expressId: String(expressId) });
     return requestJson<BimElementResponse>(`${path}?${new URLSearchParams({ modelHash })}`);
