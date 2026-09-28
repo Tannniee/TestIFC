@@ -103,6 +103,12 @@ export interface FragmentStoredResponse {
   sizeBytes: number;
 }
 
+export interface BimElementResponse {
+  modelHash: string;
+  coldStatus: ModelRuntimeResponse["coldIndexStatus"];
+  element: import("./bim-properties").BimElementRecord;
+}
+
 export type ApiMethod = "GET" | "POST" | "DELETE";
 
 export interface ApiEndpoint {
@@ -129,6 +135,7 @@ export const API_ENDPOINTS = {
   cancelModelLoad: { method: "POST", path: "/model/cancel-load" },
   retrySemantic: { method: "POST", path: "/model/retry-semantic" },
   modelRuntime: { method: "GET", path: "/model/runtime" },
+  bimElement: { method: "GET", path: "/element/by-express-id/{expressId}/bim" },
   getFragments: { method: "GET", path: "/model/fragments/{modelHash}" },
   putFragments: { method: "POST", path: "/model/fragments/{modelHash}" },
   setSelection: { method: "POST", path: "/selection" },

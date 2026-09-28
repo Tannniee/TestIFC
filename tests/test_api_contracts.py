@@ -72,6 +72,19 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             self.assertIsNone(payload["activeModelHash"])
             self.assertEqual(payload["hotIndexStatus"], "idle")
 
+    async def test_bim_element_endpoint_returns_semantic_record_without_geometry(self):
+        record = {"modelHash": "a" * 64, "coldStatus": "indexing", "element": {"expressId": 42}}
+        with patch.object(model_operations, "bim_element_by_express_id", return_value=record) as lookup:
+            response = await self.client.get(f"/element/by-express-id/42/bim?modelHash={'a' * 64}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), record)
+        lookup.assert_called_once_with(42, "a" * 64)
+
+        with patch.object(model_operations, "bim_element_by_express_id", side_effect=model_operations.ActiveModelChangedError()):
+            response = await self.client.get(f"/element/by-express-id/42/bim?modelHash={'b' * 64}")
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["error"], "active_model_changed")
+
     async def test_selection_round_trip(self):
         selection = {
             "schemaVersion": 1,
@@ -168,6 +181,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             "/model/tree": {"get"},
             "/model/search": {"get"},
             "/element/by-express-id/{expressId}": {"get"},
+            "/element/by-express-id/{expressId}/bim": {"get"},
             "/element/{globalId}": {"get"},
             "/model/materials": {"get"},
             "/mass/material-reference": {"get"},

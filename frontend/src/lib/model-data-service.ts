@@ -1,16 +1,27 @@
 import type { FragmentsModel, ItemData, SpatialTreeItem } from "@thatopen/fragments";
+import type { BimElementResponse } from "./api-contracts";
+import { bimPropertyGroups, type PropertyGroup } from "./bim-properties.ts";
 
 export interface BrowserNode { id: string; localId: number | null; label: string; children: BrowserNode[] }
-export interface PropertyGroup { name: string; rows: Array<{ name: string; value: string }> }
+export type { PropertyGroup } from "./bim-properties";
+export type PropertyTab = "attributes" | "properties" | "relations" | "materials" | "location";
+export interface PropertyResult { groups: PropertyGroup[]; coldStatus?: "not_configured" | "indexing" | "ready" | "error" }
 const yieldUI = () => new Promise<void>(resolve => setTimeout(resolve, 0));
 const attr = (item: ItemData, name: string) => { const value = item[name]; return value && !Array.isArray(value) ? value.value : null; };
 
 export class ModelDataService {
+  private readonly active: () => FragmentsModel | null;
+  private readonly activeHash: () => string;
+  private readonly readBim: (expressId: number, modelHash: string) => Promise<BimElementResponse>;
   private owner: FragmentsModel | null = null;
   private tree: Promise<BrowserNode[]> | null = null;
-  private properties = new Map<string, Promise<PropertyGroup[]>>();
+  private properties = new Map<string, Promise<PropertyResult>>();
   private names = new Map<number, string>();
-  constructor(private readonly active: () => FragmentsModel | null) {}
+  constructor(
+    active: () => FragmentsModel | null,
+    activeHash: () => string,
+    readBim: (expressId: number, modelHash: string) => Promise<BimElementResponse>,
+  ) { this.active = active; this.activeHash = activeHash; this.readBim = readBim; }
   private model() {
     const model = this.active();
     if (model !== this.owner) { this.clear(); this.owner = model; }
@@ -65,12 +76,27 @@ export class ModelDataService {
     }
     return Object.fromEntries(ids.map(id => [id,this.names.get(id) ?? ""]));
   }
-  getProperties(localId: number, group: "attributes" | "properties" | "materials" | "location"): Promise<PropertyGroup[]> {
+  getProperties(localId: number, group: PropertyTab): Promise<PropertyResult> {
     const model = this.model(), key = `${localId}:${group}`;
     const existing = this.properties.get(key); if (existing) return existing;
     const request = (async () => {
-      const relationNames = group === "properties" ? ["IsDefinedBy", "IsTypedBy", "HasProperties", "Quantities"]
-        : group === "materials" ? ["HasAssociations", "RelatingMaterial", "ForLayerSet", "MaterialLayers", "Material"]
+      if (group === "properties" || group === "relations") {
+        let result;
+        const modelHash = this.activeHash();
+        try { result = await this.readBim(localId, modelHash); }
+        catch (error) {
+          if (error && typeof error === "object" && "status" in error && "message" in error
+            && error.status === 409 && error.message === "index_preparing") {
+            this.check(model);
+            return { groups: [], coldStatus: "indexing" } as PropertyResult;
+          }
+          throw error;
+        }
+        this.check(model);
+        if (result.modelHash !== modelHash) throw new Error("Model query cancelled");
+        return { groups: bimPropertyGroups(result.element, group), coldStatus: result.coldStatus } as PropertyResult;
+      }
+      const relationNames = group === "materials" ? ["HasAssociations", "RelatingMaterial", "ForLayerSet", "MaterialLayers", "Material"]
           : group === "location" ? ["ContainedInStructure", "Decomposes"] : [];
       const relations = Object.fromEntries(relationNames.map(name => [name, { attributes: true, relations: true }]));
       const items = await model.getItemsData([localId], { attributesDefault: true,
@@ -87,8 +113,11 @@ export class ModelDataService {
         if (rows.length) groups.push({ name, rows });
       };
       for (const item of items) visit(item, "Attributes",0);
-      return groups;
-    })().catch(error => { if (this.owner === model) this.properties.delete(key); throw error; });
+      return { groups };
+    })().then(result => {
+      if (this.owner === model && result.coldStatus && result.coldStatus !== "ready") this.properties.delete(key);
+      return result;
+    }).catch(error => { if (this.owner === model) this.properties.delete(key); throw error; });
     this.properties.set(key,request);
     if (this.properties.size > 64) this.properties.delete(this.properties.keys().next().value!);
     return request;

@@ -3,6 +3,7 @@ import {
   API_ENDPOINTS,
   apiPath,
   type ActivateModelResponse,
+  type BimElementResponse,
   type StageModelResponse,
   type CacheInventory,
   type FragmentStoredResponse,
@@ -143,6 +144,10 @@ export const api = {
     return true;
   },
   runtime: (signal?: AbortSignal) => requestJson<ModelRuntimeResponse>(API_ENDPOINTS.modelRuntime.path, { signal }),
+  bimElement(expressId: number, modelHash: string) {
+    const path = apiPath(API_ENDPOINTS.bimElement, { expressId: String(expressId) });
+    return requestJson<BimElementResponse>(`${path}?${new URLSearchParams({ modelHash })}`);
+  },
   async getFragments(modelHash: string, signal?: AbortSignal): Promise<ArrayBuffer | null> {
     const response = await sessionFetch(apiPath(API_ENDPOINTS.getFragments, { modelHash }), { signal });
     if (response.status === 404) return null;

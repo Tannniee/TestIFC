@@ -193,15 +193,17 @@ test("failed worker disposal stays hidden and is retried before another document
   await expect(page.locator(".document-tabs [role=tab]").nth(0)).toHaveAttribute("aria-selected", "true");
 });
 
-for (const profile of ["attributes", "minimum"]) test(`Browser and Properties provide a safe fallback for the ${profile} fragment profile`, async ({page}) => {
+for (const profile of ["attributes", "minimum"]) test(`Browser and Properties use BIM data with the ${profile} fragment profile`, async ({page}) => {
   test.skip(!modelB); test.setTimeout(90000);
   await workspacePage(page, profile); await openModel(page, modelB!);
   await page.getByRole("button", {name:"Project Browser",exact:true}).click();
   await page.getByRole("button", {name:"Model",exact:true}).click();
   await expect.poll(() => page.getByRole("treeitem").count()).toBeGreaterThan(0);
   await page.evaluate(async () => { const v=(window as any).viewer; await v.selectItems((await v.model.getItemsIdsWithGeometry()).slice(0,1)); });
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus), {timeout:60000}).toBe("ready");
   await page.getByRole("button", {name:"Psets / Quantities",exact:true}).click();
-  await expect(page.locator(".properties-body")).toContainText("Không có dữ liệu quan hệ");
+  await expect(page.locator(".properties-body")).not.toContainText("fragments hiện tại");
+  await expect(page.locator(".properties-body [role=alert]")).toHaveCount(0);
   await expect(page.locator(".project-browser [role=alert]")).toHaveCount(0);
 });
 
@@ -289,12 +291,18 @@ test("Browser builds on demand, selects elements and queries real IFC properties
   await expect(page.locator(".properties-panel h3")).not.toHaveText("3D View");
   await page.getByRole("button",{name:"Attributes",exact:true}).click();
   await expect.poll(()=>page.locator(".property-group dd").count()).toBeGreaterThan(0);
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus), {timeout:60000}).toBe("ready");
   await page.getByRole("button",{name:"Psets / Quantities",exact:true}).click();
   await expect(page.locator(".properties-body")).not.toContainText("Loading…");
   await expect(page.locator(".properties-body [role=alert]")).toHaveCount(0);
   const properties=await page.locator(".properties-body").innerText();
-  // Both private A/B exports contain no IfcPropertySet; show an explicit empty result.
-  expect(properties).toContain("Không có dữ liệu quan hệ");
+  const indexed = await page.evaluate(async expressId => {
+    const hash = (window as any).viewer.modelHash;
+    return (await (await fetch(`/element/by-express-id/${expressId}/bim?modelHash=${hash}`)).json()).element;
+  }, probe.ids[0]);
+  const sets = [...Object.keys(indexed.properties ?? {}), ...Object.keys(indexed.quantities ?? {})];
+  if (sets.length) expect(properties).toContain(sets[0]);
+  else expect(properties).toContain("không có dữ liệu BIM");
   await page.screenshot({path:testInfo.outputPath("browser-properties.png")});
   await testInfo.attach("properties",{body:JSON.stringify({probe,properties}),contentType:"application/json"});
   expect(await page.getByRole("treeitem").count()).toBeLessThanOrEqual(50);
@@ -305,6 +313,7 @@ test("Properties resolves Psets, quantities and materials; late results cannot o
   test.skip(!fixture,"Set enriched isolated IFC fixture"); test.setTimeout(90000);
   await workspacePage(page); await openModel(page,fixture!);
   await page.evaluate(async()=>{await (window as any).viewer.selectItems([58]);});
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus), {timeout:60000}).toBe("ready");
   await page.getByRole("button",{name:"Psets / Quantities",exact:true}).click();
   await expect(page.locator(".properties-body")).toContainText("WS-PSET-READY");
   await expect(page.locator(".properties-body")).toContainText("GateLength");

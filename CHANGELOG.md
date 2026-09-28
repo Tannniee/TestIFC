@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — 1.0.3a development
+
+- Read selected-element Psets, Qto, type, material, and classification from the
+  backend semantic index in the Properties panel. Show INDEX readiness and allow
+  a refresh while cold data is still being prepared.
+- Bind BIM property requests to the active model hash and avoid geometry extraction
+  for those requests, so a late response cannot show data from another IFC.
+
 ## 1.0.3 — 2026-09-03
 
 - Add document tabs and independent view sessions for multi-IFC workspaces,

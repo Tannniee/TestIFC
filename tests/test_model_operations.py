@@ -19,6 +19,7 @@ from mass_facts import MaterialUse
 class ModelOperationsTests(unittest.TestCase):
     class Lease:
         index = object()
+        ref = type("Ref", (), {"model_hash": "a" * 64})()
 
         def __enter__(self):
             return self
@@ -147,6 +148,22 @@ class ModelOperationsTests(unittest.TestCase):
             index=self.Lease.index,
         )
         extract.assert_called_once_with(unittest.mock.ANY, "GUID-1")
+
+    def test_bim_element_reads_index_without_opening_geometry(self):
+        record = {"expressId": 42, "properties": {"Pset_BeamCommon": {"FireRating": "2h"}}}
+        index = type("Index", (), {
+            "cold_status": "ready",
+            "record_by_express_id": lambda self, express_id: record if express_id == 42 else None,
+        })()
+        lease = self.Lease()
+        lease.index = index
+        with patch.object(model_operations, "lease_active_model", return_value=lease):
+            self.assertEqual(
+                model_operations.bim_element_by_express_id(42, "a" * 64),
+                {"modelHash": "a" * 64, "coldStatus": "ready", "element": record},
+            )
+            with self.assertRaises(model_operations.ActiveModelChangedError):
+                model_operations.bim_element_by_express_id(42, "b" * 64)
 
 
 if __name__ == "__main__":

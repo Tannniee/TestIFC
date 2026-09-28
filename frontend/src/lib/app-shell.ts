@@ -38,7 +38,11 @@ export type {
 export class AppShellService {
   private viewer: ViewerService | null = null;
   private workspace: WorkspaceManager | null = null;
-  readonly modelData = new ModelDataService(() => this.activeModel);
+  readonly modelData = new ModelDataService(
+    () => this.activeModel,
+    () => this.viewer?.modelHash ?? "",
+    (expressId, modelHash) => api.bimElement(expressId, modelHash),
+  );
   private workspaceListeners = new Set<(state: WorkspaceState) => void>();
   subscribeWorkspace(listener: (state: WorkspaceState) => void) {
     this.workspaceListeners.add(listener); listener(this.workspace?.snapshot() ?? emptyWorkspace());

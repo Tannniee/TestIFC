@@ -4,7 +4,7 @@
   import SectionBoxPanel from "./SectionBoxPanel.svelte";
   import type { ViewerSelection, SectionBoxState } from "./viewer-contracts";
   import type { ViewSession } from "./workspace-contracts";
-  import type { ModelDataService, PropertyGroup } from "./model-data-service";
+  import type { ModelDataService, PropertyGroup, PropertyResult, PropertyTab } from "./model-data-service";
   export let open: boolean;
   export let view: ViewSession | null;
   export let selection: ViewerSelection | null;
@@ -22,13 +22,15 @@
   export let onFit: () => void;
   export let onReset: () => void;
   export let onDisplay: (display: {showBox:boolean;showHandles:boolean}) => void;
-  let groups: PropertyGroup[] = [], loading = false, error = "", request = 0, owner = "", detail = "";
+  const tabs: PropertyTab[] = ["attributes", "properties", "relations", "materials", "location"];
+  let groups: PropertyGroup[] = [], loading = false, error = "", request = 0, owner = "", detail: PropertyTab | "" = "";
+  let coldStatus: PropertyResult["coldStatus"];
   $: currentOwner = `${view?.id}:${selection?.modelId}:${selection?.localId}:${preferView}:${busy}`;
-  $: if (owner !== currentOwner) { owner=currentOwner; request++; groups=[]; loading=false; error=""; detail=""; }
+  $: if (owner !== currentOwner) { owner=currentOwner; request++; groups=[]; loading=false; error=""; detail=""; coldStatus=undefined; }
   $: showElement = Boolean(selection && !preferView);
-  async function load(group: "attributes" | "properties" | "materials" | "location") {
-    if(!selection || busy) return; const current=++request; loading=true; error=""; detail=group;
-    try { const result=await service.getProperties(selection.localId!,group); if(current===request) groups=result; }
+  async function load(group: PropertyTab) {
+    if(!selection || busy) return; const current=++request; loading=true; error=""; detail=group; coldStatus=undefined; groups=[];
+    try { const result=await service.getProperties(selection.localId!,group); if(current===request) { groups=result.groups; coldStatus=result.coldStatus; } }
     catch(failure) { if(current===request) error=String(failure); }
     finally { if(current===request) loading=false; }
   }
@@ -50,11 +52,19 @@
           <dt>Express ID</dt><dd>{selection.expressId ?? "—"}</dd>
         </dl>
         <div class="property-sections">
-          {#each ["attributes","properties","materials","location"] as group}<button disabled={busy} class:active={detail===group} onclick={()=>load(group as "attributes" | "properties" | "materials" | "location")}>{group==="properties"?"Psets / Quantities":group[0].toUpperCase()+group.slice(1)}</button>{/each}
+          {#each tabs as group}<button disabled={busy} class:active={detail===group} onclick={()=>load(group)}>{group==="properties"?"Psets / Quantities":group==="relations"?"IFC Relations":group[0].toUpperCase()+group.slice(1)}</button>{/each}
         </div>
         {#if loading}<p>Loading…</p>{/if}
         {#if error}<p role="alert">{error}</p>{/if}
-        {#if detail && !loading && !error && (!groups.length || (detail!=="attributes" && groups.every(g=>g.name==="Attributes")))}<p>Không có dữ liệu quan hệ trong fragments hiện tại.</p>{/if}
+        {#if !loading && !error && (coldStatus === "indexing" || coldStatus === "not_configured")}
+          <p role="status">Dữ liệu BIM đang được lập chỉ mục. Tải lại khi INDEX hoàn tất.</p>
+          {#if detail}<button onclick={()=>load(detail as PropertyTab)}>Tải lại</button>{/if}
+        {:else if !loading && !error && coldStatus === "error"}
+          <p role="alert">INDEX gặp lỗi. Thử Retry ở thanh trạng thái, rồi tải lại dữ liệu BIM.</p>
+          {#if detail}<button onclick={()=>load(detail as PropertyTab)}>Tải lại</button>{/if}
+        {:else if detail && !loading && !error && (!groups.length || (coldStatus === undefined && detail!=="attributes" && groups.every(g=>g.name==="Attributes")))}
+          <p>{coldStatus ? "Phần tử này không có dữ liệu BIM trong mục đã chọn." : "Không có dữ liệu quan hệ trong fragments hiện tại."}</p>
+        {/if}
         {#each groups as group}<section class="property-group"><h4>{group.name}</h4><dl class="property-identity">{#each group.rows as row}<dt>{row.name}</dt><dd>{row.value}</dd>{/each}</dl></section>{/each}
       {:else}
         {#if count>1}<p>{count} elements selected</p>{/if}

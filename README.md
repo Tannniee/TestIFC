@@ -51,6 +51,10 @@ The frontend follows the same composition boundary:
 - `viewer-model-loader.ts` owns file reads, conversion, fragment models and
   backend preparation. Conversion workers are created on demand and terminated
   after completion, cancellation or failure.
+- The Properties panel reads Pset, Qto, type, material, and classification from
+  the backend semantic index. Its BIM request is bound to the active model hash;
+  the panel reports when cold indexing is still in progress. Fragment metadata
+  continues to supply immediate attributes and location details.
 - `viewcube-math.ts` owns the pure ViewCube geometry, naming, and orientation math.
 - `api-contracts.ts` is the typed frontend endpoint manifest. Contract tests compare
   it with the backend OpenAPI document, and Vite derives its proxy prefixes from it.

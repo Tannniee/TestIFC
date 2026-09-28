@@ -32,6 +32,10 @@ class MaterializedModel:
     size_bytes: int
 
 
+class ActiveModelChangedError(ValueError):
+    """A query arrived after the viewer switched to another IFC model."""
+
+
 def materialize_uploaded_model(
     reader: BinaryIO,
     original_filename: str | None,
@@ -90,6 +94,18 @@ def search_active_model(
 def element_by_express_id(express_id: int) -> dict[str, Any]:
     with lease_active_model() as lease:
         return extract_element_by_express_id(lease, express_id)
+
+
+def bim_element_by_express_id(express_id: int, model_hash: str) -> dict[str, Any]:
+    """Read indexed BIM data without opening or triangulating IFC geometry."""
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {
+            "modelHash": model_hash,
+            "coldStatus": lease.index.cold_status,
+            "element": lease.index.record_by_express_id(express_id),
+        }
 
 
 def element_by_global_id(global_id: str) -> dict[str, Any]:

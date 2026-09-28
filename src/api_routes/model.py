@@ -8,7 +8,7 @@ from model_limits import ModelTooLargeError
 
 import logging
 
-from fastapi import APIRouter, File, Request, UploadFile
+from fastapi import APIRouter, File, Query, Request, UploadFile
 from fastapi import Path as FastApiPath
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
@@ -252,6 +252,23 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
                 status_code=500,
                 content=ErrorResponse(error="extraction_failed").model_dump(),
             )
+
+    @router.get("/element/by-express-id/{expressId}/bim", response_model=None)
+    def get_bim_element_by_express_id(
+        expressId: int,
+        modelHash: str = Query(pattern=MODEL_HASH_PATTERN),
+    ):
+        try:
+            return model_operations.bim_element_by_express_id(expressId, modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except LookupError:
+            return error_response(404, "element_not_found")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("BIM element query failed", extra={"event": "bim_element_failed"})
+            return error_response(500, "bim_element_failed")
 
     @router.get(
         "/element/{globalId}",
