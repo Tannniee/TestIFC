@@ -51,7 +51,8 @@ The frontend follows the same composition boundary:
 - `viewer-model-loader.ts` owns file reads, conversion, fragment models and
   backend preparation. Conversion workers are created on demand and terminated
   after completion, cancellation or failure.
-- The Properties panel reads Pset, Qto, type, material, and classification from
+- The Properties panel reads Pset, Qto, type, material, classification, spatial
+  ancestry, and group/system memberships from
   the backend semantic index. Its BIM request is bound to the active model hash;
   the panel reports when cold indexing is still in progress. Fragment metadata
   continues to supply immediate attributes and location details.

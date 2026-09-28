@@ -10,6 +10,9 @@ export interface BimElementRecord {
   type?: Record<string, unknown>;
   material?: Record<string, unknown>;
   classifications?: Array<Record<string, unknown>>;
+  spatialPath?: Array<Record<string, unknown>>;
+  groups?: Array<Record<string, unknown>>;
+  systems?: Array<Record<string, unknown>>;
 }
 
 function rowsFrom(value: unknown): PropertyGroup["rows"] {
@@ -43,8 +46,12 @@ export function bimPropertyGroups(record: BimElementRecord, section: "properties
     for (const [name, value] of Object.entries(record.quantities ?? {})) add(name, value);
     if (groups.length > quantityStart) add("Quantity units", record.units);
   } else {
+    record.spatialPath?.forEach((item, index) =>
+      add(`Spatial ${index + 1}: ${String(item.name || item.ifcType || "Element")}`, item));
     add("Type", record.type);
     add("Material", record.material);
+    record.groups?.forEach((item, index) => add(`Group ${index + 1}`, item));
+    record.systems?.forEach((item, index) => add(`System ${index + 1}`, item));
     record.classifications?.forEach((item, index) => add(`Classification ${index + 1}`, item));
   }
   return groups;

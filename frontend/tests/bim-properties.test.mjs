@@ -31,3 +31,17 @@ test("BIM relationship groups expose type, material, and every classification", 
   assert.deepEqual(groups.map(group => group.name), ["Type", "Material", "Classification 1", "Classification 2"]);
   assert.deepEqual(groups[2].rows, [{ name: "identification", value: "A" }, { name: "name", value: "Steel" }]);
 });
+
+test("BIM relationship groups expose spatial path, groups, and systems", () => {
+  const groups = bimPropertyGroups({
+    spatialPath: [
+      { ifcType: "IfcProject", name: "Project", expressId: 1 },
+      { ifcType: "IfcBuildingStorey", name: "Level 1", expressId: 4 },
+    ],
+    groups: [{ ifcType: "IfcGroup", name: "Envelope", expressId: 20 }],
+    systems: [{ ifcType: "IfcDistributionSystem", name: "Power", expressId: 21 }],
+  }, "relations");
+  assert.deepEqual(groups.map(group => group.name), ["Spatial 1: Project", "Spatial 2: Level 1", "Group 1", "System 1"]);
+  assert.ok(groups[0].rows.some(row => row.name === "name" && row.value === "Project"));
+  assert.ok(groups[3].rows.some(row => row.name === "name" && row.value === "Power"));
+});

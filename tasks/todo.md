@@ -2,8 +2,8 @@
 
 - [x] A1: Nâng WebIFC JS/WASM lên 0.0.78 và đổi cache Fragments; test/build/cold-load.
 - [ ] A2: Kiểm tra hồi quy IFC thật và bản đóng gói WebView2.
-- [ ] B1: Trích xuất và hiển thị quan hệ không gian.
-- [ ] B2: Trích xuất và hiển thị nhóm/hệ thống IFC.
+- [x] B1: Trích xuất và hiển thị quan hệ không gian.
+- [x] B2: Trích xuất và hiển thị nhóm/hệ thống IFC.
 - [ ] B3: Lập chỉ mục Pset/Qto có thể tìm theo tên và giá trị.
 - [ ] B4: API và giao diện lọc Pset/Qto.
 - [ ] C1: Đọc và phân loại IFC georeference; fixture và test.

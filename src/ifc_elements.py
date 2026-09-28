@@ -114,6 +114,41 @@ def _classification_records(element: Any) -> list[dict]:
     )
 
 
+def _relation_ref(entity: Any) -> dict:
+    return {
+        "globalId": getattr(entity, "GlobalId", None),
+        "expressId": entity.id(),
+        "ifcType": entity.is_a(),
+        "name": getattr(entity, "Name", None),
+    }
+
+
+def _spatial_path(element: Any) -> list[dict]:
+    """Ancestors from project to the element's spatial container, if present."""
+    current = (ifcopenshell.util.element.get_container(element)
+               or ifcopenshell.util.element.get_aggregate(element))
+    seen = {element.id()}
+    ancestors = []
+    while current is not None and current.id() not in seen and len(ancestors) < 32:
+        seen.add(current.id())
+        ancestors.append(_relation_ref(current))
+        current = (ifcopenshell.util.element.get_aggregate(current)
+                   or ifcopenshell.util.element.get_container(current, should_get_direct=True))
+    return list(reversed(ancestors))
+
+
+def _group_memberships(element: Any) -> tuple[list[dict], list[dict]]:
+    groups, systems = [], []
+    seen = set()
+    for group in ifcopenshell.util.element.get_groups(element):
+        if group.id() in seen:
+            continue
+        seen.add(group.id())
+        (systems if group.is_a("IfcSystem") else groups).append(_relation_ref(group))
+    key = lambda record: (str(record["name"] or ""), record["ifcType"], record["expressId"])
+    return sorted(groups, key=key), sorted(systems, key=key)
+
+
 def build_cold_record(
     element: Any,
     ifc_file: Any,
@@ -147,10 +182,14 @@ def build_cold_record(
             }
             unit_record["massUnit"] = "kg"
 
+    groups, systems = _group_memberships(element)
     return {
         "properties": properties,
         "quantities": normalized_quantities,
         "classifications": _classification_records(element),
+        "spatialPath": _spatial_path(element),
+        "groups": groups,
+        "systems": systems,
         "units": unit_record,
     }
 

@@ -34,4 +34,5 @@ test("Properties displays indexed IFC Psets, Qto, and material for a selected el
   await expect(panel).toContainText("Qto_BeamBaseQuantities");
   await panel.getByRole("button", { name: "IFC Relations" }).click();
   await expect(panel).toContainText("Steel");
+  await expect(panel).toContainText("Spatial 4: Level 1");
 });

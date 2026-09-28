@@ -14,7 +14,7 @@ from typing import Any, Callable, Iterable, Literal
 import ifcopenshell
 
 INDEX_SCHEMA_VERSION = 3
-EXTRACTOR_VERSION = 1
+EXTRACTOR_VERSION = 2
 INDEXED_TYPES = ("IfcProject", "IfcProduct", "IfcTypeProduct")
 IndexStatus = Literal["not_configured", "indexing", "ready", "error"]
 
