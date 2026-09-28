@@ -122,6 +122,35 @@ export interface ModelGeoreferenceResponse {
     factorX: number; factorY: number; factorZ: number };
 }
 
+export type BrowserView = "spatial" | "systems" | "types" | "groups" | "classification" | "material";
+export interface ModelBrowserResponse {
+  modelHash: string;
+  view: BrowserView;
+  coldStatus: ModelRuntimeResponse["coldIndexStatus"];
+  elements: Array<{ localId: number; globalId: string | null; ifcType: string; name: string | null }>;
+  facets: Array<{ key: string; label: string; localId: number }>;
+}
+export interface SemanticSearchRequest {
+  kind: "pset" | "qto"; setName: string; propertyName: string;
+  op: "eq" | "contains" | "gt" | "gte" | "lt" | "lte";
+  value: string; ifcType: string; limit?: number;
+}
+export interface SemanticSearchResponse {
+  modelHash: string;
+  coldStatus: ModelRuntimeResponse["coldIndexStatus"];
+  truncated: boolean;
+  results: Array<{ localId: number; globalId: string | null; ifcType: string;
+    name: string | null; value: string; unit: string | null }>;
+}
+export interface ManualAnchor {
+  longitude: number; latitude: number; elevationMeters: number;
+  rotationDegrees: number; scale: number;
+}
+export interface GisAnchorResponse {
+  modelHash: string; status: "manual" | "unavailable"; source: "manual" | null;
+  anchor?: ManualAnchor; updatedAt?: string;
+}
+
 export type ApiMethod = "GET" | "POST" | "DELETE";
 
 export interface ApiEndpoint {
@@ -149,6 +178,9 @@ export const API_ENDPOINTS = {
   retrySemantic: { method: "POST", path: "/model/retry-semantic" },
   modelRuntime: { method: "GET", path: "/model/runtime" },
   modelGeoreference: { method: "GET", path: "/model/georeference" },
+  modelBrowser: { method: "GET", path: "/model/browser" },
+  semanticSearch: { method: "GET", path: "/model/semantic-search" },
+  gisAnchor: { method: "GET", path: "/model/gis-anchor" },
   bimElement: { method: "GET", path: "/element/by-express-id/{expressId}/bim" },
   getFragments: { method: "GET", path: "/model/fragments/{modelHash}" },
   putFragments: { method: "POST", path: "/model/fragments/{modelHash}" },

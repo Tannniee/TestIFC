@@ -46,14 +46,14 @@
   const shell = new AppShellService();
   let workspace = emptyWorkspace();
   let browserOpen = false;
-  let browserWidth = 240;
+  let browserWidth = 300;
   let propertiesViewContext = false;
   const resizeCleanups = new Set<() => void>();
   let browserResizing = false;
   $: workspaceDocument = activeDocument(workspace);
   $: workspaceView = activeView(workspace);
   $: runtimeModelKey = `${workspace.activeDocumentId ?? ""}:${shell.activeModel?.modelId ?? ""}`;
-  let appVersion = "1.0.3";
+  let appVersion = "1.0.4";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;
@@ -332,9 +332,15 @@
     event.preventDefault();
     browserResizing = true;
     const start = event.clientX, width = browserWidth;
-    const move = (e: PointerEvent) => { browserWidth = Math.min(380,Math.max(180,width+e.clientX-start)); };
+    const move = (e: PointerEvent) => { browserWidth = Math.min(480,Math.max(240,width+e.clientX-start)); };
     const stop = () => { browserResizing = false; window.removeEventListener("pointermove",move); window.removeEventListener("pointerup",stop); window.removeEventListener("pointercancel",stop); resizeCleanups.delete(stop); };
     resizeCleanups.add(stop); window.addEventListener("pointermove",move); window.addEventListener("pointerup",stop); window.addEventListener("pointercancel",stop);
+  }
+
+  async function handleTreeAction(action: "hide" | "isolate" | "fit" | "showAll" | "properties", ids: number[]) {
+    if (action === "fit") await shell.fitItems(ids);
+    else if (action === "properties") { await shell.selectItems(ids); inspectorOpen = true; }
+    else await shell.setTreeVisibility(action, ids);
   }
 
   function resizeDrawerByKeyboard(event: KeyboardEvent) {
@@ -602,6 +608,9 @@
     {#if browserOpen}
       <ProjectBrowser state={workspace} modelKey={runtimeModelKey} service={shell.modelData}
         onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>void shell.selectItems(ids).catch(reportWorkspaceError)}
+        onAction={handleTreeAction}
+        onReadAnchor={hash=>shell.gisAnchor(hash)} onSaveAnchor={(hash,anchor)=>shell.saveGisAnchor(hash,anchor)}
+        onDeleteAnchor={hash=>shell.deleteGisAnchor(hash)}
         onExpanded={ids=>shell.setExpandedNodes(ids)} onClose={()=>browserOpen=false} onResize={startBrowserResize} />
     {/if}
     <div bind:this={viewerHost} class="viewer-mount"></div>

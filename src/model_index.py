@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import sqlite3
@@ -15,7 +16,7 @@ import ifcopenshell
 
 from ifc_georeference import inspect_georeference
 
-INDEX_SCHEMA_VERSION = 3
+INDEX_SCHEMA_VERSION = 5
 EXTRACTOR_VERSION = 3
 INDEXED_TYPES = ("IfcProject", "IfcProduct", "IfcTypeProduct")
 IndexStatus = Literal["not_configured", "indexing", "ready", "error"]
@@ -30,6 +31,7 @@ CREATE TABLE element (
   object_type TEXT,
   description TEXT,
   type_name TEXT,
+  browser_element INTEGER NOT NULL,
   record_json TEXT NOT NULL
 );
 CREATE INDEX element_global_id ON element(global_id);
@@ -47,6 +49,26 @@ CREATE TABLE element_cold (
   record_json TEXT NOT NULL,
   FOREIGN KEY(express_id) REFERENCES element(express_id)
 );
+CREATE TABLE browser_facet (
+  view TEXT NOT NULL,
+  facet_key TEXT NOT NULL,
+  label TEXT NOT NULL,
+  express_id INTEGER NOT NULL,
+  PRIMARY KEY(view, facet_key, express_id)
+);
+CREATE INDEX browser_facet_element ON browser_facet(express_id);
+CREATE TABLE semantic_value (
+  kind TEXT NOT NULL,
+  set_name TEXT NOT NULL,
+  property_name TEXT NOT NULL,
+  express_id INTEGER NOT NULL,
+  value_text TEXT NOT NULL,
+  value_number REAL,
+  unit TEXT
+);
+CREATE INDEX semantic_value_text ON semantic_value(kind, set_name, property_name, value_text);
+CREATE INDEX semantic_value_number ON semantic_value(kind, set_name, property_name, value_number);
+CREATE INDEX semantic_value_element ON semantic_value(express_id);
 CREATE TABLE tree_edge (parent_id INTEGER NOT NULL, child_id INTEGER NOT NULL);
 CREATE INDEX tree_edge_parent ON tree_edge(parent_id);
 CREATE TABLE tree_root (express_id INTEGER PRIMARY KEY, ordinal INTEGER NOT NULL);
@@ -144,6 +166,75 @@ def _classification_text(record: dict) -> str:
     return " ".join(str(value) for value in values if value)
 
 
+def _browser_facets(record: dict, *, cold: bool) -> list[tuple[str, str, str]]:
+    """Stable facet identity and display text, without Pset/Qto payloads."""
+    result: list[tuple[str, str, str]] = []
+    if not cold:
+        for view, field in (("types", "type"), ("material", "material")):
+            value = record.get(field)
+            if isinstance(value, dict) and value.get("expressId") is not None:
+                key = str(value["expressId"])
+                result.append((view, key, str(value.get("name") or value.get("ifcType") or key)))
+    else:
+        for view, field in (("systems", "systems"), ("groups", "groups"),
+                            ("classification", "classifications")):
+            for value in record.get(field) or []:
+                if not isinstance(value, dict):
+                    continue
+                key = str(value.get("expressId") or value.get("identification") or value.get("name") or "")
+                if key:
+                    label = value.get("name") or value.get("identification") or key
+                    result.append((view, key, str(label)))
+    return result
+
+
+def _is_browser_element(entity: Any, ifc_type: str) -> bool:
+    try:
+        return bool(entity.is_a("IfcProduct") and not entity.is_a("IfcSpatialElement")
+                    and not entity.is_a("IfcSpatialStructureElement"))
+    except TypeError:  # Minimal test doubles only implement is_a().
+        return ifc_type not in {"IfcProject", "IfcSite", "IfcBuilding", "IfcBuildingStorey"}
+
+
+def _quantity_unit(name: str, units: dict) -> str | None:
+    lowered = name.lower()
+    for suffix, field in (("volume", "volumeUnit"), ("area", "areaUnit"),
+                          ("weight", "massUnit"), ("mass", "massUnit"),
+                          ("length", "lengthUnit"), ("width", "lengthUnit"),
+                          ("height", "lengthUnit"), ("perimeter", "lengthUnit")):
+        if lowered.endswith(suffix):
+            return units.get(field)
+    return None
+
+
+def _semantic_values(record: dict) -> list[tuple[str, str, str, str, float | None, str | None]]:
+    """Flatten scalar Pset/Qto leaves while keeping original records untouched."""
+    rows = []
+    units = record.get("units") or {}
+    for kind, field in (("pset", "properties"), ("qto", "quantities")):
+        sets = record.get(field) or {}
+        if not isinstance(sets, dict):
+            continue
+        for set_name, properties in sets.items():
+            if not isinstance(properties, dict):
+                continue
+            stack = [(str(name), value) for name, value in properties.items() if name != "id"]
+            while stack:
+                name, value = stack.pop()
+                if isinstance(value, dict):
+                    stack.extend((f"{name}.{child}", item) for child, item in value.items() if child != "id")
+                elif isinstance(value, list):
+                    stack.extend((f"{name}[{index}]", item) for index, item in enumerate(value))
+                elif value is not None and isinstance(value, bool | int | float | str):
+                    number = float(value) if isinstance(value, int | float) and not isinstance(value, bool) else None
+                    if number is not None and not math.isfinite(number):
+                        continue
+                    text = str(value).lower() if isinstance(value, bool) else str(value)
+                    rows.append((kind, str(set_name), name, text, number,
+                                 _quantity_unit(name, units) if kind == "qto" else None))
+    return rows
+
+
 def _fts_query(query: str) -> str | None:
     tokens = re.findall(r"[^\W_]+", query, flags=re.UNICODE)
     if not tokens:
@@ -189,8 +280,8 @@ def build_hot(
             type_name = _type_text(record, ifc_type)
             connection.execute(
                 "INSERT INTO element "
-                "(express_id, global_id, ifc_type, name, object_type, description, type_name, record_json) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "(express_id, global_id, ifc_type, name, object_type, description, type_name, browser_element, record_json) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     express_id,
                     record.get("globalId"),
@@ -199,9 +290,15 @@ def build_hot(
                     record.get("objectType"),
                     record.get("description"),
                     type_name,
+                    int(_is_browser_element(entity, ifc_type)),
                     json.dumps(record, ensure_ascii=False, default=str),
                 ),
             )
+            if _is_browser_element(entity, ifc_type):
+                connection.executemany(
+                    "INSERT OR IGNORE INTO browser_facet (view, facet_key, label, express_id) VALUES (?, ?, ?, ?)",
+                    ((*facet, express_id) for facet in _browser_facets(record, cold=False)),
+                )
             connection.execute(
                 "INSERT INTO element_fts "
                 "(rowid, name, description, object_type, type_name, classification) "
@@ -287,14 +384,26 @@ def build_cold(
                 ))
                 connection.executemany(
                     "INSERT INTO element_cold (express_id, record_json) VALUES (?, ?)",
-                    ((express_id, encoded) for express_id, encoded, _ in pending),
+                    ((express_id, encoded) for express_id, encoded, _, _, _ in pending),
+                )
+                connection.executemany(
+                    "INSERT OR IGNORE INTO browser_facet (view, facet_key, label, express_id) VALUES (?, ?, ?, ?)",
+                    ((*facet, express_id) for express_id, _, _, facets, _ in pending for facet in facets),
+                )
+                connection.executemany(
+                    "INSERT INTO semantic_value "
+                    "(kind, set_name, property_name, express_id, value_text, value_number, unit) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    ((kind, set_name, property_name, express_id, value_text, value_number, unit)
+                     for express_id, _, _, _, values in pending
+                     for kind, set_name, property_name, value_text, value_number, unit in values),
                 )
                 connection.executemany(
                     "INSERT OR REPLACE INTO element_fts "
                     "(rowid, name, description, object_type, type_name, classification) "
                     "VALUES (?, ?, ?, ?, ?, ?)",
                     ((express_id, *hot_rows[express_id], classification)
-                     for express_id, _, classification in pending if express_id in hot_rows),
+                     for express_id, _, classification, _, _ in pending if express_id in hot_rows),
                 )
                 _set_meta(connection, "cold_completed", str(rows))
                 connection.commit()
@@ -314,7 +423,8 @@ def build_cold(
             # No write transaction is held while the native extractor runs.
             record = build_record(entity)
             encoded = json.dumps(record, ensure_ascii=False, default=str)
-            pending.append((express_id, encoded, _classification_text(record)))
+            pending.append((express_id, encoded, _classification_text(record),
+                            _browser_facets(record, cold=True), _semantic_values(record)))
             pending_bytes += len(encoded.encode("utf-8"))
             rows += 1
             if len(pending) >= 128 or pending_bytes >= 4 * 1024 * 1024 or monotonic() - batch_started >= 0.5:
@@ -371,6 +481,73 @@ class ModelIndex:
         rows = self._query("SELECT value FROM meta WHERE key = 'georeference'")
         return json.loads(rows[0][0]) if rows else {"status": "unavailable", "source": None,
                                                   "reason": "not_indexed"}
+
+    def browser(self, view: str) -> dict[str, Any]:
+        if view not in {"spatial", "systems", "types", "groups", "classification", "material"}:
+            raise ValueError("unsupported browser view")
+        elements = [
+            {"localId": row[0], "globalId": row[1], "ifcType": row[2], "name": row[3]}
+            for row in self._query(
+                "SELECT express_id, global_id, ifc_type, name FROM element "
+                "WHERE browser_element = 1 ORDER BY express_id"
+            )
+        ]
+        facets = [] if view == "spatial" else [
+            {"key": row[0], "label": row[1], "localId": row[2]}
+            for row in self._query(
+                "SELECT facet_key, label, express_id FROM browser_facet "
+                "WHERE view = ? ORDER BY label COLLATE NOCASE, facet_key, express_id", (view,)
+            )
+        ]
+        return {"coldStatus": self.cold_status, "elements": elements, "facets": facets}
+
+    def semantic_search(self, kind: str, set_name: str, property_name: str, operator: str,
+                        value: str, ifc_type: str, limit: int) -> dict[str, Any]:
+        if kind not in {"pset", "qto"} or operator not in {"eq", "contains", "gt", "gte", "lt", "lte"}:
+            raise ValueError("unsupported semantic filter")
+        if not 1 <= limit <= 500:
+            raise ValueError("semantic filter limit must be 1..500")
+        status = self.cold_status
+        if status != "ready":
+            return {"coldStatus": status, "results": [], "truncated": False}
+        clause = "v.value_text = ? COLLATE NOCASE"
+        parameter: str | float = value
+        numeric_equal: float | None = None
+        if operator == "eq":
+            try:
+                parsed = float(value)
+                if math.isfinite(parsed):
+                    numeric_equal = parsed
+                    clause = "(v.value_text = ? COLLATE NOCASE OR v.value_number = ?)"
+            except ValueError:
+                pass
+        elif operator == "contains":
+            clause = "v.value_text LIKE ? ESCAPE '\\'"
+            parameter = "%" + value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+        elif operator != "eq":
+            try:
+                parameter = float(value)
+            except ValueError as error:
+                raise ValueError("numeric_value_required") from error
+            if not math.isfinite(parameter):
+                raise ValueError("numeric_value_required")
+            comparator = {"gt": ">", "gte": ">=", "lt": "<", "lte": "<="}[operator]
+            clause = f"v.value_number {comparator} ?"
+        where_type = " AND e.ifc_type = ?" if ifc_type else ""
+        params = (kind, set_name, property_name, parameter,
+                  *((numeric_equal,) if numeric_equal is not None else ()),
+                  *((ifc_type,) if ifc_type else ()), limit + 1)
+        rows = self._query(
+            "SELECT e.express_id, e.global_id, e.ifc_type, e.name, v.value_text, v.unit "
+            "FROM semantic_value v JOIN element e ON e.express_id = v.express_id "
+            f"WHERE v.kind = ? AND v.set_name = ? COLLATE NOCASE "
+            f"AND v.property_name = ? COLLATE NOCASE AND {clause}{where_type} "
+            "GROUP BY e.express_id ORDER BY e.express_id LIMIT ?", params,
+        )
+        return {"coldStatus": status, "truncated": len(rows) > limit,
+                "results": [{"localId": row[0], "globalId": row[1], "ifcType": row[2],
+                             "name": row[3], "value": row[4], "unit": row[5]}
+                            for row in rows[:limit]]}
 
     def _query(self, sql: str, params=()):
         with closing(sqlite3.connect(self._path.resolve().as_uri() + "?mode=ro", uri=True, timeout=0.75)) as connection:

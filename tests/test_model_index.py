@@ -50,12 +50,16 @@ class IfcFile:
 
 
 def record(entity):
-    return {
+    result = {
         "globalId": entity.GlobalId,
         "expressId": entity.id(),
         "ifcType": entity.is_a(),
         "name": entity.Name,
     }
+    if entity.id() == 2:
+        result["type"] = {"expressId": 15, "name": "Wall Type A"}
+        result["material"] = {"expressId": 16, "name": "Concrete"}
+    return result
 
 
 def children(entity):
@@ -65,9 +69,14 @@ def children(entity):
 def cold_record(entity):
     result = {"properties": {"Phase4": {"ExpressId": entity.id()}}}
     if entity.id() == 2:
+        result["properties"]["Pset_WallCommon"] = {"id": 50, "FireRating": "2h", "IsExternal": False}
+        result["quantities"] = {"Qto_WallBaseQuantities": {"NetVolume": 12.5, "NetArea": 0}}
+        result["units"] = {"volumeUnit": "m3", "areaUnit": "m2"}
         result["classifications"] = [
             {"identification": "STR-BEAM", "name": "Structural steel"}
         ]
+        result["groups"] = [{"expressId": 30, "name": "Envelope"}]
+        result["systems"] = [{"expressId": 31, "name": "Facade system"}]
     return result
 
 
@@ -77,7 +86,7 @@ class ModelIndexTests(unittest.TestCase):
             base = Path(temporary)
             self.assertEqual(
                 model_index.index_path_for(base, "abc"),
-                base / "abc.semantic-v3.sqlite",
+                base / "abc.semantic-v5.sqlite",
             )
             self.assertEqual(model_index.legacy_index_path_for(base, "abc"), base / "abc.sqlite")
             self.assertFalse(model_index.is_usable(base / "missing.sqlite"))
@@ -104,6 +113,25 @@ class ModelIndexTests(unittest.TestCase):
             self.assertEqual(index.record_by_express_id(3)["ifcType"], "IfcDoor")
             self.assertEqual([item["expressId"] for item in index.children(1)], [3, 2])
             self.assertEqual(index.cold_status, "ready")
+            browser = index.browser("systems")
+            self.assertEqual([item["localId"] for item in browser["elements"]], [2, 3])
+            self.assertEqual(browser["facets"], [{"key": "31", "label": "Facade system", "localId": 2}])
+            self.assertEqual(index.browser("types")["facets"][0]["label"], "Wall Type A")
+            self.assertEqual(index.browser("material")["facets"][0]["label"], "Concrete")
+            self.assertEqual(index.browser("groups")["facets"][0]["label"], "Envelope")
+            self.assertEqual(index.browser("classification")["facets"][0]["label"], "Structural steel")
+            rating = index.semantic_search("pset", "Pset_WallCommon", "FireRating", "eq", "2h", "", 10)
+            self.assertEqual([item["localId"] for item in rating["results"]], [2])
+            self.assertEqual(index.semantic_search("pset", "Pset_WallCommon", "IsExternal", "eq", "false", "", 10)["results"][0]["value"], "false")
+            volume = index.semantic_search("qto", "Qto_WallBaseQuantities", "NetVolume", "gte", "12.5", "IfcWall", 10)
+            self.assertEqual(volume["results"][0]["unit"], "m3")
+            self.assertEqual(index.semantic_search("qto", "Qto_WallBaseQuantities", "NetArea", "lt", "1", "", 10)["results"][0]["value"], "0")
+            self.assertEqual(index.semantic_search("qto", "Qto_WallBaseQuantities", "NetArea", "eq", "0.0", "", 10)["results"][0]["localId"], 2)
+            self.assertEqual(index.semantic_search("qto", "Qto_WallBaseQuantities", "NetVolume", "gt", "12.5", "", 10)["results"], [])
+            self.assertEqual(index.semantic_search("pset", "Pset_WallCommon", "Missing", "eq", "2h", "", 10)["results"], [])
+            self.assertEqual(index.semantic_search("pset", "Pset_WallCommon", "FireRating", "contains", "h", "", 10)["results"][0]["localId"], 2)
+            with self.assertRaisesRegex(ValueError, "numeric_value_required"):
+                index.semantic_search("qto", "Qto_WallBaseQuantities", "NetVolume", "gte", "many", "", 10)
 
     def test_hot_index_is_usable_before_cold_records_finish(self):
         with TemporaryDirectory() as temporary:
@@ -113,6 +141,8 @@ class ModelIndexTests(unittest.TestCase):
             self.assertEqual(rows, 3)
             self.assertTrue(model_index.is_usable(target))
             self.assertEqual(model_index.cold_status(target), "indexing")
+            self.assertEqual(model_index.ModelIndex(target).browser("groups")["facets"], [])
+            self.assertEqual(model_index.ModelIndex(target).semantic_search("pset", "Pset_WallCommon", "FireRating", "eq", "2h", "", 10)["coldStatus"], "indexing")
             self.assertNotIn(
                 "properties", model_index.ModelIndex(target).record_by_global_id("W2")
             )

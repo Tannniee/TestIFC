@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   const token = loadEnv(mode, ".", "IFC_API_SESSION_TOKEN").IFC_API_SESSION_TOKEN;
   return {
     plugins: [svelte()],
+    optimizeDeps: { exclude: ["maplibre-gl"] },
     build: {
       outDir: "dist",
       emptyOutDir: true,

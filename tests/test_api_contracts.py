@@ -38,7 +38,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["service"], "ifc-selection-bridge")
-        self.assertEqual(payload["appVersion"], "1.0.3")
+        self.assertEqual(payload["appVersion"], "1.0.4")
         self.assertFalse(payload["hasSelection"])
 
     async def test_georeference_endpoint_is_bound_to_a_model_hash(self):
@@ -51,6 +51,18 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response.json(), record)
         lookup.assert_called_once_with(model_hash)
         self.assertEqual((await self.client.get("/model/georeference?modelHash=bad")).status_code, 422)
+
+    async def test_manual_anchor_validates_coordinates_and_binds_model_hash(self):
+        model_hash = "a" * 64
+        body = {"modelHash": model_hash, "longitude": 105.8, "latitude": 21.0,
+                "elevationMeters": 11, "rotationDegrees": 390, "scale": 1}
+        with patch.object(model_operations, "save_manual_anchor", return_value={"status": "manual"}) as save:
+            response = await self.client.post("/model/gis-anchor", json=body)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(save.call_args.args[1]["rotationDegrees"], 30)
+        for bad in ({**body, "latitude": 91}, {**body, "longitude": "inf"},
+                    {**body, "scale": 0}, {**body, "modelHash": "../bad"}):
+            self.assertEqual((await self.client.post("/model/gis-anchor", json=bad)).status_code, 422)
 
     async def test_semantic_retry_rejects_stale_activation_and_duplicate_attempt(self):
         import model_runtime
@@ -190,6 +202,9 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             "/register-model": {"post"},
             "/model/runtime": {"get"},
             "/model/georeference": {"get"},
+            "/model/browser": {"get"},
+            "/model/semantic-search": {"get"},
+            "/model/gis-anchor": {"get", "post", "delete"},
             "/model/tree": {"get"},
             "/model/search": {"get"},
             "/element/by-express-id/{expressId}": {"get"},

@@ -12,9 +12,9 @@ const small=process.env.IFC_E2E_MODEL_B;
 const hash=process.env.IFC_WORKSPACE_BENCH_HASH;
 if(!model||!small||!hash)throw new Error("Set large model, small model and large model hash");
 if(await stat(path.join(output,"result.json")).catch(()=>null))throw new Error("Use a fresh benchmark output directory");
-if((await stat(path.join(sourceCache,hash+".semantic-v3.sqlite-wal")).catch(()=>null))?.size)throw new Error("Source cache is not a closed database snapshot");
+if((await stat(path.join(sourceCache,hash+".semantic-v5.sqlite-wal")).catch(()=>null))?.size)throw new Error("Source cache is not a closed database snapshot");
 await mkdir(path.join(output,"cache"),{recursive:true});
-for(const suffix of [".ifc",".fragments-v2-full.frag",".semantic-v3.sqlite"])
+for(const suffix of [".ifc",".fragments-v2-full.frag",".semantic-v5.sqlite"])
   await copyFile(path.join(sourceCache,hash+suffix),path.join(output,"cache",hash+suffix));
 const probe=createServer();await new Promise(r=>probe.listen(0,"127.0.0.1",r));const port=probe.address().port;await new Promise(r=>probe.close(r));
 const stop=path.join(output,"backend.stop"),token=crypto.randomUUID()+crypto.randomUUID(),children=[];

@@ -1,8 +1,9 @@
 import type { FragmentsModel, ItemData, SpatialTreeItem } from "@thatopen/fragments";
-import type { BimElementResponse } from "./api-contracts";
+import type { BimElementResponse, BrowserView, ModelBrowserResponse, SemanticSearchRequest, SemanticSearchResponse } from "./api-contracts";
 import { bimPropertyGroups, type PropertyGroup } from "./bim-properties.ts";
 
-export interface BrowserNode { id: string; localId: number | null; label: string; children: BrowserNode[] }
+export interface BrowserNode { id: string; localId: number | null; label: string; children: BrowserNode[];
+  ifcType?: string; globalId?: string | null; count?: number; kind?: "element" | "category" | "spatial" | "facet" }
 export type { PropertyGroup } from "./bim-properties";
 export type PropertyTab = "attributes" | "properties" | "relations" | "materials" | "location";
 export interface PropertyResult { groups: PropertyGroup[]; coldStatus?: "not_configured" | "indexing" | "ready" | "error" }
@@ -13,29 +14,60 @@ export class ModelDataService {
   private readonly active: () => FragmentsModel | null;
   private readonly activeHash: () => string;
   private readonly readBim: (expressId: number, modelHash: string) => Promise<BimElementResponse>;
+  private readonly readBrowser: (modelHash: string, view: BrowserView) => Promise<ModelBrowserResponse>;
+  private readonly readSemantic: (modelHash: string, filter: SemanticSearchRequest) => Promise<SemanticSearchResponse>;
   private owner: FragmentsModel | null = null;
-  private tree: Promise<BrowserNode[]> | null = null;
+  private trees = new Map<BrowserView, Promise<BrowserNode[]>>();
+  private statuses = new Map<BrowserView, ModelBrowserResponse["coldStatus"]>();
   private properties = new Map<string, Promise<PropertyResult>>();
   private names = new Map<number, string>();
   constructor(
     active: () => FragmentsModel | null,
     activeHash: () => string,
     readBim: (expressId: number, modelHash: string) => Promise<BimElementResponse>,
-  ) { this.active = active; this.activeHash = activeHash; this.readBim = readBim; }
+    readBrowser: (modelHash: string, view: BrowserView) => Promise<ModelBrowserResponse>,
+    readSemantic: (modelHash: string, filter: SemanticSearchRequest) => Promise<SemanticSearchResponse>,
+  ) { this.active = active; this.activeHash = activeHash; this.readBim = readBim;
+    this.readBrowser = readBrowser; this.readSemantic = readSemantic; }
   private model() {
     const model = this.active();
     if (model !== this.owner) { this.clear(); this.owner = model; }
     if (!model) throw new Error("No active IFC");
     return model;
   }
-  clear() { this.owner = null; this.tree = null; this.properties.clear(); this.names.clear(); }
+  clear() { this.owner = null; this.trees.clear(); this.statuses.clear(); this.properties.clear(); this.names.clear(); }
   private check(model: FragmentsModel) { if (model !== this.active()) throw new Error("Model query cancelled"); }
-  getTree(): Promise<BrowserNode[]> {
+  getTree(view: BrowserView = "spatial"): Promise<BrowserNode[]> {
     const model = this.model();
-    if (!this.tree) this.tree = this.buildTree(model).catch(error => { if (this.owner === model) this.tree = null; throw error; });
-    return this.tree;
+    let tree = this.trees.get(view);
+    if (!tree) {
+      tree = this.buildTree(model, view).catch(error => { if (this.owner === model) this.trees.delete(view); throw error; });
+      this.trees.set(view, tree);
+    }
+    return tree;
   }
-  private async buildTree(model: FragmentsModel): Promise<BrowserNode[]> {
+  refreshTree(view: BrowserView) { this.trees.delete(view); return this.getTree(view); }
+  getTreeStatus(view: BrowserView) { return this.statuses.get(view) ?? "not_configured"; }
+  async getVisibleIds(visible: boolean) { const model = this.model(); const ids = await model.getItemsByVisibility(visible); this.check(model); return ids; }
+  async searchSemantic(filter: SemanticSearchRequest) {
+    const model = this.model(), hash = this.activeHash();
+    const result = await this.readSemantic(hash, filter); this.check(model);
+    if (result.modelHash !== hash) throw new Error("Model semantic query cancelled");
+    return result;
+  }
+  private async buildTree(model: FragmentsModel, view: BrowserView): Promise<BrowserNode[]> {
+    let snapshot: ModelBrowserResponse | null = null;
+    const modelHash = this.activeHash();
+    try {
+      snapshot = await this.readBrowser(modelHash, view); this.check(model);
+      if (snapshot.modelHash !== modelHash || snapshot.view !== view) throw new Error("Model browser query cancelled");
+      this.statuses.set(view, snapshot.coldStatus);
+    }
+    catch (error) {
+      if (view !== "spatial" || !(error && typeof error === "object" && "message" in error && error.message === "index_preparing")) throw error;
+      this.statuses.set(view, "indexing");
+    }
+    if (view !== "spatial") return buildFacetTree(snapshot!);
     const structure = await model.getSpatialStructure(); this.check(model);
     const root: BrowserNode[] = [];
     const contained = new Set<number>();
@@ -45,7 +77,8 @@ export class ModelDataService {
       const {item,target,path} = queue.pop()!;
       if (!item) continue;
       const node: BrowserNode = { id: `${path}/${item.localId ?? item.category ?? "root"}`, localId: item.localId ?? null,
-        label: `${item.category ?? "Model"}${item.localId != null ? ` #${item.localId}` : ""}`, children: [] };
+        label: `${item.category ?? "Model"}${item.localId != null ? ` #${item.localId}` : ""}`, children: [],
+        ifcType: item.category ?? undefined, kind: "spatial" };
       target.push(node);
       if (node.localId !== null) contained.add(node.localId);
       const children = item.children ?? [];
@@ -55,15 +88,17 @@ export class ModelDataService {
     if (root.length === 1 && root[0].localId === null && root[0].children.length === 0) {
       const categories = await model.getItemsOfCategories([/.*/]); this.check(model); root.length = 0;
       for (const [category, ids] of Object.entries(categories)) {
-        root.push({ id: `category/${category}`, localId: null, label: category,
-          children: ids.map(localId => ({ id: `${category}/${localId}`, localId, label: `${category} #${localId}`, children: [] })) });
+        root.push({ id: `category/${category}`, localId: null, label: category, kind: "category", count: ids.length,
+          children: ids.map(localId => ({ id: `${category}/${localId}`, localId, label: `${category} #${localId}`, ifcType: category, kind: "element", children: [] })) });
       }
     } else {
       const ids = await model.getItemsIdsWithGeometry(); this.check(model);
       const missing = ids.filter(id => !contained.has(id));
-      if (missing.length) root.push({id:"uncontained",localId:null,label:"Uncontained elements",children:missing.map(localId=>({
-        id:`uncontained/${localId}`,localId,label:`Element #${localId}`,children:[] }))});
+      if (missing.length) root.push({id:"uncontained",localId:null,label:"Uncontained",kind:"category",count:missing.length,children:missing.map(localId=>({
+        id:`uncontained/${localId}`,localId,label:`Element #${localId}`,kind:"element",children:[] }))});
     }
+    if (snapshot) enrichSpatialTree(root, snapshot);
+    groupSpatialCategories(root);
     return root;
   }
   async getNames(ids: number[]) {
@@ -122,6 +157,115 @@ export class ModelDataService {
     if (this.properties.size > 64) this.properties.delete(this.properties.keys().next().value!);
     return request;
   }
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  IfcWall: "Walls", IfcWallStandardCase: "Walls", IfcDoor: "Doors", IfcBeam: "Beams",
+  IfcColumn: "Columns", IfcSlab: "Slabs", IfcWindow: "Windows", IfcRoof: "Roofs",
+  IfcStair: "Stairs", IfcSpace: "Spaces", IfcPipeSegment: "Pipe segments",
+  IfcDuctSegment: "Duct segments", IfcBuildingElementProxy: "Proxies",
+};
+const categoryLabel = (ifcType: string) => CATEGORY_LABELS[ifcType] ?? `${ifcType.replace(/^Ifc/, "")}s`;
+
+function enrichSpatialTree(root: BrowserNode[], snapshot: ModelBrowserResponse) {
+  const elements = new Map(snapshot.elements.map(item => [item.localId, item]));
+  const stack = [...root];
+  while (stack.length) {
+    const node = stack.pop()!;
+    const item = node.localId === null ? null : elements.get(node.localId);
+    if (item) {
+      node.ifcType = item.ifcType; node.globalId = item.globalId;
+      node.label = item.name || `${item.ifcType} #${item.localId}`;
+      node.kind = "element";
+    }
+    stack.push(...node.children);
+  }
+}
+
+function groupSpatialCategories(root: BrowserNode[]) {
+  const stack = [...root];
+  while (stack.length) {
+    const node = stack.pop()!;
+    stack.push(...node.children);
+    if (node.ifcType !== "IfcBuildingStorey" && node.id !== "uncontained") continue;
+    const groups = new Map<string, BrowserNode[]>();
+    const other: BrowserNode[] = [];
+    for (const child of node.children) {
+      if (child.kind !== "element" || child.localId === null) { other.push(child); continue; }
+      const type = child.ifcType || "IfcProduct";
+      const label = categoryLabel(type);
+      if (!groups.has(label)) groups.set(label, []);
+      groups.get(label)!.push(child);
+    }
+    const categories = [...groups].sort(([a], [b]) => a.localeCompare(b)).map(([label, children]) => ({
+      id: `${node.id}/category/${label}`, localId: null, label,
+      kind: "category" as const, count: children.length, children,
+    }));
+    node.children = [...other, ...categories];
+  }
+}
+
+export function buildFacetTree(snapshot: ModelBrowserResponse): BrowserNode[] {
+  const elements = new Map(snapshot.elements.map(item => [item.localId, item]));
+  const groups = new Map<string, BrowserNode>();
+  const assigned = new Set<number>();
+  for (const facet of snapshot.facets) {
+    const item = elements.get(facet.localId);
+    if (!item) continue;
+    const groupId = `${snapshot.view}/${facet.key}`;
+    let group = groups.get(groupId);
+    if (!group) {
+      group = { id: groupId, localId: null, label: facet.label, kind: "facet", children: [] };
+      groups.set(groupId, group);
+    }
+    group.children.push({ id: `${groupId}/${item.localId}`, localId: item.localId,
+      label: item.name || `${item.ifcType} #${item.localId}`, ifcType: item.ifcType,
+      globalId: item.globalId, kind: "element", children: [] });
+    assigned.add(item.localId);
+  }
+  const result = [...groups.values()].map(group => ({ ...group, count: group.children.length }));
+  const unassigned = snapshot.elements.filter(item => !assigned.has(item.localId));
+  if (unassigned.length) result.push({ id: `${snapshot.view}/unassigned`, localId: null,
+    label: "Unassigned", kind: "facet", count: unassigned.length,
+    children: unassigned.map(item => ({ id: `${snapshot.view}/unassigned/${item.localId}`,
+      localId: item.localId, label: item.name || `${item.ifcType} #${item.localId}`,
+      ifcType: item.ifcType, globalId: item.globalId, kind: "element", children: [] })) });
+  return result;
+}
+
+export function descendantIds(node: BrowserNode): number[] {
+  const result = new Set<number>(), stack = [node];
+  while (stack.length) {
+    const item = stack.pop()!;
+    if (item.localId !== null && item.kind === "element") result.add(item.localId);
+    stack.push(...item.children);
+  }
+  return [...result];
+}
+
+export function filterBrowserTree(nodes: BrowserNode[], query: string, ifcType: string,
+  scope: "all" | "visible" | "selected", allowedIds: Set<number> | null,
+  semanticIds: Set<number> | null = null): BrowserNode[] {
+  const needle = query.trim().toLocaleLowerCase();
+  if (!needle && !ifcType && scope === "all" && !semanticIds) return nodes;
+  const filter = (node: BrowserNode): BrowserNode | null => {
+    if (!node.children.length) {
+      if (node.kind !== "element" || node.localId === null) return null;
+      if (ifcType && node.ifcType !== ifcType) return null;
+      if (scope !== "all" && !allowedIds?.has(node.localId)) return null;
+      if (semanticIds && !semanticIds.has(node.localId)) return null;
+      if (needle && ![node.label, node.globalId, node.ifcType].some(value => value?.toLocaleLowerCase().includes(needle))) return null;
+      return node;
+    }
+    const children = node.children.map(filter).filter((item): item is BrowserNode => item !== null);
+    const ownMatch = node.kind === "element" && node.localId !== null
+      && (!ifcType || node.ifcType === ifcType)
+      && (scope === "all" || allowedIds?.has(node.localId))
+      && (!semanticIds || semanticIds.has(node.localId))
+      && (!needle || [node.label, node.globalId, node.ifcType].some(value => value?.toLocaleLowerCase().includes(needle)));
+    return children.length || ownMatch ? { ...node, children, count: node.kind === "category" || node.kind === "facet" ? children.length : node.count } : null;
+  };
+  return nodes.map(filter).filter((item): item is BrowserNode => item !== null);
 }
 
 export function visibleTreeRows(nodes: BrowserNode[], expanded: Set<string>): Array<{ node: BrowserNode; depth: number }> {

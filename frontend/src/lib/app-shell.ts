@@ -16,6 +16,7 @@ import type {
   ViewportBackground,
   ViewPreset,
 } from "./viewer-contracts";
+import type { ManualAnchor } from "./api-contracts";
 
 export type { AppSettings } from "./settings";
 export type {
@@ -42,6 +43,8 @@ export class AppShellService {
     () => this.activeModel,
     () => this.viewer?.modelHash ?? "",
     (expressId, modelHash) => api.bimElement(expressId, modelHash),
+    (modelHash, view) => api.modelBrowser(modelHash, view),
+    (modelHash, filter) => api.semanticSearch(modelHash, filter),
   );
   private workspaceListeners = new Set<(state: WorkspaceState) => void>();
   subscribeWorkspace(listener: (state: WorkspaceState) => void) {
@@ -54,6 +57,13 @@ export class AppShellService {
   closeView(id: string) { return this.workspace?.closeView(id) ?? Promise.resolve(); }
   setBoxDisplay(display: { showBox: boolean; showHandles: boolean }) { this.viewer?.setBoxDisplay(display); }
   selectItems(ids: number[]) { return this.viewer?.selectItems(ids) ?? Promise.resolve(); }
+  fitItems(ids: number[]) { return this.viewer?.fitItems(ids) ?? Promise.resolve(); }
+  setTreeVisibility(action: "hide" | "isolate" | "showAll", ids: number[]) {
+    return this.viewer?.setTreeVisibility(action, ids) ?? Promise.resolve();
+  }
+  gisAnchor(modelHash: string) { return api.gisAnchor(modelHash); }
+  saveGisAnchor(modelHash: string, anchor: ManualAnchor) { return api.saveGisAnchor(modelHash, anchor); }
+  deleteGisAnchor(modelHash: string) { return api.deleteGisAnchor(modelHash); }
   get activeModel() { return this.viewer?.model ?? null; }
   setExpandedNodes(ids: string[]) { this.workspace?.setExpandedNodes(ids); }
   private settingsInitialized = false;

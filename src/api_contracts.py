@@ -12,6 +12,15 @@ from version import APP_VERSION
 SCHEMA_VERSION = 1
 
 
+class SaveManualAnchorRequest(BaseModel):
+    modelHash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    longitude: float = Field(ge=-180, le=180, allow_inf_nan=False)
+    latitude: float = Field(ge=-90, le=90, allow_inf_nan=False)
+    elevationMeters: float = Field(allow_inf_nan=False)
+    rotationDegrees: float = Field(allow_inf_nan=False)
+    scale: float = Field(default=1.0, gt=0, le=1_000_000, allow_inf_nan=False)
+
+
 class ModelRef(BaseModel):
     id: str | None = None
     name: str | None = None

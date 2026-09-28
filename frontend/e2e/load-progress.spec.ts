@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 
 test.beforeEach(async ({ page }) => {
-  await page.route("**/health", (route) => route.fulfill({ json: { ok: true, appVersion: "1.0.3" } }));
+  await page.route("**/health", (route) => route.fulfill({ json: { ok: true, appVersion: "1.0.4" } }));
   await page.route("**/selection", (route) => route.fulfill({ json: { ok: true } }));
   await page.addInitScript(() => window.addEventListener("ifc-viewer-ready", (event: any) => { (window as any).__viewer = event.detail; }));
   await page.goto("/?viewerDebug=1");

@@ -183,7 +183,18 @@ PyInstaller executable:
 ```
 
 The executable name and Windows version metadata come from `APP_VERSION` in
-`src\version.py`. Version 1.0.3 is written to `dist\IFC Viewer 1.0.3.exe` by default.
+`src\version.py`. Version 1.0.4 is written to `dist\IFC Viewer 1.0.4.exe` by default.
+
+Project Browser now supports Spatial, Systems, Types, Groups, Classification,
+and Material views. Use its search and filters for Name, GlobalId, IFC type,
+visibility, selection, or indexed Pset/Qto values. Right-click a row for
+Hide, Isolate, Fit, Select children, and Show Properties. Spatial storeys group
+products by IFC category and show an Uncontained bucket when needed.
+
+The GIS section saves a manual WGS84 anchor per model hash and previews a map
+marker. The preview uses MapLibre demo tiles when online and offers an offline
+blank background. A manual anchor does not establish IFC survey accuracy;
+projected IFC CRS conversion and a 3D map overlay are still pending.
 Set `IFC_BUILD_DIST` to choose another output directory, such as `BUILD RELEASE`.
 Release changes are recorded in `CHANGELOG.md`. The application requires no license,
 account or sign-in; its internal API uses a per-launch session credential.

@@ -1,7 +1,7 @@
 {
   "name": "ifc-viewer-alternative-frontend",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "packageManager": "pnpm@11.19.0",
   "type": "module",
   "scripts": {
@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@thatopen/fragments": "3.4.7",
+    "maplibre-gl": "6.10.0",
     "three": "0.185.0",
     "web-ifc": "0.0.78"
   }

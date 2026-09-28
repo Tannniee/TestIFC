@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased — 1.0.3a development
+## 1.0.4 — 2026-09-28
+
+- Upgrade the bundled WebIFC JavaScript/WASM pair to 0.0.78 and invalidate old conversion caches.
+- Set the application, API, frontend and Windows executable version to 1.0.4.
+- Expand Project Browser to Spatial, Systems, Types, Groups, Classification and Material views, with storey categories, counts, search, visibility/selection filters and context actions.
+- Index scalar Pset/Qto values in semantic cache v5 and filter the tree by property text or numeric quantity comparisons.
+- Save manual GIS anchors by model hash and preview them as MapLibre markers with an offline background option. IFC projected CRS placement and 3D model overlay remain under development.
 
 - Read selected-element Psets, Qto, type, material, and classification from the
   backend semantic index in the Properties panel. Show INDEX readiness and allow

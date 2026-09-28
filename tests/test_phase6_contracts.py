@@ -16,8 +16,8 @@ from api_routes.model import FRAGMENT_CACHE_KEY_PATTERN, MODEL_HASH_PATTERN
 
 
 class Phase6ContractTests(unittest.TestCase):
-    def test_semantic_v3_uses_fts5_and_exact_global_id_index(self):
-        self.assertEqual(model_index.INDEX_SCHEMA_VERSION, 3)
+    def test_semantic_v5_uses_fts5_and_exact_global_id_index(self):
+        self.assertEqual(model_index.INDEX_SCHEMA_VERSION, 5)
         self.assertIn("USING fts5", model_index._SCHEMA)
         self.assertIn("CREATE INDEX element_global_id", model_index._SCHEMA)
 

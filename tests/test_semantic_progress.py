@@ -137,7 +137,7 @@ model_index.build_cold(DenseFile(), Path(sys.argv[1]), extract)
             cache = Path(temporary)
             active, old = "a" * 64, "b" * 64
             (cache / f"{active}.ifc").write_bytes(b"x")
-            db = cache / f"{old}.semantic-v3.sqlite"
+            db = cache / f"{old}.semantic-v5.sqlite"
             wal = Path(str(db) + "-wal")
             db.write_bytes(b"x"); wal.write_bytes(b"x" * 4096)
             unlink = Path.unlink

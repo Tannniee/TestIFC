@@ -1,3 +1,4 @@
+@import "maplibre-gl/dist/maplibre-gl.css";
 @layer reset, tokens, components, app;
 
 @layer reset {
@@ -263,7 +264,7 @@
 .view-cube-host { right: calc(var(--workspace-right, 0px) + 10px); }
 .viewer-settings, .viewer-section-panel { left: calc(var(--workspace-left, 0px) + 12px); }
 .project-browser, .properties-panel.qn-drawer { position: absolute; top: var(--workspace-top, 0px); bottom: 32px; height: auto; z-index: 25; background: var(--surface-elevated); color: var(--text-primary); font: 12px/1.4 var(--font-sans); box-shadow: none; }
-.project-browser { left: 0; width: var(--browser-width, 240px); display: flex; flex-direction: column; border-right: 1px solid var(--border-default); }
+.project-browser { left: 0; width: var(--browser-width, 300px); display: flex; flex-direction: column; border-right: 1px solid var(--border-default); }
 .properties-panel.qn-drawer { right: 0; width: var(--properties-width, 300px); transform: none; transition: none; border-left: 1px solid var(--border-default); }
 .viewer-toolbar { transform: translateX(var(--workspace-left, 0px)); transition: transform 340ms cubic-bezier(.215,.61,.355,1); }
 .viewer-toolbar__tools { grid-template-rows: repeat(4, 40px); }
@@ -274,14 +275,43 @@
 .browser-views { padding: 0 10px 10px; max-height: 180px; overflow: auto; }
 .browser-views button { display: block; width: 100%; text-align: left; border: 0; color: inherit; padding: 6px; background: transparent; cursor: pointer; }
 .browser-views button.active, .model-tree-row.selected, .properties-context .active { background: var(--surface-overlay); color: var(--accent-primary); }
+.browser-gis-anchor { border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); padding: 6px 10px; max-height: 42vh; overflow: auto; }
+.browser-gis-anchor summary { cursor: pointer; font-weight: 600; }
+.browser-gis-anchor p { padding: 0; margin: 6px 0; }
+.browser-gis-anchor form { display: grid; gap: 5px; }
+.browser-gis-anchor label { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 6px; }
+.browser-gis-anchor input { width: 100%; min-width: 0; box-sizing: border-box; padding: 4px; border: 1px solid var(--border-default); background: var(--surface-sunken); color: inherit; font: inherit; }
+.browser-gis-anchor form div { display: flex; gap: 5px; }
+.browser-gis-anchor button { padding: 5px; border: 1px solid var(--border-default); background: var(--surface-overlay); color: inherit; cursor: pointer; font: inherit; }
+.browser-gis-anchor small { display: block; padding-top: 5px; overflow-wrap: anywhere; }
+.browser-gis-anchor .gis-map-toggle { margin-top: 5px; }
+.gis-map-preview { margin-top: 7px; }
+.gis-map-canvas { height: 250px; background: #e8eff3; }
+.gis-map-caption { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 4px; }
+.gis-map-caption button { white-space: nowrap; }
 .browser-model-heading { display: flex; padding: 8px; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
 .browser-model-heading button { flex: 1; background: transparent; color: inherit; border: 0; text-align: left; font-weight: 600; cursor: pointer; }
+.browser-filters { padding: 8px; display: grid; gap: 6px; border-bottom: 1px solid var(--border-subtle); }
+.browser-filters label { display: flex; align-items: center; gap: 8px; }
+.browser-filters input, .browser-filters select { min-width: 0; width: 100%; padding: 5px 6px; background: var(--surface-sunken); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: 4px; font: inherit; }
+.browser-filter-row { display: grid; grid-template-columns: minmax(0, 1fr) 82px; gap: 6px; }
+.browser-semantic-filter { padding: 8px; display: grid; gap: 5px; border-bottom: 1px solid var(--border-subtle); }
+.browser-semantic-filter input, .browser-semantic-filter select { min-width: 0; width: 100%; padding: 5px 6px; background: var(--surface-sunken); color: var(--text-primary); border: 1px solid var(--border-default); border-radius: 4px; font: inherit; }
+.browser-semantic-filter strong { font-size: 11px; }
+.browser-filter-actions { display: flex; gap: 6px; }
+.browser-filter-actions button { padding: 5px 8px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--surface-overlay); color: inherit; cursor: pointer; }
+.browser-semantic-filter small { color: var(--text-secondary); }
 .project-browser p { padding: 0 12px; color: var(--text-secondary); }
 .model-tree-scroll { flex: 1; overflow: auto; min-height: 0; }
 .model-tree-row { position: absolute; left: 0; right: 0; height: 28px; display: flex; align-items: center; }
 .model-tree-row button { border: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; height: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: inherit; }
 .model-tree-row .tree-expand { flex: 0 0 22px; text-align: center; padding: 0; }
 .model-tree-row button[role=treeitem] { flex: 1; min-width: 0; }
+.model-tree-row.hidden { color: var(--text-secondary); opacity: .58; }
+.tree-kind { display: inline-block; width: 14px; text-align: center; color: var(--accent-primary); }
+.tree-context-menu { position: fixed; z-index: 100; display: grid; min-width: 160px; padding: 4px; background: var(--surface-elevated); color: var(--text-primary); border: 1px solid var(--border-default); box-shadow: 0 6px 20px #0004; border-radius: 5px; }
+.tree-context-menu button { border: 0; padding: 7px 10px; background: transparent; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+.tree-context-menu button:hover, .tree-context-menu button:focus-visible { background: var(--surface-overlay); }
 .browser-resize { position: absolute; right: -4px; top: 0; bottom: 0; width: 8px; border: 0; background: transparent; cursor: ew-resize; z-index: 2; }
 .properties-body { overflow: auto; padding: 0 12px 12px; flex: 1; }
 .properties-content { padding: 0; margin: 0; border: 0; min-width: 0; }
@@ -296,7 +326,7 @@
 .box-display { display: flex; align-items: center; gap: 6px; padding: 5px 0; }
 @media (max-width: 900px) {
   .viewer-mount { left: 0; right: 0; }
-  .project-browser { width: min(240px, 42vw); }
+  .project-browser { width: min(300px, 42vw); }
   .viewer-toolbar { transform: translateX(min(var(--workspace-left, 0px), 240px, 42vw)); }
   .properties-panel.qn-drawer { width: min(300px, 48vw); }
   .view-cube-host { right: 10px; }

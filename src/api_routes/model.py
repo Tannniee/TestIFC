@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from api_contracts import RetrySemanticRequest
+from api_contracts import RetrySemanticRequest, SaveManualAnchorRequest
 from model_runtime import retry_semantic_index
 from model_limits import ModelTooLargeError
 
@@ -198,6 +198,86 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
         except Exception:
             logger.exception("IFC georeference query failed", extra={"event": "georeference_failed"})
             return error_response(500, "georeference_failed")
+
+    @router.get("/model/browser", response_model=None)
+    def get_model_browser(
+        modelHash: str = Query(pattern=MODEL_HASH_PATTERN),
+        view: str = Query(pattern="^(spatial|systems|types|groups|classification|material)$"),
+    ):
+        try:
+            return model_operations.model_browser(modelHash, view)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("Model browser query failed", extra={"event": "model_browser_failed"})
+            return error_response(500, "model_browser_failed")
+
+    @router.get("/model/semantic-search", response_model=None)
+    def search_semantic_values(
+        modelHash: str = Query(pattern=MODEL_HASH_PATTERN),
+        kind: str = Query(pattern="^(pset|qto)$"),
+        setName: str = Query(min_length=1, max_length=128),
+        propertyName: str = Query(min_length=1, max_length=128),
+        op: str = Query(pattern="^(eq|contains|gt|gte|lt|lte)$"),
+        value: str = Query(max_length=256),
+        ifcType: str = Query(default="", max_length=80),
+        limit: int = Query(default=200, ge=1, le=500),
+    ):
+        try:
+            return model_operations.semantic_search(
+                modelHash, kind, setName, propertyName, op, value, ifcType, limit)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except ValueError as exc:
+            return error_response(422, str(exc))
+        except Exception:
+            logger.exception("Semantic property search failed", extra={"event": "semantic_search_failed"})
+            return error_response(500, "semantic_search_failed")
+
+    @router.get("/model/gis-anchor", response_model=None)
+    def get_gis_anchor(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
+        try:
+            return model_operations.manual_anchor(modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except NoActiveModelError as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("GIS anchor read failed", extra={"event": "gis_anchor_read_failed"})
+            return error_response(500, "gis_anchor_read_failed")
+
+    @router.post("/model/gis-anchor", response_model=None)
+    def save_gis_anchor(request: SaveManualAnchorRequest):
+        try:
+            return model_operations.save_manual_anchor(request.modelHash, {
+                "longitude": request.longitude, "latitude": request.latitude,
+                "elevationMeters": request.elevationMeters,
+                "rotationDegrees": request.rotationDegrees % 360,
+                "scale": request.scale,
+            })
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except NoActiveModelError as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("GIS anchor save failed", extra={"event": "gis_anchor_save_failed"})
+            return error_response(500, "gis_anchor_save_failed")
+
+    @router.delete("/model/gis-anchor", response_model=None)
+    def delete_gis_anchor(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
+        try:
+            return model_operations.delete_manual_anchor(modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except NoActiveModelError as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("GIS anchor delete failed", extra={"event": "gis_anchor_delete_failed"})
+            return error_response(500, "gis_anchor_delete_failed")
 
     @router.get(
         "/model/tree",

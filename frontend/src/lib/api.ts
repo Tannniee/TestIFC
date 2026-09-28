@@ -11,6 +11,12 @@ import {
   type LoadModelResponse,
   type ModelRuntimeResponse,
   type ModelGeoreferenceResponse,
+  type ModelBrowserResponse,
+  type BrowserView,
+  type SemanticSearchRequest,
+  type SemanticSearchResponse,
+  type ManualAnchor,
+  type GisAnchorResponse,
   type SelectionPayload,
   type SelectionResponse,
 } from "./api-contracts";
@@ -67,6 +73,21 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  modelBrowser: (modelHash: string, view: BrowserView) => requestJson<ModelBrowserResponse>(
+    `${API_ENDPOINTS.modelBrowser.path}?modelHash=${encodeURIComponent(modelHash)}&view=${encodeURIComponent(view)}`),
+  semanticSearch: (modelHash: string, filter: SemanticSearchRequest) => {
+    const params = new URLSearchParams({ modelHash, kind: filter.kind, setName: filter.setName,
+      propertyName: filter.propertyName, op: filter.op, value: filter.value,
+      ifcType: filter.ifcType, limit: String(filter.limit ?? 200) });
+    return requestJson<SemanticSearchResponse>(`${API_ENDPOINTS.semanticSearch.path}?${params}`);
+  },
+  gisAnchor: (modelHash: string) => requestJson<GisAnchorResponse>(
+    `${API_ENDPOINTS.gisAnchor.path}?modelHash=${encodeURIComponent(modelHash)}`),
+  saveGisAnchor: (modelHash: string, anchor: ManualAnchor) => requestJson<GisAnchorResponse>(
+    API_ENDPOINTS.gisAnchor.path, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modelHash, ...anchor }) }),
+  deleteGisAnchor: (modelHash: string) => requestJson<GisAnchorResponse>(
+    `${API_ENDPOINTS.gisAnchor.path}?modelHash=${encodeURIComponent(modelHash)}`, { method: "DELETE" }),
   health: () => requestJson<HealthResponse>(API_ENDPOINTS.health.path),
   loadModel(file: File): Promise<LoadModelResponse> {
     const body = new FormData();

@@ -11,6 +11,7 @@ from ifc_elements import (
 )
 from model_cache import cached_model_file
 import model_cache
+import gis_anchor
 import model_runtime
 import model_transactions
 from model_runtime import (
@@ -114,6 +115,46 @@ def model_georeference(model_hash: str) -> dict[str, Any]:
         if lease.ref.model_hash != model_hash:
             raise ActiveModelChangedError()
         return {"modelHash": model_hash, **lease.index.georeference()}
+
+
+def model_browser(model_hash: str, view: str) -> dict[str, Any]:
+    """Return compact indexed elements and memberships for one browser view."""
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, "view": view, **lease.index.browser(view)}
+
+
+def semantic_search(model_hash: str, kind: str, set_name: str, property_name: str,
+                    operator: str, value: str, ifc_type: str, limit: int) -> dict[str, Any]:
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, **lease.index.semantic_search(
+            kind, set_name, property_name, operator, value, ifc_type, limit)}
+
+
+def _require_active_hash(model_hash: str) -> None:
+    model = model_runtime._state.get_or_none()
+    if model is None:
+        raise model_runtime.NoActiveModelError()
+    if model.contentHashSha256 != model_hash:
+        raise ActiveModelChangedError()
+
+
+def manual_anchor(model_hash: str) -> dict[str, Any]:
+    _require_active_hash(model_hash)
+    return gis_anchor.read_anchor(model_cache.CACHE_DIR, model_hash)
+
+
+def save_manual_anchor(model_hash: str, anchor: dict[str, float]) -> dict[str, Any]:
+    _require_active_hash(model_hash)
+    return gis_anchor.save_anchor(model_cache.CACHE_DIR, model_hash, anchor)
+
+
+def delete_manual_anchor(model_hash: str) -> dict[str, Any]:
+    _require_active_hash(model_hash)
+    return gis_anchor.delete_anchor(model_cache.CACHE_DIR, model_hash)
 
 
 def element_by_global_id(global_id: str) -> dict[str, Any]:

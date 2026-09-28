@@ -104,7 +104,18 @@ try {
       || !['projected', 'unavailable'].includes(georeference.body.status)) {
       throw new Error(`Packaged GIS metadata query failed: ${JSON.stringify(georeference)}`);
     }
-    process.stdout.write("packaged real IFC geometry and semantic index passed\n");
+    await page.getByRole('button', { name: 'Project Browser' }).click();
+    const panel = page.getByRole('complementary', { name: 'Project Browser' });
+    await panel.getByText('GIS · Manual anchor').click();
+    await panel.getByLabel('GIS longitude').fill('105.8');
+    await panel.getByLabel('GIS latitude').fill('21');
+    await panel.getByRole('button', { name: 'Save anchor' }).click();
+    await panel.getByRole('button', { name: 'Xem trên bản đồ' }).click();
+    await panel.locator('.maplibregl-marker').waitFor({ timeout: 30000 });
+    await panel.locator('.maplibregl-canvas').waitFor({ timeout: 30000 });
+    await panel.getByRole('button', { name: 'Offline view' }).click();
+    await panel.getByRole('button', { name: 'Delete anchor' }).click();
+    process.stdout.write("packaged IFC geometry, semantic index and GIS marker passed\n");
   }
   process.stdout.write("packaged WebView2 CDP smoke test passed\n");
 } finally {

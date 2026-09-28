@@ -509,6 +509,24 @@ export class ViewerService {
     if (!model) return;
     this.view.fit(this.fitBounds(), animate);
   }
+  async fitItems(localIds: number[]) {
+    const model = this.activeModel;
+    if (!model || !localIds.length) return;
+    const bounds = await model.getMergedBox([...new Set(localIds)]);
+    if (model !== this.activeModel || bounds.isEmpty()) return;
+    this.orbitEpoch++;
+    this.view.fit(bounds, true);
+  }
+  async setTreeVisibility(action: "hide" | "isolate" | "showAll", localIds: number[]) {
+    const model = this.activeModel;
+    if (!model) return;
+    if (action === "showAll") await model.resetVisible();
+    else if (localIds.length) {
+      if (action === "isolate") await model.setVisible(undefined, false);
+      await model.setVisible([...new Set(localIds)], action === "isolate");
+    }
+    if (model === this.activeModel) await this.fragmentUpdates.request(true);
+  }
   private fitBounds() {
     const bounds = this.activeModel?.box.clone() ?? new THREE.Box3();
     const box = this.sectionBox;
