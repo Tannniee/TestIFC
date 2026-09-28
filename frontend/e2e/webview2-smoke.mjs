@@ -86,6 +86,24 @@ try {
       const state = await (await fetch('/model/runtime', { headers: { 'X-IFC-Session': token } })).json();
       return state.hotIndexStatus === 'ready' && state.coldIndexStatus === 'ready';
     }, null, { timeout: 120000 });
+    let georeference;
+    const georeferenceDeadline = Date.now() + 120000;
+    do {
+      georeference = await page.evaluate(async () => {
+        const { token } = await window.pywebview.api.get_api_session();
+        const modelHash = window.__packageMetrics[0].modelHash;
+        const response = await fetch(`/model/georeference?modelHash=${modelHash}`, {
+          headers: { 'X-IFC-Session': token },
+        });
+        return { ok: response.ok, modelHash, body: await response.json() };
+      });
+      if (georeference.ok || georeference.body.error !== 'index_preparing') break;
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } while (Date.now() < georeferenceDeadline);
+    if (!georeference.ok || georeference.body.modelHash !== georeference.modelHash
+      || !['projected', 'unavailable'].includes(georeference.body.status)) {
+      throw new Error(`Packaged GIS metadata query failed: ${JSON.stringify(georeference)}`);
+    }
     process.stdout.write("packaged real IFC geometry and semantic index passed\n");
   }
   process.stdout.write("packaged WebView2 CDP smoke test passed\n");

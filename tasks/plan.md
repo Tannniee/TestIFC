@@ -22,9 +22,11 @@ Ngày lập: 2026-09-28. Nguồn phát triển duy nhất: `codex/testifc-1.0.3a
 
 **A1. Nâng cặp JS/WASM.** Cập nhật `package.json`, lockfile và WASM vendor đúng cùng phiên bản. Đổi namespace cache Fragments để lần mở đầu tiên dùng hình học mới.
 
-Chấp nhận: phiên bản phụ thuộc/lock là `0.0.78`; hash WASM vendor khớp package đã cài; không đọc cache chuyển đổi cũ. Kiểm tra: frontend test, type/Svelte check, build và cold-load IFC thật.
+Chấp nhận: phiên bản phụ thuộc/lock là `0.0.78`; hash WASM vendor khớp package đã cài; không đọc cache chuyển đổi cũ. Kiểm tra: frontend test, type/Svelte check, build và cold-load fixture IFC; A2 kiểm tra tiếp trên bộ IFC thực tế.
 
 **A2. Kiểm tra hồi quy đóng gói.** So sánh cấu kiện, GlobalId, bounds và hình học của bộ IFC hiện có; đo cold conversion riêng với cache reopen. Xác nhận WebView2 packaged smoke trước khi coi nâng cấp là sẵn sàng phát hành.
+
+Đã chạy packaged WebView2 smoke với fixture `test-fixtures/phase3-bim.ifc`, gồm hình học, semantic index và API georeference. Còn thiếu bộ IFC thực tế đủ đa dạng để đối chiếu hình học và benchmark lạnh.
 
 Phát hiện trong A1: bản JS 0.0.78 gọi `StreamMeshes` của WASM với 4 tham số nhưng binding tại tag 0.78 vẫn khai báo 3. Bản vá pnpm trong `frontend/patches/` giữ đường mặc định 3 tham số, đồng thời từ chối rõ ràng yêu cầu tắt linear scaling mà binding này chưa hỗ trợ. Bỏ bản vá khi upstream sửa binding và kiểm tra lại IFC thật.
 

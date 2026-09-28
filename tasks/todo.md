@@ -1,7 +1,7 @@
 # IFC Viewer 1.0.3a — BIM và BIM-GIS
 
-- [x] A1: Nâng WebIFC JS/WASM lên 0.0.78 và đổi cache Fragments; test/build/cold-load.
-- [ ] A2: Kiểm tra hồi quy IFC thật và bản đóng gói WebView2.
+- [x] A1: Nâng WebIFC JS/WASM lên 0.0.78 và đổi cache Fragments; test/build/cold-load fixture IFC.
+- [ ] A2: Packaged WebView2 smoke đã qua với fixture IFC; còn so sánh hình học và thời gian cold-load trên bộ IFC thực tế.
 - [x] B1: Trích xuất và hiển thị quan hệ không gian.
 - [x] B2: Trích xuất và hiển thị nhóm/hệ thống IFC.
 - [ ] B3: Lập chỉ mục Pset/Qto có thể tìm theo tên và giá trị.
