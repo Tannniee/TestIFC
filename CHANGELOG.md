@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Keep Project Browser Tree bound to the IFC currently shown: clear it during model switches, automatically load the new document's Tree, and ignore late replies from the previous document.
+
 ## 1.0.4 — 2026-09-28
 
 - Upgrade the bundled WebIFC JavaScript/WASM pair to 0.0.78 and invalidate old conversion caches.

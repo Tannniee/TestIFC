@@ -7,6 +7,7 @@
   import type { BrowserView, GisAnchorResponse, ManualAnchor } from "./api-contracts";
   export let state: WorkspaceState;
   export let modelKey: string;
+  export let activeModelHash: string;
   export let service: ModelDataService;
   export let onView: (id: string) => void;
   export let onSelect: (ids: number[]) => void;
@@ -18,6 +19,7 @@
   export let onClose: () => void;
   export let onResize: (event: PointerEvent) => void;
   let owner = "", request = 0, root: BrowserNode[] | null = null, loading = false, error = "";
+  let treeRequested = false, autoLoadOwner = "";
   let expanded = new Set<string>(), names: Record<number,string> = {}, scrollTop = 0, nameKey = "";
   let viewMode: BrowserView = "spatial", search = "", ifcType = "", scope: "all" | "visible" | "selected" = "all";
   let visibleIds = new Set<number>(), hiddenIds = new Set<number>();
@@ -30,12 +32,18 @@
   onDestroy(() => { request++; });
   $: doc = activeDocument(state);
   $: view = activeView(state);
+  $: modelReady = !state.busy && !!doc && !!activeModelHash && doc.modelHash === activeModelHash;
   $: selected = new Set(view?.state.selection.map(ref => ref.localId) ?? []);
   $: if (owner !== modelKey) {
     owner = modelKey; request++; root = null; loading = false; error = ""; names = {}; nameKey = ""; scrollTop = 0;
+    visibleIds = new Set(); hiddenIds = new Set();
     viewMode = "spatial"; search = ""; ifcType = ""; scope = "all"; menu = null; coldStatus = "not_configured";
     semanticHits = null; appliedSemanticKey = ""; semanticMessage = ""; semanticLoading = false;
     expanded = new Set(doc?.expandedNodes ?? []);
+  }
+  $: if (modelReady && treeRequested && autoLoadOwner !== owner) {
+    autoLoadOwner = owner;
+    void loadTree();
   }
   $: allowedIds = scope === "selected" ? selected : scope === "visible" ? visibleIds : null;
   $: currentSemanticKey = [semanticKind, semanticSet, semanticProperty, semanticOp, semanticValue, ifcType].join("\u0000");
@@ -52,19 +60,24 @@
   async function loadNames(ids: number[]) {
     const current = request;
     try { const result = await service.getNames(ids); if (current === request) names = { ...names,...result }; }
-    catch (failure) { if (current === request && !state.busy) error = String(failure); }
+    catch (failure) { if (current === request && matchesActiveModel()) error = String(failure); }
   }
   async function loadTree(force = false) {
-    if (loading || state.busy) return;
-    const current = ++request; loading = true; error = "";
-    try { const result = await (force ? service.refreshTree(viewMode) : service.getTree(viewMode)); if (current === request) {
+    if (loading || !matchesActiveModel()) return;
+    const current = ++request, expectedOwner = owner; loading = true; error = "";
+    try { const result = await (force ? service.refreshTree(viewMode) : service.getTree(viewMode)); if (current === request && owner === expectedOwner && matchesActiveModel()) {
       root=result; expanded = viewMode === "spatial" && expanded.size ? expanded : new Set(result.slice(0, viewMode === "spatial" ? 1 : 0).map(n=>n.id));
       coldStatus = service.getTreeStatus(viewMode);
       void refreshVisibility();
     } }
-    catch (failure) { if (current === request) error=String(failure); }
+    catch (failure) { if (current === request && owner === expectedOwner && matchesActiveModel()) error=String(failure); }
     finally { if(current===request) loading=false; }
   }
+  function matchesActiveModel() {
+    const currentDoc = activeDocument(state);
+    return !state.busy && !!currentDoc && !!activeModelHash && currentDoc.modelHash === activeModelHash;
+  }
+  function openTree() { treeRequested = true; autoLoadOwner = owner; void loadTree(true); }
   function collectTypes(node: BrowserNode): string[] {
     const own = node.kind === "element" && node.ifcType ? [node.ifcType] : [];
     return [...own, ...node.children.flatMap(collectTypes)];
@@ -81,8 +94,8 @@
     const current = request;
     try {
       const hidden = new Set(await service.getVisibleIds(false));
-      if (current === request) { hiddenIds = hidden; visibleIds = new Set((root ?? []).flatMap(descendantIds).filter(id => !hidden.has(id))); }
-    } catch (failure) { if (current === request) error = String(failure); }
+      if (current === request && matchesActiveModel()) { hiddenIds = hidden; visibleIds = new Set((root ?? []).flatMap(descendantIds).filter(id => !hidden.has(id))); }
+    } catch (failure) { if (current === request && matchesActiveModel()) error = String(failure); }
   }
   function switchView() { request++; loading = false; root = null; expanded = new Set(); names = {}; nameKey = ""; scrollTop = 0; menu = null; void loadTree(); }
   async function showAll() {
@@ -91,7 +104,7 @@
   }
   async function applySemantic(event: SubmitEvent) {
     event.preventDefault();
-    if (!semanticSet.trim() || !semanticProperty.trim()) return;
+    if (!matchesActiveModel() || !semanticSet.trim() || !semanticProperty.trim()) return;
     const current = request, key = currentSemanticKey;
     semanticLoading = true; semanticMessage = "";
     try {
@@ -121,6 +134,7 @@
     } else onSelect([node.localId]);
   }
   function contextMenu(node: BrowserNode, event: MouseEvent) {
+    if (!matchesActiveModel()) return;
     event.preventDefault(); menu = { node, x: Math.min(event.clientX, innerWidth - 180), y: Math.min(event.clientY, innerHeight - 230) };
   }
   function contextKey(node: BrowserNode, event: KeyboardEvent) {
@@ -131,7 +145,7 @@
   }
   async function act(action: "hide" | "isolate" | "fit" | "showAll" | "properties" | "selectChildren") {
     const node = menu?.node; menu = null;
-    if (!node) return;
+    if (!node || !matchesActiveModel()) return;
     const ids = descendantIds(node);
     if (action === "selectChildren") { onSelect(ids); return; }
     if (action === "properties" && node.localId !== null) { await onAction(action, [node.localId]); return; }
@@ -155,20 +169,20 @@
   <div class="browser-views"><h3>Views</h3>
     {#each doc?.views ?? [] as item (item.id)}<button disabled={state.busy} class:active={item.id===doc?.activeViewId} onclick={()=>onView(item.id)}>{item.type==="sectionBox"?"◇":"▧"} {item.name}</button>{/each}
   </div>
-  <GisAnchorPanel modelHash={doc?.modelHash ?? null} onRead={onReadAnchor} onSave={onSaveAnchor} onDelete={onDeleteAnchor} />
-  <div class="browser-model-heading"><button disabled={!doc || state.busy || loading} onclick={()=>void loadTree(true)}>{loading?"Loading…":"Model"}</button>
-    {#if root && selected.size}<button onclick={reveal} title="Reveal selected element">↳ {selected.size}</button>{/if}
-    {#if root}<button onclick={()=>void showAll()} title="Show all elements" aria-label="Show all elements">◉</button>{/if}
+  <GisAnchorPanel modelHash={modelReady ? doc?.modelHash ?? null : null} onRead={onReadAnchor} onSave={onSaveAnchor} onDelete={onDeleteAnchor} />
+  <div class="browser-model-heading"><button disabled={!modelReady || loading} onclick={openTree}>{loading?"Loading…":"Model"}</button>
+    {#if modelReady && root && selected.size}<button onclick={reveal} title="Reveal selected element">↳ {selected.size}</button>{/if}
+    {#if modelReady && root}<button onclick={()=>void showAll()} title="Show all elements" aria-label="Show all elements">◉</button>{/if}
   </div>
   <div class="browser-filters">
-    <label>View by <select bind:value={viewMode} onchange={switchView} disabled={!doc || state.busy}>
+    <label>View by <select bind:value={viewMode} onchange={switchView} disabled={!modelReady}>
       <option value="spatial">Spatial</option><option value="systems">Systems</option><option value="types">Types</option>
       <option value="groups">Groups</option><option value="classification">Classification</option><option value="material">Material</option>
     </select></label>
-    <input aria-label="Search tree" placeholder="Search name, GlobalId, IFC type" bind:value={search} disabled={!root} />
-    <div class="browser-filter-row"><select aria-label="IFC type filter" bind:value={ifcType} disabled={!root}>
+    <input aria-label="Search tree" placeholder="Search name, GlobalId, IFC type" bind:value={search} disabled={!modelReady || !root} />
+    <div class="browser-filter-row"><select aria-label="IFC type filter" bind:value={ifcType} disabled={!modelReady || !root}>
       <option value="">All IFC types</option>{#each typeOptions as type}<option value={type}>{type}</option>{/each}
-    </select><select aria-label="Tree scope" bind:value={scope} disabled={!root} onchange={()=>{ if(scope==="visible") void refreshVisibility(); }}>
+    </select><select aria-label="Tree scope" bind:value={scope} disabled={!modelReady || !root} onchange={()=>{ if(scope==="visible") void refreshVisibility(); }}>
       <option value="all">All</option><option value="visible">Visible</option><option value="selected">Selected</option>
     </select></div>
   </div>
@@ -180,15 +194,16 @@
     <input aria-label="Set name" placeholder="Pset_WallCommon / Qto_..." bind:value={semanticSet} />
     <input aria-label="Property name" placeholder="FireRating / NetVolume" bind:value={semanticProperty} />
     <input aria-label="Property value" placeholder="2h / 12.5 (SI units for Qto)" bind:value={semanticValue} />
-    <div class="browser-filter-actions"><button type="submit" disabled={semanticLoading || !semanticSet.trim() || !semanticProperty.trim()}>{semanticLoading?"Searching…":"Apply"}</button>
+    <div class="browser-filter-actions"><button type="submit" disabled={!modelReady || semanticLoading || !semanticSet.trim() || !semanticProperty.trim()}>{semanticLoading?"Searching…":"Apply"}</button>
       <button type="button" onclick={clearSemantic}>Clear</button></div>
     {#if semanticMessage}<small role="status">{semanticMessage}</small>{/if}
   </form>
-  {#if error}<p role="alert">{error}</p>{/if}
-  {#if root && coldStatus === "indexing"}<p>INDEX đang lập. Systems, Groups và Classification có thể chưa đầy đủ; bấm Model để tải lại.</p>{/if}
-  {#if root && viewMode !== "spatial" && !root.length}<p>Không có nhóm trong view này. Semantic index có thể vẫn đang lập; bấm Model để tải lại.</p>{/if}
-  {#if !root && !loading}<p>{doc?"Mở Model để xem cây IFC.":"Mở một IFC để bắt đầu."}</p>{/if}
-  <div class="model-tree-scroll" bind:this={treeHost} onscroll={e=>scrollTop=e.currentTarget.scrollTop}>
+  {#if modelReady && error}<p role="alert">{error}</p>{/if}
+  {#if modelReady && root && coldStatus === "indexing"}<p>INDEX đang lập. Systems, Groups và Classification có thể chưa đầy đủ; bấm Model để tải lại.</p>{/if}
+  {#if modelReady && root && viewMode !== "spatial" && !root.length}<p>Không có nhóm trong view này. Semantic index có thể vẫn đang lập; bấm Model để tải lại.</p>{/if}
+  {#if !modelReady}<p>{doc?"Đang chuyển mô hình; Tree sẽ hiện khi IFC đang xem sẵn sàng.":"Mở một IFC để bắt đầu."}</p>
+  {:else if !root && !loading}<p>Mở Model để xem cây IFC.</p>{/if}
+  {#if modelReady}<div class="model-tree-scroll" bind:this={treeHost} onscroll={e=>scrollTop=e.currentTarget.scrollTop}>
     <div style={`height:${rows.length*28}px;position:relative`} role="tree" aria-label="IFC Model">
       {#each visible as row, i (row.node.id)}
         <div class="model-tree-row" class:selected={row.node.localId!==null&&selected.has(row.node.localId)} class:hidden={row.node.localId!==null&&hiddenIds.has(row.node.localId)} style={`top:${(start+i)*28}px;padding-left:${row.depth*12+4}px`}>
@@ -198,8 +213,8 @@
         </div>
       {/each}
     </div>
-  </div>
-  {#if menu}
+  </div>{/if}
+  {#if modelReady && menu}
     <div class="tree-context-menu" style={`left:${menu.x}px;top:${menu.y}px`} role="menu">
       <button onclick={()=>void act("hide")}>Hide</button><button onclick={()=>void act("isolate")}>Isolate</button>
       <button onclick={()=>void act("fit")}>Fit to element</button><button onclick={()=>void act("selectChildren")}>Select children</button>

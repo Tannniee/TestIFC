@@ -65,6 +65,7 @@ export class AppShellService {
   saveGisAnchor(modelHash: string, anchor: ManualAnchor) { return api.saveGisAnchor(modelHash, anchor); }
   deleteGisAnchor(modelHash: string) { return api.deleteGisAnchor(modelHash); }
   get activeModel() { return this.viewer?.model ?? null; }
+  get activeModelHash() { return this.viewer?.modelHash ?? ""; }
   setExpandedNodes(ids: string[]) { this.workspace?.setExpandedNodes(ids); }
   private settingsInitialized = false;
   private settingsSaveTimer: number | null = null;

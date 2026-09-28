@@ -10,11 +10,13 @@
 
   let owner: string | null = null, sequence = 0, busy = false, status = "";
   let anchor: ManualAnchor | null = null, showMap = false;
+  let detailsElement: HTMLDetailsElement;
   let longitude = "", latitude = "", elevationMeters = "0", rotationDegrees = "0", scale = "1";
   onDestroy(() => { sequence++; });
   $: if (owner !== modelHash) {
     owner = modelHash; sequence++; busy = false; status = ""; anchor = null; showMap = false;
     longitude = ""; latitude = ""; elevationMeters = "0"; rotationDegrees = "0"; scale = "1";
+    if (modelHash && detailsElement?.open) void load();
   }
 
   function display(result: GisAnchorResponse) {
@@ -60,7 +62,7 @@
   }
 </script>
 
-<details class="browser-gis-anchor" ontoggle={event => { if (event.currentTarget.open) void load(); }}>
+<details class="browser-gis-anchor" bind:this={detailsElement} ontoggle={event => { if (event.currentTarget.open) void load(); }}>
   <summary>GIS · Manual anchor</summary>
   <p>Vị trí do người dùng nhập, chưa được xác minh bằng CRS IFC.</p>
   <form onsubmit={save}>

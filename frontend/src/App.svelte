@@ -53,6 +53,7 @@
   $: workspaceDocument = activeDocument(workspace);
   $: workspaceView = activeView(workspace);
   $: runtimeModelKey = `${workspace.activeDocumentId ?? ""}:${shell.activeModel?.modelId ?? ""}`;
+  $: runtimeModelHash = workspace.activeDocumentId ? shell.activeModelHash : "";
   let appVersion = "1.0.4";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
@@ -606,7 +607,7 @@
       onCloseDocument={id => void shell.closeDocument(id).catch(reportWorkspaceError)}
       onCloseView={id => void shell.closeView(id).catch(reportWorkspaceError)} onOpen={openFilePicker} onBrowser={() => (browserOpen = !browserOpen)} />
     {#if browserOpen}
-      <ProjectBrowser state={workspace} modelKey={runtimeModelKey} service={shell.modelData}
+      <ProjectBrowser state={workspace} modelKey={runtimeModelKey} activeModelHash={runtimeModelHash} service={shell.modelData}
         onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>void shell.selectItems(ids).catch(reportWorkspaceError)}
         onAction={handleTreeAction}
         onReadAnchor={hash=>shell.gisAnchor(hash)} onSaveAnchor={(hash,anchor)=>shell.saveGisAnchor(hash,anchor)}
