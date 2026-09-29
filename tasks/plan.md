@@ -56,7 +56,8 @@ Chấp nhận: IFC thiếu một cấp vẫn hiển thị phần còn lại; ph�
 
 **C3. Bản đồ vị trí.** Bản đồ riêng trong WebView2 trước hết hiển thị marker/footprint từ anchor/IFC georeference, cảnh báo khi CRS chưa thể chuyển sang WGS84. Kiểm tra hành vi mất mạng và nguồn tile.
 
-MapLibre hiện hiển thị marker và footprint theo manual anchor, cho bấm chọn vị trí trên bản đồ toàn cầu, dùng MapTiler Streets khi có `VITE_MAPTILER_API_KEY` và chuyển sang nền trống khi mất tile. Backend dùng pyproj để chuyển `IfcMapConversion` có EPSG projected CRS đơn vị mét sang WGS84, gồm gốc và ba điểm kiểm soát cách gốc một mét. CRS không giải được vẫn giữ metadata projected và chỉ cho đặt thủ công. Cao độ IFC được hiển thị nhưng luôn ghi rõ hệ quy chiếu đứng chưa được xác minh. Bản đồ không ghi ngược vị trí vào IFC.
+MapLibre hiện hiển thị marker và footprint theo manual anchor, cho bấm chọn vị trí trên bản đồ toàn cầu, dùng MapTiler Hybrid khi có `VITE_MAPTILER_API_KEY` và chuyển sang nền trống khi mất tile. Backend dùng pyproj để chuyển `IfcMapConversion` có EPSG projected CRS đơn vị mét sang WGS84, gồm gốc và ba điểm kiểm soát cách gốc một mét. CRS không giải được vẫn giữ metadata projected và chỉ cho đặt thủ công. Cao độ IFC được hiển thị nhưng luôn ghi rõ hệ quy chiếu đứng chưa được xác minh. Bản đồ không ghi ngược vị trí vào IFC.
+Nền mặc định khi có key là MapTiler Hybrid vệ tinh để vị trí ít dữ liệu đường phố vẫn có ảnh nền; có nút đổi sang Streets. Chọn điểm thủ công tự đưa cả mô hình vào khung nhìn khi hình học sẵn sàng, còn nút đến vị trí dùng khung nhìn mô hình thay vì zoom cố định quá sát.
 
 **C4. Lớp mô hình 3D.** Chỉ khi C1–C3 đúng mới đặt model lên custom 3D layer; bảo toàn hướng, kích thước, cao độ, selection/GlobalId. So sánh ít nhất hai điểm kiểm soát và bounds sau chuyển đổi; kiểm tra GPU, mô hình lớn và packaged runtime.
 

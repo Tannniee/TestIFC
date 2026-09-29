@@ -85,7 +85,7 @@ test("Project Browser switches semantic views and tree actions update model visi
   const map = panel.getByLabel("GIS anchor map preview");
   await expect(map).toContainText("21.000000°, 105.800000°");
   await expect(map.locator(".maplibregl-marker")).toHaveCount(1);
-  await expect(map).toContainText(/Demo tiles|MapTiler streets|Nền trống/, { timeout: 15_000 });
+  await expect(map).toContainText(/Demo tiles|MapTiler vệ tinh|Nền trống/, { timeout: 15_000 });
   if (process.env.IFC_GIS_SCREENSHOT) await map.screenshot({ path: process.env.IFC_GIS_SCREENSHOT });
   await map.getByRole("button", { name: "Offline view" }).click();
   await expect(map).toContainText("Nền trống");

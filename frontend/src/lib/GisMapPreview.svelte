@@ -31,10 +31,13 @@
   let tileState = "Đang tải bản đồ thử nghiệm…";
   let useTiles = true;
   const configuredKey = import.meta.env.VITE_MAPTILER_API_KEY?.trim() ?? "";
+  let mapStyleId = "hybrid-v4";
+  const mapTilerStyle = (key: string) =>
+    `https://api.maptiler.com/maps/${mapStyleId}/style.json?key=${encodeURIComponent(key)}`;
   let tileStyle = configuredKey
-    ? `https://api.maptiler.com/maps/streets-v4/style.json?key=${encodeURIComponent(configuredKey)}`
+    ? mapTilerStyle(configuredKey)
     : "https://demotiles.maplibre.org/style.json";
-  let tileLabel = configuredKey ? "MapTiler streets" : "Demo tiles";
+  let tileLabel = configuredKey ? "MapTiler vệ tinh" : "Demo tiles";
   let mapTilerKey = configuredKey;
   const emptyStyle = { version: 8 as const, sources: {},
     layers: [{ id: "background", type: "background" as const,
@@ -127,7 +130,7 @@
         map.on("click", event => {
           const localId = overlay?.pick(event.point, map!.getCanvas().clientWidth, map!.getCanvas().clientHeight);
           if (localId !== null && localId !== undefined) onSelect(localId);
-          else { useIfc = false; autoFitDone = true; onPick(event.lngLat.lng, event.lngLat.lat); }
+          else { useIfc = false; autoFitDone = false; onPick(event.lngLat.lng, event.lngLat.lat); }
         });
         map.on("style.load", () => {
           styleReady = true;
@@ -176,13 +179,17 @@
   }
   function useMapTiler() {
     if (!map || !mapTilerKey.trim()) return;
-    tileStyle = `https://api.maptiler.com/maps/streets-v4/style.json?key=${encodeURIComponent(mapTilerKey.trim())}`;
-    tileLabel = "MapTiler streets";
+    tileStyle = mapTilerStyle(mapTilerKey.trim());
+    tileLabel = mapStyleId === "hybrid-v4" ? "MapTiler vệ tinh" : "MapTiler đường phố";
     useTiles = true;
     styleReady = false;
     map.setStyle(tileStyle, { diff: false });
     scheduleTileFallback();
-    tileState = "Đang tải MapTiler streets…";
+    tileState = `Đang tải ${tileLabel}…`;
+  }
+  function toggleMapStyle() {
+    mapStyleId = mapStyleId === "hybrid-v4" ? "streets-v4" : "hybrid-v4";
+    useMapTiler();
   }
   function goTo(longitude: number, latitude: number, zoom: number) {
     map?.flyTo({ center: [longitude, latitude], zoom, essential: true });
@@ -196,15 +203,19 @@
   <div class="gis-map-caption"><span>{tileState}</span><div class="gis-map-actions">
     <button type="button" onclick={() => goTo(105.8, 16, 5)}>Việt Nam</button>
     <button type="button" onclick={() => goTo(0, 20, 2)}>Toàn cầu</button>
-    {#if activePosition}<button type="button" onclick={() => goTo(activePosition.longitude, activePosition.latitude, 19)}>{useIfc ? "Đến gốc IFC" : "Đến vị trí"}</button>{/if}
+    {#if activePosition}<button type="button" onclick={() => {
+      if (!useIfc && overlayReady) fitModel();
+      else goTo(activePosition.longitude, activePosition.latitude, 16);
+    }}>{useIfc ? "Đến gốc IFC" : "Đến vị trí"}</button>{/if}
     {#if overlayReady}<button type="button" onclick={fitModel}>Đến mô hình</button>{/if}
     {#if ifcControls}<button type="button" aria-pressed={useIfc} onclick={() => { useIfc = true; autoFitDone = false; syncPosition(); }}>Vị trí IFC</button>{/if}
     {#if anchor && ifcControls}<button type="button" aria-pressed={!useIfc} onclick={() => { useIfc = false; autoFitDone = false; syncPosition(); goTo(anchor.longitude, anchor.latitude, 19); }}>Vị trí thủ công</button>{/if}
     <button type="button" onclick={toggleTiles}>{useTiles ? "Offline view" : tileLabel}</button>
+    {#if configuredKey || mapTilerKey.trim()}<button type="button" onclick={toggleMapStyle}>{mapStyleId === "hybrid-v4" ? "Đường phố" : "Vệ tinh"}</button>{/if}
     <button type="button" onclick={onSave} disabled={!anchor || saveDisabled}>Lưu vị trí</button>
   </div></div>
   <small>{modelState} · Bấm vào cấu kiện 3D để chọn trong viewer.</small>
-  <div class="gis-map-provider"><span>Demo tiles chỉ có ranh giới quốc gia. Bản đồ đường phố cần key riêng.</span>
+  <div class="gis-map-provider"><span>{configuredKey || mapTilerKey.trim() ? "Nền vệ tinh cho phép kiểm tra địa hình khi bản đồ đường phố thiếu chi tiết." : "Demo tiles chỉ có ranh giới quốc gia. Bản đồ chi tiết cần MapTiler key."}</span>
     <input aria-label="MapTiler API key" type="password" autocomplete="off" placeholder="MapTiler API key" bind:value={mapTilerKey} />
     <button type="button" onclick={useMapTiler} disabled={!mapTilerKey.trim()}>Bản đồ chi tiết</button>
   </div>

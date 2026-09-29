@@ -121,16 +121,22 @@ try {
       }
       await panel.getByRole('button', { name: 'Đóng bản đồ GIS' }).click();
     }
-    await panel.getByLabel('GIS longitude').fill('105.8');
-    await panel.getByLabel('GIS latitude').fill('21');
-    await panel.getByLabel('GIS scale').fill('100');
+    await panel.getByLabel('GIS longitude').fill(process.env.IFC_E2E_GIS_LONGITUDE || '105.8');
+    await panel.getByLabel('GIS latitude').fill(process.env.IFC_E2E_GIS_LATITUDE || '21');
+    await panel.getByLabel('GIS scale').fill(process.env.IFC_E2E_GIS_SCALE || '100');
     await panel.getByRole('button', { name: 'Save anchor' }).click();
     await panel.getByRole('button', { name: 'Xem trên bản đồ' }).click();
     await panel.locator('.maplibregl-marker').waitFor({ timeout: 30000 });
     await panel.locator('.maplibregl-canvas').waitFor({ timeout: 30000 });
+    if (process.env.IFC_E2E_GIS_SCREENSHOT) {
+      await panel.locator('.gis-map-canvas[data-gis3d="ready"]').waitFor({ timeout: 30000 });
+      await page.waitForTimeout(4000);
+      await panel.locator('.gis-map-preview').screenshot({ path: process.env.IFC_E2E_GIS_SCREENSHOT });
+      process.stdout.write(`Packaged GIS screenshot saved; diagnostics: ${diagnostics.slice(-15).join(' | ').replace(/key=[^& ]+/g, 'key=REDACTED')}\n`);
+    }
     await panel.getByRole('button', { name: 'Offline view' }).click();
     await panel.locator('.gis-map-canvas[data-gis3d="ready"]').waitFor({ timeout: 30000 });
-    await panel.getByText(/Mô hình IFC 3D · 1 phần hình học/).waitFor({ timeout: 30000 });
+    await panel.getByText(/Mô hình IFC 3D · \d+ phần hình học/).waitFor({ timeout: 30000 });
     await panel.getByRole('button', { name: 'Delete anchor' }).click();
     process.stdout.write("packaged IFC geometry, semantic index and GIS 3D layer passed\n");
   }

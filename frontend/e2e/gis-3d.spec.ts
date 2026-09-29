@@ -23,8 +23,17 @@ test("GIS map renders IFC geometry and synchronizes element selection", async ({
   await panel.getByRole("button", { name: "Xem trên bản đồ" }).click();
   const preview = panel.getByLabel("GIS anchor map preview");
   await expect(preview.locator('.gis-map-canvas[data-gis3d="ready"]')).toHaveCount(1, { timeout: 30_000 });
-  if (process.env.IFC_E2E_REQUIRE_MAPTILER) await expect(preview.locator(".gis-map-caption > span"))
-    .toHaveText("MapTiler streets · cần Internet");
+  if (process.env.IFC_E2E_REQUIRE_MAPTILER) {
+    await expect(preview.locator(".gis-map-caption > span"))
+      .toHaveText("MapTiler vệ tinh · cần Internet");
+    await preview.getByRole("button", { name: "Đường phố" }).click();
+    await expect(preview.locator(".gis-map-caption > span"))
+      .toHaveText("MapTiler đường phố · cần Internet");
+    await preview.getByRole("button", { name: "Vệ tinh" }).click();
+    await expect(preview.locator(".gis-map-caption > span"))
+      .toHaveText("MapTiler vệ tinh · cần Internet");
+    await expect(preview.locator('.gis-map-canvas[data-gis3d="ready"]')).toHaveCount(1);
+  }
   await preview.getByRole("button", { name: "Offline view" }).click();
   await expect(preview).toContainText("Mô hình IFC 3D · 1 phần hình học · 12 tam giác");
   await expect(preview).toContainText("Nền trống");
@@ -39,6 +48,30 @@ test("GIS map renders IFC geometry and synchronizes element selection", async ({
     .toBe("3pQnedmDr2W9TjRvz8roX9");
   await expect(panel.getByLabel("GIS longitude")).toHaveValue("105.8");
   expect(errors).toEqual([]);
+});
+
+test("manual map pick updates anchor while the IFC preview stays mounted", async ({ page }) => {
+  test.skip(!process.env.IFC_E2E_BIM_FIXTURE, "Set IFC_E2E_BIM_FIXTURE");
+  test.setTimeout(90_000);
+  await page.addInitScript(() => window.addEventListener("ifc-viewer-ready", (event: any) => {
+    (window as any).viewer = event.detail;
+  }));
+  await page.goto("/?viewerDebug=1");
+  await page.waitForFunction(() => !!(window as any).viewer);
+  await page.locator('input[type="file"]').setInputFiles(process.env.IFC_E2E_BIM_FIXTURE!);
+  await expect.poll(() => page.evaluate(() => (window as any).viewer?.modelHash),
+    { timeout: 60_000 }).toMatch(/^[0-9a-f]{64}$/);
+  await page.getByRole("button", { name: "Project Browser" }).click();
+  const panel = page.getByRole("complementary", { name: "Project Browser" });
+  await panel.getByText("GIS · Manual anchor").click();
+  if (await panel.getByRole("button", { name: "Delete anchor" }).isEnabled())
+    await panel.getByRole("button", { name: "Delete anchor" }).click();
+  await panel.getByRole("button", { name: "Chọn vị trí trên bản đồ" }).click();
+  const preview = panel.getByLabel("GIS anchor map preview");
+  await preview.locator(".maplibregl-canvas").click({ position: { x: 300, y: 200 } });
+  await expect(panel.getByLabel("GIS longitude")).not.toHaveValue("");
+  await expect(preview.locator('.gis-map-canvas[data-gis3d="ready"]')).toHaveCount(1, { timeout: 30_000 });
+  await expect(preview.getByRole("button", { name: "Đến mô hình" })).toBeVisible();
 });
 
 test("IFC EPSG georeference positions the model without a manual anchor", async ({ page }) => {
