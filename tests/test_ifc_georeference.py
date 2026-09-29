@@ -6,6 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import ifcopenshell
+from pyproj import Transformer
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,6 +55,14 @@ class IfcGeoreferenceTests(unittest.TestCase):
         self.assertEqual(info["origin"], {
             "eastings": 499999.0, "northings": 5300000.0, "height": 120.0,
         })
+        controls = info["wgs84"]["controlPoints"]
+        expected_lon, expected_lat = Transformer.from_crs("EPSG:25832", "EPSG:4326",
+                                                           always_xy=True).transform(499999, 5300000)
+        self.assertAlmostEqual(controls["origin"]["longitude"], expected_lon, places=8)
+        self.assertAlmostEqual(controls["origin"]["latitude"], expected_lat, places=8)
+        self.assertEqual(controls["origin"]["elevationMeters"], 120)
+        self.assertAlmostEqual(info["wgs84"]["projectUnitMeters"], 0.001)
+        self.assertGreater(controls["east"]["longitude"], controls["origin"]["longitude"])
 
         with TemporaryDirectory() as temporary:
             target = Path(temporary) / "model.sqlite"
@@ -69,6 +78,13 @@ class IfcGeoreferenceTests(unittest.TestCase):
         add_map_conversion(model, scale=-1.0)
         self.assertEqual(ifc_georeference.inspect_georeference(model)["reason"],
                          "invalid_coordinate_operation")
+
+    def test_unresolvable_crs_keeps_projected_metadata_without_map_placement(self):
+        model = fixture_model()
+        add_map_conversion(model, crs_name="Local Grid")
+        info = ifc_georeference.inspect_georeference(model)
+        self.assertEqual(info["status"], "projected")
+        self.assertIsNone(info["wgs84"])
 
 
 if __name__ == "__main__":

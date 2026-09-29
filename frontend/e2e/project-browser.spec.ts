@@ -12,12 +12,15 @@ test("Project Browser switches semantic views and tree actions update model visi
     (window as any).viewer = event.detail;
   }));
   await page.goto("/?viewerDebug=1");
+  await page.waitForFunction(() => !!(window as any).viewer);
   await page.locator('input[type="file"]').setInputFiles(fixture!);
+  await expect.poll(() => page.evaluate(() => (window as any).viewer?.modelHash),
+    { timeout: 60_000 }).toMatch(/^[0-9a-f]{64}$/);
   await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus),
     { timeout: 60_000 }).toBe("ready");
   await page.getByRole("button", { name: "Project Browser" }).click();
   const panel = page.getByRole("complementary", { name: "Project Browser" });
-  await panel.getByRole("button", { name: "Model" }).click();
+  await panel.getByRole("button", { name: "Model", exact: true }).click();
   await panel.getByLabel("Search tree").fill("Synthetic Beam");
   await expect(panel.getByRole("treeitem", { name: /Synthetic Beam/ })).toBeVisible();
   await panel.getByLabel("Search tree").fill("");
@@ -115,7 +118,7 @@ test("Project Browser follows the viewed IFC when documents switch", async ({ pa
   await expect(page.locator('.document-tabs [role="tab"]')).toHaveCount(1);
   await panelButton.click();
   const panel = page.getByRole("complementary", { name: "Project Browser" });
-  await panel.getByRole("button", { name: "Model" }).click();
+  await panel.getByRole("button", { name: "Model", exact: true }).click();
   await panel.getByLabel("Search tree").fill("Beam");
   await expect(panel).toContainText("Synthetic Beam");
   const hashA = await page.evaluate(() => (window as any).viewer.modelHash);
@@ -126,12 +129,16 @@ test("Project Browser follows the viewed IFC when documents switch", async ({ pa
     buffer: Buffer.from(original.replace("Synthetic Beam", "Model B Beam")) });
   await expect(page.locator('.document-tabs [role="tab"]')).toHaveCount(2);
   await expect.poll(() => page.evaluate(() => (window as any).viewer.modelHash)).not.toBe(hashA);
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus),
+    { timeout: 60_000 }).toBe("ready");
+  await panel.getByRole("button", { name: "Model", exact: true }).click();
   await panel.getByLabel("Search tree").fill("Beam");
   await expect(panel).toContainText("Model B Beam");
   await expect(panel).not.toContainText("Synthetic Beam");
 
   await page.locator('.document-tabs [role="tab"]').first().click();
   await expect.poll(() => page.evaluate(() => (window as any).viewer.modelHash)).toBe(hashA);
+  await panel.getByRole("button", { name: "Model", exact: true }).click();
   await panel.getByLabel("Search tree").fill("Beam");
   await expect(panel).toContainText("Synthetic Beam");
   await expect(panel).not.toContainText("Model B Beam");
@@ -157,7 +164,7 @@ test("a late Tree response from IFC A cannot replace IFC B", async ({ page }) =>
   });
   await page.getByRole("button", { name: "Project Browser" }).click();
   const panel = page.getByRole("complementary", { name: "Project Browser" });
-  await panel.getByRole("button", { name: "Model" }).click();
+  await panel.getByRole("button", { name: "Model", exact: true }).click();
   await expect.poll(() => Boolean(releaseA), { timeout: 10_000 }).toBe(true);
 
   const original = (await readFile(fixture!)).toString();

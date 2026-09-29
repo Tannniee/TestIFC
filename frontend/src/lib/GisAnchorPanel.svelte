@@ -1,17 +1,25 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
+  import type { FragmentsModel } from "@thatopen/fragments";
   import GisMapPreview from "./GisMapPreview.svelte";
-  import type { GisAnchorResponse, ManualAnchor } from "./api-contracts";
+  import { ApiError } from "./api";
+  import type { GisAnchorResponse, ManualAnchor, ModelGeoreferenceResponse } from "./api-contracts";
   import type { GisModelBounds } from "./gis-footprint";
 
   export let modelHash: string | null;
   export let modelBounds: GisModelBounds | null;
+  export let model: FragmentsModel | null;
+  export let selectedIds: number[];
+  export let onSelect: (localId: number) => void;
   export let onRead: (modelHash: string) => Promise<GisAnchorResponse>;
+  export let onReadGeoreference: (modelHash: string) => Promise<ModelGeoreferenceResponse>;
   export let onSave: (modelHash: string, anchor: ManualAnchor) => Promise<GisAnchorResponse>;
   export let onDelete: (modelHash: string) => Promise<GisAnchorResponse>;
 
   let owner: string | null = null, sequence = 0, dirty = false, busy = false, status = "";
   let anchor: ManualAnchor | null = null, showMap = false;
+  let georeference: ModelGeoreferenceResponse | null = null;
+  let geoStatus = "";
   let detailsElement: HTMLDetailsElement;
   let longitude = "", latitude = "", elevationMeters = "0", rotationDegrees = "0", scale = "1";
   $: draftPosition = [longitude, latitude, elevationMeters, rotationDegrees, scale].every(value => String(value).trim()
@@ -21,7 +29,8 @@
         rotationDegrees: Number(rotationDegrees), scale: Number(scale) } : null;
   onDestroy(() => { sequence++; });
   $: if (owner !== modelHash) {
-    owner = modelHash; sequence++; dirty = false; busy = false; status = ""; anchor = null; showMap = false;
+    owner = modelHash; sequence++; dirty = false; busy = false; status = ""; geoStatus = "";
+    anchor = null; georeference = null; showMap = false;
     longitude = ""; latitude = ""; elevationMeters = "0"; rotationDegrees = "0"; scale = "1";
     if (modelHash && detailsElement?.open) void load();
   }
@@ -37,9 +46,30 @@
   async function load() {
     if (!modelHash) return;
     const current = ++sequence, hash = modelHash; busy = true;
-    try { const result = await onRead(hash); if (current === sequence && !dirty && result.modelHash === hash) display(result); }
-    catch (error) { if (current === sequence) status = String(error); }
+    void loadIfcGeoreference(hash, current);
+    try {
+      const manual = await onRead(hash);
+      if (current === sequence && !dirty && manual.modelHash === hash) display(manual);
+    } catch (error) { if (current === sequence) status = String(error); }
     finally { if (current === sequence) busy = false; }
+  }
+  async function loadIfcGeoreference(hash: string, current: number) {
+    geoStatus = "Đang đọc IFC CRS…";
+    for (let attempt = 0; attempt < 120 && current === sequence; attempt++) {
+      try {
+        const info = await onReadGeoreference(hash);
+        if (current === sequence && info.modelHash === hash) { georeference = info; geoStatus = ""; }
+        return;
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 409 && error.message === "index_preparing") {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+        if (current === sequence) geoStatus = `Không đọc được IFC CRS: ${String(error)}`;
+        return;
+      }
+    }
+    if (current === sequence) geoStatus = "INDEX chưa sẵn sàng để đọc IFC CRS; mở lại mục GIS sau khi INDEX hoàn tất.";
   }
   function number(value: string | number, label: string) {
     if (!String(value).trim()) throw new Error(`Thiếu ${label}`);
@@ -75,7 +105,10 @@
   }
 </script>
 
-<details class="browser-gis-anchor" bind:this={detailsElement} ontoggle={event => { if (event.currentTarget.open) void load(); }}>
+<details class="browser-gis-anchor" bind:this={detailsElement} ontoggle={event => {
+  if (event.currentTarget.open) void load();
+  else { sequence++; busy = false; }
+}}>
   <summary>GIS · Manual anchor</summary>
   <p>Vị trí do người dùng chọn, chưa được xác minh bằng CRS IFC.</p>
   <form onsubmit={save} oninput={() => dirty = true}>
@@ -88,7 +121,10 @@
       <button type="button" onclick={() => void remove()} disabled={!modelHash || busy}>Delete anchor</button></div>
   </form>
   {#if status}<small role="status">{status}</small>{/if}
-  {#if modelHash}<button class="gis-map-toggle" onclick={() => showMap = !showMap}>{showMap ? "Đóng bản đồ" : anchor ? "Xem trên bản đồ" : "Chọn vị trí trên bản đồ"}</button>{/if}
-  {#if showMap}<GisMapPreview anchor={draftPosition} bounds={modelBounds} onPick={pick}
+  {#if geoStatus}<small>{geoStatus}</small>{/if}
+  {#if georeference?.wgs84}<small>IFC CRS: {georeference.crsName} · có thể đặt mô hình theo georeference. Cao độ chưa xác minh hệ quy chiếu đứng.</small>
+  {:else if georeference?.status === "projected"}<small>IFC CRS: {georeference.crsName} · chưa chuyển được sang WGS84; chọn vị trí thủ công.</small>{/if}
+  {#if modelHash}<button class="gis-map-toggle" onclick={() => showMap = !showMap}>{showMap ? "Đóng bản đồ" : anchor || georeference?.wgs84 ? "Xem trên bản đồ" : "Chọn vị trí trên bản đồ"}</button>{/if}
+  {#if showMap}<GisMapPreview anchor={draftPosition} {georeference} bounds={modelBounds} {model} {selectedIds} onPick={pick} {onSelect}
     onSave={() => void commit()} onClose={() => showMap = false} saveDisabled={busy} />{/if}
 </details>

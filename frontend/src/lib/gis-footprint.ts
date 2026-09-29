@@ -3,6 +3,7 @@ import type { ManualAnchor } from "./api-contracts";
 /** Viewer X is IFC east/X; viewer -Z is IFC north/Y. The anchor marks the bounds center. */
 export interface GisModelBounds {
   minEast: number; maxEast: number; minNorth: number; maxNorth: number;
+  minHeight: number; maxHeight: number;
 }
 
 const EARTH_CIRCUMFERENCE_METERS = 40075016.68557849;

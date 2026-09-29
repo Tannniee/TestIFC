@@ -107,15 +107,32 @@ try {
     await page.getByRole('button', { name: 'Project Browser' }).click();
     const panel = page.getByRole('complementary', { name: 'Project Browser' });
     await panel.getByText('GIS · Manual anchor').click();
+    if (process.env.IFC_E2E_EXPECT_IFC_CRS) {
+      if (!georeference.body.wgs84?.controlPoints?.origin?.longitude) {
+        throw new Error(`Packaged CRS projection missing: ${JSON.stringify(georeference.body)}`);
+      }
+      await panel.getByText(/IFC CRS: EPSG:/).waitFor({ timeout: 30000 });
+      await panel.getByRole('button', { name: 'Xem trên bản đồ' }).click();
+      await panel.getByRole('button', { name: 'Offline view' }).click();
+      try { await panel.locator('.gis-map-canvas[data-gis3d="ready"]').waitFor({ timeout: 30000 }); }
+      catch (error) {
+        process.stderr.write(`Packaged GIS state: ${(await panel.locator('.gis-map-preview').innerText()).slice(0, 900)}\n`);
+        throw error;
+      }
+      await panel.getByRole('button', { name: 'Đóng bản đồ GIS' }).click();
+    }
     await panel.getByLabel('GIS longitude').fill('105.8');
     await panel.getByLabel('GIS latitude').fill('21');
+    await panel.getByLabel('GIS scale').fill('100');
     await panel.getByRole('button', { name: 'Save anchor' }).click();
     await panel.getByRole('button', { name: 'Xem trên bản đồ' }).click();
     await panel.locator('.maplibregl-marker').waitFor({ timeout: 30000 });
     await panel.locator('.maplibregl-canvas').waitFor({ timeout: 30000 });
     await panel.getByRole('button', { name: 'Offline view' }).click();
+    await panel.locator('.gis-map-canvas[data-gis3d="ready"]').waitFor({ timeout: 30000 });
+    await panel.getByText(/Mô hình IFC 3D · 1 phần hình học/).waitFor({ timeout: 30000 });
     await panel.getByRole('button', { name: 'Delete anchor' }).click();
-    process.stdout.write("packaged IFC geometry, semantic index and GIS marker passed\n");
+    process.stdout.write("packaged IFC geometry, semantic index and GIS 3D layer passed\n");
   }
   process.stdout.write("packaged WebView2 CDP smoke test passed\n");
 } finally {

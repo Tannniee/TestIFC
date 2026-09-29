@@ -62,6 +62,7 @@ export class AppShellService {
     return this.viewer?.setTreeVisibility(action, ids) ?? Promise.resolve();
   }
   gisAnchor(modelHash: string) { return api.gisAnchor(modelHash); }
+  gisGeoreference(modelHash: string) { return api.modelGeoreference(modelHash); }
   saveGisAnchor(modelHash: string, anchor: ManualAnchor) { return api.saveGisAnchor(modelHash, anchor); }
   deleteGisAnchor(modelHash: string) { return api.deleteGisAnchor(modelHash); }
   get activeModel() { return this.viewer?.model ?? null; }

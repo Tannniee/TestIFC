@@ -54,10 +54,12 @@
   $: workspaceDocument = activeDocument(workspace);
   $: workspaceView = activeView(workspace);
   $: runtimeModelKey = `${workspace.activeDocumentId ?? ""}:${shell.activeModel?.modelId ?? ""}`;
+  $: runtimeModel = runtimeModelKey && workspace.activeDocumentId ? shell.activeModel : null;
   $: runtimeModelHash = workspace.activeDocumentId ? shell.activeModelHash : "";
   $: gisBounds = runtimeModelKey && shell.activeModel ? {
     minEast: shell.activeModel.box.min.x, maxEast: shell.activeModel.box.max.x,
     minNorth: -shell.activeModel.box.max.z, maxNorth: -shell.activeModel.box.min.z,
+    minHeight: shell.activeModel.box.min.y, maxHeight: shell.activeModel.box.max.y,
   } satisfies GisModelBounds : null;
   let appVersion = "1.0.4";
   let modelStatus: string | null = null;
@@ -613,10 +615,11 @@
       onCloseView={id => void shell.closeView(id).catch(reportWorkspaceError)} onOpen={openFilePicker} onBrowser={() => (browserOpen = !browserOpen)} />
     {#if browserOpen}
       <ProjectBrowser state={workspace} modelKey={runtimeModelKey} activeModelHash={runtimeModelHash} service={shell.modelData}
-        modelBounds={gisBounds}
+        modelBounds={gisBounds} model={runtimeModel}
         onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>void shell.selectItems(ids).catch(reportWorkspaceError)}
         onAction={handleTreeAction}
         onReadAnchor={hash=>shell.gisAnchor(hash)} onSaveAnchor={(hash,anchor)=>shell.saveGisAnchor(hash,anchor)}
+        onReadGeoreference={hash=>shell.gisGeoreference(hash)}
         onDeleteAnchor={hash=>shell.deleteGisAnchor(hash)}
         onExpanded={ids=>shell.setExpandedNodes(ids)} onClose={()=>browserOpen=false} onResize={startBrowserResize} />
     {/if}

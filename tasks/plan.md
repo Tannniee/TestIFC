@@ -56,9 +56,11 @@ Chấp nhận: IFC thiếu một cấp vẫn hiển thị phần còn lại; ph�
 
 **C3. Bản đồ vị trí.** Bản đồ riêng trong WebView2 trước hết hiển thị marker/footprint từ anchor/IFC georeference, cảnh báo khi CRS chưa thể chuyển sang WGS84. Kiểm tra hành vi mất mạng và nguồn tile.
 
-Prototype hiện chỉ hiển thị marker của manual anchor WGS84 bằng `maplibre-gl@6.10.0`; mặc định dùng demo tiles MapLibre và có chế độ nền trống khi offline. Marker và canvas đã qua browser test và packaged WebView2 smoke với fixture. Chưa biến projected CRS thành kinh/vĩ độ, chưa có footprint và nguồn tile do người dùng cấu hình. Không gắn nhãn vị trí này là tọa độ khảo sát IFC.
+MapLibre hiện hiển thị marker và footprint theo manual anchor, cho bấm chọn vị trí trên bản đồ toàn cầu, dùng MapTiler Streets khi có `VITE_MAPTILER_API_KEY` và chuyển sang nền trống khi mất tile. Backend dùng pyproj để chuyển `IfcMapConversion` có EPSG projected CRS đơn vị mét sang WGS84, gồm gốc và ba điểm kiểm soát cách gốc một mét. CRS không giải được vẫn giữ metadata projected và chỉ cho đặt thủ công. Cao độ IFC được hiển thị nhưng luôn ghi rõ hệ quy chiếu đứng chưa được xác minh. Bản đồ không ghi ngược vị trí vào IFC.
 
 **C4. Lớp mô hình 3D.** Chỉ khi C1–C3 đúng mới đặt model lên custom 3D layer; bảo toàn hướng, kích thước, cao độ, selection/GlobalId. So sánh ít nhất hai điểm kiểm soát và bounds sau chuyển đổi; kiểm tra GPU, mô hình lớn và packaged runtime.
+
+Đã dựng lớp MapLibre custom WebGL từ `FragmentsModel.getItemsGeometry`, giữ `localId` từng mesh và đồng bộ chọn cấu kiện/GlobalId với viewer. Manual anchor đặt tâm mặt bằng tại marker; IFC CRS khôi phục phép dời `COORDINATE_TO_ORIGIN` bằng `getCoordinationMatrix` rồi dùng các điểm kiểm soát để tạo phép chiếu địa phương. Có kiểm thử số học trục, góc, scale, cao độ, browser rendering/chọn cấu kiện, ảnh quan sát với IFC có gốc lệch 1–2 km và packaged WebView2 smoke cho cả vị trí IFC lẫn thủ công. Preview giới hạn 500.000 tam giác và hiển thị cảnh báo khi bị cắt; đây chưa phải đường hiển thị toàn bộ mô hình rất lớn. Cần thêm IFC khảo sát thực, đối chiếu mốc hiện trường, xác minh hệ cao độ và benchmark GPU với mô hình lớn trước khi gọi vị trí là chính xác khảo sát.
 
 ## Cổng kiểm tra và rủi ro
 

@@ -120,6 +120,11 @@ export interface ModelGeoreferenceResponse {
   mapConversion?: { eastings: number; northings: number; height: number;
     xAxisAbscissa: number; xAxisOrdinate: number; scale: number;
     factorX: number; factorY: number; factorZ: number };
+  wgs84?: {
+    controlPoints: Record<"origin" | "east" | "north" | "up",
+      { longitude: number; latitude: number; elevationMeters: number }>;
+    projectUnitMeters: number; verticalDatumVerified: boolean;
+  } | null;
 }
 
 export type BrowserView = "spatial" | "systems" | "types" | "groups" | "classification" | "material";

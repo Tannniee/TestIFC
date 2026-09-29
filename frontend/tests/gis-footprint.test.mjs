@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { footprintCoordinates } from "../src/lib/gis-footprint.ts";
 
-const bounds = { minEast: -10, maxEast: 10, minNorth: -5, maxNorth: 5 };
+const bounds = { minEast: -10, maxEast: 10, minNorth: -5, maxNorth: 5,
+  minHeight: 0, maxHeight: 20 };
 const anchor = { longitude: 105.8, latitude: 21, elevationMeters: 0,
   rotationDegrees: 0, scale: 1 };
 
