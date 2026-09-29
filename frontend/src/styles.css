@@ -327,7 +327,7 @@
 @media (max-width: 900px) {
   .viewer-mount { left: 0; right: 0; }
   .project-browser { width: min(300px, 42vw); }
-  .viewer-toolbar { transform: translateX(min(var(--workspace-left, 0px), 240px, 42vw)); }
+  .viewer-toolbar { transform: translateX(min(var(--workspace-left, 0px), 42vw)); }
   .properties-panel.qn-drawer { width: min(300px, 48vw); }
   .view-cube-host { right: 10px; }
   .viewer-settings, .viewer-section-panel { left: 12px; }
