@@ -15,9 +15,12 @@
   let MarkerClass: (typeof import("maplibre-gl"))["Marker"] | null = null;
   let tileState = "Đang tải bản đồ thử nghiệm…";
   let useTiles = true;
-  let tileStyle = "https://demotiles.maplibre.org/style.json";
-  let tileLabel = "Demo tiles";
-  let mapTilerKey = "";
+  const configuredKey = import.meta.env.VITE_MAPTILER_API_KEY?.trim() ?? "";
+  let tileStyle = configuredKey
+    ? `https://api.maptiler.com/maps/streets-v4/style.json?key=${encodeURIComponent(configuredKey)}`
+    : "https://demotiles.maplibre.org/style.json";
+  let tileLabel = configuredKey ? "MapTiler streets" : "Demo tiles";
+  let mapTilerKey = configuredKey;
   const emptyStyle = { version: 8 as const, sources: {},
     layers: [{ id: "background", type: "background" as const,
       paint: { "background-color": "#e8eff3" } }] };
