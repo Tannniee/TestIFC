@@ -32,3 +32,9 @@ Nguồn: https://maplibre.org/maplibre-gl-js/docs/examples/add-a-3d-model-using-
 - IFC thật có georeference, IFC thiếu georeference, IFC dữ liệu mâu thuẫn; không đánh đồng nhãn CRS với tọa độ WGS84 đã chuyển.
 - So sánh world-space bounds và hướng sau khi đặt lên bản đồ; chọn cấu kiện trên bản đồ phải dẫn đến cùng GlobalId/Pset/Qto trong viewer BIM.
 - Đo cold load, first visible geometry, map overlay và reopen cache riêng; packaged WebView2, mất mạng, nguồn tile và vòng đời GPU đều cần kiểm tra.
+
+## Tiến độ 2026-09-29
+
+Đã thêm bản đồ chọn điểm thủ công trước khi có anchor, nút đến Việt Nam/toàn cầu, thao tác lưu ngay trên bản đồ và footprint từ bounding box ngang của Fragments. Tâm bounding box được đặt tại marker; góc xoay theo chiều kim đồng hồ và scale do người dùng nhập. Footprint chỉ là ước lượng mặt bằng, không phải biên dạng công trình hay kết quả trắc địa. Bản đồ demo MapLibre chỉ có dữ liệu quốc gia tới zoom 6; người dùng có thể nhập key MapTiler riêng để xem đường phố. Key chỉ giữ trong phiên mở bản đồ, không ghi vào IFC hay localStorage.
+
+`pnpm check`, `pnpm test`, `pnpm build` và Playwright với `test-fixtures/phase3-bim.ifc` kiểm tra luồng trình duyệt. Chưa kiểm tra lớp 3D, lựa chọn cấu kiện trên bản đồ, IFC CRS→WGS84, hoặc WebView2 đóng gói cho thao tác mới. MapTiler style URL theo tài liệu chính thức: https://docs.maptiler.com/maplibre/examples/how-to-use-maplibre/ .

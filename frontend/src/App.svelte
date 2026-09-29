@@ -18,6 +18,7 @@
   import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
   import { applyGeometryProgress, applySemanticProgress, beginModelLoad, emptyModelReadiness, geometryReady } from "./lib/model-readiness";
   import { MAX_IFC_BYTES } from "./lib/model-limits";
+  import type { GisModelBounds } from "./lib/gis-footprint";
 
   const sectionAxes = ["x", "y", "z"] as const;
 
@@ -54,6 +55,10 @@
   $: workspaceView = activeView(workspace);
   $: runtimeModelKey = `${workspace.activeDocumentId ?? ""}:${shell.activeModel?.modelId ?? ""}`;
   $: runtimeModelHash = workspace.activeDocumentId ? shell.activeModelHash : "";
+  $: gisBounds = runtimeModelKey && shell.activeModel ? {
+    minEast: shell.activeModel.box.min.x, maxEast: shell.activeModel.box.max.x,
+    minNorth: -shell.activeModel.box.max.z, maxNorth: -shell.activeModel.box.min.z,
+  } satisfies GisModelBounds : null;
   let appVersion = "1.0.4";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
@@ -608,6 +613,7 @@
       onCloseView={id => void shell.closeView(id).catch(reportWorkspaceError)} onOpen={openFilePicker} onBrowser={() => (browserOpen = !browserOpen)} />
     {#if browserOpen}
       <ProjectBrowser state={workspace} modelKey={runtimeModelKey} activeModelHash={runtimeModelHash} service={shell.modelData}
+        modelBounds={gisBounds}
         onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>void shell.selectItems(ids).catch(reportWorkspaceError)}
         onAction={handleTreeAction}
         onReadAnchor={hash=>shell.gisAnchor(hash)} onSaveAnchor={(hash,anchor)=>shell.saveGisAnchor(hash,anchor)}

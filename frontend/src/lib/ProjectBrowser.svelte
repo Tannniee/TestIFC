@@ -5,9 +5,11 @@
   import { activeDocument, activeView, type WorkspaceState } from "./workspace-contracts";
   import { descendantIds, filterBrowserTree, visibleTreeRows, type BrowserNode, type ModelDataService } from "./model-data-service";
   import type { BrowserView, GisAnchorResponse, ManualAnchor } from "./api-contracts";
+  import type { GisModelBounds } from "./gis-footprint";
   export let state: WorkspaceState;
   export let modelKey: string;
   export let activeModelHash: string;
+  export let modelBounds: GisModelBounds | null;
   export let service: ModelDataService;
   export let onView: (id: string) => void;
   export let onSelect: (ids: number[]) => void;
@@ -169,7 +171,7 @@
   <div class="browser-views"><h3>Views</h3>
     {#each doc?.views ?? [] as item (item.id)}<button disabled={state.busy} class:active={item.id===doc?.activeViewId} onclick={()=>onView(item.id)}>{item.type==="sectionBox"?"◇":"▧"} {item.name}</button>{/each}
   </div>
-  <GisAnchorPanel modelHash={modelReady ? doc?.modelHash ?? null : null} onRead={onReadAnchor} onSave={onSaveAnchor} onDelete={onDeleteAnchor} />
+  <GisAnchorPanel modelHash={modelReady ? doc?.modelHash ?? null : null} {modelBounds} onRead={onReadAnchor} onSave={onSaveAnchor} onDelete={onDeleteAnchor} />
   <div class="browser-model-heading"><button disabled={!modelReady || loading} onclick={openTree}>{loading?"Loading…":"Model"}</button>
     {#if modelReady && root && selected.size}<button onclick={reveal} title="Reveal selected element">↳ {selected.size}</button>{/if}
     {#if modelReady && root}<button onclick={()=>void showAll()} title="Show all elements" aria-label="Show all elements">◉</button>{/if}

@@ -8,7 +8,7 @@
 - [x] B4: API và giao diện lọc Pset/Qto, trả trạng thái index và giới hạn 500 kết quả.
 - [x] C1: Đọc và phân loại IFC georeference; fixture và test.
 - [x] C2: Lưu manual anchor theo model hash, tách khỏi cache bundle; sửa/xóa và kiểm tra tọa độ.
-- [ ] C3: Marker MapLibre từ manual anchor đã qua browser và packaged WebView2; còn footprint, tile provider cấu hình được và IFC CRS→WGS84.
+- [ ] C3: Marker và footprint bounding box từ manual anchor; chọn điểm trên bản đồ, có thể dùng key MapTiler cho bản đồ đường phố. Còn kiểm tra packaged WebView2 cho luồng mới, cấu hình tile provider bền vững và IFC CRS→WGS84.
 - [ ] C4: Đặt mô hình 3D có kiểm chứng tọa độ và hiệu năng.
 
 ## Project Browser
