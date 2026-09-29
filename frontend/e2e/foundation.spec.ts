@@ -42,6 +42,26 @@ test("viewer sleeps at rest and redraws UI changes and animated camera moves", a
   expect(result.final).toBe(result.animated);
 });
 
+test("experimental camera settings restore display resolution when camera stops", async ({ page }) => {
+  await page.goto("/?viewerDebug=1&adaptiveDpr=1&fragmentUpdateMs=33");
+  const ratios = await page.evaluate(() => {
+    const viewer = (window as any).__fragmentViewer;
+    const original = viewer.loader.activeModel;
+    viewer.loader.activeModel = { modelId: "camera-quality-fixture" };
+    viewer.viewDiagnostics.latestFrame = { triangles: 2_500_001 };
+    try {
+      viewer.cameraUpdated(false);
+      const moving = viewer.renderer.getPixelRatio();
+      viewer.cameraUpdated(true);
+      return { moving, settled: viewer.renderer.getPixelRatio(), display: viewer.displayPixelRatio,
+        updateInterval: viewer.fragmentUpdates.intervalMs };
+    } finally { viewer.loader.activeModel = original; }
+  });
+  expect(ratios.moving).toBeLessThan(ratios.display);
+  expect(ratios.settled).toBe(ratios.display);
+  expect(ratios.updateInterval).toBe(33);
+});
+
 test("conversion worker is lazy, terminates on done/cancel/error, and ignores obsolete results", async ({ page }) => {
   const result = await page.evaluate(async () => {
     const path = "/src/lib/ifc-converter.ts";

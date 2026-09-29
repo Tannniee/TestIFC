@@ -17,7 +17,11 @@ if (fragmentProfile && !["full", "attributes", "minimum"].includes(fragmentProfi
   throw new Error(`Invalid IFC_BENCH_FRAGMENT_PROFILE: ${fragmentProfile}`);
 }
 const coldOnly = process.env.IFC_BENCH_COLD_ONLY === "1";
-const url = `http://127.0.0.1:${frontendPort}${fragmentProfile ? `?fragmentProfile=${fragmentProfile}` : ""}`;
+const query = new URLSearchParams();
+if (fragmentProfile) query.set("fragmentProfile", fragmentProfile);
+if (process.env.IFC_BENCH_ADAPTIVE_DPR === "1") query.set("adaptiveDpr", "1");
+if (process.env.IFC_BENCH_FRAGMENT_UPDATE_MS === "33") query.set("fragmentUpdateMs", "33");
+const url = `http://127.0.0.1:${frontendPort}${query.size ? `?${query}` : ""}`;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const limit = (promise, ms, label) => {
   let timer;
@@ -36,7 +40,9 @@ const manifestPath = path.resolve(process.env.IFC_BENCH_MANIFEST || path.join(ro
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 const filter = process.env.IFC_BENCH_MODELS?.split(",");
 const models = manifest.models.filter((model) => !filter || filter.includes(model.id));
-const results = { startedAt: new Date().toISOString(), viewport: { width: 1440, height: 900 }, models: [] };
+const results = { startedAt: new Date().toISOString(), viewport: { width: 1440, height: 900 },
+  adaptiveDpr: process.env.IFC_BENCH_ADAPTIVE_DPR === "1",
+  fragmentUpdateMs: process.env.IFC_BENCH_FRAGMENT_UPDATE_MS === "33" ? 33 : 50, models: [] };
 
 async function phase(name, page) {
   await writeFile(phaseFile, JSON.stringify({ model: currentModel, phase: name }));
@@ -83,7 +89,8 @@ async function instrument(page) {
   await page.evaluate(async () => {
     const source = "/src/lib/viewer.ts";
     const { ViewerService } = await import(source);
-    const b = window.__bench = { phase: "baseline", runs: [], frames: {}, inputFrames: {}, longTasks: {}, pendingInputs: [], selectionEvents: [], measurements: [], events: [] };
+    const b = window.__bench = { phase: "baseline", runs: [], frames: {}, inputFrames: {}, longTasks: {},
+      pixelRatios: {}, pendingInputs: [], selectionEvents: [], measurements: [], events: [] };
     let lastFrame = performance.now();
     const push = (map, value) => { const list = map[b.phase] ||= []; if (list.length < 120000) list.push(value); };
     function frame(now) { push(b.frames, now - lastFrame); lastFrame = now; requestAnimationFrame(frame); }
@@ -120,6 +127,7 @@ async function instrument(page) {
         const render = this.renderer.render.bind(this.renderer);
         this.renderer.render = (...args) => {
           render(...args);
+          push(b.pixelRatios, this.renderer.getPixelRatio());
           const now = performance.now();
           const current = b.current;
           if (current && !current.firstModelRenderMs && this.activeModel?.modelId.endsWith(`-${current.sequence}`)) current.firstModelRenderMs = now - current.started;
@@ -185,8 +193,13 @@ async function snapshot(page) {
       const quantile = (p) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? null;
       return [key, { samples: sorted.length, p50Ms: quantile(0.5), p95Ms: quantile(0.95), p99Ms: quantile(0.99), maxMs: sorted.at(-1) ?? null, over50Ms: sorted.filter((v) => v > 50).length }];
     }));
-    return { runs: b.runs, frames: summarize(b.frames), inputToRender: summarize(b.inputFrames), longTasks: summarize(b.longTasks), selections: b.selectionEvents, measurementCount: b.measurements.length,
-      renderer: v && { memory: { ...v.renderer.info.memory }, drawCalls: v.renderer.info.render.calls, triangles: v.renderer.info.render.triangles }, canvasCount: document.querySelectorAll(".viewer-mount canvas").length };
+    const pixelRatios = Object.fromEntries(Object.entries(b.pixelRatios).map(([key, values]) =>
+      [key, { samples: values.length, min: values.reduce((best, value) => Math.min(best, value), Infinity),
+        max: values.reduce((best, value) => Math.max(best, value), -Infinity) }]));
+    return { runs: b.runs, frames: summarize(b.frames), inputToRender: summarize(b.inputFrames), longTasks: summarize(b.longTasks),
+      pixelRatios, selections: b.selectionEvents, measurementCount: b.measurements.length,
+      renderer: v && { memory: { ...v.renderer.info.memory }, latestFrame: v.viewDiagnostics.latestFrame },
+      canvasCount: document.querySelectorAll(".viewer-mount canvas").length };
   }), 30_000, "snapshot");
 }
 

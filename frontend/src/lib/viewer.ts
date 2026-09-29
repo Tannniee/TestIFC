@@ -5,7 +5,7 @@ import {
   browserFragmentMetadataProfile,
 } from "./fragment-profile";
 import { ViewerModelLoader, type ModelLoadOptions } from "./viewer-model-loader";
-import { FragmentUpdates, RenderScheduler } from "./render-scheduler";
+import { FragmentUpdates, NavigationPixelRatio, RenderScheduler } from "./render-scheduler";
 import { ViewerCamera, type CameraUpdateContext } from "./viewer-camera";
 import { sectionBoxFromSweep, validSectionBox } from "./viewer-clipping";
 import { ClippingController } from "./clipping-controller";
@@ -54,8 +54,12 @@ export class ViewerService {
   private readonly boxZoomRectangle: HTMLDivElement;
   private readonly loader: ViewerModelLoader;
   private readonly scheduler = new RenderScheduler((time) => this.render(time));
+  private readonly fragmentUpdateIntervalMs = new URLSearchParams(location.search).get("fragmentUpdateMs") === "33"
+    ? 33 : FRAGMENTS_MAX_UPDATE_RATE_MS;
   readonly viewDiagnostics = { requests: 0, dispatches: 0, viewEvents: 0, forced: 0, forcedMilliseconds: 0,
-    latestCamera: null as CameraUpdateContext | null, reason: "initial", events: [] as Array<Record<string, unknown>> };
+    latestCamera: null as CameraUpdateContext | null, reason: "initial", events: [] as Array<Record<string, unknown>>,
+    latestFrame: null as null | { cpuMilliseconds: number; intervalMilliseconds: number | null;
+      triangles: number; calls: number; pixelRatio: number; cameraRevision: number | null; viewEvents: number } };
   private readonly fragmentUpdates = new FragmentUpdates(async (force) => {
     // With no model, there can be no frame completion event after a delete RPC.
     // Do not await the engine's global fence while restoring an empty viewport.
@@ -65,15 +69,18 @@ export class ViewerService {
     const rate = settings.maxUpdateRate;
     settings.maxUpdateRate = 0;
     const started = performance.now();
+    const cameraRevision = this.viewDiagnostics.latestCamera?.revision ?? null;
     this.viewDiagnostics.dispatches++;
     if (force) this.viewDiagnostics.forced++;
-    this.recordViewEvent("dispatch", { force, reason: this.viewDiagnostics.reason, camera: this.viewDiagnostics.latestCamera });
+    this.recordViewEvent("dispatch", { force, reason: this.viewDiagnostics.reason, camera: this.viewDiagnostics.latestCamera,
+      cameraAgeMs: this.lastCameraChangeAt === null ? null : started - this.lastCameraChangeAt });
     try { await this.loader.fragments.update(force); }
     finally { settings.maxUpdateRate = rate; }
     if (force) this.viewDiagnostics.forcedMilliseconds += performance.now() - started;
-    this.recordViewEvent("returned", { force, milliseconds: performance.now() - started });
+    this.recordViewEvent("returned", { force, milliseconds: performance.now() - started, cameraRevision,
+      latestCameraRevision: this.viewDiagnostics.latestCamera?.revision ?? null });
     this.scheduler.invalidate();
-  }, FRAGMENTS_MAX_UPDATE_RATE_MS);
+  }, this.fragmentUpdateIntervalMs);
   private readonly fragmentViewUpdated = () => {
     this.viewDiagnostics.viewEvents++;
     // The event carries no revision; do not mislabel it as completion of the latest camera.
@@ -81,8 +88,12 @@ export class ViewerService {
     this.scheduler.invalidate();
   };
   private cameraMoving = false;
+  private lastRenderedAt: number | null = null;
+  private lastCameraChangeAt: number | null = null;
   private settledTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly displayPixelRatio = Math.min(window.devicePixelRatio, 2);
+  private readonly adaptiveDprEnabled = new URLSearchParams(location.search).get("adaptiveDpr") === "1";
+  private readonly navigationPixelRatio = new NavigationPixelRatio(this.displayPixelRatio);
   private readonly resizeObserver: ResizeObserver;
   private readonly callbacks: ViewerCallbacks;
   private grid: THREE.GridHelper;
@@ -650,15 +661,14 @@ export class ViewerService {
   private cameraUpdated(force: boolean, context?: CameraUpdateContext) {
     if (this.disposed) return;
     this.viewDiagnostics.latestCamera = context ?? null;
+    this.lastCameraChangeAt = performance.now();
     const model = this.loader?.activeModel;
     if (!force && model) {
       if (!this.cameraMoving) {
         this.cameraMoving = true;
-        // Dense scenes spend substantial GPU time on pixels during navigation.
-        // Keep all geometry; restore full display resolution when damping ends.
-        if (this.renderer.info.render.triangles > 2_000_000) {
-          this.renderer.setPixelRatio(Math.min(this.displayPixelRatio, 0.75));
-        }
+        const heavyScene = (this.viewDiagnostics.latestFrame?.triangles ?? 0) > 2_000_000;
+        if (this.adaptiveDprEnabled) this.setNavigationPixelRatio(this.navigationPixelRatio.begin(heavyScene));
+        else if (heavyScene) this.setNavigationPixelRatio(Math.min(this.displayPixelRatio, 0.75));
       }
       if (this.settledTimer !== null) clearTimeout(this.settledTimer);
       this.settledTimer = setTimeout(() => {
@@ -673,22 +683,41 @@ export class ViewerService {
   private endCameraMotion() {
     if (this.settledTimer !== null) clearTimeout(this.settledTimer);
     this.settledTimer = null;
-    if (this.cameraMoving) this.renderer.setPixelRatio(this.displayPixelRatio);
+    if (this.cameraMoving) this.setNavigationPixelRatio(this.adaptiveDprEnabled
+      ? this.navigationPixelRatio.end() : this.displayPixelRatio);
     this.cameraMoving = false;
   }
 
+  private setNavigationPixelRatio(value: number) {
+    if (this.renderer.getPixelRatio() !== value) this.renderer.setPixelRatio(value);
+  }
+
   private readonly render = (time: number) => {
+    const started = performance.now();
+    const intervalMilliseconds = this.lastRenderedAt === null ? null : time - this.lastRenderedAt;
+    this.lastRenderedAt = time;
     const moving = this.view.render(time);
     this.interaction.updateOverlay();
     const opacity = 0.34 * THREE.MathUtils.smoothstep(this.camera.zoom, 0.08, 0.65);
     for (const material of this.gridMaterials) material.opacity = opacity;
     this.renderer.render(this.scene, this.camera);
+    // The Section Box overlay is another render pass and resets renderer.info.
+    const triangles = this.renderer.info.render.triangles;
+    const calls = this.renderer.info.render.calls;
     this.boxController.update();
     if (this.boxController.visible) {
       const autoClear = this.renderer.autoClear;
       this.renderer.autoClear = false;
       try { this.renderer.clearDepth(); this.clipping.overlay(() => this.renderer.render(this.boxController.scene, this.camera)); }
       finally { this.renderer.autoClear = autoClear; }
+    }
+    this.viewDiagnostics.latestFrame = { cpuMilliseconds: performance.now() - started,
+      intervalMilliseconds: this.cameraMoving && intervalMilliseconds !== null && intervalMilliseconds <= 250
+        ? intervalMilliseconds : null,
+      triangles, calls, pixelRatio: this.renderer.getPixelRatio(),
+      cameraRevision: this.viewDiagnostics.latestCamera?.revision ?? null, viewEvents: this.viewDiagnostics.viewEvents };
+    if (this.cameraMoving && this.adaptiveDprEnabled) {
+      this.setNavigationPixelRatio(this.navigationPixelRatio.sample(time));
     }
     return moving;
   };

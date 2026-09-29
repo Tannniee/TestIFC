@@ -14,6 +14,13 @@ node benchmarks/run_large_models.mjs
 Optional environment variables: `IFC_BENCH_OUTPUT` selects a separate results/cache
 directory, `IFC_BENCH_MODELS` selects comma-separated manifest IDs, and
 `IFC_BENCH_PORT` selects the backend port (frontend uses the next port).
+`IFC_BENCH_ADAPTIVE_DPR=1` enables the experimental navigation DPR policy;
+leave it unset for the current production behavior. Compare separate runs on the
+same models, viewport, and GPU before making it the default. Each result records
+the selected mode and the observed DPR range for each navigation phase.
+`IFC_BENCH_FRAGMENT_UPDATE_MS=33` separately tests a faster camera/Fragments
+update cadence; the default remains 50 ms. Forced final updates bypass the
+interval in both modes.
 `IFC_BENCH_SEMANTIC_TIMEOUT_MS` controls the wait after tool checks (default 20
 minutes; the PVF baseline needed about 10.3 minutes at this stage). The default
 ports are 8140/8141. The runner starts its own processes and shuts them down after
