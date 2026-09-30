@@ -22,10 +22,7 @@ class InternalApiTests(unittest.IsolatedAsyncioTestCase):
         for path, methods in schema["paths"].items():
             if path == "/health":
                 continue
-            url = (path.replace("{modelHash}", "a" * 64)
-                   .replace("{artifactKey}", "a" * 64 + ".engine-v2-m5-p2-e0.8.9-p6.2")
-                   .replace("{jobId}", "b" * 32).replace("{file}", "positions.ifcv2")
-                   .replace("{globalId}", "anything"))
+            url = path.replace("{modelHash}", "a" * 64).replace("{globalId}", "anything")
             for method in methods:
                 response = await self.client.request(method, url)
                 self.assertEqual(response.status_code, 401, (method, path))
@@ -49,3 +46,11 @@ class InternalApiTests(unittest.IsolatedAsyncioTestCase):
         remote = httpx.ASGITransport(app=app_module.app, client=("192.0.2.1", 12))
         async with httpx.AsyncClient(transport=remote, base_url="http://127.0.0.1") as client:
             self.assertEqual((await client.get("/health")).status_code, 403)
+
+    async def test_only_local_bim_gis_page_can_be_embedded(self):
+        response = await self.client.get("/vendor/bim-gis/index.html")
+        self.assertEqual(response.headers["X-Frame-Options"], "SAMEORIGIN")
+        response = await self.client.get("/health")
+        self.assertEqual(response.headers["X-Frame-Options"], "DENY")
+        response = await self.client.get("/vendor/bim-gis/index.html", headers={"Origin": "https://evil.example"})
+        self.assertEqual(response.status_code, 403)

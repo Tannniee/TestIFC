@@ -19,16 +19,10 @@ import model_limits
 
 
 class ModelLimitTests(unittest.TestCase):
-    def test_limit_allows_exactly_two_decimal_gb_and_rejects_larger(self):
+    def test_limit_allows_exactly_one_gib_and_rejects_larger(self):
         model_limits.require_supported_ifc_size(model_limits.MAX_IFC_BYTES)
         with self.assertRaises(model_limits.ModelTooLargeError):
             model_limits.require_supported_ifc_size(model_limits.MAX_IFC_BYTES + 1)
-
-    def test_large_model_requires_native_mode(self):
-        model_limits.require_legacy_ifc_size(model_limits.ONE_GIB_BYTES)
-        with self.assertRaisesRegex(model_limits.ModelTooLargeError, "large_model_requires_engine_v2"):
-            model_limits.require_legacy_ifc_size(model_limits.ONE_GIB_BYTES + 1)
-        model_limits.require_supported_ifc_size(model_limits.ONE_GIB_BYTES + 1)
 
     def test_stream_limit_stops_before_writing_the_rejected_chunk(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -47,9 +41,8 @@ class ModelLimitTests(unittest.TestCase):
 
     def test_frontend_and_backend_limits_match(self):
         source = (ROOT / "frontend" / "src" / "lib" / "model-limits.ts").read_text(encoding="utf-8")
-        self.assertIn("2_000_000_000", source)
-        self.assertEqual(model_limits.MAX_IFC_BYTES, 2_000_000_000)
-        self.assertEqual(model_limits.ONE_GIB_BYTES, 1024 * 1024 * 1024)
+        self.assertIn("1024 * 1024 * 1024", source)
+        self.assertEqual(model_limits.MAX_IFC_BYTES, 1024 * 1024 * 1024)
 
 
 if __name__ == "__main__":

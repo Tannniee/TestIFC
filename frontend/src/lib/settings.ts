@@ -1,6 +1,6 @@
 import type { Locale } from "./i18n";
 import type { ViewportBackground } from "./viewer-contracts";
-import type { ModelSource } from "./model-source";
+import { normalizeMapboxToken } from "./mapbox-token";
 
 export interface AppSettings {
   schemaVersion: 1;
@@ -10,13 +10,13 @@ export interface AppSettings {
   viewportBackground: ViewportBackground;
   wheelZoomSpeed: number;
   rotationSpeed: number;
+  mapboxPublicToken: string;
 }
 
 interface DesktopSettingsApi {
   get_api_session(): Promise<{ token: string }>;
   load_settings(): Promise<unknown>;
   save_settings(settings: AppSettings): Promise<unknown>;
-  choose_ifc_file?(): Promise<unknown>;
 }
 
 declare global {
@@ -66,6 +66,7 @@ function normalizeSettings(value: unknown): AppSettings | null {
   if (source.wheelZoomSpeed < 0.25 || source.wheelZoomSpeed > 3) return null;
   return {
     schemaVersion: 1,
+    mapboxPublicToken: normalizeMapboxToken(source.mapboxPublicToken),
     locale: source.locale,
     mode: source.mode,
     gridVisible: source.gridVisible,
@@ -94,19 +95,4 @@ export async function saveDesktopSettings(settings: AppSettings): Promise<void> 
   } catch {
     // localStorage remains the browser-development fallback.
   }
-}
-
-/** Undefined means browser host; null means the user cancelled the desktop dialog. */
-export async function chooseDesktopIfcFile(): Promise<ModelSource | null | undefined> {
-  const api = await waitForDesktopApi();
-  if (!api?.choose_ifc_file) return undefined;
-  const selected = await api.choose_ifc_file();
-  if (selected == null) return null;
-  if (!selected || typeof selected !== "object") throw new Error("Desktop file picker returned an invalid model");
-  const source = selected as Partial<ModelSource>;
-  if (typeof source.name !== "string" || typeof source.size !== "number"
-    || typeof source.modelHash !== "string" || !/^[0-9a-f]{64}$/.test(source.modelHash)) {
-    throw new Error("Desktop file picker returned an invalid model");
-  }
-  return { name: source.name, size: source.size, modelHash: source.modelHash, origin: "desktop" };
 }

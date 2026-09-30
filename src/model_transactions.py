@@ -1,11 +1,10 @@
 """Staged model handover. Cache leases outlive individual HTTP requests."""
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass
 from threading import RLock
 from time import monotonic
 
 import model_cache
 import model_runtime as runtime
-from model_limits import require_legacy_ifc_size
 
 
 class TransactionConflict(ValueError):
@@ -85,7 +84,7 @@ def prepare(key: str, model_hash: str, filename: str | None) -> dict:
         return snapshot(key)
 
 
-def transition(key: str, action: str, semantic_mode: str | None = None) -> dict:
+def transition(key: str, action: str) -> dict:
     with _lock:
         reap_stages()
         stage = _stages.get(key)
@@ -93,12 +92,6 @@ def transition(key: str, action: str, semantic_mode: str | None = None) -> dict:
             raise TransactionConflict("model_stage_expired")
         if action == "commit":
             if stage.status == "prepared":
-                semantic_mode = semantic_mode or "legacy"
-                if semantic_mode not in ("legacy", "native"):
-                    raise ValueError("invalid_semantic_mode")
-                if semantic_mode == "legacy":
-                    require_legacy_ifc_size(stage.model.sizeBytes)
-                stage.model = replace(stage.model, semanticMode=semantic_mode)
                 if _fingerprint(stage.model.path) != stage.fingerprint:
                     raise TransactionConflict("staged_model_file_changed")
                 if not runtime._state.replace_if_current(stage.previous, stage.model):
@@ -107,8 +100,6 @@ def transition(key: str, action: str, semantic_mode: str | None = None) -> dict:
                 stage.expires = monotonic() + LEASE_SECONDS
             elif stage.status not in ("committed", "finalized"):
                 raise TransactionConflict("model_stage_already_cancelled")
-            elif semantic_mode is not None and stage.model.semanticMode != semantic_mode:
-                raise TransactionConflict("model_stage_semantic_mode_mismatch")
             elif runtime._state.get_or_none() != stage.model:
                 raise TransactionConflict("active_model_generation_changed")
         elif action == "rollback":

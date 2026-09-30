@@ -65,3 +65,53 @@ export class FragmentUpdates {
     await this.running;
   }
 }
+
+/** Adjust navigation resolution from rendered frame intervals, never from idle RAF time. */
+export class NavigationPixelRatio {
+  private readonly minimum: number;
+  private value: number;
+  private previousFrame: number | null = null;
+  private slowFrames = 0;
+  private fastFrames = 0;
+  private lastChange = -Infinity;
+
+  constructor(private readonly display: number) {
+    this.minimum = Math.min(display, 0.75);
+    this.value = display;
+  }
+
+  begin(heavyScene: boolean): number {
+    this.previousFrame = null;
+    this.slowFrames = this.fastFrames = 0;
+    this.lastChange = -Infinity;
+    this.value = heavyScene ? this.minimum : this.display;
+    return this.value;
+  }
+
+  sample(frameAt: number): number {
+    const interval = this.previousFrame === null ? 0 : frameAt - this.previousFrame;
+    this.previousFrame = frameAt;
+    if (interval <= 0 || interval > 250) {
+      this.slowFrames = this.fastFrames = 0;
+      return this.value;
+    }
+    this.slowFrames = interval > 22 ? this.slowFrames + 1 : 0;
+    this.fastFrames = interval < 14 ? this.fastFrames + 1 : 0;
+    if (this.slowFrames >= 5 && frameAt - this.lastChange >= 250) {
+      this.value = Math.max(this.minimum, this.value - 0.25);
+      this.slowFrames = 0;
+      this.lastChange = frameAt;
+    } else if (this.fastFrames >= 20 && frameAt - this.lastChange >= 500) {
+      this.value = Math.min(this.display, this.value + 0.25);
+      this.fastFrames = 0;
+      this.lastChange = frameAt;
+    }
+    return this.value;
+  }
+
+  end(): number {
+    this.previousFrame = null;
+    this.value = this.display;
+    return this.value;
+  }
+}

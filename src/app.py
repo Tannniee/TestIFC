@@ -19,11 +19,8 @@ from api_routes.core import create_core_router
 from api_routes.idea import create_idea_router
 from api_routes.mass import create_mass_router
 from api_routes.model import create_model_router
-from api_routes.engine_v2 import create_engine_v2_router
 from api_state import BridgeState
 from fragment_service import FragmentService
-from engine_v2_artifacts import EngineV2ArtifactRepository
-from engine_v2_jobs import EngineV2JobManager
 from member_scan_service import MemberScanService
 from app_lifecycle import backend_lifespan
 from internal_api import InternalApiSession, DEV_ORIGINS, SESSION_HEADER
@@ -36,13 +33,10 @@ fragment_service = FragmentService()
 member_scan_service = MemberScanService()
 takeoff_service = TakeoffService()
 model_takeoff_job = ModelTakeoffJob(takeoff_service)
-engine_v2_artifacts = EngineV2ArtifactRepository()
-engine_v2_jobs = EngineV2JobManager(engine_v2_artifacts)
 
 app = FastAPI(title="IFC Viewer", version=APP_VERSION, lifespan=backend_lifespan)
 app.state.api_session = InternalApiSession()
 app.state.model_takeoff_job = model_takeoff_job
-app.state.engine_v2_jobs = engine_v2_jobs
 app.add_middleware(
     CORSMiddleware,
     allow_origins=sorted(DEV_ORIGINS),
@@ -57,6 +51,5 @@ app.middleware("http")(app.state.api_session.protect)
 
 app.include_router(create_core_router(state))
 app.include_router(create_model_router(fragment_service))
-app.include_router(create_engine_v2_router(engine_v2_artifacts, engine_v2_jobs))
 app.include_router(create_mass_router(model_takeoff_job, takeoff_service))
 app.include_router(create_idea_router(member_scan_service))

@@ -1,7 +1,11 @@
+import { type FragmentsModel } from "@thatopen/fragments";
 import * as THREE from "three";
 import { markViewerCreated, markViewerDisposed } from "./lifecycle-diagnostics";
+import {
+  browserFragmentMetadataProfile,
+} from "./fragment-profile";
 import { ViewerModelLoader, type ModelLoadOptions } from "./viewer-model-loader";
-import { FragmentUpdates, RenderScheduler } from "./render-scheduler";
+import { FragmentUpdates, NavigationPixelRatio, RenderScheduler } from "./render-scheduler";
 import { ViewerCamera, type CameraUpdateContext } from "./viewer-camera";
 import { sectionBoxFromSweep, validSectionBox } from "./viewer-clipping";
 import { ClippingController } from "./clipping-controller";
@@ -23,8 +27,6 @@ import {
 } from "./viewer-contracts";
 import { createViewerSelection, ViewerHighlights } from "./viewer-selection";
 import { ViewerInteraction } from "./viewer-interaction";
-import type { ViewerModel } from "./viewer-model-contract";
-import type { ModelSource } from "./model-source";
 
 export { isLoadCancelledError, LoadCancelledError } from "./viewer-contracts";
 export type * from "./viewer-contracts";
@@ -46,34 +48,39 @@ export class ViewerService {
   private inputBlocked = false;
   private boxDisplay = { showBox: true, showHandles: true };
   private readonly boxController: SectionBoxController;
-  private sectionCreation: { source: ViewSessionState; model: ViewerModel; createView: boolean } | null = null;
+  private sectionCreation: { source: ViewSessionState; model: FragmentsModel; createView: boolean } | null = null;
   private transientCleanup: Promise<void> = Promise.resolve();
   private readonly interaction: ViewerInteraction;
   private readonly boxZoomRectangle: HTMLDivElement;
   private readonly loader: ViewerModelLoader;
   private readonly scheduler = new RenderScheduler((time) => this.render(time));
+  private readonly fragmentUpdateIntervalMs = new URLSearchParams(location.search).get("fragmentUpdateMs") === "33"
+    ? 33 : FRAGMENTS_MAX_UPDATE_RATE_MS;
   readonly viewDiagnostics = { requests: 0, dispatches: 0, viewEvents: 0, forced: 0, forcedMilliseconds: 0,
-    latestCamera: null as CameraUpdateContext | null, reason: "initial", events: [] as Array<Record<string, unknown>> };
+    latestCamera: null as CameraUpdateContext | null, reason: "initial", events: [] as Array<Record<string, unknown>>,
+    latestFrame: null as null | { cpuMilliseconds: number; intervalMilliseconds: number | null;
+      triangles: number; calls: number; pixelRatio: number; cameraRevision: number | null; viewEvents: number } };
   private readonly fragmentUpdates = new FragmentUpdates(async (force) => {
-    const activeModel = this.loader.activeModel;
     // With no model, there can be no frame completion event after a delete RPC.
     // Do not await the engine's global fence while restoring an empty viewport.
-    if (!activeModel) { this.scheduler.invalidate(); return; }
+    if (!this.loader.fragments.models.list.size) { this.scheduler.invalidate(); return; }
     // This adapter owns the cadence; engine throttling must not silently drop a final view.
+    const settings = this.loader.fragments.settings;
+    const rate = settings.maxUpdateRate;
+    settings.maxUpdateRate = 0;
     const started = performance.now();
+    const cameraRevision = this.viewDiagnostics.latestCamera?.revision ?? null;
     this.viewDiagnostics.dispatches++;
     if (force) this.viewDiagnostics.forced++;
-    this.recordViewEvent("dispatch", { force, reason: this.viewDiagnostics.reason, camera: this.viewDiagnostics.latestCamera });
-    if (activeModel.update) {
-      try { await activeModel.update(this.camera); }
-      catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) throw error;
-      }
-    }
+    this.recordViewEvent("dispatch", { force, reason: this.viewDiagnostics.reason, camera: this.viewDiagnostics.latestCamera,
+      cameraAgeMs: this.lastCameraChangeAt === null ? null : started - this.lastCameraChangeAt });
+    try { await this.loader.fragments.update(force); }
+    finally { settings.maxUpdateRate = rate; }
     if (force) this.viewDiagnostics.forcedMilliseconds += performance.now() - started;
-    this.recordViewEvent("returned", { force, milliseconds: performance.now() - started });
+    this.recordViewEvent("returned", { force, milliseconds: performance.now() - started, cameraRevision,
+      latestCameraRevision: this.viewDiagnostics.latestCamera?.revision ?? null });
     this.scheduler.invalidate();
-  }, FRAGMENTS_MAX_UPDATE_RATE_MS);
+  }, this.fragmentUpdateIntervalMs);
   private readonly fragmentViewUpdated = () => {
     this.viewDiagnostics.viewEvents++;
     // The event carries no revision; do not mislabel it as completion of the latest camera.
@@ -81,8 +88,12 @@ export class ViewerService {
     this.scheduler.invalidate();
   };
   private cameraMoving = false;
+  private lastRenderedAt: number | null = null;
+  private lastCameraChangeAt: number | null = null;
   private settledTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly displayPixelRatio = Math.min(window.devicePixelRatio, 2);
+  private readonly adaptiveDprEnabled = new URLSearchParams(location.search).get("adaptiveDpr") === "1";
+  private readonly navigationPixelRatio = new NavigationPixelRatio(this.displayPixelRatio);
   private readonly resizeObserver: ResizeObserver;
   private readonly callbacks: ViewerCallbacks;
   private grid: THREE.GridHelper;
@@ -105,6 +116,7 @@ export class ViewerService {
   constructor(
     private readonly host: HTMLElement,
     callbacks: ViewerCallbacks,
+    fragmentProfile = browserFragmentMetadataProfile(),
   ) {
     this.callbacks = callbacks;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -118,7 +130,7 @@ export class ViewerService {
       onOrientationChange: (orientation) => this.callbacks.onCameraOrientationChange(orientation),
       onUpdate: (force, context) => this.cameraUpdated(force, context),
     });
-    this.loader = new ViewerModelLoader({
+    this.loader = new ViewerModelLoader(this.camera, fragmentProfile, {
       onProgress: (value) => callbacks.onProgress(value), onBridgeProgress: (value) => callbacks.onBridgeProgress(value),
       onFragmentMetrics: (value) => callbacks.onFragmentMetrics(value),
       attach: async (model, assertCurrent) => {
@@ -154,6 +166,7 @@ export class ViewerService {
       fit: () => this.fit({ animate: false }),
       update: () => this.fragmentUpdates.request(true),
     });
+    this.fragments.settings.maxUpdateRate = FRAGMENTS_MAX_UPDATE_RATE_MS;
     this.interaction = new ViewerInteraction(
       this.host,
       this.renderer.domElement,
@@ -202,6 +215,7 @@ export class ViewerService {
       window.dispatchEvent(new CustomEvent("ifc-viewer-ready", { detail: this }));
     }
   }
+  private get fragments() { return this.loader.fragments; }
   private get bridge() { return this.loader.bridge; }
   private get activeModel() { return this.loader.activeModel; }
   private get activeModelName() { return this.loader.activeModelName; }
@@ -481,7 +495,7 @@ export class ViewerService {
     this.view.viewSection(model.box, section);
   }
 
-  async load(file: ModelSource, options: ModelLoadOptions = {}): Promise<void> {
+  async load(file: File, options: ModelLoadOptions = {}): Promise<void> {
     await this.cancelTransientInteraction();
     await this.highlights.drain();
     await this.loader.load(file, options);
@@ -493,7 +507,7 @@ export class ViewerService {
       await this.clearSelection(); this.interaction.reset();
       await this.loader.closeModel(); this.clearClipping(); this.scheduler.invalidate();
     } catch (error) {
-      if (model && this.model === model) await this.applyViewState(state);
+      if (model && this.model === model && this.fragments.models.list.has(model.modelId)) await this.applyViewState(state);
       throw error;
     }
   }
@@ -505,6 +519,29 @@ export class ViewerService {
     const model = this.activeModel;
     if (!model) return;
     this.view.fit(this.fitBounds(), animate);
+  }
+  async fitItems(localIds: number[]) {
+    const model = this.activeModel;
+    if (!model || !localIds.length) return;
+    const bounds = await model.getMergedBox([...new Set(localIds)]);
+    if (model !== this.activeModel || bounds.isEmpty()) return;
+    this.orbitEpoch++;
+    this.view.fit(bounds, true);
+  }
+  async setTreeVisibility(action: "hide" | "isolate" | "showAll", localIds: number[]) {
+    const model = this.activeModel;
+    if (!model) return;
+    if (action === "showAll") await model.resetVisible();
+    else if (localIds.length) {
+      if (action === "isolate") {
+        const geometryIds = await model.getItemsIdsWithGeometry();
+        if (model !== this.activeModel) return;
+        await model.setVisible(geometryIds, false);
+      }
+      if (model !== this.activeModel) return;
+      await model.setVisible([...new Set(localIds)], action === "isolate");
+    }
+    if (model === this.activeModel) await this.fragmentUpdates.request(true);
   }
   private fitBounds() {
     const bounds = this.activeModel?.box.clone() ?? new THREE.Box3();
@@ -597,7 +634,7 @@ export class ViewerService {
     for (const material of materials) material.dispose();
   }
 
-  private async alignGridToIfcElevationZero(model: ViewerModel, assertCurrent: () => void) {
+  private async alignGridToIfcElevationZero(model: FragmentsModel, assertCurrent: () => void) {
     try {
       const coordinationMatrix = await model.getCoordinationMatrix();
       assertCurrent();
@@ -621,7 +658,6 @@ export class ViewerService {
   private requestFragmentUpdate(force = false, reason = "scene") {
     this.scheduler.invalidate();
     if (!this.loader || this.disposed) return;
-    this.loader.activeModel?.cancelUpdate?.();
     this.viewDiagnostics.requests++;
     this.viewDiagnostics.reason = reason;
     void this.fragmentUpdates.request(force).catch((error) => console.warn("Fragment view update failed", error));
@@ -630,15 +666,14 @@ export class ViewerService {
   private cameraUpdated(force: boolean, context?: CameraUpdateContext) {
     if (this.disposed) return;
     this.viewDiagnostics.latestCamera = context ?? null;
+    this.lastCameraChangeAt = performance.now();
     const model = this.loader?.activeModel;
     if (!force && model) {
       if (!this.cameraMoving) {
         this.cameraMoving = true;
-        // Dense scenes spend substantial GPU time on pixels during navigation.
-        // Keep all geometry; restore full display resolution when damping ends.
-        if (this.renderer.info.render.triangles > 2_000_000) {
-          this.renderer.setPixelRatio(Math.min(this.displayPixelRatio, 0.75));
-        }
+        const heavyScene = (this.viewDiagnostics.latestFrame?.triangles ?? 0) > 2_000_000;
+        if (this.adaptiveDprEnabled) this.setNavigationPixelRatio(this.navigationPixelRatio.begin(heavyScene));
+        else if (heavyScene) this.setNavigationPixelRatio(Math.min(this.displayPixelRatio, 0.75));
       }
       if (this.settledTimer !== null) clearTimeout(this.settledTimer);
       this.settledTimer = setTimeout(() => {
@@ -653,22 +688,41 @@ export class ViewerService {
   private endCameraMotion() {
     if (this.settledTimer !== null) clearTimeout(this.settledTimer);
     this.settledTimer = null;
-    if (this.cameraMoving) this.renderer.setPixelRatio(this.displayPixelRatio);
+    if (this.cameraMoving) this.setNavigationPixelRatio(this.adaptiveDprEnabled
+      ? this.navigationPixelRatio.end() : this.displayPixelRatio);
     this.cameraMoving = false;
   }
 
+  private setNavigationPixelRatio(value: number) {
+    if (this.renderer.getPixelRatio() !== value) this.renderer.setPixelRatio(value);
+  }
+
   private readonly render = (time: number) => {
+    const started = performance.now();
+    const intervalMilliseconds = this.lastRenderedAt === null ? null : time - this.lastRenderedAt;
+    this.lastRenderedAt = time;
     const moving = this.view.render(time);
     this.interaction.updateOverlay();
     const opacity = 0.34 * THREE.MathUtils.smoothstep(this.camera.zoom, 0.08, 0.65);
     for (const material of this.gridMaterials) material.opacity = opacity;
     this.renderer.render(this.scene, this.camera);
+    // The Section Box overlay is another render pass and resets renderer.info.
+    const triangles = this.renderer.info.render.triangles;
+    const calls = this.renderer.info.render.calls;
     this.boxController.update();
     if (this.boxController.visible) {
       const autoClear = this.renderer.autoClear;
       this.renderer.autoClear = false;
       try { this.renderer.clearDepth(); this.clipping.overlay(() => this.renderer.render(this.boxController.scene, this.camera)); }
       finally { this.renderer.autoClear = autoClear; }
+    }
+    this.viewDiagnostics.latestFrame = { cpuMilliseconds: performance.now() - started,
+      intervalMilliseconds: this.cameraMoving && intervalMilliseconds !== null && intervalMilliseconds <= 250
+        ? intervalMilliseconds : null,
+      triangles, calls, pixelRatio: this.renderer.getPixelRatio(),
+      cameraRevision: this.viewDiagnostics.latestCamera?.revision ?? null, viewEvents: this.viewDiagnostics.viewEvents };
+    if (this.cameraMoving && this.adaptiveDprEnabled) {
+      this.setNavigationPixelRatio(this.navigationPixelRatio.sample(time));
     }
     return moving;
   };
@@ -846,7 +900,7 @@ export class ViewerService {
     const selectionSequence = ++this.selectionSequence;
     const orbitEpoch = this.orbitEpoch;
     const activeModel = this.activeModel;
-    // The model adapter converts viewport coordinates to its raycast space.
+    // FragmentsModels converts viewport coordinates to NDC internally.
     const mouse = new THREE.Vector2(event.clientX, event.clientY);
     const hit = await activeModel.raycast({ camera: this.camera, mouse, dom: this.renderer.domElement });
     if (selectionSequence !== this.selectionSequence || activeModel !== this.activeModel) return;
@@ -880,7 +934,7 @@ export class ViewerService {
     await this.bridge.publishSelection(selection, () => selectionSequence === this.selectionSequence && hit.fragments === this.activeModel);
   }
 
-  private async applyMultiSelection(model: ViewerModel | null, localIds: number[]) {
+  private async applyMultiSelection(model: FragmentsModel | null, localIds: number[]) {
     const selectionSequence = ++this.selectionSequence;
     await this.highlights.clear();
     this.scheduler.invalidate();
@@ -922,7 +976,7 @@ export class ViewerService {
     await this.bridge.publishSelection(selection, () => sequence === this.selectionSequence && model === this.activeModel);
   }
 
-  private async centerSelectionOrbit(model: ViewerModel, localId: number | null, sequence: number, epoch: number) {
+  private async centerSelectionOrbit(model: FragmentsModel, localId: number | null, sequence: number, epoch: number) {
     const current = () => !this.disposed && !this.inputBlocked && this.activeTool === "selectOrbit"
       && model === this.activeModel && sequence === this.selectionSequence && epoch === this.orbitEpoch;
     if (localId === null || !current()) return;

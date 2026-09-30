@@ -24,7 +24,6 @@ import webview
 from app import app
 from desktop_bridges import DesktopApi, SettingsBridge, TaskbarBridge
 from logging_config import configure_logging
-from model_operations import materialize_local_model
 from server_host import ServerHost
 from settings_store import SettingsStore
 from version import APP_VERSION
@@ -36,7 +35,7 @@ _ICON_PATH = resolve_dir("desktop", "assets", "app_icon.ico")
 
 def create_desktop_api(logger, data_dir: Path) -> DesktopApi:
     settings = SettingsBridge(SettingsStore(data_dir / "settings.json"))
-    return DesktopApi(TaskbarBridge(logger), settings, materialize_local_model)
+    return DesktopApi(TaskbarBridge(logger), settings)
 
 
 def main() -> None:

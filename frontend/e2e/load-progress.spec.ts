@@ -114,17 +114,19 @@ test("cancel waits for stage reply and rolls back that exact ticket without acti
   expect(calls).toEqual(["stage:A", "rollback:true"]);
 });
 
-test("real IFC native artifact load cancels and the same file can open again", async ({ page }) => {
+test("real IFC conversion cancels and the same file can open again", async ({ page }) => {
   test.setTimeout(180_000);
   const modelPath = process.env.IFC_E2E_MODEL_PATH;
   test.skip(!modelPath, "Set IFC_E2E_MODEL_PATH for the real conversion cancellation gate");
+  // Force conversion while keeping the user's source/cache untouched.
+  await page.route("**/model/fragments/*", (route) => route.request().method() === "GET"
+    ? route.fulfill({ status: 404, json: { error: "fragments_not_cached" } }) : route.continue());
   await page.evaluate(async () => {
-    const { api } = await import(/* @vite-ignore */ "/src/lib/api.ts");
-    (window as any).originalManifest = api.engineV2Manifest;
-    api.engineV2Manifest = (_key: string, signal: AbortSignal) => {
+    const converter = (window as any).__viewer.loader.converter;
+    const convert = converter.convert;
+    converter.convert = function (...args: any[]) {
       (window as any).conversionStarted = true;
-      return new Promise((_, reject) => signal.addEventListener("abort",
-        () => reject(new DOMException("cancelled", "AbortError")), { once: true }));
+      return convert.apply(this, args);
     };
     (window as any).loadMetrics = [];
     window.addEventListener("ifc-fragment-metrics", (event) => (window as any).loadMetrics.push((event as CustomEvent).detail));
@@ -138,10 +140,7 @@ test("real IFC native artifact load cancels and the same file can open again", a
   await expect(page.locator(".viewer-empty-state")).toContainText("Đã hủy");
   expect(await page.evaluate(() => (window as any).loadMetrics.length)).toBe(0);
   await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).activeModelHash)).toBe(previousHash);
-  await page.evaluate(async () => {
-    const { api } = await import(/* @vite-ignore */ "/src/lib/api.ts");
-    api.engineV2Manifest = (window as any).originalManifest;
-  });
+  await page.unroute("**/model/fragments/*");
   await input.setInputFiles(modelPath!);
   await expect.poll(() => page.evaluate(() => (window as any).loadMetrics.length), { timeout: 120_000 }).toBe(1);
   await expect(page.getByRole("dialog")).toHaveCount(0);

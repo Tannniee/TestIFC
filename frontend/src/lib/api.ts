@@ -3,15 +3,23 @@ import {
   API_ENDPOINTS,
   apiPath,
   type ActivateModelResponse,
+  type BimElementResponse,
   type StageModelResponse,
   type CacheInventory,
   type FragmentStoredResponse,
-  type EngineV2JobResponse,
   type HealthResponse,
   type LoadModelResponse,
   type ModelRuntimeResponse,
-  type ModelTreeResponse,
-  type ElementsResponse,
+  type ModelGeoreferenceResponse,
+  type ModelBrowserResponse,
+  type BrowserView,
+  type SemanticSearchRequest,
+  type SemanticFilterRequest,
+  type SemanticFilterResponse,
+  type SemanticFieldCatalog,
+  type SemanticSearchResponse,
+  type ManualAnchor,
+  type GisAnchorResponse,
   type SelectionPayload,
   type SelectionResponse,
 } from "./api-contracts";
@@ -19,7 +27,6 @@ import {
 export type {
   ActivateModelResponse,
   FragmentStoredResponse,
-  EngineV2JobResponse,
   HealthResponse,
   LoadModelResponse,
   ModelRuntimeResponse,
@@ -69,6 +76,24 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  modelBrowser: (modelHash: string, view: BrowserView) => requestJson<ModelBrowserResponse>(
+    `${API_ENDPOINTS.modelBrowser.path}?modelHash=${encodeURIComponent(modelHash)}&view=${encodeURIComponent(view)}`),
+  semanticSearch: (modelHash: string, filter: SemanticSearchRequest) => {
+    const params = new URLSearchParams({ modelHash, kind: filter.kind, setName: filter.setName,
+      propertyName: filter.propertyName, op: filter.op, value: filter.value,
+      ifcType: filter.ifcType, limit: String(filter.limit ?? 200) });
+    return requestJson<SemanticSearchResponse>(`${API_ENDPOINTS.semanticSearch.path}?${params}`);
+  },
+  semanticFilter: (modelHash: string, filter: SemanticFilterRequest) => requestJson<SemanticFilterResponse>(API_ENDPOINTS.semanticFilter.path,
+    {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({modelHash,...filter})}),
+  semanticFields: (modelHash: string) => requestJson<SemanticFieldCatalog>(`${API_ENDPOINTS.semanticFields.path}?modelHash=${encodeURIComponent(modelHash)}`),
+  gisAnchor: (modelHash: string) => requestJson<GisAnchorResponse>(
+    `${API_ENDPOINTS.gisAnchor.path}?modelHash=${encodeURIComponent(modelHash)}`),
+  saveGisAnchor: (modelHash: string, anchor: ManualAnchor) => requestJson<GisAnchorResponse>(
+    API_ENDPOINTS.gisAnchor.path, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modelHash, ...anchor }) }),
+  deleteGisAnchor: (modelHash: string) => requestJson<GisAnchorResponse>(
+    `${API_ENDPOINTS.gisAnchor.path}?modelHash=${encodeURIComponent(modelHash)}`, { method: "DELETE" }),
   health: () => requestJson<HealthResponse>(API_ENDPOINTS.health.path),
   loadModel(file: File): Promise<LoadModelResponse> {
     const body = new FormData();
@@ -115,9 +140,9 @@ export const api = {
     return requestJson<StageModelResponse>("/model/stage", { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ stageId, modelHash, filename }), signal: AbortSignal.timeout(120000) });
   },
-  stageAction(stageId: string, action: "commit" | "rollback" | "finalize", semanticMode?: "legacy" | "native") {
+  stageAction(stageId: string, action: "commit" | "rollback" | "finalize") {
     return requestJson<StageModelResponse>(`/model/stage/${stageId}`, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, semanticMode }), signal: AbortSignal.timeout(15000) });
+      body: JSON.stringify({ action }), signal: AbortSignal.timeout(15000) });
   },
   cacheInventory: () => requestJson<CacheInventory>("/model/cache"),
   clearCache: (scope: "fragments" | "all") => requestJson<CacheInventory & { freedBytes: number; failedFiles: number }>("/model/cache/clear", {
@@ -147,23 +172,15 @@ export const api = {
     return true;
   },
   runtime: (signal?: AbortSignal) => requestJson<ModelRuntimeResponse>(API_ENDPOINTS.modelRuntime.path, { signal }),
-  modelTree(signal?: AbortSignal) {
-    return requestJson<ModelTreeResponse>(API_ENDPOINTS.modelTree.path, { signal });
+  modelGeoreference(modelHash: string, signal?: AbortSignal) {
+    return requestJson<ModelGeoreferenceResponse>(
+      `${API_ENDPOINTS.modelGeoreference.path}?${new URLSearchParams({ modelHash })}`,
+      { signal },
+    );
   },
-  modelElements(localIds: number[] = [], globalIds: string[] = [], signal?: AbortSignal) {
-    return requestJson<ElementsResponse>(API_ENDPOINTS.modelElements.path, {
-      method: API_ENDPOINTS.modelElements.method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ localIds, globalIds }), signal,
-    });
-  },
-  async modelSource(modelHash: string, signal?: AbortSignal): Promise<ArrayBuffer> {
-    const response = await sessionFetch(apiPath(API_ENDPOINTS.modelSource, { modelHash }), { signal });
-    if (!response.ok) {
-      const body = await response.text();
-      throw new ApiError(responseMessage(response.status, response.statusText, body), response.status, body);
-    }
-    return response.arrayBuffer();
+  bimElement(expressId: number, modelHash: string) {
+    const path = apiPath(API_ENDPOINTS.bimElement, { expressId: String(expressId) });
+    return requestJson<BimElementResponse>(`${path}?${new URLSearchParams({ modelHash })}`);
   },
   async getFragments(modelHash: string, signal?: AbortSignal): Promise<ArrayBuffer | null> {
     const response = await sessionFetch(apiPath(API_ENDPOINTS.getFragments, { modelHash }), { signal });
@@ -186,48 +203,6 @@ export const api = {
       throw new ApiError(responseMessage(response.status, response.statusText, body), response.status, body);
     }
     await response.json() as FragmentStoredResponse;
-  },
-  prepareEngineV2(modelHash: string) {
-    return requestJson<EngineV2JobResponse>(apiPath(API_ENDPOINTS.prepareEngineV2, { modelHash }), {
-      method: API_ENDPOINTS.prepareEngineV2.method,
-    });
-  },
-  engineV2Job(jobId: string, signal?: AbortSignal) {
-    return requestJson<EngineV2JobResponse>(apiPath(API_ENDPOINTS.engineV2Job, { jobId }), { signal });
-  },
-  cancelEngineV2Job(jobId: string) {
-    return requestJson<EngineV2JobResponse>(apiPath(API_ENDPOINTS.cancelEngineV2Job, { jobId }), {
-      method: API_ENDPOINTS.cancelEngineV2Job.method,
-    });
-  },
-  engineV2Manifest(artifactKey: string, signal?: AbortSignal) {
-    return requestJson<unknown>(apiPath(API_ENDPOINTS.engineV2Manifest, { artifactKey }), { signal });
-  },
-  async engineV2Chunk(artifactKey: string, file: string, signal?: AbortSignal): Promise<ArrayBuffer> {
-    const response = await sessionFetch(apiPath(API_ENDPOINTS.engineV2Chunk, { artifactKey, file }), { signal });
-    if (!response.ok) {
-      const body = await response.text();
-      throw new ApiError(responseMessage(response.status, response.statusText, body), response.status, body);
-    }
-    return response.arrayBuffer();
-  },
-  async engineV2ChunkRange(artifactKey: string, file: string, offset: number, length: number, signal?: AbortSignal): Promise<ArrayBuffer> {
-    if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length <= 0) {
-      throw new Error("Engine V2 chunk range is invalid");
-    }
-    const end = offset + length - 1;
-    const response = await sessionFetch(apiPath(API_ENDPOINTS.engineV2Chunk, { artifactKey, file }), {
-      headers: { Range: `bytes=${offset}-${end}` }, signal,
-    });
-    if (response.status !== 206) {
-      const body = await response.text();
-      throw new ApiError(responseMessage(response.status, response.statusText, body || "range_not_honored"), response.status, body);
-    }
-    const contentRange = response.headers.get("Content-Range");
-    if (!contentRange?.startsWith(`bytes ${offset}-${end}/`)) throw new Error("Engine V2 chunk returned an invalid Content-Range");
-    const result = await response.arrayBuffer();
-    if (result.byteLength !== length) throw new Error("Engine V2 chunk range is truncated");
-    return result;
   },
   setSelection(selection: SelectionPayload) {
     return requestJson<SelectionResponse>(API_ENDPOINTS.setSelection.path, {

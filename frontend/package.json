@@ -1,7 +1,7 @@
 {
   "name": "ifc-viewer-alternative-frontend",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "packageManager": "pnpm@11.19.0",
   "type": "module",
   "scripts": {
@@ -11,7 +11,11 @@
     "test:e2e": "playwright test",
     "test:webview2": "node e2e/webview2-smoke.mjs",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "gis:install": "npm --prefix gis-runtime ci --ignore-scripts --no-audit --no-fund",
+    "gis:build": "npm --prefix gis-runtime run build",
+    "predev": "npm --prefix gis-runtime run build",
+    "prebuild": "npm --prefix gis-runtime run build"
   },
   "devDependencies": {
     "@playwright/test": "1.62.0",
@@ -23,6 +27,9 @@
     "vite": "8.2.2"
   },
   "dependencies": {
-    "three": "0.185.0"
+    "@thatopen/fragments": "3.4.7",
+    "maplibre-gl": "6.10.0",
+    "three": "0.185.0",
+    "web-ifc": "0.0.78"
   }
 }

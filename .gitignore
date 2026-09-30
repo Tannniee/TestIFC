@@ -7,6 +7,7 @@ __pycache__/
 # Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/.env.local
 frontend/.vite/
 frontend/.vite-temp/
 frontend/test-results/
@@ -19,9 +20,6 @@ dist/
 build-*/
 dist-*/
 /BUILD RELEASE/
-/engine_v2/**/bin/
-/engine_v2/**/obj/
-/engine_v2/publish/
 *.log
 
 # Runtime and model data
@@ -42,3 +40,7 @@ input/
 pyinstxtractor-*/
 reports/
 tools/
+
+# Isolated IFC.js / Mapbox runtime build
+frontend/gis-runtime/node_modules/
+frontend/public/vendor/bim-gis/

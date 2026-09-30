@@ -11,6 +11,7 @@ from ifc_elements import (
 )
 from model_cache import cached_model_file
 import model_cache
+import gis_anchor
 import model_runtime
 import model_transactions
 from model_runtime import (
@@ -21,7 +22,6 @@ from model_runtime import (
     open_model_session,
     register_model,
 )
-from model_limits import require_supported_ifc_size
 from mass_facts import MaterialUse, survey_materials
 from model_query import get_model_tree, search_model
 
@@ -31,6 +31,10 @@ class MaterializedModel:
     model_hash: str
     original_filename: str | None
     size_bytes: int
+
+
+class ActiveModelChangedError(ValueError):
+    """A query arrived after the viewer switched to another IFC model."""
 
 
 def materialize_uploaded_model(
@@ -47,28 +51,9 @@ def materialize_uploaded_model(
     )
 
 
-def materialize_local_model(path: str) -> MaterializedModel:
-    """Copy a desktop-picked IFC directly into the managed cache."""
-    from pathlib import Path
-
-    source = Path(path)
-    require_supported_ifc_size(source.stat().st_size)
-    with source.open("rb") as reader:
-        info = materialize_model_stream(reader, source.name, True, activate=False)
-    return MaterializedModel(
-        model_hash=info["contentHashSha256"],
-        original_filename=info["originalFilename"],
-        size_bytes=info["sizeBytes"],
-    )
-
-
 def activate_cached_model(model_hash: str) -> dict[str, Any]:
     path = cached_model_file(model_hash)
     return register_model(str(path), model_hash, True)
-
-
-def cached_model_source(model_hash: str):
-    return cached_model_file(model_hash)
 
 
 def register_external_model(path: str, expected_hash: str) -> dict[str, Any]:
@@ -83,8 +68,8 @@ def prepare_stage(stage_id: str, model_hash: str, filename: str | None) -> dict:
     return model_transactions.prepare(stage_id, model_hash, filename)
 
 
-def transition_stage(stage_id: str, action: str, semantic_mode: str | None = None) -> dict:
-    return model_transactions.transition(stage_id, action, semantic_mode)
+def transition_stage(stage_id: str, action: str) -> dict:
+    return model_transactions.transition(stage_id, action)
 
 
 def cached_storage(scope: str | None = None) -> dict:
@@ -112,23 +97,84 @@ def element_by_express_id(express_id: int) -> dict[str, Any]:
         return extract_element_by_express_id(lease, express_id)
 
 
+def bim_element_by_express_id(express_id: int, model_hash: str) -> dict[str, Any]:
+    """Read indexed BIM data without opening or triangulating IFC geometry."""
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {
+            "modelHash": model_hash,
+            "coldStatus": lease.index.cold_status,
+            "element": lease.index.record_by_express_id(express_id),
+        }
+
+
+def model_georeference(model_hash: str) -> dict[str, Any]:
+    """Return indexed IFC map metadata bound to the active model hash."""
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, **lease.index.georeference()}
+
+
+def model_browser(model_hash: str, view: str) -> dict[str, Any]:
+    """Return compact indexed elements and memberships for one browser view."""
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, "view": view, **lease.index.browser(view)}
+
+
+def semantic_search(model_hash: str, kind: str, set_name: str, property_name: str,
+                    operator: str, value: str, ifc_type: str, limit: int) -> dict[str, Any]:
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, **lease.index.semantic_search(
+            kind, set_name, property_name, operator, value, ifc_type, limit)}
+
+
+def semantic_filter(model_hash: str, conditions: list[dict], match: str,
+                    ifc_type: str, cursor: int, limit: int) -> dict[str, Any]:
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, **lease.index.semantic_filter(conditions, match, ifc_type, cursor, limit)}
+
+
+def semantic_fields(model_hash: str) -> dict[str, Any]:
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, **lease.index.semantic_fields()}
+
+
+def _require_active_hash(model_hash: str) -> None:
+    model = model_runtime._state.get_or_none()
+    if model is None:
+        raise model_runtime.NoActiveModelError()
+    if model.contentHashSha256 != model_hash:
+        raise ActiveModelChangedError()
+
+
+def manual_anchor(model_hash: str) -> dict[str, Any]:
+    _require_active_hash(model_hash)
+    return gis_anchor.read_anchor(model_cache.CACHE_DIR, model_hash)
+
+
+def save_manual_anchor(model_hash: str, anchor: dict[str, float]) -> dict[str, Any]:
+    _require_active_hash(model_hash)
+    return gis_anchor.save_anchor(model_cache.CACHE_DIR, model_hash, anchor)
+
+
+def delete_manual_anchor(model_hash: str) -> dict[str, Any]:
+    _require_active_hash(model_hash)
+    return gis_anchor.delete_anchor(model_cache.CACHE_DIR, model_hash)
+
+
 def element_by_global_id(global_id: str) -> dict[str, Any]:
     with lease_active_model() as lease:
         return extract_element(lease, global_id)
-
-
-def element_records(local_ids: list[int], global_ids: list[str]) -> dict[str, Any]:
-    if len(local_ids) + len(global_ids) > 500:
-        raise ValueError("too_many_element_ids")
-    with lease_active_model() as lease:
-        local = lease.index.records_by_express_ids(local_ids)
-        global_ = lease.index.records_by_global_ids(global_ids)
-        return {
-            "localIds": local_ids,
-            "globalIds": global_ids,
-            "byLocalId": [local.get(value) for value in local_ids],
-            "byGlobalId": [global_.get(value) for value in global_ids],
-        }
 
 
 def active_model_materials() -> tuple[MaterialUse, ...]:

@@ -3,12 +3,11 @@ import { emptyModelReadiness } from "./model-readiness";
 import type { ViewerService } from "./viewer";
 import { LoadCancelledError, type ViewerProgress, type BridgeProgress } from "./viewer-contracts";
 import { ModelSourceError } from "./model-source-error";
-import { normalizeModelSource, type ModelSource } from "./model-source";
 
 /** Session ownership lives here; the viewer owns only the active rendering resources. */
 export class WorkspaceManager {
   private state = emptyWorkspace();
-  private sources = new Map<string, ModelSource>();
+  private sources = new Map<string, File>();
   private listeners = new Set<(state: WorkspaceState) => void>();
   private queue: Promise<void> = Promise.resolve();
   private revision = 0;
@@ -17,6 +16,7 @@ export class WorkspaceManager {
   subscribe(listener: (state: WorkspaceState) => void) { this.listeners.add(listener); listener(structuredClone(this.state)); return () => { this.listeners.delete(listener); }; }
   private emit() { const snapshot = structuredClone(this.state); for (const listener of this.listeners) listener(snapshot); }
   snapshot() { return structuredClone(this.state); }
+  get activeSourceFile() { return this.sources.get(this.state.activeDocumentId ?? "") ?? null; }
   saveActive() {
     const doc = activeDocument(this.state), view = activeView(this.state);
     if (doc && view && this.viewer.modelHash === doc.modelHash && !this.viewer.sectionBoxCreationActive) view.state = this.viewer.captureViewState();
@@ -62,18 +62,17 @@ export class WorkspaceManager {
     this.queue = task.catch(() => {});
     return task;
   }
-  openDocument(input: File | ModelSource) {
-    const source = normalizeModelSource(input);
+  openDocument(file: File) {
     return this.run(async check => {
-      await this.viewer.load(source, { identified: hash => {
+      await this.viewer.load(file, { identified: hash => {
         check();
         let doc = this.state.documents.find(d => d.modelHash === hash);
         if (!doc) {
-          doc = { id: hash, modelHash: hash, filename: source.name, activeViewId: "", views: [],
+          doc = { id: hash, modelHash: hash, filename: file.name, activeViewId: "", views: [],
             readiness: emptyModelReadiness(), expandedNodes: [], error: null };
           this.state.documents.push(doc);
         }
-        this.sources.set(doc.id, source);
+        this.sources.set(doc.id, file);
         this.state.requestedDocumentId = doc.id; doc.error = null; doc.sourceIssue = null; this.emit();
         return doc.views.find(v => v.id === doc.activeViewId)?.state;
       } });
@@ -92,9 +91,9 @@ export class WorkspaceManager {
   }
   private async loadDocument(doc: DocumentSession) {
     this.state.requestedDocumentId = doc.id; doc.error = null; this.emit();
-    const source = this.sources.get(doc.id);
-    if (!source) throw new ModelSourceError("unavailable");
-    await this.viewer.load(source, { hash: doc.modelHash, state: doc.views.find(v => v.id === doc.activeViewId)?.state });
+    const file = this.sources.get(doc.id);
+    if (!file) throw new ModelSourceError("unavailable");
+    await this.viewer.load(file, { hash: doc.modelHash, state: doc.views.find(v => v.id === doc.activeViewId)?.state });
     this.adoptLoaded();
   }
   activateDocument(id: string) {

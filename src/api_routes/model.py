@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-from api_contracts import RetrySemanticRequest
+from api_contracts import RetrySemanticRequest, SaveManualAnchorRequest, SemanticFilterRequest
 from model_runtime import retry_semantic_index
 from model_limits import ModelTooLargeError
 
 import logging
 
-from fastapi import APIRouter, File, Request, UploadFile
+from fastapi import APIRouter, File, Query, Request, UploadFile
 from fastapi import Path as FastApiPath
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 import model_operations
-from api_contracts import StageModelRequest, StageActionRequest, StageModelResponse, CacheClearRequest, ElementsRequest
+from api_contracts import StageModelRequest, StageActionRequest, StageModelResponse, CacheClearRequest
 from api_contracts import (
     ActivateModelResponse,
     CancelModelLoadRequest,
@@ -54,17 +54,15 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             return model_operations.prepare_stage(request.stageId, request.modelHash, request.filename)
         except FileNotFoundError:
             return error_response(404, "model_not_cached")
-        except ModelTooLargeError as error:
-            return error_response(413, str(error))
+        except ModelTooLargeError:
+            return error_response(413, "ifc_file_exceeds_1_gib_limit")
         except ValueError as error:
             return error_response(409, str(error))
 
     @router.post("/model/stage/{stageId}", response_model=StageModelResponse)
     def stage_action(request: StageActionRequest, stageId: str = FastApiPath(pattern="^[0-9a-f-]{36}$")):
         try:
-            return model_operations.transition_stage(stageId, request.action, request.semanticMode)
-        except ModelTooLargeError as error:
-            return error_response(413, str(error))
+            return model_operations.transition_stage(stageId, request.action)
         except ValueError as error:
             return error_response(409, str(error))
 
@@ -75,14 +73,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.post("/model/cache/clear")
     def clear_cache(request: CacheClearRequest):
         return model_operations.cached_storage(request.scope)
-
-    @router.get("/model/source/{modelHash}", response_model=None)
-    def get_model_source(modelHash: str = FastApiPath(pattern=MODEL_HASH_PATTERN)):
-        try:
-            path = model_operations.cached_model_source(modelHash)
-        except FileNotFoundError:
-            return error_response(404, "model_not_cached")
-        return FileResponse(path, media_type="application/octet-stream", filename=f"{modelHash}.ifc")
 
     @router.post(
         "/load-model",
@@ -101,8 +91,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
                 originalFilename=loaded.original_filename,
                 sizeBytes=loaded.size_bytes,
             )
-        except ModelTooLargeError as error:
-            return error_response(413, str(error))
+        except ModelTooLargeError:
+            return error_response(413, "ifc_file_exceeds_1_gib_limit")
         except Exception:
             logger.exception(
                 "Model upload materialization failed",
@@ -160,8 +150,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             )
         except (FileNotFoundError, HashMismatchError):
             return error_response(404, "model_not_cached")
-        except ModelTooLargeError as error:
-            return error_response(413, str(error))
+        except ModelTooLargeError:
+            return error_response(413, "ifc_file_exceeds_1_gib_limit")
         return {"ok": True, **info}
 
     @router.post("/model/cancel-load")
@@ -183,8 +173,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             return error_response(404, str(exc))
         except HashMismatchError as exc:
             return error_response(409, str(exc))
-        except ModelTooLargeError as error:
-            return error_response(413, str(error))
+        except ModelTooLargeError:
+            return error_response(413, "ifc_file_exceeds_1_gib_limit")
         return {"ok": True, **info}
 
     @router.post("/model/retry-semantic")
@@ -196,6 +186,128 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
     @router.get("/model/runtime", response_model=ModelRuntimeResponse)
     def get_model_runtime():
         return model_operations.runtime_status()
+
+    @router.get("/model/georeference", response_model=None)
+    def get_model_georeference(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
+        try:
+            return model_operations.model_georeference(modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("IFC georeference query failed", extra={"event": "georeference_failed"})
+            return error_response(500, "georeference_failed")
+
+    @router.get("/model/browser", response_model=None)
+    def get_model_browser(
+        modelHash: str = Query(pattern=MODEL_HASH_PATTERN),
+        view: str = Query(pattern="^(spatial|systems|types|groups|classification|material)$"),
+    ):
+        try:
+            return model_operations.model_browser(modelHash, view)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("Model browser query failed", extra={"event": "model_browser_failed"})
+            return error_response(500, "model_browser_failed")
+
+    @router.get("/model/semantic-search", response_model=None)
+    def search_semantic_values(
+        modelHash: str = Query(pattern=MODEL_HASH_PATTERN),
+        kind: str = Query(pattern="^(pset|qto)$"),
+        setName: str = Query(min_length=1, max_length=128),
+        propertyName: str = Query(min_length=1, max_length=128),
+        op: str = Query(pattern="^(eq|contains|gt|gte|lt|lte)$"),
+        value: str = Query(max_length=256),
+        ifcType: str = Query(default="", max_length=80),
+        limit: int = Query(default=200, ge=1, le=500),
+    ):
+        try:
+            return model_operations.semantic_search(
+                modelHash, kind, setName, propertyName, op, value, ifcType, limit)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except ValueError as exc:
+            return error_response(422, str(exc))
+        except Exception:
+            logger.exception("Semantic property search failed", extra={"event": "semantic_search_failed"})
+            return error_response(500, "semantic_search_failed")
+
+    @router.post("/model/semantic-search", response_model=None)
+    def filter_semantic_values(request: SemanticFilterRequest):
+        try:
+            return model_operations.semantic_filter(request.modelHash,
+                [condition.model_dump() for condition in request.conditions], request.match,
+                request.ifcType, request.cursor, request.limit)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except ValueError as exc:
+            return error_response(422, str(exc))
+        except Exception:
+            logger.exception("BIM filter failed", extra={"event": "semantic_filter_failed"})
+            return error_response(500, "semantic_filter_failed")
+
+    @router.get("/model/semantic-fields", response_model=None)
+    def get_semantic_fields(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
+        try:
+            return model_operations.semantic_fields(modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("BIM fields failed", extra={"event": "semantic_fields_failed"})
+            return error_response(500, "semantic_fields_failed")
+
+    @router.get("/model/gis-anchor", response_model=None)
+    def get_gis_anchor(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
+        try:
+            return model_operations.manual_anchor(modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except NoActiveModelError as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("GIS anchor read failed", extra={"event": "gis_anchor_read_failed"})
+            return error_response(500, "gis_anchor_read_failed")
+
+    @router.post("/model/gis-anchor", response_model=None)
+    def save_gis_anchor(request: SaveManualAnchorRequest):
+        try:
+            return model_operations.save_manual_anchor(request.modelHash, {
+                "longitude": request.longitude, "latitude": request.latitude,
+                "elevationMeters": request.elevationMeters,
+                "rotationDegrees": request.rotationDegrees % 360,
+                "scale": request.scale,
+                **({"groundOffsetMeters": request.groundOffsetMeters}
+                   if request.groundOffsetMeters is not None else {}),
+            })
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except NoActiveModelError as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("GIS anchor save failed", extra={"event": "gis_anchor_save_failed"})
+            return error_response(500, "gis_anchor_save_failed")
+
+    @router.delete("/model/gis-anchor", response_model=None)
+    def delete_gis_anchor(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
+        try:
+            return model_operations.delete_manual_anchor(modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except NoActiveModelError as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("GIS anchor delete failed", extra={"event": "gis_anchor_delete_failed"})
+            return error_response(500, "gis_anchor_delete_failed")
 
     @router.get(
         "/model/tree",
@@ -239,18 +351,6 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
                 content=ErrorResponse(error="model_search_failed").model_dump(),
             )
 
-    @router.post("/model/elements", response_model=None)
-    def get_elements(request: ElementsRequest):
-        try:
-            return model_operations.element_records(request.localIds, request.globalIds)
-        except ValueError as exc:
-            return error_response(422, str(exc))
-        except (IndexPreparingError, NoActiveModelError) as exc:
-            return _model_error(exc)
-        except Exception:
-            logger.exception("Model element batch failed", extra={"event": "model_element_batch_failed"})
-            return error_response(500, "model_element_batch_failed")
-
     @router.get(
         "/element/by-express-id/{expressId}",
         response_model=None,
@@ -274,6 +374,23 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
                 status_code=500,
                 content=ErrorResponse(error="extraction_failed").model_dump(),
             )
+
+    @router.get("/element/by-express-id/{expressId}/bim", response_model=None)
+    def get_bim_element_by_express_id(
+        expressId: int,
+        modelHash: str = Query(pattern=MODEL_HASH_PATTERN),
+    ):
+        try:
+            return model_operations.bim_element_by_express_id(expressId, modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except LookupError:
+            return error_response(404, "element_not_found")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("BIM element query failed", extra={"event": "bim_element_failed"})
+            return error_response(500, "bim_element_failed")
 
     @router.get(
         "/element/{globalId}",

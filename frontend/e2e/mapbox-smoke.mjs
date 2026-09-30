@@ -1,0 +1,178 @@
+import { chromium, expect } from '@playwright/test';
+import { spawn } from 'node:child_process';
+import { readFile, mkdir, mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { randomBytes, createHash } from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+const envText=await readFile(path.join(root,'frontend/.env.local'),'utf8');
+const publicToken=process.env.MAPBOX_TEST_TOKEN || envText.match(/^VITE_MAPBOX_ACCESS_TOKEN=(.+)$/m)?.[1]?.trim();
+if(!publicToken?.startsWith('pk.')) throw new Error('Set a public Mapbox token in frontend/.env.local');
+const session=randomBytes(32).toString('hex');
+const cacheDir=await mkdtemp(path.join(tmpdir(),'testifc-mapbox-smoke-'));
+const output=path.join(root,'reports/mapbox'); await mkdir(output,{recursive:true});
+const children=[];
+function child(executable,args,options={}) {
+  const process=spawn(executable,args,{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe'],...options});children.push(process);
+  let messages=''; process.stderr.on('data',data=>messages=(messages+data).slice(-6000));
+  process.on('exit',code=>{ if(code && code!==null) console.error(`Smoke host exited ${code}`); });
+  return process;
+}
+const python=path.join(root,'.venv/Scripts/python.exe');
+const port=Number(process.env.MAPBOX_TEST_PORT || 4173);
+const host=child(python,['-c',`import sys; sys.path[:0]=['src','desktop']; import uvicorn; from app import app; from fastapi.staticfiles import StaticFiles; app.mount('/',StaticFiles(directory='frontend/dist',html=True)); uvicorn.run(app,host='127.0.0.1',port=${port},log_level='warning')`],{env:{...process.env,IFC_API_SESSION_TOKEN:session,IFC_MODEL_CACHE_DIR:cacheDir}});
+async function wait(url) { const end=Date.now()+30000; while(Date.now()<end) { if(host.exitCode!==null) throw new Error('Smoke host failed'); try { if((await fetch(url)).ok) return; } catch {} await new Promise(r=>setTimeout(r,200)); } throw new Error('Smoke host startup timeout'); }
+let browser;
+try {
+  await wait(`http://127.0.0.1:${port}/health`);
+  browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});
+  const page=await browser.newPage({viewport:{width:1440,height:900}});
+  const errors=[]; page.on('pageerror',e=>{errors.push(e.message);console.log('Page error:',e.message);});
+  page.on('requestfailed',r=>{ if(r.url().startsWith('http://127.0.0.1')) console.log('Local asset failed:',new URL(r.url()).pathname,r.failure()?.errorText); });
+  page.on('console',message=>{ if(message.type()==='error') console.log('Browser error:',message.text().replace(/pk\.[A-Za-z0-9._-]+/g,'[public-token]').replace(/access_token=[^&\s]+/g,'access_token=[redacted]')); });
+  await page.addInitScript(({session})=>{
+    window.pywebview={api:{get_api_session:async()=>({token:session}),load_settings:async()=>null,save_settings:async settings=>settings}};
+    window.__gisReadiness=[];
+    window.addEventListener('message',event=>{if(event.origin===location.origin && event.data?.channel==='testifc-bim-gis-v1' && event.data.type==='model-ready') window.__gisReadiness.push({time:Date.now(),cached:event.data.cached,hash:event.data.hash,bounds:event.data.bounds});});
+  },{session});
+  await page.goto(`http://127.0.0.1:${port}/?viewerDebug=1`);
+  await expect(page.locator('.viewer-mount canvas')).toHaveCount(1);
+  await page.getByRole('button',{name:'BIM–GIS Mapbox',exact:true}).click();
+  await page.getByRole('button',{name:'Mở Cài đặt Mapbox'}).click();
+  await page.getByLabel(/\(pk\.\)/).fill(publicToken);
+  await page.getByRole('button',{name:'Kiểm tra key',exact:true}).click();
+  await expect(page.getByRole('status').filter({hasText:'Key hợp lệ'})).toBeVisible({timeout:15000});
+  await page.getByRole('button',{name:'Lưu key',exact:true}).click();
+  await page.locator('.viewer-settings__header button').click();
+  const frame=page.frameLocator('iframe[title="Mapbox BIM–GIS"]');
+  await expect(frame.locator('.mapboxgl-canvas')).toHaveCount(1,{timeout:30000});
+  await expect(frame.locator('.mapboxgl-ctrl-geocoder input')).toBeVisible();
+  await page.waitForTimeout(4000);
+  await page.screenshot({path:path.join(output,'01-globe.png')});
+  console.log('PASS Mapbox live Light v10 / globe / editable token');
+  const fixture=process.env.IFC_E2E_BIM_FIXTURE || path.join(root,'test-fixtures/phase3-bim.ifc');
+  const coldStart=Date.now();
+  await page.locator('input[type=file]').setInputFiles(fixture);
+  await expect(page.locator('.map-controls .status')).toContainText('IFC sẵn sàng',{timeout:45000});
+  const coldReady=await page.evaluate(()=>window.__gisReadiness.at(-1));
+  console.log(`Cold viewer + GIS ready: ${coldReady.time-coldStart} ms (end-to-end readiness, not first visible pixels)`);
+  console.log('GIS glTF bounds (m at scale 1):', coldReady.bounds);
+  await expect(page.locator('.map-controls .dimensions')).toHaveAttribute('aria-label','Kích thước trên bản đồ');
+  if (path.basename(fixture).toLowerCase() === 'heineken_full_rev00.ifc') {
+    expect(coldReady.bounds.width).toBeCloseTo(27.9, 1);
+    expect(coldReady.bounds.depth).toBeCloseTo(112.85, 1);
+    expect(coldReady.bounds.height).toBeCloseTo(29.69, 1);
+    await expect(page.locator('.map-controls .dimensions')).toContainText('112,85');
+  }
+  await page.getByRole('button',{name:'Tới mô hình',exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-model-layer','ready',{timeout:15000});
+  await expect.poll(()=>frame.locator('html').getAttribute('data-rendered-triangles')).not.toBe('0');
+  await page.waitForTimeout(3500);
+  await page.screenshot({path:path.join(output,'02-model.png')});
+  const activeFrame=page.frames().find(f=>f.url().includes('/vendor/bim-gis/index.html'));
+  const db=await activeFrame.evaluate(async()=>{
+    const opened=await new Promise((resolve,reject)=>{const r=indexedDB.open('TestIFC-BimGis');r.onsuccess=()=>resolve(r.result);r.onerror=reject;});
+    const rows=await new Promise((resolve,reject)=>{const r=opened.transaction('models').objectStore('models').getAll();r.onsuccess=()=>resolve(r.result);r.onerror=reject;});opened.close();
+    return rows.map(r=>({hash:r.hash,models:r.models.length,properties:r.properties.length}));
+  });
+  expect(db.length).toBeGreaterThan(0);expect(db.at(-1).models).toBeGreaterThan(0);expect(db.at(-1).properties).toBeGreaterThan(0);
+  console.log('PASS actual WebIFC 0.0.78 → instanced glTF + placement metadata → IndexedDB → Mapbox');
+  const originalGround=Number(await frame.locator('html').getAttribute('data-ground-offset'));
+  const originalLongitude=await frame.locator('html').getAttribute('data-anchor-longitude');
+  const rectangle=await frame.locator('.mapboxgl-canvas').boundingBox();
+  await page.getByRole('button',{name:'Xoay tại chỗ',exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-interaction','rotate');
+  await page.mouse.move(rectangle.x+rectangle.width*.6,rectangle.y+rectangle.height*.55);
+  await page.mouse.down();
+  await page.mouse.move(rectangle.x+rectangle.width*.6+90,rectangle.y+rectangle.height*.55,{steps:12});
+  await page.mouse.up();
+  await expect.poll(async()=>Number(await frame.locator('html').getAttribute('data-model-yaw'))).toBeCloseTo(31.5,1);
+  await expect(frame.locator('html')).toHaveAttribute('data-anchor-longitude',originalLongitude);
+  await page.getByRole('button',{name:'Reset',exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-model-yaw','0');
+  await page.getByRole('button',{name:'Căn mặt với đường',exact:true}).click();
+  let selected=false;
+  for(const [x,y] of [[.5,.36],[.5,.30],[.5,.40],[.49,.45],[.52,.35],[.48,.35],[.52,.45],[.5,.48]]) {
+    await frame.locator('.mapboxgl-canvas').click({position:{x:rectangle.width*x,y:rectangle.height*y}});
+    if(await frame.locator('html').getAttribute('data-interaction')==='none'){selected=true;break;}
+  }
+  expect(selected,'surface picking must hit actual IFC geometry').toBe(true);
+  await expect(page.locator('.map-controls .status')).toContainText('Đã căn mặt');
+  const selectedGround=Number(await frame.locator('html').getAttribute('data-ground-offset'));
+  expect(selectedGround).toBeGreaterThanOrEqual(originalGround);
+  await expect(frame.locator('html')).toHaveAttribute('data-anchor-longitude',originalLongitude);
+  await page.getByRole('button',{name:'Lưu vị trí',exact:true}).click();
+  await expect(page.locator('.map-controls .status')).toContainText('Đã lưu vị trí thủ công');
+  await page.getByRole('button',{name:'Căn mặt với đường',exact:true}).click();
+  await page.getByLabel('Mốc nền từ đáy mô hình (m)',{exact:true}).fill('0');
+  await page.getByRole('button',{name:'Reset',exact:true}).click();
+  await expect.poll(async()=>Number(await frame.locator('html').getAttribute('data-ground-offset'))).toBeCloseTo(selectedGround,5);
+  await page.getByRole('button',{name:'Chi tiết',exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-deferred-triangles','0');
+  await page.getByRole('button',{name:'Mượt',exact:true}).click();
+  console.log('PASS surface hit / saved road datum / pointer rotation / fixed pivot / reset / full-detail restoration');
+
+  await page.getByRole('button',{name:'Xoay tại chỗ',exact:true}).click();
+  await page.getByLabel('Xoay IFC (°)',{exact:true}).fill('45');
+  await page.locator('.editing summary').click();
+  await page.getByLabel('Cao độ đường (m)',{exact:true}).fill('5');
+  await page.getByRole('button',{name:'Hủy',exact:true}).click();
+  await page.getByRole('button',{name:'Xoay tại chỗ',exact:true}).click();
+  await expect(page.getByLabel('Xoay IFC (°)',{exact:true})).toHaveValue('0');
+  await page.getByRole('button',{name:'Đặt marker trên bản đồ',exact:true}).click();
+  const markerBefore=await frame.locator('.mapboxgl-marker').elementHandle();
+  await frame.locator('.mapboxgl-canvas').click({position:{x:850,y:450}});
+  expect(await markerBefore.evaluate(element=>element.isConnected)).toBe(true);
+  await page.getByRole('button',{name:'Xoay tại chỗ',exact:true}).click();
+  await page.getByLabel('Xoay IFC (°)',{exact:true}).fill('30');
+  await page.getByRole('button',{name:'Lưu vị trí',exact:true}).click();
+  await expect(page.locator('.map-controls .status')).toContainText('Đã lưu vị trí thủ công');
+  await page.screenshot({path:path.join(output,'03-placed.png')});
+  console.log('PASS map click / yaw preview / cancel / backend placement save');
+  const cameraBefore=await activeFrame.evaluate(()=>JSON.parse(sessionStorage.getItem('testifc-map-camera')));
+  // A saved token may be deleted and restored without repeating conversion.
+  await page.getByRole('button',{name:'BIM–GIS Mapbox',exact:true}).click();
+  await expect(page.locator('.viewer-mount')).toHaveCSS('visibility','visible');
+  await page.getByRole('button',{name:'BIM–GIS Mapbox',exact:true}).click();
+  await page.getByRole('button',{name:'Cài đặt hiển thị',exact:true}).click();
+  await page.getByRole('button',{name:'Xóa key',exact:true}).click();
+  await expect(page.locator('.map-controls')).toContainText('Thêm public token');
+  await page.getByLabel(/\(pk\.\)/).fill(publicToken);
+  await page.getByRole('button',{name:'Lưu key',exact:true}).click();
+  await page.locator('.viewer-settings__header button').click();
+  await expect(page.locator('.map-controls .status')).toContainText('Đã lưu vị trí thủ công');
+  await expect(frame.locator('.mapboxgl-canvas')).toHaveCount(1);
+  await page.waitForTimeout(1500);
+  const cameraAfter=await activeFrame.evaluate(()=>JSON.parse(sessionStorage.getItem('testifc-map-camera')));
+  expect(cameraAfter.zoom).toBeCloseTo(cameraBefore.zoom,6);
+  expect(cameraAfter.center[0]).toBeCloseTo(cameraBefore.center[0],6);
+  expect(cameraAfter.center[1]).toBeCloseTo(cameraBefore.center[1],6);
+  await page.reload();
+  await page.getByRole('button',{name:'BIM–GIS Mapbox',exact:true}).click();
+  const warmStart=Date.now();await page.locator('input[type=file]').setInputFiles(fixture);
+  await expect(page.locator('.map-controls .status')).toContainText('cache',{timeout:60000});
+  const warmReady=await page.evaluate(()=>window.__gisReadiness.at(-1));
+  await expect.poll(async()=>Number(await frame.locator('html').getAttribute('data-ground-offset'))).toBeCloseTo(selectedGround,5);
+  console.log(`Warm viewer + GIS ready: ${warmReady.time-warmStart} ms (cache reopening)`);
+  console.log('PASS viewer/map switch / token removal+restore / warm glTF cache');
+  const alternate=path.join(root,'test-fixtures/phase3-georef.ifc');
+  const otherHash=createHash('sha256').update(await readFile(alternate)).digest('hex');
+  await page.locator('input[type=file]').setInputFiles(alternate);
+  await expect(frame.locator('html')).toHaveAttribute('data-model-hash',otherHash,{timeout:60000});
+  await expect(frame.locator('html')).toHaveAttribute('data-model-state','ready',{timeout:60000});
+  await expect(frame.locator('html')).toHaveAttribute('data-model-triangles','12');
+  await expect(frame.locator('.mapboxgl-marker')).toHaveCount(1);
+  await page.getByRole('button',{name:'Close phase3-georef.ifc',exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-model-hash',coldReady.hash,{timeout:60000});
+  await expect(frame.locator('html')).toHaveAttribute('data-model-state','ready',{timeout:60000});
+  await page.getByRole('button',{name:`Close ${path.basename(fixture)}`,exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-model-state','empty',{timeout:30000});
+  await expect(frame.locator('.mapboxgl-marker')).toHaveCount(0);
+  console.log('PASS document replacement / exact active hash / one marker / complete 12-triangle beam / close lifecycle');
+  expect(errors).toEqual([]);
+} finally {
+  await browser?.close();
+  for(const p of children) if(p.exitCode===null) p.kill();
+}

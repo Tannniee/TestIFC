@@ -40,14 +40,14 @@ test("transactional A/B loading preserves A on failure/cancel and Section Box cl
     root.originalCamera = JSON.stringify(root.viewer.view.captureState());
     root.originalClipping = JSON.stringify(root.viewer.sectionBox);
   });
-  // Fail an actual native manifest request after the backend has issued a stage lease.
-  await page.route("**/model/engine-v2/artifacts/*/manifest", async route => {
+  // Fail an actual cache request after the backend has issued a stage lease.
+  await page.route("**/model/fragments/**", async route => {
     if (route.request().method() === "GET") await route.fulfill({ status: 500, body: "injected cache read failure" });
     else await route.continue();
   });
   await input.setInputFiles(modelB!);
   await expect.poll(() => page.evaluate(() => (window as any).loadResult)).toContain("injected cache read failure");
-  await page.unroute("**/model/engine-v2/artifacts/*/manifest");
+  await page.unroute("**/model/fragments/**");
   const preserved = await page.evaluate(async () => {
     const root = window as any;
     return { same: root.originalA === root.viewer.loader.activeModel,
@@ -68,14 +68,14 @@ test("transactional A/B loading preserves A on failure/cancel and Section Box cl
     same: (window as any).viewer.loader.activeModel === (window as any).originalA,
     clipping: JSON.stringify((window as any).viewer.sectionBox) === (window as any).originalClipping,
     backend: (await (await fetch("/model/runtime")).json()).activeModelHash,
-    models: ((window as any).viewer.loader.activeModel ? 1 : 0),
+    models: (window as any).viewer.loader.fragments.models.list.size,
   }))).toEqual({ same: true, clipping: true, backend: hashA, models: 1 });
   await page.evaluate(() => { (window as any).viewer.loader.callbacks.update = (window as any).originalUpdate; });
   // Hold a cancellable request while exercising the real Cancel button.
   await page.evaluate(async () => {
     const { api } = await import(/* @vite-ignore */ "/src/lib/api.ts");
-    (window as any).originalNativeManifest = api.engineV2Manifest;
-    api.engineV2Manifest = (_: string, signal: AbortSignal) => new Promise((_, reject) => {
+    (window as any).originalFragments = api.getFragments;
+    api.getFragments = (_: string, signal: AbortSignal) => new Promise((_, reject) => {
       signal.addEventListener("abort", () => reject(new DOMException("cancelled", "AbortError")), { once: true });
     });
   });
@@ -87,15 +87,15 @@ test("transactional A/B loading preserves A on failure/cancel and Section Box cl
   await expect.poll(() => page.evaluate(() => (window as any).viewer.loader.activeModel === (window as any).originalA)).toBe(true);
   await page.evaluate(async () => {
     const { api } = await import(/* @vite-ignore */ "/src/lib/api.ts");
-    api.engineV2Manifest = (window as any).originalNativeManifest;
+    api.getFragments = (window as any).originalFragments;
   });
   // B is superseded by C (the same IFC bytes as A); only C may finish.
   await page.evaluate(async () => {
     const { api } = await import(/* @vite-ignore */ "/src/lib/api.ts");
     const root = window as any;
     root.heldB = false;
-    api.engineV2Manifest = (key: string, signal: AbortSignal) => {
-      if (key.startsWith(root.metrics[0].modelHash)) return root.originalNativeManifest(key, signal);
+    api.getFragments = (key: string, signal: AbortSignal) => {
+      if (key.startsWith(root.metrics[0].modelHash)) return root.originalFragments(key, signal);
       root.heldB = true;
       return new Promise((_, reject) => signal.addEventListener("abort", () => reject(new DOMException("superseded", "AbortError")), { once: true }));
     };
@@ -105,7 +105,7 @@ test("transactional A/B loading preserves A on failure/cancel and Section Box cl
   await open(modelA!);
   await page.evaluate(async () => {
     const { api } = await import(/* @vite-ignore */ "/src/lib/api.ts");
-    api.engineV2Manifest = (window as any).originalNativeManifest;
+    api.getFragments = (window as any).originalFragments;
   });
   // Lose the first successful commit reply; retry must reuse exactly one ticket.
   const commitTickets: string[] = [];
@@ -160,19 +160,20 @@ test("transactional A/B loading preserves A on failure/cancel and Section Box cl
   expect(metrics[2].cacheHit).toBe(true);
   const final = await page.evaluate(async () => ({
     backend: (await (await fetch("/model/runtime")).json()).activeModelHash,
-    models: ((window as any).viewer.loader.activeModel ? 1 : 0),
+    models: (window as any).viewer.loader.fragments.models.list.size,
   }));
   expect(final).toEqual({ backend: hashA, models: 1 });
   const transforms = await page.evaluate(() => (window as any).viewer.loader.activeModel.object.position.toArray());
   expect(transforms).toEqual([0, 0, 0]);
   await page.getByRole("button", { name: "Cài đặt hiển thị", exact: true }).click();
+  await page.getByRole("tab", {name:"Bộ nhớ",exact:true}).click();
   await expect(page.locator(".cache-settings")).toContainText("Fragment:");
   const viewport = page.viewportSize()!;
   await page.setViewportSize({ width: 420, height: 320 });
   await expect(page.locator(".viewer-settings")).toBeInViewport({ ratio: 1 });
   await page.setViewportSize(viewport);
   await page.screenshot({ path: "../benchmarks/results/upgrade-20260903/cache-options-light.png" });
-  await page.getByRole("button", { name: "Clear fragment cache", exact: true }).click();
+  await page.getByRole("button", { name: "Dọn bộ nhớ hình học", exact: true }).click();
   await expect(page.locator(".cache-settings [role=status]")).toContainText("Đã dọn");
   expect(await page.evaluate(async () => (await (await fetch("/model/runtime")).json()).activeModelHash)).toBe(hashA);
   await page.evaluate(() => document.querySelector(".qn-theme")!.setAttribute("data-mode", "dark"));

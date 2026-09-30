@@ -13,20 +13,15 @@ const backendPort = Number(process.env.IFC_BENCH_PORT || 8140);
 const frontendPort = backendPort + 1;
 const semanticTimeoutMs = Number(process.env.IFC_BENCH_SEMANTIC_TIMEOUT_MS || 20 * 60_000);
 const fragmentProfile = process.env.IFC_BENCH_FRAGMENT_PROFILE;
-const viewerEngine = process.env.IFC_BENCH_ENGINE;
 if (fragmentProfile && !["full", "attributes", "minimum"].includes(fragmentProfile)) {
   throw new Error(`Invalid IFC_BENCH_FRAGMENT_PROFILE: ${fragmentProfile}`);
 }
-if (viewerEngine && !["webifc", "auto", "engine-v2"].includes(viewerEngine)) {
-  throw new Error(`Invalid IFC_BENCH_ENGINE: ${viewerEngine}`);
-}
 const coldOnly = process.env.IFC_BENCH_COLD_ONLY === "1";
-const skipPropertyProbe = process.env.IFC_BENCH_SKIP_PROPERTY === "1";
-const cacheDir = process.env.IFC_BENCH_CACHE_DIR || path.join(output, "cache");
-const viewerUrl = new URL(`http://127.0.0.1:${frontendPort}`);
-if (fragmentProfile) viewerUrl.searchParams.set("fragmentProfile", fragmentProfile);
-if (viewerEngine) viewerUrl.searchParams.set("ifcEngine", viewerEngine);
-const url = viewerUrl.href;
+const query = new URLSearchParams();
+if (fragmentProfile) query.set("fragmentProfile", fragmentProfile);
+if (process.env.IFC_BENCH_ADAPTIVE_DPR === "1") query.set("adaptiveDpr", "1");
+if (process.env.IFC_BENCH_FRAGMENT_UPDATE_MS === "33") query.set("fragmentUpdateMs", "33");
+const url = `http://127.0.0.1:${frontendPort}${query.size ? `?${query}` : ""}`;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const limit = (promise, ms, label) => {
   let timer;
@@ -45,7 +40,9 @@ const manifestPath = path.resolve(process.env.IFC_BENCH_MANIFEST || path.join(ro
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 const filter = process.env.IFC_BENCH_MODELS?.split(",");
 const models = manifest.models.filter((model) => !filter || filter.includes(model.id));
-const results = { startedAt: new Date().toISOString(), viewport: { width: 1440, height: 900 }, models: [] };
+const results = { startedAt: new Date().toISOString(), viewport: { width: 1440, height: 900 },
+  adaptiveDpr: process.env.IFC_BENCH_ADAPTIVE_DPR === "1",
+  fragmentUpdateMs: process.env.IFC_BENCH_FRAGMENT_UPDATE_MS === "33" ? 33 : 50, models: [] };
 
 async function phase(name, page) {
   await writeFile(phaseFile, JSON.stringify({ model: currentModel, phase: name }));
@@ -92,7 +89,8 @@ async function instrument(page) {
   await page.evaluate(async () => {
     const source = "/src/lib/viewer.ts";
     const { ViewerService } = await import(source);
-    const b = window.__bench = { phase: "baseline", runs: [], frames: {}, inputFrames: {}, longTasks: {}, pendingInputs: [], selectionEvents: [], measurements: [], events: [] };
+    const b = window.__bench = { phase: "baseline", runs: [], frames: {}, inputFrames: {}, longTasks: {},
+      pixelRatios: {}, pendingInputs: [], selectionEvents: [], measurements: [], events: [] };
     let lastFrame = performance.now();
     const push = (map, value) => { const list = map[b.phase] ||= []; if (list.length < 120000) list.push(value); };
     function frame(now) { push(b.frames, now - lastFrame); lastFrame = now; requestAnimationFrame(frame); }
@@ -102,7 +100,7 @@ async function instrument(page) {
       document.addEventListener(type, (event) => { if (event.target instanceof HTMLCanvasElement) b.pendingInputs.push({ phase: b.phase, at: event.timeStamp }); }, true);
     }
     const original = ViewerService.prototype.load;
-    ViewerService.prototype.load = function(file, ...args) {
+    ViewerService.prototype.load = function(file) {
       window.__benchViewer = this;
       const run = { name: file.name, started: performance.now(), stages: [], bridge: [], done: false, error: null };
       b.runs.push(run); b.current = run;
@@ -129,6 +127,7 @@ async function instrument(page) {
         const render = this.renderer.render.bind(this.renderer);
         this.renderer.render = (...args) => {
           render(...args);
+          push(b.pixelRatios, this.renderer.getPixelRatio());
           const now = performance.now();
           const current = b.current;
           if (current && !current.firstModelRenderMs && this.activeModel?.modelId.endsWith(`-${current.sequence}`)) current.firstModelRenderMs = now - current.started;
@@ -138,7 +137,7 @@ async function instrument(page) {
           }
         };
       }
-      return original.call(this, file, ...args).then(() => { run.done = true; run.completedMs = performance.now() - run.started; }, (error) => {
+      return original.call(this, file).then(() => { run.done = true; run.completedMs = performance.now() - run.started; }, (error) => {
         run.done = true; run.error = String(error); run.completedMs = performance.now() - run.started; throw error;
       });
     };
@@ -194,15 +193,20 @@ async function snapshot(page) {
       const quantile = (p) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? null;
       return [key, { samples: sorted.length, p50Ms: quantile(0.5), p95Ms: quantile(0.95), p99Ms: quantile(0.99), maxMs: sorted.at(-1) ?? null, over50Ms: sorted.filter((v) => v > 50).length }];
     }));
-    return { runs: b.runs, frames: summarize(b.frames), inputToRender: summarize(b.inputFrames), longTasks: summarize(b.longTasks), selections: b.selectionEvents, measurementCount: b.measurements.length,
-      renderer: v && { memory: { ...v.renderer.info.memory }, drawCalls: v.renderer.info.render.calls, triangles: v.renderer.info.render.triangles }, canvasCount: document.querySelectorAll(".viewer-mount canvas").length };
+    const pixelRatios = Object.fromEntries(Object.entries(b.pixelRatios).map(([key, values]) =>
+      [key, { samples: values.length, min: values.reduce((best, value) => Math.min(best, value), Infinity),
+        max: values.reduce((best, value) => Math.max(best, value), -Infinity) }]));
+    return { runs: b.runs, frames: summarize(b.frames), inputToRender: summarize(b.inputFrames), longTasks: summarize(b.longTasks),
+      pixelRatios, selections: b.selectionEvents, measurementCount: b.measurements.length,
+      renderer: v && { memory: { ...v.renderer.info.memory }, latestFrame: v.viewDiagnostics.latestFrame },
+      canvasCount: document.querySelectorAll(".viewer-mount canvas").length };
   }), 30_000, "snapshot");
 }
 
 try {
   await phase("setup");
   const backend = launch(python, ["benchmarks/serve_benchmark.py", String(backendPort), path.join(output, "backend.stop")], "backend", {
-    IFC_MODEL_CACHE_DIR: cacheDir, IFC_CACHE_KEEP_MODELS: "8", IFC_CACHE_MAX_BYTES: String(80 * 1024 ** 3),
+    IFC_MODEL_CACHE_DIR: path.join(output, "cache"), IFC_CACHE_KEEP_MODELS: "8", IFC_CACHE_MAX_BYTES: String(80 * 1024 ** 3),
   });
   backend.stdin.end();
   const vite = launch(process.execPath, ["frontend/node_modules/vite/bin/vite.js", "frontend", "--host", "127.0.0.1", "--port", String(frontendPort), "--strictPort"], "vite", { IFC_BRIDGE_URL: `http://127.0.0.1:${backendPort}` });
@@ -233,21 +237,7 @@ try {
       entry.webglRenderer = gpuRenderer;
       console.log(JSON.stringify({ model: model.id, sizeBytes: entry.sizeBytes, renderer: gpuRenderer }));
       await loadModel(page, model, "cold-load");
-      entry.semanticCoreProbe = viewerEngine === "engine-v2" ? await page.evaluate(async () => {
-        const model = window.__benchViewer.model;
-        const [localId] = await model.getItemsIdsWithGeometry();
-        const [item] = await model.getItemsData([localId]);
-        const [guid] = await model.getGuidsByLocalIds([localId]);
-        const tree = await model.getSpatialStructure();
-        return {
-          localId,
-          guid,
-          name: item?.Name?.value ?? null,
-          category: item?._category?.value ?? null,
-          roots: tree.children?.length ?? 0,
-        };
-      }) : { skipped: true };
-      entry.propertyProbe = skipPropertyProbe ? { skipped: true } : await page.evaluate(async () => {
+      entry.propertyProbe = await page.evaluate(async () => {
         const model = window.__benchViewer.model;
         const [localId] = await model.getItemsIdsWithGeometry();
         const relationNames = ["IsDefinedBy", "IsTypedBy", "HasProperties", "Quantities"];
@@ -282,38 +272,8 @@ try {
       await delay(1500);
       await phase("select", page);
       const box = await page.locator(".viewer-mount canvas").boundingBox();
-      const raycastProbe = await page.evaluate(async () => {
-        const viewer = window.__benchViewer, model = viewer.model, dom = viewer.renderer.domElement;
-        const vector = (x, y) => ({ x, y,
-          clone() { return vector(this.x, this.y); },
-          subScalar(value) { this.x -= value; this.y -= value; return this; },
-          addScalar(value) { this.x += value; this.y += value; return this; },
-        });
-        const bounds = dom.getBoundingClientRect();
-        for (let row = 1; row < 20; row++) for (let column = 1; column < 20; column++) {
-          const x = bounds.left + bounds.width * column / 20, y = bounds.top + bounds.height * row / 20;
-          const mouse = vector(x, y);
-          const hit = await model.raycast({ camera: viewer.camera, mouse, dom });
-          if (hit) {
-            const [edge] = await model.raycastWithSnapping({ camera: viewer.camera, mouse, dom, snappingClasses: [1] }) ?? [];
-            return { x, y, localId: hit.localId, edgeSnap: Boolean(edge?.snappedEdgeP1 && edge?.snappedEdgeP2) };
-          }
-        }
-        return null;
-      });
-      entry.raycastProbe = raycastProbe;
-      let hitPoint = raycastProbe ? { x: raycastProbe.x, y: raycastProbe.y } : null;
-      if (hitPoint) {
-        const before = await page.evaluate(() => window.__bench.selectionEvents.length);
-        const at = Date.now();
-        await page.mouse.click(hitPoint.x, hitPoint.y);
-        for (let i = 0; i < 30; i++) {
-          await delay(100);
-          const event = await limit(page.evaluate(() => ({ count: window.__bench.selectionEvents.length, last: window.__bench.selectionEvents.at(-1) })), 30_000, "selection");
-          if (event.count > before) { if (event.last.hit) entry.selectionResponseMs = Date.now() - at; else hitPoint = null; break; }
-        }
-      }
-      if (!hitPoint) for (const [fx, fy] of [[0.5, 0.5], [0.4, 0.5], [0.6, 0.5], [0.5, 0.4], [0.5, 0.6], [0.3, 0.4], [0.7, 0.6]]) {
+      let hitPoint = null;
+      for (const [fx, fy] of [[0.5, 0.5], [0.4, 0.5], [0.6, 0.5], [0.5, 0.4], [0.5, 0.6], [0.3, 0.4], [0.7, 0.6]]) {
         const before = await page.evaluate(() => window.__bench.selectionEvents.length);
         const at = Date.now();
         const point = { x: box.x + box.width * fx, y: box.y + box.height * fy };
@@ -380,7 +340,7 @@ try {
       entry.final = await snapshot(page);
       await page.screenshot({ path: path.join(output, `${model.id}-loaded.png`) });
       await phase("unload", page);
-      await page.evaluate(async () => { await window.__benchViewer.closeModel(); });
+      await page.evaluate(async () => { await window.__benchViewer.cancelLoad(); });
       const cdp = await context.newCDPSession(page);
       await cdp.send("HeapProfiler.collectGarbage");
       await delay(3000);

@@ -4,6 +4,7 @@ numpy==2.5.2
 pydantic==2.13.4
 python-multipart==0.0.22
 pywebview==6.2.1
+pyproj==3.8.0
 pywin32==312
 uvicorn==0.52.4
 websockets==17.0.1

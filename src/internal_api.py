@@ -51,5 +51,9 @@ class InternalApiSession:
             response.headers["Cache-Control"] = "no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["X-Frame-Options"] = "DENY"
+        # The isolated IFC.js renderer is a local packaged asset, embedded only
+        # by this application's own origin. All other pages remain unframeable.
+        response.headers["X-Frame-Options"] = (
+            "SAMEORIGIN" if path == "/vendor/bim-gis/index.html" else "DENY"
+        )
         return response

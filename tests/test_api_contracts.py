@@ -38,8 +38,45 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["service"], "ifc-selection-bridge")
-        self.assertEqual(payload["appVersion"], "1.0.4")
+        self.assertEqual(payload["appVersion"], "1.0.5")
         self.assertFalse(payload["hasSelection"])
+
+    async def test_georeference_endpoint_is_bound_to_a_model_hash(self):
+        model_hash = "a" * 64
+        record = {"modelHash": model_hash, "status": "unavailable",
+                  "source": None, "reason": "coordinate_operation_missing"}
+        with patch.object(model_operations, "model_georeference", return_value=record) as lookup:
+            response = await self.client.get(f"/model/georeference?modelHash={model_hash}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), record)
+        lookup.assert_called_once_with(model_hash)
+        self.assertEqual((await self.client.get("/model/georeference?modelHash=bad")).status_code, 422)
+
+    async def test_manual_anchor_validates_coordinates_and_binds_model_hash(self):
+        model_hash = "a" * 64
+        body = {"modelHash": model_hash, "longitude": 105.8, "latitude": 21.0,
+                "elevationMeters": 11, "rotationDegrees": 390, "scale": 1, "groundOffsetMeters": 39.25}
+        with patch.object(model_operations, "save_manual_anchor", return_value={"status": "manual"}) as save:
+            response = await self.client.post("/model/gis-anchor", json=body)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(save.call_args.args[1]["rotationDegrees"], 30)
+        self.assertEqual(save.call_args.args[1]["groundOffsetMeters"], 39.25)
+        for bad in ({**body, "latitude": 91}, {**body, "longitude": "inf"},
+                    {**body, "scale": 0}, {**body, "groundOffsetMeters": -1},
+                    {**body, "groundOffsetMeters": "nan"}, {**body, "modelHash": "../bad"}):
+            self.assertEqual((await self.client.post("/model/gis-anchor", json=bad)).status_code, 422)
+
+    async def test_compound_filter_contract_validates_pages_and_conditions(self):
+        condition = {"kind": "pset", "setName": "Pset_WallCommon", "propertyName": "FireRating", "op": "eq", "value": "2h"}
+        body = {"modelHash": "a"*64, "conditions": [condition], "match": "all", "cursor": 0, "limit": 500}
+        with patch.object(model_operations, "semantic_filter", return_value={"total": 1, "results": []}) as query:
+            response = await self.client.post("/model/semantic-search", json=body)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(query.call_args.args[1], [condition])
+        for bad in [{**body, "conditions": []}, {**body, "conditions": [condition]*9}, {**body, "limit": 501}, {**body, "cursor": -1}, {**body, "match": "invalid"}, {**body, "modelHash": "../bad"}]:
+            self.assertEqual((await self.client.post("/model/semantic-search", json=bad)).status_code, 422)
+        with patch.object(model_operations, "semantic_filter", side_effect=model_operations.ActiveModelChangedError()):
+            self.assertEqual((await self.client.post("/model/semantic-search", json=body)).status_code, 409)
 
     async def test_semantic_retry_rejects_stale_activation_and_duplicate_attempt(self):
         import model_runtime
@@ -71,7 +108,19 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         if not payload["hasActiveModel"]:
             self.assertIsNone(payload["activeModelHash"])
             self.assertEqual(payload["hotIndexStatus"], "idle")
-            self.assertIsNone(payload["semanticMode"])
+
+    async def test_bim_element_endpoint_returns_semantic_record_without_geometry(self):
+        record = {"modelHash": "a" * 64, "coldStatus": "indexing", "element": {"expressId": 42}}
+        with patch.object(model_operations, "bim_element_by_express_id", return_value=record) as lookup:
+            response = await self.client.get(f"/element/by-express-id/42/bim?modelHash={'a' * 64}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), record)
+        lookup.assert_called_once_with(42, "a" * 64)
+
+        with patch.object(model_operations, "bim_element_by_express_id", side_effect=model_operations.ActiveModelChangedError()):
+            response = await self.client.get(f"/element/by-express-id/42/bim?modelHash={'b' * 64}")
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["error"], "active_model_changed")
 
     async def test_selection_round_trip(self):
         selection = {
@@ -144,7 +193,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
                 files={"file": ("large.ifc", b"IFC", "application/octet-stream")},
             )
         self.assertEqual(response.status_code, 413)
-        self.assertEqual(response.json()["error"], "ifc_file_exceeds_2_gb_limit")
+        self.assertEqual(response.json()["error"], "ifc_file_exceeds_1_gib_limit")
 
     async def test_openapi_preserves_the_complete_bridge_surface(self):
         paths = (await self.client.get("/openapi.json")).json()["paths"]
@@ -160,21 +209,21 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             "/model/stage/{stageId}": {"post"},
             "/model/cache": {"get"},
             "/model/cache/clear": {"post"},
-            "/model/source/{modelHash}": {"get"},
-            "/model/elements": {"post"},
             "/model/fragments/{modelHash}": {"get", "post"},
-            "/model/engine-v2/{modelHash}/prepare": {"post"},
-            "/model/engine-v2/jobs/{jobId}": {"get", "delete"},
-            "/model/engine-v2/artifacts/{artifactKey}/manifest": {"get"},
-            "/model/engine-v2/artifacts/{artifactKey}/chunks/{file}": {"get"},
             "/model/activate/{modelHash}": {"post"},
             "/model/cancel-load": {"post"},
             "/model/retry-semantic": {"post"},
             "/register-model": {"post"},
             "/model/runtime": {"get"},
+            "/model/georeference": {"get"},
+            "/model/browser": {"get"},
+            "/model/semantic-search": {"get", "post"},
+            "/model/semantic-fields": {"get"},
+            "/model/gis-anchor": {"get", "post", "delete"},
             "/model/tree": {"get"},
             "/model/search": {"get"},
             "/element/by-express-id/{expressId}": {"get"},
+            "/element/by-express-id/{expressId}/bim": {"get"},
             "/element/{globalId}": {"get"},
             "/model/materials": {"get"},
             "/mass/material-reference": {"get"},

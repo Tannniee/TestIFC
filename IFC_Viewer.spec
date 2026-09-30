@@ -30,20 +30,20 @@ VERSION_INFO = VSVersionInfo(
 )
 
 ifc_data, ifc_binaries, ifc_hidden = collect_all("ifcopenshell")
+proj_data, proj_binaries, proj_hidden = collect_all("pyproj")
 webview_hidden = collect_submodules("webview")
 
 analysis = Analysis(
     [str(ROOT / "desktop" / "main.py")],
     pathex=[str(ROOT / "src")],
-    binaries=ifc_binaries,
-    datas=ifc_data
+    binaries=ifc_binaries + proj_binaries,
+    datas=ifc_data + proj_data
     + [
         (str(ROOT / "frontend" / "dist"), "frontend/dist"),
         (str(ROOT / "backend" / "reference_data"), "backend/reference_data"),
         (str(ROOT / "desktop" / "assets" / "app_icon.ico"), "desktop/assets"),
-        (str(ROOT / "engine_v2" / "publish" / "win-x64"), "engine_v2/worker"),
     ],
-    hiddenimports=ifc_hidden + webview_hidden,
+    hiddenimports=ifc_hidden + proj_hidden + webview_hidden,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

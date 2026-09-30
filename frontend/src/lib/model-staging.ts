@@ -1,7 +1,6 @@
 import { api, ApiError } from "./api";
 import type { ActivateModelResponse, StageModelResponse } from "./api-contracts";
 import { ModelSourceError } from "./model-source-error";
-import type { ModelSource } from "./model-source";
 
 /** Mutations are idempotent by stage ID: retry a lost reply without another activation. */
 async function retry<T>(operation: () => Promise<T>): Promise<T> {
@@ -21,15 +20,13 @@ export class ModelStage {
       || (activation && runtime.activeLoadedAt !== activation.loadedAt)) throw new ApiError("active_model_generation_changed", 409);
   }
   private constructor(readonly id: string, readonly prepared: StageModelResponse) {}
-  static async prepare(source: ModelSource, hash: string, signal: AbortSignal, progress: (value: number) => void) {
+  static async prepare(file: File, hash: string, signal: AbortSignal, progress: (value: number) => void) {
     const id = crypto.randomUUID();
-    const prepare = () => retry(() => api.stageModel(id, hash, source.name));
+    const prepare = () => retry(() => api.stageModel(id, hash, file.name));
     let response: StageModelResponse;
     try { response = await prepare(); }
     catch (error) {
       if (!(error instanceof ApiError) || error.status !== 404) throw error;
-      const file = source.file;
-      if (!file) throw new ModelSourceError("unavailable");
       // A retained browser File can become unreadable after deletion/replacement.
       // Probe only when the cached IFC is absent; warm activation needs no source IO.
       try { await file.slice(0, 1).arrayBuffer(); }
@@ -46,7 +43,7 @@ export class ModelStage {
     }
     return stage;
   }
-  commit(semanticMode: "legacy" | "native") { return retry(() => api.stageAction(this.id, "commit", semanticMode)); }
+  commit() { return retry(() => api.stageAction(this.id, "commit")); }
   rollback() { return retry(() => api.stageAction(this.id, "rollback")); }
   finalize() { return retry(() => api.stageAction(this.id, "finalize")); }
 }

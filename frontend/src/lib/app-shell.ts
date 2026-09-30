@@ -1,10 +1,11 @@
 import { api, type HealthResponse } from "./api";
-import { chooseDesktopIfcFile, loadDesktopSettings, saveDesktopSettings, type AppSettings } from "./settings";
+import { loadDesktopSettings, saveDesktopSettings, type AppSettings } from "./settings";
 import { ViewerService } from "./viewer";
 import { WorkspaceManager } from "./workspace-manager";
 import { ModelDataService } from "./model-data-service";
 import { activeView, emptyWorkspace, type WorkspaceState } from "./workspace-contracts";
 import { isLoadCancelledError } from "./viewer-contracts";
+import { normalizeMapboxToken } from "./mapbox-token";
 import type {
   SectionPlaneDefinition,
   SectionBoxState,
@@ -16,7 +17,7 @@ import type {
   ViewportBackground,
   ViewPreset,
 } from "./viewer-contracts";
-import type { ModelSource } from "./model-source";
+import type { ManualAnchor } from "./api-contracts";
 
 export type { AppSettings } from "./settings";
 export type {
@@ -39,7 +40,15 @@ export type {
 export class AppShellService {
   private viewer: ViewerService | null = null;
   private workspace: WorkspaceManager | null = null;
-  readonly modelData = new ModelDataService(() => this.activeModel);
+  readonly modelData = new ModelDataService(
+    () => this.activeModel,
+    () => this.viewer?.modelHash ?? "",
+    (expressId, modelHash) => api.bimElement(expressId, modelHash),
+    (modelHash, view) => api.modelBrowser(modelHash, view),
+    (modelHash, filter) => api.semanticSearch(modelHash, filter),
+    (modelHash, filter) => api.semanticFilter(modelHash, filter),
+    modelHash => api.semanticFields(modelHash),
+  );
   private workspaceListeners = new Set<(state: WorkspaceState) => void>();
   subscribeWorkspace(listener: (state: WorkspaceState) => void) {
     this.workspaceListeners.add(listener); listener(this.workspace?.snapshot() ?? emptyWorkspace());
@@ -51,7 +60,17 @@ export class AppShellService {
   closeView(id: string) { return this.workspace?.closeView(id) ?? Promise.resolve(); }
   setBoxDisplay(display: { showBox: boolean; showHandles: boolean }) { this.viewer?.setBoxDisplay(display); }
   selectItems(ids: number[]) { return this.viewer?.selectItems(ids) ?? Promise.resolve(); }
+  fitItems(ids: number[]) { return this.viewer?.fitItems(ids) ?? Promise.resolve(); }
+  setTreeVisibility(action: "hide" | "isolate" | "showAll", ids: number[]) {
+    return this.viewer?.setTreeVisibility(action, ids) ?? Promise.resolve();
+  }
+  gisAnchor(modelHash: string) { return api.gisAnchor(modelHash); }
+  gisGeoreference(modelHash: string) { return api.modelGeoreference(modelHash); }
+  saveGisAnchor(modelHash: string, anchor: ManualAnchor) { return api.saveGisAnchor(modelHash, anchor); }
+  deleteGisAnchor(modelHash: string) { return api.deleteGisAnchor(modelHash); }
   get activeModel() { return this.viewer?.model ?? null; }
+  get activeModelHash() { return this.viewer?.modelHash ?? ""; }
+  get activeSourceFile() { return this.workspace?.activeSourceFile ?? null; }
   setExpandedNodes(ids: string[]) { this.workspace?.setExpandedNodes(ids); }
   private settingsInitialized = false;
   private settingsSaveTimer: number | null = null;
@@ -64,6 +83,7 @@ export class AppShellService {
     const savedRotationSpeed = Number(localStorage.getItem("ifc-viewer-rotation-speed"));
     return {
       schemaVersion: 1,
+      mapboxPublicToken: normalizeMapboxToken(localStorage.getItem("ifc-viewer-mapbox-public-token")),
       locale: savedLocale === "en" ? "en" : "vi",
       mode: savedMode === "dark" ? "dark" : "light",
       gridVisible: localStorage.getItem("ifc-viewer-grid") !== "hidden",
@@ -103,6 +123,7 @@ export class AppShellService {
   }
 
   persistSettings(settings: AppSettings, delay = 0) {
+    localStorage.setItem("ifc-viewer-mapbox-public-token", settings.mapboxPublicToken);
     localStorage.setItem("ifc-viewer-locale", settings.locale);
     localStorage.setItem("ifc-viewer-theme", settings.mode);
     localStorage.setItem("ifc-viewer-grid", settings.gridVisible ? "visible" : "hidden");
@@ -120,7 +141,6 @@ export class AppShellService {
   async retrySemantic() { await this.workspace?.retrySemantic(); }
   cacheInventory() { return api.cacheInventory(); }
   clearCache(scope: "fragments" | "all") { return api.clearCache(scope); }
-  chooseIfcFile() { return chooseDesktopIfcFile(); }
 
   health(): Promise<HealthResponse> {
     return api.health();
@@ -130,8 +150,8 @@ export class AppShellService {
     return isLoadCancelledError(error);
   }
 
-  load(source: File | ModelSource) {
-    return this.workspace?.openDocument(source) ?? Promise.resolve();
+  load(file: File) {
+    return this.workspace?.openDocument(file) ?? Promise.resolve();
   }
 
   cancelLoad() {

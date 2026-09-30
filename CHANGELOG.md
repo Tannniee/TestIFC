@@ -1,50 +1,35 @@
 # Changelog
 
-## 1.0.4 — 2026-09-25
+## Unreleased
 
-- Expand Engine V2 profile and face coverage: accept rounded DEGREE conversion
-  factors, filleted hollow rectangles, C and L profiles, reversed trimmed arcs,
-  slightly rounded polygonal coordinates, auxiliary CoG points, generic
-  IfcProductRepresentation bindings, empty shape representations, collapsed
-  zero-area PolyLoops, and translated folded strips.
-- Add resumable graph and artifact corpus gates for the local IFC test corpus.
-  The full 34-file `IFC Temp` corpus now produces viewer-ready Engine V2
-  artifacts. Boolean trees and malformed source surfaces use selective,
-  source-hash-bound IfcOpenShell meshes inside the native artifact pipeline.
-- Recover exact zero-area outer/hole matches, exact backtracking ring spurs,
-  redundant nested holes, and tilted congruent holes in bounded faces. The
-  Bison and Kingston reference files now produce viewer-ready artifacts.
-- Build an isolated 1.0.4 EXE and verify cold packaged WebView2 loads:
-  `MaiSanh_F02_26-08-03.ifc` in 1.14 s and the 255 MB Bison reference file in
-  26.87 s, including native semantic readiness. These timings are single runs.
-- Route every accepted IFC through Engine V2, including small browser files and
-  models up to the 2,000,000,000-byte limit. Remove WebIFC and Fragments runtime
-  assets from the frontend package.
-- Stream native artifacts into the Three.js viewer and retain transactional
-  loading, cancellation, selection, model switching and semantic lookup.
-- Resolve nested Boolean, solid-operand CSG, invalid BRep and polygonal faces,
-  problematic extrusions, swept disks, and revolved solids through selective
-  IfcOpenShell conversion. An empty Boolean result emits no product geometry.
-  Keep the previous model visible if a new one cannot be built.
-- Run selective IfcOpenShell repair in a child process so its expanded IFC graph
-  is released after conversion instead of remaining in the desktop process.
-- Record separate artifact and visible-load metrics for the large-model path.
-  Very large CSG models can still take several minutes on a cold conversion.
-- Support derived 2D profiles and topologically matched tapered extrusions in
-  the native worker; recognize unstyled material layer sets without rejecting
-  the model. Verified on `TTHC-IFC.ifc` and `MaiSanh_F02_26-08-03.ifc`.
-- Cache generated base mesh clusters within a 64 MiB planner budget for repeated
-  pages. A lightweight product-bounds overview now keeps all `GIAN NANG.ifc`
-  groups visible while exact triangles stream into the page residency budget.
-- Colour the bounded overview from each product's first material, hide it for
-  hidden products, and dim it where exact pages are resident. Extend overview
-  capacity to the 620,315-product SVD reference model.
-- Admit up to 96 visible pages when their aggregate geometry is small enough;
-  this restores the complete 66-page TTHC overview within the existing GPU
-  and triangle budgets.
-- Decode Engine V2's stored RGB colours into Three.js's linear working space
-  before uploading instance colours. Match the 1.0.3 WebIFC palette on
-  `MaiSanh_F02_26-08-03.ifc` without changing model transparency.
+## 1.0.5 — 2026-09-30
+
+- Keep the viewer canvas at a stable size while Project Browser and Properties
+  slide over it. Retain panel content, support rapid reversal and reduced motion.
+- Organize Settings into General, Navigation, BIM–GIS and Storage tabs. Add saved
+  Vietnamese/English language and appearance choices, with localized settings text.
+- Filter indexed BIM data with up to eight Pset/Qto conditions joined by AND/OR,
+  authored field suggestions, literal text matching and numeric SI comparisons.
+- Collect every result page before enabling bulk selection or isolation. Respect
+  tree name, IFC type and visibility/selection filters and cancel stale queries.
+- Resolve visibility by element occurrence when geometry is shared. Preserve
+  BIM–GIS placement, floor alignment, in-place rotation and reset controls.
+
+- Keep Project Browser Tree bound to the IFC currently shown: clear it during model switches, automatically load the new document's Tree, and ignore late replies from the previous document.
+
+## 1.0.4 — 2026-09-28
+
+- Upgrade the bundled WebIFC JavaScript/WASM pair to 0.0.78 and invalidate old conversion caches.
+- Set the application, API, frontend and Windows executable version to 1.0.4.
+- Expand Project Browser to Spatial, Systems, Types, Groups, Classification and Material views, with storey categories, counts, search, visibility/selection filters and context actions.
+- Index scalar Pset/Qto values in semantic cache v5 and filter the tree by property text or numeric quantity comparisons.
+- Save manual GIS anchors by model hash and preview them as MapLibre markers with an offline background option. IFC projected CRS placement and 3D model overlay remain under development.
+
+- Read selected-element Psets, Qto, type, material, and classification from the
+  backend semantic index in the Properties panel. Show INDEX readiness and allow
+  a refresh while cold data is still being prepared.
+- Bind BIM property requests to the active model hash and avoid geometry extraction
+  for those requests, so a late response cannot show data from another IFC.
 
 ## 1.0.3 — 2026-09-03
 

@@ -1,0 +1,2 @@
+patchedDependencies:
+  web-ifc@0.0.78: patches/web-ifc@0.0.78.patch

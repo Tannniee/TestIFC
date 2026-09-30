@@ -24,6 +24,7 @@ only configures middleware, creates shared state, and composes the application.
 adapters. The IFC foundation is split into four services:
 
 - `src/ifc_units.py`: unit resolution and quantity normalization.
+- `src/ifc_georeference.py`: read-only projected CRS and map conversion metadata.
 - `src/model_cache.py`: persistent IFC, fragment, index, and store cache paths.
 - `src/model_runtime.py`: active-model lifecycle, index preparation, and live IFC access.
 - `src/ifc_elements.py`: semantic records and optional element geometry.
@@ -48,10 +49,14 @@ The frontend follows the same composition boundary:
 - `frontend/src/lib/app-shell.ts` owns settings, viewer lifecycle, and commands.
 - `App.svelte` composes the rail, dialogs, inspector, and viewer workspace.
 - `viewer.ts` coordinates the camera, selection and render-on-demand scheduler.
-- `viewer-model-loader.ts` stages IFC uploads and Engine V2 artifacts, then
-  activates the native model transactionally. Engine V2 handles files up to
-  2,000,000,000 bytes; unsupported geometry is reported instead of displayed
-  incompletely.
+- `viewer-model-loader.ts` owns file reads, conversion, fragment models and
+  backend preparation. Conversion workers are created on demand and terminated
+  after completion, cancellation or failure.
+- The Properties panel reads Pset, Qto, type, material, classification, spatial
+  ancestry, and group/system memberships from
+  the backend semantic index. Its BIM request is bound to the active model hash;
+  the panel reports when cold indexing is still in progress. Fragment metadata
+  continues to supply immediate attributes and location details.
 - `viewcube-math.ts` owns the pure ViewCube geometry, naming, and orientation math.
 - `api-contracts.ts` is the typed frontend endpoint manifest. Contract tests compare
   it with the backend OpenAPI document, and Vite derives its proxy prefixes from it.
@@ -112,8 +117,9 @@ semantic-index preparation, and search timings as JSON under
 `benchmarks/results/`. The local corpus and generated results are ignored by Git;
 no private IFC model is committed to this repository.
 
-Historical fragment metadata A/B results remain in `benchmarks/fragment-ab.md`.
-Version 1.0.4 uses Engine V2 for model geometry.
+For fragment metadata A/B testing, follow
+`benchmarks/fragment-ab.md`. The `full` profile remains the default until the
+lighter profiles pass the real-model feature matrix.
 
 Semantic DB v2, facts-cache versioning, and take-off schema v6 are documented in
 `benchmarks/phase4-5.md`.
@@ -178,6 +184,17 @@ PyInstaller executable:
 
 The executable name and Windows version metadata come from `APP_VERSION` in
 `src\version.py`. Version 1.0.4 is written to `dist\IFC Viewer 1.0.4.exe` by default.
+
+Project Browser now supports Spatial, Systems, Types, Groups, Classification,
+and Material views. Use its search and filters for Name, GlobalId, IFC type,
+visibility, selection, or indexed Pset/Qto values. Right-click a row for
+Hide, Isolate, Fit, Select children, and Show Properties. Spatial storeys group
+products by IFC category and show an Uncontained bucket when needed.
+
+The GIS section saves a manual WGS84 anchor per model hash and previews a map
+marker. The preview uses MapLibre demo tiles when online and offers an offline
+blank background. A manual anchor does not establish IFC survey accuracy;
+projected IFC CRS conversion and a 3D map overlay are still pending.
 Set `IFC_BUILD_DIST` to choose another output directory, such as `BUILD RELEASE`.
 Release changes are recorded in `CHANGELOG.md`. The application requires no license,
 account or sign-in; its internal API uses a per-launch session credential.

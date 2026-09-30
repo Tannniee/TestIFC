@@ -5,7 +5,7 @@ import { MAX_IFC_BYTES } from "../src/lib/model-limits";
 const modelA = process.env.IFC_E2E_MODEL_A;
 const modelB = process.env.IFC_E2E_MODEL_B;
 
-async function workspacePage(page: import("@playwright/test").Page) {
+async function workspacePage(page: import("@playwright/test").Page, profile = "full") {
   await page.addInitScript(() => {
     const root = window as any; root.metrics = [];
     window.addEventListener("ifc-fragment-metrics", (event: any) => root.metrics.push(event.detail));
@@ -18,7 +18,7 @@ async function workspacePage(page: import("@playwright/test").Page) {
       };
     });
   });
-  await page.goto("/?viewerDebug=1");
+  await page.goto(`/?viewerDebug=1&fragmentProfile=${profile}`);
   await expect.poll(() => page.evaluate(() => Boolean((window as any).viewer))).toBe(true);
 }
 async function openModel(page: import("@playwright/test").Page, path: string) {
@@ -27,15 +27,15 @@ async function openModel(page: import("@playwright/test").Page, path: string) {
   await expect(page.locator(".view-tabs button[role=tab]").first()).toBeEnabled();
 }
 
-test("IFC larger than 2 GB is rejected before conversion starts", async ({page}) => {
+test("IFC larger than 1 GiB is rejected before WebIFC starts", async ({page}, testInfo) => {
+  const source = testInfo.outputPath("oversize.ifc");
+  const handle = await import("node:fs/promises").then(fs => fs.open(source, "w"));
+  try { await handle.truncate(MAX_IFC_BYTES + 1); }
+  finally { await handle.close(); }
   await workspacePage(page);
-  // Exercise the UI limit without making Playwright transfer a 2 GB fixture.
-  await page.evaluate((size) => {
-    Object.defineProperty(File.prototype, "size", { configurable: true, get: () => size });
-  }, MAX_IFC_BYTES + 1);
-  await page.locator('input[type="file"]').setInputFiles({ name: "oversize.ifc", mimeType: "application/octet-stream", buffer: Buffer.from("IFC") });
-  await expect(page.getByRole("alert")).toContainText("Engine V2");
-  await expect(page.getByRole("alert")).toContainText("2.00 GB");
+  await page.locator('input[type="file"]').setInputFiles(source);
+  await expect(page.getByRole("alert")).toContainText("WebIFC");
+  await expect(page.getByRole("alert")).toContainText("1.00 GiB");
   expect(await page.evaluate(() => (window as any).loadResult)).toBe("idle");
 });
 
@@ -81,7 +81,7 @@ test("multi IFC restores A/B state, deduplicates content, recovers deleted cache
   await docs.nth(1).click(); await expect(docs.nth(1)).toHaveAttribute("aria-selected","true");
   const rebuilt=await page.evaluate(async()=>{
     const root=window as any,v=root.viewer;
-    return {state:v.captureViewState(),last:root.metrics.at(-1),models:(v.loader.activeModel ? 1 : 0),sameRenderer:v.renderer===root.renderer,
+    return {state:v.captureViewState(),last:root.metrics.at(-1),models:v.loader.fragments.models.list.size,sameRenderer:v.renderer===root.renderer,
       backend:(await(await fetch("/model/runtime")).json()).activeModelHash,hash:v.modelHash};
   });
   expect(rebuilt.last.cacheHit).toBe(false); expect(rebuilt.models).toBe(1); expect(rebuilt.sameRenderer).toBe(true); expect(rebuilt.backend).toBe(rebuilt.hash);
@@ -89,7 +89,7 @@ test("multi IFC restores A/B state, deduplicates content, recovers deleted cache
   expect(rebuilt.state.camera).toEqual(savedB.camera); expect(rebuilt.state.selection.map((r:any)=>r.globalId)).toEqual(savedB.selection.map((r:any)=>r.globalId));
   await page.locator(".document-tabs .tab-close").nth(0).click(); await expect(docs).toHaveCount(1);
   await page.locator(".document-tabs .tab-close").click(); await expect(docs).toHaveCount(0);
-  expect(await page.evaluate(async()=>({models:((window as any).viewer.loader.activeModel ? 1 : 0),
+  expect(await page.evaluate(async()=>({models:(window as any).viewer.loader.fragments.models.list.size,
     backend:(await(await fetch("/model/runtime")).json()).activeModelHash,labels:document.querySelectorAll(".viewer-measurement-label").length}))).toEqual({models:0,backend:null,labels:0});
   await openModel(page,modelB!); await expect(docs).toHaveCount(1);
   expect(errors).toEqual([]);
@@ -155,7 +155,7 @@ test("rollback conflict preserves the newer backend generation until explicit re
   const conflict = await page.evaluate(async () => {
     const root = window as any;
     return {state:root.viewer.captureViewState(),backend:await(await fetch("/model/runtime")).json(),other:root.otherActivation,
-      models:(root.viewer.loader.activeModel ? 1 : 0)};
+      models:root.viewer.loader.fragments.models.list.size};
   });
   expect(conflict.state).toEqual(saved); expect(conflict.models).toBe(1);
   expect(conflict.backend.activeLoadedAt).toBe(conflict.other.loadedAt);
@@ -170,38 +170,40 @@ test("rollback conflict preserves the newer backend generation until explicit re
   expect(recovered.generation).toBe(recovered.session);
   await page.locator(".document-tabs [role=tab]").nth(1).click();
   await expect(page.locator(".document-tabs [role=tab]").nth(1)).toHaveAttribute("aria-selected", "true");
-  expect(await page.evaluate(() => ((window as any).viewer.loader.activeModel ? 1 : 0))).toBe(1);
+  expect(await page.evaluate(() => (window as any).viewer.loader.fragments.models.list.size)).toBe(1);
 });
 
-test("failed native model disposal stays hidden and is retried before another document can load", async ({page}) => {
+test("failed worker disposal stays hidden and is retried before another document can load", async ({page}) => {
   test.skip(!modelA || !modelB); test.setTimeout(120000);
   await workspacePage(page); await openModel(page, modelA!);
   await page.evaluate(() => {
-    const root = window as any, v = root.viewer, previous = v.model;
-    const dispose = previous.dispose.bind(previous); root.previousModel = previous;
-    previous.dispose = async () => {
-      previous.dispose = dispose;
-      throw new Error("injected disposal failure");
+    const root = window as any, v = root.viewer, fragments = v.loader.fragments, dispose = fragments.disposeModel.bind(fragments);
+    const previous = v.model.modelId; root.previousModel = v.model;
+    fragments.disposeModel = async (id:string) => {
+      if (id === previous) { fragments.disposeModel = dispose; throw new Error("injected disposal failure"); }
+      return dispose(id);
     };
   });
   await openModel(page, modelB!);
   await expect(page.locator(".semantic-status button")).toBeVisible();
   expect(await page.evaluate(() => (window as any).previousModel.object.visible)).toBe(false);
   await page.locator(".semantic-status button").click();
-  await expect.poll(() => page.evaluate(() => (window as any).viewer.loader.pendingDisposals.size)).toBe(0);
+  await expect.poll(() => page.evaluate(() => (window as any).viewer.loader.fragments.models.list.size)).toBe(1);
   await page.locator(".document-tabs [role=tab]").nth(0).click();
   await expect(page.locator(".document-tabs [role=tab]").nth(0)).toHaveAttribute("aria-selected", "true");
 });
 
-test("Browser and Properties read Engine V2 native semantics", async ({page}) => {
+for (const profile of ["attributes", "minimum"]) test(`Browser and Properties use BIM data with the ${profile} fragment profile`, async ({page}) => {
   test.skip(!modelB); test.setTimeout(90000);
-  await workspacePage(page); await openModel(page, modelB!);
+  await workspacePage(page, profile); await openModel(page, modelB!);
   await page.getByRole("button", {name:"Project Browser",exact:true}).click();
   await page.getByRole("button", {name:"Model",exact:true}).click();
   await expect.poll(() => page.getByRole("treeitem").count()).toBeGreaterThan(0);
   await page.evaluate(async () => { const v=(window as any).viewer; await v.selectItems((await v.model.getItemsIdsWithGeometry()).slice(0,1)); });
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus), {timeout:60000}).toBe("ready");
   await page.getByRole("button", {name:"Psets / Quantities",exact:true}).click();
-  await expect(page.locator(".properties-body")).toBeVisible();
+  await expect(page.locator(".properties-body")).not.toContainText("fragments hiện tại");
+  await expect(page.locator(".properties-body [role=alert]")).toHaveCount(0);
   await expect(page.locator(".project-browser [role=alert]")).toHaveCount(0);
 });
 
@@ -289,13 +291,18 @@ test("Browser builds on demand, selects elements and queries real IFC properties
   await expect(page.locator(".properties-panel h3")).not.toHaveText("3D View");
   await page.getByRole("button",{name:"Attributes",exact:true}).click();
   await expect.poll(()=>page.locator(".property-group dd").count()).toBeGreaterThan(0);
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus), {timeout:60000}).toBe("ready");
   await page.getByRole("button",{name:"Psets / Quantities",exact:true}).click();
   await expect(page.locator(".properties-body")).not.toContainText("Loading…");
   await expect(page.locator(".properties-body [role=alert]")).toHaveCount(0);
   const properties=await page.locator(".properties-body").innerText();
-  // Native artifact semantics must provide the selected element's identity and values.
-  expect(properties).toContain("IFC type");
-  expect(properties).toContain("GlobalId");
+  const indexed = await page.evaluate(async expressId => {
+    const hash = (window as any).viewer.modelHash;
+    return (await (await fetch(`/element/by-express-id/${expressId}/bim?modelHash=${hash}`)).json()).element;
+  }, probe.ids[0]);
+  const sets = [...Object.keys(indexed.properties ?? {}), ...Object.keys(indexed.quantities ?? {})];
+  if (sets.length) expect(properties).toContain(sets[0]);
+  else expect(properties).toContain("không có dữ liệu BIM");
   await page.screenshot({path:testInfo.outputPath("browser-properties.png")});
   await testInfo.attach("properties",{body:JSON.stringify({probe,properties}),contentType:"application/json"});
   expect(await page.getByRole("treeitem").count()).toBeLessThanOrEqual(50);
@@ -306,6 +313,7 @@ test("Properties resolves Psets, quantities and materials; late results cannot o
   test.skip(!fixture,"Set enriched isolated IFC fixture"); test.setTimeout(90000);
   await workspacePage(page); await openModel(page,fixture!);
   await page.evaluate(async()=>{await (window as any).viewer.selectItems([58]);});
+  await expect.poll(() => page.evaluate(async () => (await (await fetch("/model/runtime")).json()).coldIndexStatus), {timeout:60000}).toBe("ready");
   await page.getByRole("button",{name:"Psets / Quantities",exact:true}).click();
   await expect(page.locator(".properties-body")).toContainText("WS-PSET-READY");
   await expect(page.locator(".properties-body")).toContainText("GateLength");
@@ -340,10 +348,10 @@ test("pending document tabs cancel cleanly, failed neighbor keeps the active vie
     const root=window as any; root.original=root.viewer.model;
     return {hash:root.viewer.modelHash,state:root.viewer.captureViewState()};
   });
-  await page.evaluate(async()=>{
-    const root=window as any, {api}=await import(/* @vite-ignore */ "/src/lib/api.ts");
-    root.getNativeManifest=api.engineV2Manifest;
-    api.engineV2Manifest=(_key:string,signal:AbortSignal)=>{root.held=true;return new Promise((_,reject)=>signal.addEventListener("abort",()=>reject(new DOMException("cancelled","AbortError")),{once:true}));};
+  await page.evaluate(()=>{
+    const root=window as any,bridge=root.viewer.loader.bridge;
+    root.getFragments=bridge.fragments.bind(bridge);
+    bridge.fragments=()=>{root.held=true;return new Promise((_,reject)=>bridge.fragmentRequests.signal.addEventListener("abort",()=>reject(new DOMException("cancelled","AbortError")),{once:true}));};
   });
   await page.locator('input[type=file]').setInputFiles(modelB!);
   await expect.poll(()=>page.evaluate(()=>(window as any).held)).toBe(true);
@@ -353,20 +361,20 @@ test("pending document tabs cancel cleanly, failed neighbor keeps the active vie
   await expect(tabs).toHaveCount(1);
   await expect(page.locator("dialog.model-load-dialog")).toHaveCount(0);
   expect(await page.evaluate(()=>(window as any).viewer.model===(window as any).original)).toBe(true);
-  await page.evaluate(async()=>{const root=window as any,{api}=await import(/* @vite-ignore */ "/src/lib/api.ts");api.engineV2Manifest=root.getNativeManifest;});
+  await page.evaluate(()=>{const root=window as any;root.viewer.loader.bridge.fragments=root.getFragments;});
   await openModel(page,modelB!);
   // Loading the neighbor fails: closing B must not discard B or its saved state.
-  await page.route("**/model/engine-v2/artifacts/*/manifest",route=>route.fulfill({status:500,body:"neighbor activation failed"}));
+  await page.route("**/model/fragments/*",route=>route.request().method()==="GET"?route.fulfill({status:500,body:"neighbor activation failed"}):route.continue());
   await page.locator(".document-tabs .tab-close").nth(1).click();
   await expect(page.locator(".viewer-empty-state-error")).toContainText("neighbor activation failed");
   await expect(tabs).toHaveCount(2); await expect(tabs.nth(1)).toHaveAttribute("aria-selected","true");
-  await page.unroute("**/model/engine-v2/artifacts/*/manifest");
+  await page.unroute("**/model/fragments/*");
   // A/B/A requested rapidly through real document tabs. Only the final A may commit.
   await tabs.nth(0).click(); await tabs.nth(1).click(); await tabs.nth(0).click();
   await expect(tabs.nth(0)).toHaveAttribute("aria-selected","true");
   await expect(page.locator(".view-tabs [role=tab]").first()).toBeEnabled();
   const final=await page.evaluate(async()=>{
-    const v=(window as any).viewer;return {state:v.captureViewState(),hash:v.modelHash,models:(v.loader.activeModel ? 1 : 0),
+    const v=(window as any).viewer;return {state:v.captureViewState(),hash:v.modelHash,models:v.loader.fragments.models.list.size,
       backend:(await(await fetch("/model/runtime")).json()).activeModelHash};
   });
   expect(final).toEqual({state:original.state,hash:original.hash,backend:original.hash,models:1});
@@ -434,7 +442,7 @@ test("View state restores clipping, multiple selection and measurements without 
     const cleared = viewer.captureViewState();
     await viewer.applyViewState(original);
     const restored = viewer.captureViewState();
-    return { original, restored, cleared, sameModel: viewer.model === model, count: (viewer.loader.activeModel ? 1 : 0),
+    return { original, restored, cleared, sameModel: viewer.model === model, count: viewer.loader.fragments.models.list.size,
       labels: document.querySelectorAll(".viewer-measurement-label").length, selected: viewer.highlights.localIds, ids };
   });
   expect(result.sameModel).toBe(true); expect(result.count).toBe(1);
@@ -455,9 +463,6 @@ test("six handles, numeric bounds and display toggles share one box; partial vie
   await expect(boxTab).toHaveAttribute("aria-selected","true");
   for(const axis of ["x","y","z"])for(const side of ["min","max"]){
     const handle=page.locator(`[data-section-face="${axis}-${side}"]`),position=(await handle.boundingBox())!;
-    // The tiny fixture projects some opposite faces onto the same pixel.
-    await page.locator(".section-box-handle").evaluateAll(elements => elements.forEach(element => (element as HTMLElement).style.zIndex = "0"));
-    await handle.evaluate(element => (element as HTMLElement).style.zIndex = "1");
     const before=await page.evaluate(({axis,side})=>(window as any).viewer.sectionBox[side][axis],{axis,side});
     await page.mouse.move(position.x+14,position.y+14);await page.mouse.down();
     const drag=await page.evaluate(()=>{const d=(window as any).viewer.boxController.drag;return d?{dx:d.dx,dy:d.dy,face:d.face}:null;});

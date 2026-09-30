@@ -1,10 +1,11 @@
 <script lang="ts">
+  import MapboxWorkspace from "./lib/MapboxWorkspace.svelte";
+  import SettingsPanel from "./lib/SettingsPanel.svelte";
   import SemanticStatus from "./lib/SemanticStatus.svelte";
   import ProjectBrowser from "./lib/ProjectBrowser.svelte";
   import PropertiesPanel from "./lib/PropertiesPanel.svelte";
   import WorkspaceTabs from "./lib/WorkspaceTabs.svelte";
   import { activeDocument, activeView, emptyWorkspace } from "./lib/workspace-contracts";
-  import CacheSettings from "./lib/CacheSettings.svelte";
   import type { SectionBoxState } from "./lib/viewer-contracts";
   import { onMount } from "svelte";
   import AppRail from "./lib/AppRail.svelte";
@@ -18,14 +19,17 @@
   import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
   import { applyGeometryProgress, applySemanticProgress, beginModelLoad, emptyModelReadiness, geometryReady } from "./lib/model-readiness";
   import { MAX_IFC_BYTES } from "./lib/model-limits";
-  import { normalizeModelSource, type ModelSource } from "./lib/model-source";
 
   const sectionAxes = ["x", "y", "z"] as const;
 
   let locale: Locale = "vi";
   let mode: "light" | "dark" = "light";
+  let mapActive = false;
+  let mapInitialized = false;
+  let mapboxPublicToken = "";
   let inspectorOpen = false;
   let displaySettingsOpen = false;
+  let settingsSection: "general" | "navigation" | "map" | "cache" = "general";
   let boxZoomActive = false;
   let sectionPanelOpen = false;
   let sectionBox: SectionBoxState | null = null;
@@ -47,14 +51,17 @@
   const shell = new AppShellService();
   let workspace = emptyWorkspace();
   let browserOpen = false;
-  let browserWidth = 240;
+  let browserWidth = 300;
   let propertiesViewContext = false;
   const resizeCleanups = new Set<() => void>();
   let browserResizing = false;
   $: workspaceDocument = activeDocument(workspace);
   $: workspaceView = activeView(workspace);
   $: runtimeModelKey = `${workspace.activeDocumentId ?? ""}:${shell.activeModel?.modelId ?? ""}`;
-  let appVersion = "1.0.4";
+  $: runtimeModelHash = workspaceDocument?.modelHash === shell.activeModelHash ? shell.activeModelHash : "";
+  $: mapModelHash = workspace.busy && workspace.requestedDocumentId ? "" : runtimeModelHash;
+  $: sourceFile = mapModelHash ? shell.activeSourceFile : null;
+  let appVersion = "1.0.5";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;
@@ -200,12 +207,13 @@
     viewportBackground = settings.viewportBackground;
     wheelZoomSpeed = settings.wheelZoomSpeed;
     rotationSpeed = settings.rotationSpeed;
+    mapboxPublicToken = settings.mapboxPublicToken;
     document.documentElement.lang = locale;
     shell.applyViewerSettings(settings);
   }
 
   function currentSettings(): AppSettings {
-    return { schemaVersion: 1, locale, mode, gridVisible, viewportBackground, wheelZoomSpeed, rotationSpeed };
+    return { schemaVersion: 1, locale, mode, gridVisible, viewportBackground, wheelZoomSpeed, rotationSpeed, mapboxPublicToken };
   }
 
   function persistSettings(delay = 0) {
@@ -270,15 +278,8 @@
     }, 340);
   }
 
-  async function openFilePicker() {
-    try {
-      const source = await shell.chooseIfcFile();
-      if (source === undefined) fileInput.click();
-      else if (source) await openIfcFile(source);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      errorMessage = message.includes("ifc_file_exceeds_2_gb_limit") ? t.ifcTooLarge : message;
-    }
+  function openFilePicker() {
+    fileInput.click();
   }
 
   function openHelp() {
@@ -340,9 +341,15 @@
     event.preventDefault();
     browserResizing = true;
     const start = event.clientX, width = browserWidth;
-    const move = (e: PointerEvent) => { browserWidth = Math.min(380,Math.max(180,width+e.clientX-start)); };
+    const move = (e: PointerEvent) => { browserWidth = Math.min(480,Math.max(240,width+e.clientX-start)); };
     const stop = () => { browserResizing = false; window.removeEventListener("pointermove",move); window.removeEventListener("pointerup",stop); window.removeEventListener("pointercancel",stop); resizeCleanups.delete(stop); };
     resizeCleanups.add(stop); window.addEventListener("pointermove",move); window.addEventListener("pointerup",stop); window.addEventListener("pointercancel",stop);
+  }
+
+  async function handleTreeAction(action: "hide" | "isolate" | "fit" | "showAll" | "properties", ids: number[]) {
+    if (action === "fit") await shell.fitItems(ids);
+    else if (action === "properties") { await shell.selectItems(ids); inspectorOpen = true; }
+    else await shell.setTreeVisibility(action, ids);
   }
 
   function resizeDrawerByKeyboard(event: KeyboardEvent) {
@@ -466,27 +473,26 @@
   }
   function reportWorkspaceError(error: unknown) { if (!shell.isCancelledLoad(error)) errorMessage = error instanceof Error ? error.message : String(error); }
 
-  async function openIfcFile(input: File | ModelSource) {
-    const source = normalizeModelSource(input);
+  async function openIfcFile(file: File) {
     if (cancellingLoad) return;
     errorMessage = null;
-    if (!/\.ifc$/i.test(source.name)) {
+    if (!/\.ifc$/i.test(file.name)) {
       errorMessage = t.unsupported;
       return;
     }
-    if (source.size > MAX_IFC_BYTES) {
-      errorMessage = `${t.ifcTooLarge} (${(source.size / 1e9).toFixed(2)} GB)`;
+    if (file.size > MAX_IFC_BYTES) {
+      errorMessage = `${t.ifcTooLarge} (${(file.size / 1024 ** 3).toFixed(2)} GiB)`;
       return;
     }
     const sequence = ++appLoadSequence;
-    readiness = beginModelLoad(sequence, source.name);
+    readiness = beginModelLoad(sequence, file.name);
     viewerProgress = readiness.geometry;
     if (!hasModel) bridgeProgress = readiness.semantic;
-    modelStatus = `${t.opening} ${source.name}`;
+    modelStatus = `${t.opening} ${file.name}`;
     try {
-      await shell.load(source);
+      await shell.load(file);
       if (sequence !== appLoadSequence) return;
-      modelStatus = source.name;
+      modelStatus = file.name;
     } catch (error) {
       if (shell.isCancelledLoad(error) || sequence !== appLoadSequence) return;
       const message = error instanceof Error ? error.message : String(error);
@@ -573,7 +579,9 @@
   <AppRail
     text={t}
     {mode}
-    hasModel={hasModel && !workspace.busy}
+    {mapActive}
+    onMap={() => { mapInitialized = true; mapActive = !mapActive; }}
+    hasModel={hasModel && !workspace.busy && !mapActive}
     {boxZoomActive}
     sectionActive={sectionPanelOpen || sectionPickActive || Boolean(sectionDefinition)}
     sectionBoxActive={sectionBoxPicking || Boolean(sectionBox?.enabled)}
@@ -597,7 +605,7 @@
     class:viewer-drop-active={dragActive}
     class:browser-resizing={browserResizing}
     class="viewer-surface"
-    style={`--workspace-top: ${workspaceDocument ? 68 : 34}px; --browser-width: ${browserWidth}px; --properties-width: ${drawerWidth}px; --workspace-left: ${browserOpen ? browserWidth : 0}px; --workspace-right: ${inspectorOpen ? drawerWidth : 0}px`}
+    style={`--workspace-top: ${workspaceDocument ? 68 : 34}px; --browser-width: ${browserWidth}px; --properties-width: ${drawerWidth}px; --workspace-left: ${browserOpen && !mapActive ? browserWidth : 0}px; --workspace-right: ${inspectorOpen && !mapActive ? drawerWidth : 0}px`}
     aria-label={t.workspace}
     ondragenter={handleDragEnter}
     ondragover={handleDragOver}
@@ -608,12 +616,18 @@
       onView={id => void shell.activateView(id).catch(reportWorkspaceError)}
       onCloseDocument={id => void shell.closeDocument(id).catch(reportWorkspaceError)}
       onCloseView={id => void shell.closeView(id).catch(reportWorkspaceError)} onOpen={openFilePicker} onBrowser={() => (browserOpen = !browserOpen)} />
-    {#if browserOpen}
-      <ProjectBrowser state={workspace} modelKey={runtimeModelKey} service={shell.modelData}
-        onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>void shell.selectItems(ids).catch(reportWorkspaceError)}
+      <ProjectBrowser {locale} open={browserOpen && !mapActive} state={workspace} modelKey={runtimeModelKey} activeModelHash={runtimeModelHash} service={shell.modelData}
+        onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>shell.selectItems(ids)}
+        onAction={handleTreeAction}
         onExpanded={ids=>shell.setExpandedNodes(ids)} onClose={()=>browserOpen=false} onResize={startBrowserResize} />
+    <div bind:this={viewerHost} class="viewer-mount" style:visibility={mapActive ? "hidden" : "visible"}></div>
+    {#if mapInitialized}
+      <MapboxWorkspace token={mapboxPublicToken} modelHash={mapModelHash} file={sourceFile}
+        filename={workspaceDocument?.filename ?? ""} visible={mapActive} {locale}
+        onSettings={() => {settingsSection="map";displaySettingsOpen=true;}} onViewer={() => mapActive = false}
+        onRead={hash => shell.gisAnchor(hash)} onSave={(hash,anchor) => shell.saveGisAnchor(hash,anchor)} />
     {/if}
-    <div bind:this={viewerHost} class="viewer-mount"></div>
+    {#if !mapActive}
     {#if sectionBoxPicking}<p class="viewer-sweep-hint">{locale === "vi" ? "Section Box · Quét vùng trên Top View · Esc để hủy" : "Section Box · Drag a region in Top View · Esc to cancel"}</p>{/if}
     <ViewerToolbar
       text={t}
@@ -633,54 +647,15 @@
         onOrbit={orbitFromViewCube}
       />
     </div>
-    {#if displaySettingsOpen}
-      <section class="viewer-settings" aria-label={t.displaySettings}>
-        <header class="viewer-settings__header">
-          <h2>{t.displaySettings}</h2>
-          <button aria-label={t.close} onclick={() => (displaySettingsOpen = false)}>×</button>
-        </header>
-        <CacheSettings {locale} busy={isOpeningModel(viewerProgress)} loadInventory={() => shell.cacheInventory()} clearCache={scope => shell.clearCache(scope)} />
-        <label class="viewer-settings__toggle">
-          <input type="checkbox" checked={gridVisible} onchange={(event) => changeGridVisibility(event.currentTarget.checked)} />
-          <span>{t.showGrid}</span>
-        </label>
-        <label class="viewer-settings__slider">
-          <span class="viewer-settings__slider-label"><span>{t.wheelZoomSpeed}</span><output>{wheelZoomSpeed.toFixed(2)}×</output></span>
-          <input
-            type="range"
-            min="0.25"
-            max="3"
-            step="0.25"
-            value={wheelZoomSpeed}
-            aria-label={t.wheelZoomSpeed}
-            oninput={(event) => changeWheelZoomSpeed(event.currentTarget.valueAsNumber)}
-          />
-        </label>
-        <label class="viewer-settings__slider">
-          <span class="viewer-settings__slider-label"><span>{t.rotationSpeed}</span><output>{rotationSpeed.toFixed(2)}×</output></span>
-          <input type="range" min="0.25" max="3" step="0.25" value={rotationSpeed}
-            aria-label={t.rotationSpeed} oninput={(event) => changeRotationSpeed(event.currentTarget.valueAsNumber)} />
-        </label>
-        <fieldset class="viewer-settings__backgrounds">
-          <legend>{t.background}</legend>
-          <div class="viewer-settings__choices">
-            <label class:viewer-settings__choice--active={viewportBackground === "gray"} class="viewer-settings__choice">
-              <input type="radio" name="viewport-background" checked={viewportBackground === "gray"} onchange={() => changeViewportBackground("gray")} />
-              <span class="background-swatch background-swatch-gray"></span><span>{t.backgroundGray}</span>
-            </label>
-            <label class:viewer-settings__choice--active={viewportBackground === "white"} class="viewer-settings__choice">
-              <input type="radio" name="viewport-background" checked={viewportBackground === "white"} onchange={() => changeViewportBackground("white")} />
-              <span class="background-swatch background-swatch-white"></span><span>{t.backgroundWhite}</span>
-            </label>
-            <label class:viewer-settings__choice--active={viewportBackground === "oled"} class="viewer-settings__choice">
-              <input type="radio" name="viewport-background" checked={viewportBackground === "oled"} onchange={() => changeViewportBackground("oled")} />
-              <span class="background-swatch background-swatch-oled"></span><span>{t.backgroundOled}</span>
-            </label>
-          </div>
-        </fieldset>
-      </section>
     {/if}
-    {#if sectionPanelOpen}
+    <SettingsPanel open={displaySettingsOpen} bind:section={settingsSection} {locale} {mode} {t}
+      {gridVisible} {wheelZoomSpeed} {rotationSpeed} {viewportBackground} token={mapboxPublicToken}
+      busy={isOpeningModel(viewerProgress)} onClose={()=>displaySettingsOpen=false}
+      onLocale={value=>{locale=value;persistSettings();}} onMode={value=>{if(value!==mode)toggleTheme();}}
+      onGrid={changeGridVisibility} onZoom={changeWheelZoomSpeed} onRotation={changeRotationSpeed} onBackground={changeViewportBackground}
+      onToken={value=>{mapboxPublicToken=value;persistSettings();}}
+      loadInventory={()=>shell.cacheInventory()} clearCache={scope=>shell.clearCache(scope)} />
+    {#if sectionPanelOpen && !mapActive}
       <section class="viewer-section-panel" aria-label={t.sectionPlane}>
         <header class="viewer-settings__header">
           <h2>{t.sectionPlane}</h2>
@@ -736,23 +711,20 @@
         <strong>{t.dropIfc}</strong>
       </div>
     {/if}
-    {#if (!hasModel || errorMessage) && !isOpeningModel(viewerProgress) && !cancellingLoad}
+    {#if !mapActive && (!hasModel || errorMessage) && !isOpeningModel(viewerProgress) && !cancellingLoad}
       <div class:viewer-empty-state-error={Boolean(errorMessage)} class="viewer-empty-state" role={errorMessage ? "alert" : undefined}>
         <p>{errorMessage ?? progressText(viewerProgress, t) ?? modelStatus ?? t.empty}</p>
       </div>
     {/if}
     <footer class="qn-status-bar">
       <span>{progressText(viewerProgress, t) ?? modelStatus ?? t.noModel}</span>
-      {#if viewerProgress?.stage === "ready" && viewerProgress.recoveredFaces}
-        <span class="qn-recovery-warning" role="status" title={t.recoveredIfcFacesHint}>⚠ {viewerProgress.recoveredFaces} {t.recoveredIfcFaces}</span>
-      {/if}
       <SemanticStatus progress={bridgeProgress} text={bridgeText(bridgeProgress, locale)} {locale} onRetry={() => shell.retrySemantic().catch(reportWorkspaceError)} />
       <span title={fragmentMetrics ? `${fragmentMetrics.profile} · ${fragmentMetrics.fragmentBytes} bytes · ${Math.round(fragmentMetrics.totalMilliseconds)} ms` : undefined}>{t.modelData}: {hasModel ? `${t.modelReady} · ${modelStatus ?? ""}` : viewerProgress?.stage === "error" ? t.modelError : isOpeningModel(viewerProgress) ? t.modelLoading : t.nothingSelected}</span>
       <span>{t.element}: {multiSelectionCount ? `${multiSelectionCount} ${t.selectedElements}` : selectedElement?.name ?? selectedElement?.ifcType ?? t.nothingSelected}</span>
       <span>{t.version} {appVersion}</span>
     </footer>
 
-    <PropertiesPanel open={inspectorOpen} view={workspaceView} selection={selectedElement} count={multiSelectionCount}
+    <PropertiesPanel open={inspectorOpen && !mapActive} view={workspaceView} selection={selectedElement} count={multiSelectionCount}
       box={sectionBox} {locale} bind:preferView={propertiesViewContext} busy={workspace.busy || sectionBoxPicking} service={shell.modelData}
       onClose={()=>inspectorOpen=false} onResizeStart={startDrawerResize} onResizeKeydown={resizeDrawerByKeyboard}
       onBox={box=>shell.setSectionBox(box)} onDraw={()=>void shell.beginSectionBox(true).catch(reportWorkspaceError)}

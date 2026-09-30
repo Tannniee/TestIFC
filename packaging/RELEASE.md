@@ -8,7 +8,7 @@ Create the executable only after every gate below passes.
 3. Run `pnpm run test:e2e` in `frontend`; require 20 lifecycle cycles to leave one
    canvas, one viewer, and heap growth within the tested threshold.
 4. Exercise a real SAP2000, ETABS, and HANGAR IFC through the local HTTP bridge.
-5. Verify cached IFC activation, Engine V2 artifact reuse, tree/search, element lookup,
+5. Verify cached IFC activation, fragment reuse, tree/search, element lookup,
    takeoff CSV, model takeoff, and IDEA TSV.
 6. Open one takeoff in Excel and confirm the `Takeoff` sheet contains numeric rows.
 7. Run `BuildExe.cmd` once.

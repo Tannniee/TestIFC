@@ -23,12 +23,7 @@ def reap_idle_models(stopped: Event) -> None:
 
 @asynccontextmanager
 async def backend_lifespan(app):
-    owners = (
-        model_runtime._background_indexes,
-        model_cache._retention_jobs,
-        app.state.model_takeoff_job,
-        app.state.engine_v2_jobs,
-    )
+    owners = (model_runtime._background_indexes, model_cache._retention_jobs, app.state.model_takeoff_job)
     for owner in owners:
         owner.reopen()
     stopped = Event()

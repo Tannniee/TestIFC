@@ -12,6 +12,33 @@ from version import APP_VERSION
 SCHEMA_VERSION = 1
 
 
+class SaveManualAnchorRequest(BaseModel):
+    modelHash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    longitude: float = Field(ge=-180, le=180, allow_inf_nan=False)
+    latitude: float = Field(ge=-90, le=90, allow_inf_nan=False)
+    elevationMeters: float = Field(allow_inf_nan=False)
+    rotationDegrees: float = Field(allow_inf_nan=False)
+    scale: float = Field(default=1.0, gt=0, le=1_000_000, allow_inf_nan=False)
+    groundOffsetMeters: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+
+
+class SemanticCondition(BaseModel):
+    kind: Literal["pset", "qto"]
+    setName: str = Field(min_length=1, max_length=128)
+    propertyName: str = Field(min_length=1, max_length=128)
+    op: Literal["eq", "contains", "gt", "gte", "lt", "lte"]
+    value: str = Field(max_length=256)
+
+
+class SemanticFilterRequest(BaseModel):
+    modelHash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    conditions: list[SemanticCondition] = Field(min_length=1, max_length=8)
+    match: Literal["all", "any"] = "all"
+    ifcType: str = Field(default="", max_length=80)
+    cursor: int = Field(default=0, ge=0)
+    limit: int = Field(default=500, ge=1, le=500)
+
+
 class ModelRef(BaseModel):
     id: str | None = None
     name: str | None = None
@@ -35,7 +62,7 @@ class SelectionMeta(BaseModel):
 
 class SelectionPayload(BaseModel):
     schemaVersion: int = SCHEMA_VERSION
-    source: str = "engine-v2"
+    source: str = "thatopen"
     model: ModelRef = Field(default_factory=ModelRef)
     element: ElementRef = Field(default_factory=ElementRef)
     selection: SelectionMeta
@@ -97,7 +124,6 @@ class ActivateModelResponse(BaseModel):
     originalFilename: str | None = None
     sizeBytes: int
     loadedAt: str
-    semanticMode: Literal["legacy", "native"] = "legacy"
 
 
 class CancelModelLoadRequest(BaseModel):
@@ -113,7 +139,6 @@ class StageModelRequest(BaseModel):
 
 class StageActionRequest(BaseModel):
     action: Literal["commit", "rollback", "finalize"]
-    semanticMode: Literal["legacy", "native"] | None = None
 
 
 class StageModelResponse(BaseModel):
@@ -128,11 +153,6 @@ class CacheClearRequest(BaseModel):
 
 class RetrySemanticRequest(CancelModelLoadRequest):
     attemptId: str = Field(min_length=1, max_length=100)
-
-
-class ElementsRequest(BaseModel):
-    localIds: list[int] = Field(default_factory=list, max_length=500)
-    globalIds: list[str] = Field(default_factory=list, max_length=500)
 
 
 class SemanticProgress(BaseModel):
@@ -154,7 +174,6 @@ class ModelRuntimeResponse(BaseModel):
     hasActiveModel: bool
     activeModelHash: str | None = None
     activeLoadedAt: str | None = None
-    semanticMode: Literal["legacy", "native"] | None = None
     modelResident: bool
     preparing: bool
     prepareError: str | None = None
@@ -171,16 +190,6 @@ class FragmentStoredResponse(BaseModel):
     ok: bool = True
     modelHash: str
     sizeBytes: int
-
-
-class EngineV2JobResponse(BaseModel):
-    jobId: str
-    modelHash: str
-    artifactKey: str
-    state: Literal["queued", "running", "ready", "error", "cancelled"]
-    phase: str
-    ready: bool
-    error: str | None = None
 
 
 class RegisterModelRequest(BaseModel):

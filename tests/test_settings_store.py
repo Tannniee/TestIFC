@@ -67,6 +67,16 @@ class SettingsStoreTests(unittest.TestCase):
         for value in (None, True, "2", 0, 4, float("inf")):
             self.assertEqual(normalize_settings({"rotationSpeed": value})["rotationSpeed"], 1)
 
+    def test_mapbox_public_token_persists_and_secret_tokens_are_rejected(self):
+        with TemporaryDirectory() as directory:
+            store = SettingsStore(Path(directory) / "settings.json")
+            saved = store.save({"mapboxPublicToken": "  pk.test_public-key  "})
+            self.assertEqual(saved["mapboxPublicToken"], "pk.test_public-key")
+            self.assertEqual(store.load()["mapboxPublicToken"], "pk.test_public-key")
+            self.assertEqual(store.save({"mapboxPublicToken": ""})["mapboxPublicToken"], "")
+        for token in (None, 42, "sk.secret", "pk.bad key", "pk." + "a" * 2048):
+            self.assertEqual(normalize_settings({"mapboxPublicToken": token})["mapboxPublicToken"], "")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -4,7 +4,6 @@ import sys
 import unittest
 from contextlib import nullcontext
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 
@@ -20,6 +19,7 @@ from mass_facts import MaterialUse
 class ModelOperationsTests(unittest.TestCase):
     class Lease:
         index = object()
+        ref = type("Ref", (), {"model_hash": "a" * 64})()
 
         def __enter__(self):
             return self
@@ -48,19 +48,6 @@ class ModelOperationsTests(unittest.TestCase):
         self.assertEqual(result.original_filename, "sample.ifc")
         self.assertEqual(result.size_bytes, 123)
         materialize.assert_called_once_with(reader, "sample.ifc", True)
-
-    def test_materialize_local_model_copies_without_activating(self):
-        info = {"contentHashSha256": "d" * 64, "originalFilename": "picked.ifc", "sizeBytes": 3}
-        with TemporaryDirectory() as temporary:
-            source = Path(temporary) / "picked.ifc"
-            source.write_bytes(b"IFC")
-            with patch.object(model_operations, "materialize_model_stream", return_value=info) as materialize:
-                result = model_operations.materialize_local_model(str(source))
-
-        self.assertEqual(result.model_hash, "d" * 64)
-        self.assertEqual(result.size_bytes, 3)
-        self.assertEqual(materialize.call_args.args[1:], ("picked.ifc", True))
-        self.assertEqual(materialize.call_args.kwargs, {"activate": False})
 
     def test_activate_cached_model_resolves_the_cached_path(self):
         model_hash = "b" * 64
@@ -162,16 +149,34 @@ class ModelOperationsTests(unittest.TestCase):
         )
         extract.assert_called_once_with(unittest.mock.ANY, "GUID-1")
 
-    def test_element_records_preserve_requested_order_and_missing_values(self):
-        class Index:
-            def records_by_express_ids(self, _ids): return {2: {"expressId": 2}}
-            def records_by_global_ids(self, _ids): return {"G1": {"globalId": "G1"}}
+    def test_bim_element_reads_index_without_opening_geometry(self):
+        record = {"expressId": 42, "properties": {"Pset_BeamCommon": {"FireRating": "2h"}}}
+        index = type("Index", (), {
+            "cold_status": "ready",
+            "record_by_express_id": lambda self, express_id: record if express_id == 42 else None,
+        })()
         lease = self.Lease()
-        lease.index = Index()
+        lease.index = index
         with patch.object(model_operations, "lease_active_model", return_value=lease):
-            result = model_operations.element_records([9, 2], ["G1", "missing"])
-        self.assertEqual(result["byLocalId"], [None, {"expressId": 2}])
-        self.assertEqual(result["byGlobalId"], [{"globalId": "G1"}, None])
+            self.assertEqual(
+                model_operations.bim_element_by_express_id(42, "a" * 64),
+                {"modelHash": "a" * 64, "coldStatus": "ready", "element": record},
+            )
+            with self.assertRaises(model_operations.ActiveModelChangedError):
+                model_operations.bim_element_by_express_id(42, "b" * 64)
+
+    def test_georeference_reads_index_for_matching_active_model(self):
+        index = type("Index", (), {"georeference": lambda self: {
+            "status": "unavailable", "source": None, "reason": "coordinate_operation_missing",
+        }})()
+        lease = self.Lease()
+        lease.index = index
+        with patch.object(model_operations, "lease_active_model", return_value=lease):
+            result = model_operations.model_georeference("a" * 64)
+            self.assertEqual(result["modelHash"], "a" * 64)
+            self.assertEqual(result["reason"], "coordinate_operation_missing")
+            with self.assertRaises(model_operations.ActiveModelChangedError):
+                model_operations.model_georeference("b" * 64)
 
 
 if __name__ == "__main__":

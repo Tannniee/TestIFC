@@ -1,10 +1,10 @@
-export const MAX_IFC_BYTES = 2_000_000_000;
+export const MAX_IFC_BYTES = 1024 * 1024 * 1024;
 
 export class IfcFileTooLargeError extends Error {
   readonly sizeBytes: number;
 
   constructor(sizeBytes: number) {
-    super("Engine V2 hiện hỗ trợ file IFC tối đa 2 GB.");
+    super("Không thể mở file IFC lớn hơn 1 GiB vì WebIFC không hỗ trợ ổn định kích thước này.");
     this.name = "IfcFileTooLargeError";
     this.sizeBytes = sizeBytes;
   }

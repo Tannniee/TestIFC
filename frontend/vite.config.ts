@@ -7,10 +7,11 @@ export default defineConfig(({ mode }) => {
   const token = loadEnv(mode, ".", "IFC_API_SESSION_TOKEN").IFC_API_SESSION_TOKEN;
   return {
     plugins: [svelte()],
+    optimizeDeps: { exclude: ["maplibre-gl"] },
     build: {
       outDir: "dist",
       emptyOutDir: true,
-      // Native artifact pages are loaded on demand by Engine V2.
+      // web-ifc and the fragments worker are intentionally shipped as local bundles.
       chunkSizeWarningLimit: 5000,
     },
     server: {
