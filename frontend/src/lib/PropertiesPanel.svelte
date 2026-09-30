@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { panelMotion } from "./panel-motion";
   import { onDestroy } from "svelte";
   import SectionBoxPanel from "./SectionBoxPanel.svelte";
   import type { ViewerSelection, SectionBoxState } from "./viewer-contracts";
@@ -36,8 +35,7 @@
   }
   onDestroy(()=>{ request++; });
 </script>
-{#if open}
-  <aside class="properties-panel qn-drawer qn-drawer-open" aria-label="Properties" aria-busy={busy} transition:panelMotion={"right"}>
+  <aside class="properties-panel qn-drawer workspace-panel" class:panel-open={open} aria-label="Properties" aria-hidden={!open} inert={!open} aria-busy={busy}>
     <button class="qn-drawer-handle" aria-label="Resize Properties" onpointerdown={onResizeStart} onkeydown={onResizeKeydown}></button>
     <header><strong>Properties</strong><button aria-label="Close Properties" onclick={onClose}>×</button></header>
     <div class="properties-body">
@@ -79,4 +77,3 @@
       </fieldset>
     </div>
   </aside>
-{/if}

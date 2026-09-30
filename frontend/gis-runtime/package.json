@@ -1,7 +1,7 @@
 {
   "name": "testifc-bim-gis-runtime",
   "version": "1.0.0",
-  "description": "a submission to IFC.js hackathon",
+  "description": "Isolated Mapbox renderer with modern WebIFC conversion and shared geometry",
   "main": "index.html",
   "author": {
     "name": "Helen Kwok",
@@ -12,19 +12,14 @@
   },
   "dependencies": {
     "dexie": "^3.2.2",
-    "dotenv": "^16.0.1",
     "three": "^0.135.0",
-    "web-ifc": "^0.0.35",
-    "web-ifc-three": "^0.0.118",
-    "web-ifc-viewer": "^1.0.207",
     "mapbox-gl": "2.10.0",
     "@mapbox/mapbox-gl-geocoder": "5.0.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.1.0",
     "@rollup/plugin-node-resolve": "^13.2.1",
-    "nodemon": "^2.0.19",
     "rollup": "^2.70.2"
   },
-  "private": true
+  "private": true,
+  "type": "module"
 }

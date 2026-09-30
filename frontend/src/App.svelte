@@ -1,12 +1,11 @@
 <script lang="ts">
   import MapboxWorkspace from "./lib/MapboxWorkspace.svelte";
-  import MapboxSettings from "./lib/MapboxSettings.svelte";
+  import SettingsPanel from "./lib/SettingsPanel.svelte";
   import SemanticStatus from "./lib/SemanticStatus.svelte";
   import ProjectBrowser from "./lib/ProjectBrowser.svelte";
   import PropertiesPanel from "./lib/PropertiesPanel.svelte";
   import WorkspaceTabs from "./lib/WorkspaceTabs.svelte";
   import { activeDocument, activeView, emptyWorkspace } from "./lib/workspace-contracts";
-  import CacheSettings from "./lib/CacheSettings.svelte";
   import type { SectionBoxState } from "./lib/viewer-contracts";
   import { onMount } from "svelte";
   import AppRail from "./lib/AppRail.svelte";
@@ -30,6 +29,7 @@
   let mapboxPublicToken = "";
   let inspectorOpen = false;
   let displaySettingsOpen = false;
+  let settingsSection: "general" | "navigation" | "map" | "cache" = "general";
   let boxZoomActive = false;
   let sectionPanelOpen = false;
   let sectionBox: SectionBoxState | null = null;
@@ -61,7 +61,7 @@
   $: runtimeModelHash = workspaceDocument?.modelHash === shell.activeModelHash ? shell.activeModelHash : "";
   $: mapModelHash = workspace.busy && workspace.requestedDocumentId ? "" : runtimeModelHash;
   $: sourceFile = mapModelHash ? shell.activeSourceFile : null;
-  let appVersion = "1.0.4";
+  let appVersion = "1.0.5";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
   let selectedElement: ViewerSelection | null = null;
@@ -616,19 +616,15 @@
       onView={id => void shell.activateView(id).catch(reportWorkspaceError)}
       onCloseDocument={id => void shell.closeDocument(id).catch(reportWorkspaceError)}
       onCloseView={id => void shell.closeView(id).catch(reportWorkspaceError)} onOpen={openFilePicker} onBrowser={() => (browserOpen = !browserOpen)} />
-    {#if browserOpen}
-      <div hidden={mapActive}>
-      <ProjectBrowser state={workspace} modelKey={runtimeModelKey} activeModelHash={runtimeModelHash} service={shell.modelData}
-        onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>void shell.selectItems(ids).catch(reportWorkspaceError)}
+      <ProjectBrowser {locale} open={browserOpen && !mapActive} state={workspace} modelKey={runtimeModelKey} activeModelHash={runtimeModelHash} service={shell.modelData}
+        onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>shell.selectItems(ids)}
         onAction={handleTreeAction}
         onExpanded={ids=>shell.setExpandedNodes(ids)} onClose={()=>browserOpen=false} onResize={startBrowserResize} />
-      </div>
-    {/if}
     <div bind:this={viewerHost} class="viewer-mount" style:visibility={mapActive ? "hidden" : "visible"}></div>
     {#if mapInitialized}
       <MapboxWorkspace token={mapboxPublicToken} modelHash={mapModelHash} file={sourceFile}
         filename={workspaceDocument?.filename ?? ""} visible={mapActive} {locale}
-        onSettings={() => displaySettingsOpen = true} onViewer={() => mapActive = false}
+        onSettings={() => {settingsSection="map";displaySettingsOpen=true;}} onViewer={() => mapActive = false}
         onRead={hash => shell.gisAnchor(hash)} onSave={(hash,anchor) => shell.saveGisAnchor(hash,anchor)} />
     {/if}
     {#if !mapActive}
@@ -652,54 +648,13 @@
       />
     </div>
     {/if}
-    {#if displaySettingsOpen}
-      <section class="viewer-settings" aria-label={t.displaySettings}>
-        <header class="viewer-settings__header">
-          <h2>{t.displaySettings}</h2>
-          <button aria-label={t.close} onclick={() => (displaySettingsOpen = false)}>×</button>
-        </header>
-        <MapboxSettings token={mapboxPublicToken} {locale} onSave={token => { mapboxPublicToken = token; persistSettings(); }} />
-        <CacheSettings {locale} busy={isOpeningModel(viewerProgress)} loadInventory={() => shell.cacheInventory()} clearCache={scope => shell.clearCache(scope)} />
-        <label class="viewer-settings__toggle">
-          <input type="checkbox" checked={gridVisible} onchange={(event) => changeGridVisibility(event.currentTarget.checked)} />
-          <span>{t.showGrid}</span>
-        </label>
-        <label class="viewer-settings__slider">
-          <span class="viewer-settings__slider-label"><span>{t.wheelZoomSpeed}</span><output>{wheelZoomSpeed.toFixed(2)}×</output></span>
-          <input
-            type="range"
-            min="0.25"
-            max="3"
-            step="0.25"
-            value={wheelZoomSpeed}
-            aria-label={t.wheelZoomSpeed}
-            oninput={(event) => changeWheelZoomSpeed(event.currentTarget.valueAsNumber)}
-          />
-        </label>
-        <label class="viewer-settings__slider">
-          <span class="viewer-settings__slider-label"><span>{t.rotationSpeed}</span><output>{rotationSpeed.toFixed(2)}×</output></span>
-          <input type="range" min="0.25" max="3" step="0.25" value={rotationSpeed}
-            aria-label={t.rotationSpeed} oninput={(event) => changeRotationSpeed(event.currentTarget.valueAsNumber)} />
-        </label>
-        <fieldset class="viewer-settings__backgrounds">
-          <legend>{t.background}</legend>
-          <div class="viewer-settings__choices">
-            <label class:viewer-settings__choice--active={viewportBackground === "gray"} class="viewer-settings__choice">
-              <input type="radio" name="viewport-background" checked={viewportBackground === "gray"} onchange={() => changeViewportBackground("gray")} />
-              <span class="background-swatch background-swatch-gray"></span><span>{t.backgroundGray}</span>
-            </label>
-            <label class:viewer-settings__choice--active={viewportBackground === "white"} class="viewer-settings__choice">
-              <input type="radio" name="viewport-background" checked={viewportBackground === "white"} onchange={() => changeViewportBackground("white")} />
-              <span class="background-swatch background-swatch-white"></span><span>{t.backgroundWhite}</span>
-            </label>
-            <label class:viewer-settings__choice--active={viewportBackground === "oled"} class="viewer-settings__choice">
-              <input type="radio" name="viewport-background" checked={viewportBackground === "oled"} onchange={() => changeViewportBackground("oled")} />
-              <span class="background-swatch background-swatch-oled"></span><span>{t.backgroundOled}</span>
-            </label>
-          </div>
-        </fieldset>
-      </section>
-    {/if}
+    <SettingsPanel open={displaySettingsOpen} bind:section={settingsSection} {locale} {mode} {t}
+      {gridVisible} {wheelZoomSpeed} {rotationSpeed} {viewportBackground} token={mapboxPublicToken}
+      busy={isOpeningModel(viewerProgress)} onClose={()=>displaySettingsOpen=false}
+      onLocale={value=>{locale=value;persistSettings();}} onMode={value=>{if(value!==mode)toggleTheme();}}
+      onGrid={changeGridVisibility} onZoom={changeWheelZoomSpeed} onRotation={changeRotationSpeed} onBackground={changeViewportBackground}
+      onToken={value=>{mapboxPublicToken=value;persistSettings();}}
+      loadInventory={()=>shell.cacheInventory()} clearCache={scope=>shell.clearCache(scope)} />
     {#if sectionPanelOpen && !mapActive}
       <section class="viewer-section-panel" aria-label={t.sectionPlane}>
         <header class="viewer-settings__header">

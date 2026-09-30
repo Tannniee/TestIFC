@@ -19,6 +19,24 @@ class SaveManualAnchorRequest(BaseModel):
     elevationMeters: float = Field(allow_inf_nan=False)
     rotationDegrees: float = Field(allow_inf_nan=False)
     scale: float = Field(default=1.0, gt=0, le=1_000_000, allow_inf_nan=False)
+    groundOffsetMeters: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+
+
+class SemanticCondition(BaseModel):
+    kind: Literal["pset", "qto"]
+    setName: str = Field(min_length=1, max_length=128)
+    propertyName: str = Field(min_length=1, max_length=128)
+    op: Literal["eq", "contains", "gt", "gte", "lt", "lte"]
+    value: str = Field(max_length=256)
+
+
+class SemanticFilterRequest(BaseModel):
+    modelHash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    conditions: list[SemanticCondition] = Field(min_length=1, max_length=8)
+    match: Literal["all", "any"] = "all"
+    ifcType: str = Field(default="", max_length=80)
+    cursor: int = Field(default=0, ge=0)
+    limit: int = Field(default=500, ge=1, le=500)
 
 
 class ModelRef(BaseModel):

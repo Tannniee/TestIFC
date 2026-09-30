@@ -48,7 +48,7 @@ test("Project Browser switches semantic views and tree actions update model visi
   await panel.getByLabel("Set name").fill("Pset_Phase3Benchmark");
   await panel.getByLabel("Property name").fill("Profile");
   await panel.getByLabel("Property value").fill("PL 10x200");
-  await panel.getByRole("button", { name: "Apply" }).click();
+  await panel.getByRole("button", { name: "Áp dụng" }).click();
   await expect(panel.getByRole("status")).toContainText("1 kết quả");
   await expect(beam).toBeVisible();
   await panel.getByLabel("Property kind").selectOption("qto");
@@ -56,9 +56,9 @@ test("Project Browser switches semantic views and tree actions update model visi
   await panel.getByLabel("Property name").fill("NetVolume");
   await panel.getByLabel("Property operator").selectOption("gte");
   await panel.getByLabel("Property value").fill("0.007");
-  await panel.getByRole("button", { name: "Apply" }).click();
+  await panel.getByRole("button", { name: "Áp dụng" }).click();
   await expect(panel.getByRole("status")).toContainText("1 kết quả");
-  await panel.getByRole("button", { name: "Clear", exact: true }).click();
+  await panel.getByRole("button", { name: "Xóa lọc", exact: true }).click();
   await panel.getByLabel("Search tree").fill("");
   await panel.getByLabel("IFC type filter").selectOption("");
   for (const view of ["systems", "types", "groups", "classification"] as const) {

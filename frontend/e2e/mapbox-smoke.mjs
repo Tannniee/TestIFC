@@ -35,13 +35,13 @@ try {
   await page.addInitScript(({session})=>{
     window.pywebview={api:{get_api_session:async()=>({token:session}),load_settings:async()=>null,save_settings:async settings=>settings}};
     window.__gisReadiness=[];
-    window.addEventListener('message',event=>{if(event.origin===location.origin && event.data?.channel==='testifc-bim-gis-v1' && event.data.type==='model-ready') window.__gisReadiness.push({time:Date.now(),cached:event.data.cached,hash:event.data.hash});});
+    window.addEventListener('message',event=>{if(event.origin===location.origin && event.data?.channel==='testifc-bim-gis-v1' && event.data.type==='model-ready') window.__gisReadiness.push({time:Date.now(),cached:event.data.cached,hash:event.data.hash,bounds:event.data.bounds});});
   },{session});
   await page.goto(`http://127.0.0.1:${port}/?viewerDebug=1`);
   await expect(page.locator('.viewer-mount canvas')).toHaveCount(1);
   await page.getByRole('button',{name:'BIM–GIS Mapbox',exact:true}).click();
   await page.getByRole('button',{name:'Mở Cài đặt Mapbox'}).click();
-  await page.getByLabel('Public access token (pk.)').fill(publicToken);
+  await page.getByLabel(/\(pk\.\)/).fill(publicToken);
   await page.getByRole('button',{name:'Kiểm tra key',exact:true}).click();
   await expect(page.getByRole('status').filter({hasText:'Key hợp lệ'})).toBeVisible({timeout:15000});
   await page.getByRole('button',{name:'Lưu key',exact:true}).click();
@@ -58,7 +58,15 @@ try {
   await expect(page.locator('.map-controls .status')).toContainText('IFC sẵn sàng',{timeout:45000});
   const coldReady=await page.evaluate(()=>window.__gisReadiness.at(-1));
   console.log(`Cold viewer + GIS ready: ${coldReady.time-coldStart} ms (end-to-end readiness, not first visible pixels)`);
-  await page.getByRole('button',{name:'Bay tới mô hình',exact:true}).click();
+  console.log('GIS glTF bounds (m at scale 1):', coldReady.bounds);
+  await expect(page.locator('.map-controls .dimensions')).toHaveAttribute('aria-label','Kích thước trên bản đồ');
+  if (path.basename(fixture).toLowerCase() === 'heineken_full_rev00.ifc') {
+    expect(coldReady.bounds.width).toBeCloseTo(27.9, 1);
+    expect(coldReady.bounds.depth).toBeCloseTo(112.85, 1);
+    expect(coldReady.bounds.height).toBeCloseTo(29.69, 1);
+    await expect(page.locator('.map-controls .dimensions')).toContainText('112,85');
+  }
+  await page.getByRole('button',{name:'Tới mô hình',exact:true}).click();
   await expect(frame.locator('html')).toHaveAttribute('data-model-layer','ready',{timeout:15000});
   await expect.poll(()=>frame.locator('html').getAttribute('data-rendered-triangles')).not.toBe('0');
   await page.waitForTimeout(3500);
@@ -70,14 +78,54 @@ try {
     return rows.map(r=>({hash:r.hash,models:r.models.length,properties:r.properties.length}));
   });
   expect(db.length).toBeGreaterThan(0);expect(db.at(-1).models).toBeGreaterThan(0);expect(db.at(-1).properties).toBeGreaterThan(0);
-  console.log('PASS actual IFC.js → glTF + JSON → IndexedDB → Mapbox');
-  await page.getByRole('button',{name:'Đặt / xoay IFC',exact:true}).click();
+  console.log('PASS actual WebIFC 0.0.78 → instanced glTF + placement metadata → IndexedDB → Mapbox');
+  const originalGround=Number(await frame.locator('html').getAttribute('data-ground-offset'));
+  const originalLongitude=await frame.locator('html').getAttribute('data-anchor-longitude');
+  const rectangle=await frame.locator('.mapboxgl-canvas').boundingBox();
+  await page.getByRole('button',{name:'Xoay tại chỗ',exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-interaction','rotate');
+  await page.mouse.move(rectangle.x+rectangle.width*.6,rectangle.y+rectangle.height*.55);
+  await page.mouse.down();
+  await page.mouse.move(rectangle.x+rectangle.width*.6+90,rectangle.y+rectangle.height*.55,{steps:12});
+  await page.mouse.up();
+  await expect.poll(async()=>Number(await frame.locator('html').getAttribute('data-model-yaw'))).toBeCloseTo(31.5,1);
+  await expect(frame.locator('html')).toHaveAttribute('data-anchor-longitude',originalLongitude);
+  await page.getByRole('button',{name:'Reset',exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-model-yaw','0');
+  await page.getByRole('button',{name:'Căn mặt với đường',exact:true}).click();
+  let selected=false;
+  for(const [x,y] of [[.5,.36],[.5,.30],[.5,.40],[.49,.45],[.52,.35],[.48,.35],[.52,.45],[.5,.48]]) {
+    await frame.locator('.mapboxgl-canvas').click({position:{x:rectangle.width*x,y:rectangle.height*y}});
+    if(await frame.locator('html').getAttribute('data-interaction')==='none'){selected=true;break;}
+  }
+  expect(selected,'surface picking must hit actual IFC geometry').toBe(true);
+  await expect(page.locator('.map-controls .status')).toContainText('Đã căn mặt');
+  const selectedGround=Number(await frame.locator('html').getAttribute('data-ground-offset'));
+  expect(selectedGround).toBeGreaterThanOrEqual(originalGround);
+  await expect(frame.locator('html')).toHaveAttribute('data-anchor-longitude',originalLongitude);
+  await page.getByRole('button',{name:'Lưu vị trí',exact:true}).click();
+  await expect(page.locator('.map-controls .status')).toContainText('Đã lưu vị trí thủ công');
+  await page.getByRole('button',{name:'Căn mặt với đường',exact:true}).click();
+  await page.getByLabel('Mốc nền từ đáy mô hình (m)',{exact:true}).fill('0');
+  await page.getByRole('button',{name:'Reset',exact:true}).click();
+  await expect.poll(async()=>Number(await frame.locator('html').getAttribute('data-ground-offset'))).toBeCloseTo(selectedGround,5);
+  await page.getByRole('button',{name:'Chi tiết',exact:true}).click();
+  await expect(frame.locator('html')).toHaveAttribute('data-deferred-triangles','0');
+  await page.getByRole('button',{name:'Mượt',exact:true}).click();
+  console.log('PASS surface hit / saved road datum / pointer rotation / fixed pivot / reset / full-detail restoration');
+
+  await page.getByRole('button',{name:'Xoay tại chỗ',exact:true}).click();
   await page.getByLabel('Xoay IFC (°)',{exact:true}).fill('45');
-  await page.getByLabel('Cao độ (m)',{exact:true}).fill('5');
+  await page.locator('.editing summary').click();
+  await page.getByLabel('Cao độ đường (m)',{exact:true}).fill('5');
   await page.getByRole('button',{name:'Hủy',exact:true}).click();
-  await page.getByRole('button',{name:'Đặt / xoay IFC',exact:true}).click();
+  await page.getByRole('button',{name:'Xoay tại chỗ',exact:true}).click();
   await expect(page.getByLabel('Xoay IFC (°)',{exact:true})).toHaveValue('0');
+  await page.getByRole('button',{name:'Đặt marker trên bản đồ',exact:true}).click();
+  const markerBefore=await frame.locator('.mapboxgl-marker').elementHandle();
   await frame.locator('.mapboxgl-canvas').click({position:{x:850,y:450}});
+  expect(await markerBefore.evaluate(element=>element.isConnected)).toBe(true);
+  await page.getByRole('button',{name:'Xoay tại chỗ',exact:true}).click();
   await page.getByLabel('Xoay IFC (°)',{exact:true}).fill('30');
   await page.getByRole('button',{name:'Lưu vị trí',exact:true}).click();
   await expect(page.locator('.map-controls .status')).toContainText('Đã lưu vị trí thủ công');
@@ -91,7 +139,7 @@ try {
   await page.getByRole('button',{name:'Cài đặt hiển thị',exact:true}).click();
   await page.getByRole('button',{name:'Xóa key',exact:true}).click();
   await expect(page.locator('.map-controls')).toContainText('Thêm public token');
-  await page.getByLabel('Public access token (pk.)').fill(publicToken);
+  await page.getByLabel(/\(pk\.\)/).fill(publicToken);
   await page.getByRole('button',{name:'Lưu key',exact:true}).click();
   await page.locator('.viewer-settings__header button').click();
   await expect(page.locator('.map-controls .status')).toContainText('Đã lưu vị trí thủ công');
@@ -106,6 +154,7 @@ try {
   const warmStart=Date.now();await page.locator('input[type=file]').setInputFiles(fixture);
   await expect(page.locator('.map-controls .status')).toContainText('cache',{timeout:60000});
   const warmReady=await page.evaluate(()=>window.__gisReadiness.at(-1));
+  await expect.poll(async()=>Number(await frame.locator('html').getAttribute('data-ground-offset'))).toBeCloseTo(selectedGround,5);
   console.log(`Warm viewer + GIS ready: ${warmReady.time-warmStart} ms (cache reopening)`);
   console.log('PASS viewer/map switch / token removal+restore / warm glTF cache');
   const alternate=path.join(root,'test-fixtures/phase3-georef.ifc');

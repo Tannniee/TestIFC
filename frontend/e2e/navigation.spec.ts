@@ -13,6 +13,7 @@ test("panels animate without repeated WebGL resizing and the toolbox follows Bro
   const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
   const motion = await page.evaluate(async () => {
     const v = (window as any).viewer;
+    await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
     const original = v.renderer.setSize.bind(v.renderer); let resizes = 0;
     v.renderer.setSize = (...args: any[]) => { resizes++; return original(...args); };
     (document.querySelector(".workspace-browser-toggle") as HTMLButtonElement).click();
@@ -29,15 +30,16 @@ test("panels animate without repeated WebGL resizing and the toolbox follows Bro
     v.renderer.setSize = original;
     return { frames, resizes };
   });
-  expect(motion.frames.some(f => f.durations.includes(340))).toBe(true);
+  expect(motion.frames.some(f => f.durations.includes(380))).toBe(true);
   expect(new Set(motion.frames.map(f => Math.round(f.x))).size).toBeGreaterThan(3);
-  expect(motion.resizes).toBeLessThanOrEqual(2);
+  expect(motion.resizes).toBe(0);
   const last = motion.frames.at(-1)!;
   expect(last.tools - last.right).toBeCloseTo(12, 0);
   await page.getByRole("button", { name: "Mở/đóng bảng thuộc tính", exact: true }).click();
   await expect(page.locator(".properties-panel")).toBeVisible();
   await page.getByRole("button", { name: "Close Properties", exact: true }).click();
-  await expect(page.locator(".properties-panel")).toHaveCount(0);
+  await expect(page.locator(".properties-panel")).toBeHidden();
+  await expect(page.locator(".properties-panel")).toHaveAttribute("inert", "");
   // Rapid reversal must retain one usable panel, then fully remove it.
   await page.locator(".workspace-browser-toggle").evaluate(async (button: HTMLButtonElement) => {
     button.click(); await new Promise(r => setTimeout(r, 70)); button.click();
@@ -50,7 +52,8 @@ test("panels animate without repeated WebGL resizing and the toolbox follows Bro
     return document.querySelector(".viewer-toolbar")!.getBoundingClientRect().left - b.right;
   })).toBeCloseTo(12, 0);
   await page.getByRole("button", { name: "Close Project Browser", exact: true }).click();
-  await expect(page.locator(".project-browser")).toHaveCount(0);
+  await expect(page.locator(".project-browser")).toBeHidden();
+  await expect(page.locator(".project-browser")).toHaveAttribute("inert", "");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.locator(".workspace-browser-toggle").click();
   expect(await page.locator(".viewer-toolbar").evaluate(el => getComputedStyle(el).transitionDuration)).toBe("0s");
@@ -61,12 +64,14 @@ test("panels animate without repeated WebGL resizing and the toolbox follows Bro
 test("rotation preference survives reload and scales mouse drag and ViewCube rotation", async ({ page }) => {
   await ready(page);
   await page.getByRole("button", { name: "Cài đặt hiển thị", exact: true }).click();
+  await page.getByRole("tab", {name:"Điều khiển",exact:true}).click();
   const slider = page.getByRole("slider", { name: "Tốc độ xoay", exact: true });
   await slider.fill("0.5");
   await expect.poll(() => page.evaluate(() => (window as any).viewer.view.rotationSpeed)).toBe(0.5);
   await page.reload();
   await expect.poll(() => page.evaluate(() => (window as any).viewer?.view.rotationSpeed)).toBe(0.5);
   await page.getByRole("button", { name: "Cài đặt hiển thị", exact: true }).click();
+  await page.getByRole("tab", {name:"Điều khiển",exact:true}).click();
   await expect(slider).toHaveValue("0.5");
   await page.getByRole("button", { name: "Cài đặt hiển thị", exact: true }).click();
   const deltas: number[] = [];

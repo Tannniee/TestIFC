@@ -134,6 +134,21 @@ def semantic_search(model_hash: str, kind: str, set_name: str, property_name: st
             kind, set_name, property_name, operator, value, ifc_type, limit)}
 
 
+def semantic_filter(model_hash: str, conditions: list[dict], match: str,
+                    ifc_type: str, cursor: int, limit: int) -> dict[str, Any]:
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, **lease.index.semantic_filter(conditions, match, ifc_type, cursor, limit)}
+
+
+def semantic_fields(model_hash: str) -> dict[str, Any]:
+    with lease_active_model() as lease:
+        if lease.ref.model_hash != model_hash:
+            raise ActiveModelChangedError()
+        return {"modelHash": model_hash, **lease.index.semantic_fields()}
+
+
 def _require_active_hash(model_hash: str) -> None:
     model = model_runtime._state.get_or_none()
     if model is None:

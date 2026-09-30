@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import { spawn, spawnSync } from "node:child_process";
 import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { createServer } from "node:net";
@@ -65,6 +65,11 @@ try {
   const diagnostics = [];
   page.on("console", (message) => diagnostics.push(`console.${message.type()}: ${message.text().replace(/pk\.[A-Za-z0-9._-]+/g, '[public-token]').replace(/access_token=[^&\s]+/g, 'access_token=[redacted]')}`));
   page.on("pageerror", (error) => diagnostics.push(`pageerror: ${error.message}`));
+  if(process.env.IFC_E2E_BIM_ORACLE)page.on('response',async response=>{
+    if(response.url().includes('/model/semantic-')){
+      try{const body=await response.json();process.stdout.write(`BIM response ${response.status()} ${JSON.stringify({coldStatus:body.coldStatus,total:body.total,nextCursor:body.nextCursor,error:body.error})}\n`);}catch{}
+    }
+  });
   try {
     await page.waitForSelector(".viewer-mount canvas", { timeout: 30_000 });
   } catch (error) {
@@ -105,6 +110,88 @@ try {
       || !['projected', 'unavailable'].includes(georeference.body.status)) {
       throw new Error(`Packaged GIS metadata query failed: ${JSON.stringify(georeference)}`);
     }
+    if(process.env.IFC_E2E_BIM_ORACLE){
+      const oracle=JSON.parse(await readFile(process.env.IFC_E2E_BIM_ORACLE,'utf8'));
+      await expect.poll(()=>page.evaluate(async()=>{
+        const {token}=await window.pywebview.api.get_api_session(),hash=window.__packageMetrics[0].modelHash;
+        const response=await fetch(`/model/semantic-fields?modelHash=${hash}`,{headers:{'X-IFC-Session':token}});
+        return response.ok?(await response.json()).coldStatus:'unavailable';
+      }),{timeout:120000}).toBe('ready');
+      await page.getByRole('button',{name:'Project Browser',exact:true}).click();
+      const panel=page.getByRole('complementary',{name:'Project Browser'});
+      await panel.getByRole('button',{name:'Model',exact:true}).click();
+      await panel.getByLabel('Set name',{exact:true}).fill('Tekla Common');
+      await panel.getByLabel('Property name',{exact:true}).fill('Class');
+      await panel.getByLabel('Property operator',{exact:true}).selectOption('contains');
+      await panel.getByRole('button',{name:'Áp dụng',exact:true}).click();
+      await expect(panel.getByRole('status')).toContainText(`${oracle.all.length} kết quả`,{timeout:30000});
+      await panel.getByRole('button',{name:'Chọn kết quả',exact:true}).click();
+      await expect(page.locator('.qn-status-bar')).toContainText(`${oracle.all.length} cấu kiện đã chọn`,{timeout:30000});
+      const treeIds=()=>page.evaluate(async known=>{
+        const host=document.querySelector('.model-tree-scroll'),ids=new Set(),products=new Set(known);
+        for(let top=0;top<host.scrollHeight;top+=Math.max(28,host.clientHeight-28)){
+          host.scrollTop=top;await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
+          for(const item of host.querySelectorAll('[role=treeitem][data-local-id]')){
+            const id=Number(item.dataset.localId);if(products.has(id))ids.add(id);
+          }
+        }
+        host.scrollTop=0;return [...ids].sort((a,b)=>a-b);
+      },oracle.all);
+      await panel.getByLabel('Property operator',{exact:true}).selectOption('eq');
+      await panel.getByLabel('Property value',{exact:true}).fill('3');
+      await panel.getByRole('button',{name:'Áp dụng',exact:true}).click();
+      await expect(panel.getByRole('status')).toContainText(`${oracle.subset.length} kết quả`);
+      await panel.getByRole('button',{name:'Chọn kết quả',exact:true}).click();
+      await expect(page.locator('.qn-status-bar')).toContainText(`${oracle.subset.length} cấu kiện đã chọn`);
+      await panel.getByLabel('Tree scope').selectOption('selected');
+      await expect.poll(treeIds).toEqual(oracle.subset);
+      await panel.getByLabel('Tree scope').selectOption('all');
+      await panel.getByRole('button',{name:'Cô lập',exact:true}).click();
+      await panel.getByRole('button',{name:'Xóa lọc',exact:true}).click();
+      await panel.getByLabel('Tree scope').selectOption('visible');
+      await expect.poll(treeIds).toEqual(oracle.subset);
+      await panel.getByRole('button',{name:'Show all elements',exact:true}).click();
+      await panel.getByLabel('Tree scope').selectOption('all');
+      await panel.getByLabel('Set name',{exact:true}).fill('Tekla Common');
+      await panel.getByLabel('Property name',{exact:true}).fill('Class');
+      await panel.getByLabel('Property value',{exact:true}).fill('3');
+      await panel.getByRole('button',{name:'Áp dụng',exact:true}).click();
+      await expect(panel.getByRole('status')).toContainText(`${oracle.subset.length} kết quả`);
+      await page.evaluate(async()=>{
+        window.__panelResizes=0;
+        new ResizeObserver(()=>window.__panelResizes++).observe(document.querySelector('.viewer-mount'));
+        await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);window.__panelResizes=0;
+      });
+      for(const name of ['Project Browser','Mở/đóng bảng thuộc tính']){
+        for(let i=0;i<2;i++){
+          await page.getByRole('button',{name,exact:true}).click();
+          await page.waitForTimeout(420);
+        }
+      }
+      if(await page.evaluate(()=>window.__panelResizes)!==0)throw new Error('Packaged panel toggle resized WebGL');
+      await expect(panel.getByRole('status')).toContainText(`${oracle.subset.length} kết quả`);
+      await page.getByRole('button',{name:'Cài đặt hiển thị',exact:true}).click();
+      const settings=page.locator('.settings-panel');
+      await settings.getByRole('button',{name:'Tối',exact:true}).click();
+      await settings.getByRole('button',{name:'English',exact:true}).click();
+      await expect(settings).toHaveAttribute('aria-label','Settings');
+      await expect.poll(()=>page.evaluate(async ()=>(await window.pywebview.api.load_settings())?.locale)).toBe('en');
+      await settings.getByRole('tab',{name:'Navigation',exact:true}).focus();
+      await page.keyboard.press('ArrowRight');
+      await expect(settings.getByRole('tab',{name:'BIM–GIS',exact:true})).toBeFocused();
+      await settings.getByRole('tab',{name:'General',exact:true}).click();
+      await settings.getByRole('button',{name:'Tiếng Việt',exact:true}).click();
+      await expect.poll(()=>settings.evaluate(el=>getComputedStyle(el).opacity)).toBe('1');
+      if(process.env.IFC_E2E_BIM_SCREENSHOT)await page.screenshot({path:process.env.IFC_E2E_BIM_SCREENSHOT.replace(/\.png$/,'-settings.png')});
+      await page.locator('.viewer-settings__header button').click();
+      await expect(settings).toBeHidden();
+      if(process.env.IFC_E2E_BIM_SCREENSHOT)await page.screenshot({path:process.env.IFC_E2E_BIM_SCREENSHOT});
+      await page.getByRole('button',{name:'Project Browser',exact:true}).click();
+      if(diagnostics.some(line=>line.startsWith('pageerror:')))throw new Error('Packaged BIM page errors');
+      process.stdout.write(`packaged BIM pagination ${oracle.all.length}, group selection/isolation ${oracle.subset.length}, language persistence and zero panel resizes passed\n`);
+      if(process.env.IFC_E2E_SKIP_GIS){process.stdout.write('packaged WebView2 BIM checks passed\n');}
+    }
+    if(!process.env.IFC_E2E_SKIP_GIS){
     let publicToken = process.env.MAPBOX_TEST_TOKEN;
     if (!publicToken) {
       const local = await readFile(new URL('../.env.local', import.meta.url), 'utf8');
@@ -113,7 +200,7 @@ try {
     if (!publicToken?.startsWith('pk.')) throw new Error('Missing public Mapbox test token');
     await page.getByRole('button', { name: 'BIM–GIS Mapbox', exact: true }).click();
     await page.getByRole('button', { name: 'Mở Cài đặt Mapbox' }).click();
-    await page.getByLabel('Public access token (pk.)').fill(publicToken);
+    await page.getByLabel(/\(pk\.\)/).fill(publicToken);
     await page.getByRole('button', { name: 'Kiểm tra key', exact: true }).click();
     await page.getByText('Key hợp lệ · Light v10 tải được', { exact: true }).waitFor({ timeout: 15000 });
     await page.getByRole('button', { name: 'Lưu key', exact: true }).click();
@@ -125,7 +212,7 @@ try {
       await page.waitForTimeout(2500);
       await page.screenshot({ path: process.env.IFC_E2E_GIS_SCREENSHOT.replace(/\.png$/, '-globe.png') });
     }
-    await page.getByRole('button', { name: 'Bay tới mô hình', exact: true }).click();
+    await page.getByRole('button', { name: 'Tới mô hình', exact: true }).click();
     await frame.locator('html[data-model-layer="ready"]').waitFor({ timeout: 30000 });
     await page.waitForFunction(() => {
       const html = document.querySelector('iframe[title="Mapbox BIM–GIS"]').contentDocument.documentElement;
@@ -133,7 +220,7 @@ try {
     });
     await page.waitForTimeout(2500);
     if (process.env.IFC_E2E_GIS_SCREENSHOT) await page.screenshot({ path: process.env.IFC_E2E_GIS_SCREENSHOT });
-    await page.getByRole('button', { name: 'Đặt / xoay IFC', exact: true }).click();
+    await page.getByRole('button', { name: 'Xoay tại chỗ', exact: true }).click();
     await page.getByLabel('Xoay IFC (°)', { exact: true }).fill('35');
     await frame.locator('html[data-model-yaw="35"]').waitFor();
     await page.getByRole('button', { name: 'Lưu vị trí', exact: true }).click();
@@ -144,9 +231,9 @@ try {
       return (await fetch(`/model/gis-anchor?modelHash=${modelHash}`, {headers:{'X-IFC-Session':token}})).json();
     });
     if (placement.anchor?.rotationDegrees !== 35) throw new Error('Packaged placement was not persisted');
-    await page.getByRole('button', { name: 'Ẩn marker', exact: true }).click();
+    await page.getByLabel('Marker',{exact:true}).uncheck();
     await frame.locator('.mapboxgl-marker').waitFor({ state: 'detached' });
-    await page.getByRole('button', { name: 'Hiện marker', exact: true }).click();
+    await page.getByLabel('Marker',{exact:true}).check();
     await frame.locator('.mapboxgl-marker').waitFor();
     for (let n = 0; n < 4; n++) await frame.locator('.mapboxgl-ctrl-zoom-out').click();
     await page.waitForTimeout(2500);
@@ -164,14 +251,15 @@ try {
     await page.getByRole('button', { name: 'Cài đặt hiển thị', exact: true }).click();
     await page.getByRole('button', { name: 'Xóa key', exact: true }).click();
     await page.waitForFunction(async () => (await window.pywebview.api.load_settings())?.mapboxPublicToken === '');
-    await page.getByLabel('Public access token (pk.)').fill(publicToken);
+    await page.getByLabel(/\(pk\.\)/).fill(publicToken);
     await page.getByRole('button', { name: 'Lưu key', exact: true }).click();
     await page.waitForFunction(async () => Boolean((await window.pywebview.api.load_settings())?.mapboxPublicToken));
     await page.locator('.viewer-settings__header button').click();
     await page.getByRole('button', { name: 'BIM–GIS Mapbox', exact: true }).click();
     await frame.locator('html[data-model-state="ready"]').waitFor();
-    process.stdout.write("packaged Mapbox live tiles, IFC.js GLB/JSON, actual draw, yaw, placement, key persistence and viewer switch passed\n");
+    process.stdout.write("packaged Mapbox live tiles, WebIFC instanced GLB/placement metadata, actual draw, yaw, placement, key persistence and viewer switch passed\n");
     process.stdout.write("packaged IFC geometry, semantic index and GIS 3D layer passed\n");
+    }
   }
   process.stdout.write("packaged WebView2 CDP smoke test passed\n");
 } finally {

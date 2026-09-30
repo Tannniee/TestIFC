@@ -166,13 +166,14 @@ test("transactional A/B loading preserves A on failure/cancel and Section Box cl
   const transforms = await page.evaluate(() => (window as any).viewer.loader.activeModel.object.position.toArray());
   expect(transforms).toEqual([0, 0, 0]);
   await page.getByRole("button", { name: "Cài đặt hiển thị", exact: true }).click();
+  await page.getByRole("tab", {name:"Bộ nhớ",exact:true}).click();
   await expect(page.locator(".cache-settings")).toContainText("Fragment:");
   const viewport = page.viewportSize()!;
   await page.setViewportSize({ width: 420, height: 320 });
   await expect(page.locator(".viewer-settings")).toBeInViewport({ ratio: 1 });
   await page.setViewportSize(viewport);
   await page.screenshot({ path: "../benchmarks/results/upgrade-20260903/cache-options-light.png" });
-  await page.getByRole("button", { name: "Clear fragment cache", exact: true }).click();
+  await page.getByRole("button", { name: "Dọn bộ nhớ hình học", exact: true }).click();
   await expect(page.locator(".cache-settings [role=status]")).toContainText("Đã dọn");
   expect(await page.evaluate(async () => (await (await fetch("/model/runtime")).json()).activeModelHash)).toBe(hashA);
   await page.evaluate(() => document.querySelector(".qn-theme")!.setAttribute("data-mode", "dark"));

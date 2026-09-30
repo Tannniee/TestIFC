@@ -38,7 +38,7 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
         payload = response.json()
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["service"], "ifc-selection-bridge")
-        self.assertEqual(payload["appVersion"], "1.0.4")
+        self.assertEqual(payload["appVersion"], "1.0.5")
         self.assertFalse(payload["hasSelection"])
 
     async def test_georeference_endpoint_is_bound_to_a_model_hash(self):
@@ -55,14 +55,28 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
     async def test_manual_anchor_validates_coordinates_and_binds_model_hash(self):
         model_hash = "a" * 64
         body = {"modelHash": model_hash, "longitude": 105.8, "latitude": 21.0,
-                "elevationMeters": 11, "rotationDegrees": 390, "scale": 1}
+                "elevationMeters": 11, "rotationDegrees": 390, "scale": 1, "groundOffsetMeters": 39.25}
         with patch.object(model_operations, "save_manual_anchor", return_value={"status": "manual"}) as save:
             response = await self.client.post("/model/gis-anchor", json=body)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(save.call_args.args[1]["rotationDegrees"], 30)
+        self.assertEqual(save.call_args.args[1]["groundOffsetMeters"], 39.25)
         for bad in ({**body, "latitude": 91}, {**body, "longitude": "inf"},
-                    {**body, "scale": 0}, {**body, "modelHash": "../bad"}):
+                    {**body, "scale": 0}, {**body, "groundOffsetMeters": -1},
+                    {**body, "groundOffsetMeters": "nan"}, {**body, "modelHash": "../bad"}):
             self.assertEqual((await self.client.post("/model/gis-anchor", json=bad)).status_code, 422)
+
+    async def test_compound_filter_contract_validates_pages_and_conditions(self):
+        condition = {"kind": "pset", "setName": "Pset_WallCommon", "propertyName": "FireRating", "op": "eq", "value": "2h"}
+        body = {"modelHash": "a"*64, "conditions": [condition], "match": "all", "cursor": 0, "limit": 500}
+        with patch.object(model_operations, "semantic_filter", return_value={"total": 1, "results": []}) as query:
+            response = await self.client.post("/model/semantic-search", json=body)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(query.call_args.args[1], [condition])
+        for bad in [{**body, "conditions": []}, {**body, "conditions": [condition]*9}, {**body, "limit": 501}, {**body, "cursor": -1}, {**body, "match": "invalid"}, {**body, "modelHash": "../bad"}]:
+            self.assertEqual((await self.client.post("/model/semantic-search", json=bad)).status_code, 422)
+        with patch.object(model_operations, "semantic_filter", side_effect=model_operations.ActiveModelChangedError()):
+            self.assertEqual((await self.client.post("/model/semantic-search", json=body)).status_code, 409)
 
     async def test_semantic_retry_rejects_stale_activation_and_duplicate_attempt(self):
         import model_runtime
@@ -203,7 +217,8 @@ class ApiContractTests(unittest.IsolatedAsyncioTestCase):
             "/model/runtime": {"get"},
             "/model/georeference": {"get"},
             "/model/browser": {"get"},
-            "/model/semantic-search": {"get"},
+            "/model/semantic-search": {"get", "post"},
+            "/model/semantic-fields": {"get"},
             "/model/gis-anchor": {"get", "post", "delete"},
             "/model/tree": {"get"},
             "/model/search": {"get"},

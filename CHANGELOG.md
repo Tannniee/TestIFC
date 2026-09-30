@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 1.0.5 — 2026-09-30
+
+- Keep the viewer canvas at a stable size while Project Browser and Properties
+  slide over it. Retain panel content, support rapid reversal and reduced motion.
+- Organize Settings into General, Navigation, BIM–GIS and Storage tabs. Add saved
+  Vietnamese/English language and appearance choices, with localized settings text.
+- Filter indexed BIM data with up to eight Pset/Qto conditions joined by AND/OR,
+  authored field suggestions, literal text matching and numeric SI comparisons.
+- Collect every result page before enabling bulk selection or isolation. Respect
+  tree name, IFC type and visibility/selection filters and cancel stale queries.
+- Resolve visibility by element occurrence when geometry is shared. Preserve
+  BIM–GIS placement, floor alignment, in-place rotation and reset controls.
+
 - Keep Project Browser Tree bound to the IFC currently shown: clear it during model switches, automatically load the new document's Tree, and ignore late replies from the previous document.
 
 ## 1.0.4 — 2026-09-28

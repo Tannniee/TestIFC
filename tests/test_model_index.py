@@ -133,6 +133,43 @@ class ModelIndexTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "numeric_value_required"):
                 index.semantic_search("qto", "Qto_WallBaseQuantities", "NetVolume", "gte", "many", "", 10)
 
+    def test_compound_filters_combine_conditions_and_page_all_products(self):
+        import sqlite3
+        with TemporaryDirectory() as temporary:
+            target = Path(temporary) / "model.sqlite"
+            model_index.build(IfcFile(), target, "compound", record, children, cold_record)
+            index = model_index.ModelIndex(target)
+            rating = {"kind": "pset", "setName": "Pset_WallCommon", "propertyName": "FireRating", "op": "eq", "value": "2h"}
+            volume = {"kind": "qto", "setName": "Qto_WallBaseQuantities", "propertyName": "NetVolume", "op": "gt", "value": "20"}
+            self.assertEqual(index.semantic_filter([rating, volume], "all", "", 0, 500)["total"], 0)
+            self.assertEqual(index.semantic_filter([rating, volume], "any", "", 0, 500)["total"], 1)
+            zero = {"kind": "qto", "setName": "Qto_WallBaseQuantities", "propertyName": "NetArea", "op": "eq", "value": "0.0"}
+            self.assertEqual(index.semantic_filter([rating, zero], "all", "", 0, 500)["results"][0]["localId"], 2)
+            self.assertEqual(index.semantic_filter([rating], "all", "IfcDoor", 0, 500)["total"], 0)
+            self.assertEqual(index.semantic_filter([{**rating, "op": "contains", "value": "%"}], "all", "", 0, 500)["total"], 0)
+            self.assertEqual(index.semantic_filter([{**rating, "value": "x' OR 1=1 --"}], "all", "", 0, 500)["total"], 0)
+            catalog = index.semantic_fields()
+            self.assertTrue(any(item["propertyName"] == "NetVolume" and item["unit"] == "m3" for item in catalog["fields"]))
+            with sqlite3.connect(target) as connection:
+                connection.executemany("INSERT INTO element(express_id,ifc_type,browser_element,record_json) VALUES (?,'IfcWall',1,'{}')", [(i,) for i in range(100, 1200)])
+                connection.executemany("INSERT INTO semantic_value(kind,set_name,property_name,express_id,value_text) VALUES ('pset','Pset_WallCommon','FireRating',?,'2h')", [(i,) for i in range(100, 1200)])
+            connection.close()
+            cursor, ids = 0, []
+            while True:
+                page = index.semantic_filter([rating, rating], "any", "", cursor, 500)
+                self.assertEqual(page["total"], 1101)
+                ids.extend(item["localId"] for item in page["results"])
+                if page["nextCursor"] is None:
+                    break
+                self.assertGreater(page["nextCursor"], cursor)
+                cursor = page["nextCursor"]
+            self.assertEqual(len(ids), 1101)
+            self.assertEqual(len(set(ids)), 1101)
+            with self.assertRaisesRegex(ValueError, "numeric_value_required"):
+                index.semantic_filter([{**volume, "value": "nan"}], "all", "", 0, 500)
+            with self.assertRaises(ValueError):
+                index.semantic_filter([], "all", "", 0, 500)
+
     def test_hot_index_is_usable_before_cold_records_finish(self):
         with TemporaryDirectory() as temporary:
             target = Path(temporary) / "model.sqlite"

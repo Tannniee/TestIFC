@@ -28,6 +28,14 @@ test("clockwise rotation and scale move east toward south", () => {
   assert.ok(east.distanceTo(new THREE.Vector3(0, 2e-6, 0)) < 1e-12);
 });
 
+test("a chosen floor maps to road altitude while piles stay below it without changing scale", () => {
+  const options = { ...anchor, groundOffsetMeters: 8 };
+  const floor = place(new THREE.Vector3(0, 6, 0), options);
+  assert.ok(floor.distanceTo(new THREE.Vector3(origin.x,origin.y,origin.z)) < 1e-12);
+  const bottom = place(new THREE.Vector3(0,-2,0), options);
+  assert.ok(Math.abs(bottom.z - (origin.z - 8 * origin.meterScale)) < 1e-12);
+});
+
 test("IFC control points undo the Fragments coordinate shift once", () => {
   const origin = { x: 0.5, y: 0.5, z: 0.01 };
   const scale = 1e-6;

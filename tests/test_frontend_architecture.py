@@ -37,7 +37,10 @@ class FrontendArchitectureTests(unittest.TestCase):
         self.assertIn("progressText(viewerProgress, t)", app)
         self.assertIn("bridgeText(bridgeProgress, locale)", app)
         self.assertIn("<SectionBoxPanel", source(LIB / "PropertiesPanel.svelte"))
-        self.assertIn("<CacheSettings", app)
+        self.assertIn("<SettingsPanel", app)
+        settings = (ROOT / "frontend/src/lib/SettingsPanel.svelte").read_text(encoding="utf-8-sig")
+        self.assertIn("<CacheSettings", settings)
+        self.assertIn("<MapboxSettings", settings)
 
     def test_app_shell_owns_api_settings_and_viewer_lifecycle(self):
         shell = source(LIB / "app-shell.ts")

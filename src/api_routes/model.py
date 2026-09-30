@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from api_contracts import RetrySemanticRequest, SaveManualAnchorRequest
+from api_contracts import RetrySemanticRequest, SaveManualAnchorRequest, SemanticFilterRequest
 from model_runtime import retry_semantic_index
 from model_limits import ModelTooLargeError
 
@@ -238,6 +238,34 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
             logger.exception("Semantic property search failed", extra={"event": "semantic_search_failed"})
             return error_response(500, "semantic_search_failed")
 
+    @router.post("/model/semantic-search", response_model=None)
+    def filter_semantic_values(request: SemanticFilterRequest):
+        try:
+            return model_operations.semantic_filter(request.modelHash,
+                [condition.model_dump() for condition in request.conditions], request.match,
+                request.ifcType, request.cursor, request.limit)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except ValueError as exc:
+            return error_response(422, str(exc))
+        except Exception:
+            logger.exception("BIM filter failed", extra={"event": "semantic_filter_failed"})
+            return error_response(500, "semantic_filter_failed")
+
+    @router.get("/model/semantic-fields", response_model=None)
+    def get_semantic_fields(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
+        try:
+            return model_operations.semantic_fields(modelHash)
+        except model_operations.ActiveModelChangedError:
+            return error_response(409, "active_model_changed")
+        except (IndexPreparingError, NoActiveModelError) as exc:
+            return _model_error(exc)
+        except Exception:
+            logger.exception("BIM fields failed", extra={"event": "semantic_fields_failed"})
+            return error_response(500, "semantic_fields_failed")
+
     @router.get("/model/gis-anchor", response_model=None)
     def get_gis_anchor(modelHash: str = Query(pattern=MODEL_HASH_PATTERN)):
         try:
@@ -258,6 +286,8 @@ def create_model_router(fragment_service: FragmentService) -> APIRouter:
                 "elevationMeters": request.elevationMeters,
                 "rotationDegrees": request.rotationDegrees % 360,
                 "scale": request.scale,
+                **({"groundOffsetMeters": request.groundOffsetMeters}
+                   if request.groundOffsetMeters is not None else {}),
             })
         except model_operations.ActiveModelChangedError:
             return error_response(409, "active_model_changed")

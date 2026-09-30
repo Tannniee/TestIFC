@@ -7,35 +7,39 @@
   export let clearCache: (scope: "fragments" | "all") => Promise<CacheInventory & { freedBytes: number; failedFiles: number }>;
   let inventory: CacheInventory | null = null;
   let working = false;
-  let message = "";
+  let status: "" | "unavailable" | "cleared" | "failed" = "";
+  let freedBytes=0,protectedModels=0,failedFiles=0;
   const bytes = (value: number) => `${(value / 1024 ** 2).toFixed(1)} MB`;
+  $: message=status==='unavailable'?(locale==='vi'?'Chưa kết nối bộ nhớ mô hình.':'Cache is unavailable.')
+    :status==='failed'?(locale==='vi'?'Chưa dọn được bộ nhớ. Hãy thử lại.':'Could not clear the cache. Retry.')
+    :status==='cleared'?(locale==='vi'?`Đã dọn ${bytes(freedBytes)}. Giữ lại ${protectedModels} mô hình đang sử dụng.`:`Cleared ${bytes(freedBytes)}. Kept ${protectedModels} models in use.`)
+      +(failedFiles?(locale==='vi'?` ${failedFiles} tệp chưa xóa được.`:` ${failedFiles} files could not be removed.`):''):'';
   async function refresh() {
     try { inventory = await loadInventory(); }
-    catch { message = locale === "vi" ? "Chưa kết nối cache." : "Cache is unavailable."; }
+    catch { status='unavailable'; }
   }
   async function clear(scope: "fragments" | "all") {
     working = true;
-    message = "";
+    status = "";
     try {
       const result = await clearCache(scope);
       inventory = result;
-      message = locale === "vi" ? `Đã dọn ${bytes(result.freedBytes)}. Giữ lại ${result.protectedModels} model đang sử dụng.` : `Cleared ${bytes(result.freedBytes)}. Kept ${result.protectedModels} models in use.`;
-      if (result.failedFiles) message += locale === "vi" ? ` ${result.failedFiles} tệp chưa xóa được.` : ` ${result.failedFiles} files could not be removed.`;
-    } catch (error) { message = String(error); }
+      freedBytes=result.freedBytes;protectedModels=result.protectedModels;failedFiles=result.failedFiles;status='cleared';
+    } catch { status='failed'; }
     finally { working = false; }
   }
   onMount(() => { void refresh(); });
 </script>
 
-<section class="cache-settings" aria-label="Model cache">
-  <strong>Model cache</strong>
+<section class="cache-settings" aria-label={locale === "vi" ? "Bộ nhớ mô hình" : "Model cache"}>
+  <strong>{locale === "vi" ? "Bộ nhớ mô hình" : "Model cache"}</strong>
   {#if inventory}
     <p>{bytes(inventory.totalBytes)} · Fragment: {bytes(inventory.fragmentBytes)}</p>
-    <p>{locale === "vi" ? "Tự dọn:" : "Retention:"} {inventory.keepModels} model / {bytes(inventory.maxBytes)}</p>
+    <p>{locale === "vi" ? "Tự dọn:" : "Retention:"} {inventory.keepModels} {locale === "vi" ? "mô hình" : "models"} / {bytes(inventory.maxBytes)}</p>
   {/if}
-  <div><button disabled={busy || working || !inventory} onclick={() => clear("fragments")}>Clear fragment cache</button>
-    <button disabled={busy || working || !inventory} onclick={() => clear("all")}>Clear model cache</button></div>
-  <p>{locale === "vi" ? "Giữ model đang dùng. File IFC gốc không bị xóa." : "Keeps models in use. Original IFC files are preserved."}</p>
+  <div><button disabled={busy || working || !inventory} onclick={() => clear("fragments")}>{locale === "vi" ? "Dọn bộ nhớ hình học" : "Clear fragment cache"}</button>
+    <button disabled={busy || working || !inventory} onclick={() => clear("all")}>{locale === "vi" ? "Dọn bộ nhớ mô hình" : "Clear model cache"}</button></div>
+  <p>{locale === "vi" ? "Giữ mô hình đang dùng. Tệp IFC gốc không bị xóa." : "Keeps models in use. Original IFC files are preserved."}</p>
   {#if message}<p role="status">{message}</p>{/if}
 </section>
 

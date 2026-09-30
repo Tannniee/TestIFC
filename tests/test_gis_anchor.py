@@ -21,7 +21,7 @@ class GisAnchorTests(unittest.TestCase):
     def test_anchor_is_atomic_model_scoped_and_survives_model_cache_files(self):
         model_hash = "a" * 64
         anchor = {"longitude": 105.8, "latitude": 21.0, "elevationMeters": 11.2,
-                  "rotationDegrees": 30.0, "scale": 1.0}
+                  "rotationDegrees": 30.0, "scale": 1.0, "groundOffsetMeters": 39.25}
         with TemporaryDirectory() as temporary:
             root = Path(temporary)
             self.assertEqual(gis_anchor.read_anchor(root, model_hash)["status"], "unavailable")

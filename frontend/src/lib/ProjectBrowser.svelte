@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { panelMotion } from "./panel-motion";
+  import BimFilter from "./BimFilter.svelte";
   import { onDestroy } from "svelte";
   import { activeDocument, activeView, type WorkspaceState } from "./workspace-contracts";
   import { descendantIds, filterBrowserTree, visibleTreeRows, type BrowserNode, type ModelDataService } from "./model-data-service";
   import type { BrowserView } from "./api-contracts";
+  export let open = true;
+  export let locale: "vi" | "en" = "vi";
   export let state: WorkspaceState;
   export let modelKey: string;
   export let activeModelHash: string;
   export let service: ModelDataService;
   export let onView: (id: string) => void;
-  export let onSelect: (ids: number[]) => void;
+  export let onSelect: (ids: number[]) => Promise<void>;
   export let onAction: (action: "hide" | "isolate" | "fit" | "showAll" | "properties", ids: number[]) => Promise<void>;
   export let onExpanded: (ids: string[]) => void;
   export let onClose: () => void;
@@ -21,10 +23,8 @@
   let visibleIds = new Set<number>(), hiddenIds = new Set<number>();
   let coldStatus = "not_configured";
   let menu: { x: number; y: number; node: BrowserNode } | null = null;
-  let semanticKind: "pset" | "qto" = "pset", semanticSet = "", semanticProperty = "", semanticValue = "";
-  let semanticOp: "eq" | "contains" | "gt" | "gte" | "lt" | "lte" = "eq";
-  let semanticHits: Set<number> | null = null, appliedSemanticKey = "", semanticMessage = "", semanticLoading = false;
-  let treeHost: HTMLDivElement;
+  let semanticHits: Set<number> | null = null, filterReset=0;
+  let treeHost: HTMLDivElement, panelHost: HTMLElement;
   onDestroy(() => { request++; });
   $: doc = activeDocument(state);
   $: view = activeView(state);
@@ -34,25 +34,25 @@
     owner = modelKey; request++; root = null; loading = false; error = ""; names = {}; nameKey = ""; scrollTop = 0;
     visibleIds = new Set(); hiddenIds = new Set();
     viewMode = "spatial"; search = ""; ifcType = ""; scope = "all"; menu = null; coldStatus = "not_configured";
-    semanticHits = null; appliedSemanticKey = ""; semanticMessage = ""; semanticLoading = false;
+    semanticHits = null;
     expanded = new Set(doc?.expandedNodes ?? []);
   }
-  $: if (modelReady && treeRequested && autoLoadOwner !== owner) {
+  $: if (open && modelReady && treeRequested && autoLoadOwner !== owner) {
     autoLoadOwner = owner;
     void loadTree();
   }
   $: allowedIds = scope === "selected" ? selected : scope === "visible" ? visibleIds : null;
-  $: currentSemanticKey = [semanticKind, semanticSet, semanticProperty, semanticOp, semanticValue, ifcType].join("\u0000");
-  $: effectiveSemanticHits = appliedSemanticKey === currentSemanticKey ? semanticHits : null;
-  $: filtered = filterBrowserTree(root ?? [], search, ifcType, scope, allowedIds, effectiveSemanticHits);
+  $: effectiveSemanticHits = semanticHits;
+  $: filtered = open ? filterBrowserTree(root ?? [], search, ifcType, scope, allowedIds, effectiveSemanticHits) : [];
   $: filterActive = !!(search.trim() || ifcType || scope !== "all" || effectiveSemanticHits);
   $: displayExpanded = filterActive ? new Set([...expanded, ...branchIds(filtered)]) : expanded;
   $: rows = visibleTreeRows(filtered, displayExpanded);
+  $: eligibleIds = semanticHits && root ? new Set(filtered.flatMap(descendantIds)) : null;
   $: typeOptions = [...new Set((root ?? []).flatMap(collectTypes))].sort();
   $: start = Math.max(0,Math.floor(scrollTop/28)-5);
   $: visible = rows.slice(start,start+50);
   $: nextNames = `${owner}:${visible.map(r => r.node.localId).join(",")}`;
-  $: if (root && !state.busy && nextNames !== nameKey) { nameKey = nextNames; void loadNames(visible.map(r=>r.node.localId).filter((id): id is number => id !== null)); }
+  $: if (open && root && !state.busy && nextNames !== nameKey) { nameKey = nextNames; void loadNames(visible.map(r=>r.node.localId).filter((id): id is number => id !== null)); }
   async function loadNames(ids: number[]) {
     const current = request;
     try { const result = await service.getNames(ids); if (current === request) names = { ...names,...result }; }
@@ -98,52 +98,35 @@
     try { await onAction("showAll", []); await refreshVisibility(); }
     catch (failure) { error = String(failure); }
   }
-  async function applySemantic(event: SubmitEvent) {
-    event.preventDefault();
-    if (!matchesActiveModel() || !semanticSet.trim() || !semanticProperty.trim()) return;
-    const current = request, key = currentSemanticKey;
-    semanticLoading = true; semanticMessage = "";
-    try {
-      const result = await service.searchSemantic({ kind: semanticKind, setName: semanticSet.trim(),
-        propertyName: semanticProperty.trim(), op: semanticOp, value: semanticValue,
-        ifcType, limit: 500 });
-      if (current !== request) return;
-      if (result.coldStatus !== "ready") {
-        semanticHits = null; appliedSemanticKey = "";
-        semanticMessage = result.coldStatus === "error" ? "INDEX lỗi. Hãy thử Retry trong thanh trạng thái." : "INDEX đang lập; thử lại sau.";
-      } else {
-        semanticHits = new Set(result.results.map(item => item.localId)); appliedSemanticKey = key;
-        semanticMessage = `${result.results.length} kết quả${result.truncated ? " (giới hạn 500; hãy lọc thêm)" : ""}`;
-      }
-    } catch (failure) { if (current === request) semanticMessage = String(failure); }
-    finally { if (current === request) semanticLoading = false; }
-  }
-  function clearSemantic() {
-    semanticSet = ""; semanticProperty = ""; semanticValue = ""; semanticOp = "eq";
-    semanticHits = null; appliedSemanticKey = ""; semanticMessage = "";
+  function clearSemantic() { semanticHits=null;filterReset++; }
+  function acceptSemantic(ids: Set<number> | null) {
+    semanticHits=ids;
+    if(ids && !root && modelReady) {treeRequested=true;autoLoadOwner=owner;void loadTree();}
   }
   function toggle(node: BrowserNode) { const next=new Set(expanded); next.has(node.id)?next.delete(node.id):next.add(node.id); expanded=next; onExpanded([...next]); }
   function select(node: BrowserNode, event: MouseEvent) {
     if (node.localId === null) { toggle(node); return; }
     if (event.ctrlKey || event.metaKey) {
-      const ids = new Set(selected); ids.has(node.localId) ? ids.delete(node.localId) : ids.add(node.localId); onSelect([...ids]);
-    } else onSelect([node.localId]);
+      const ids = new Set(selected); ids.has(node.localId) ? ids.delete(node.localId) : ids.add(node.localId); void onSelect([...ids]).catch(failure=>error=String(failure));
+    } else void onSelect([node.localId]).catch(failure=>error=String(failure));
   }
   function contextMenu(node: BrowserNode, event: MouseEvent) {
     if (!matchesActiveModel()) return;
-    event.preventDefault(); menu = { node, x: Math.min(event.clientX, innerWidth - 180), y: Math.min(event.clientY, innerHeight - 230) };
+    event.preventDefault(); const panel=panelHost.getBoundingClientRect();
+    menu = { node, x: Math.min(event.clientX, innerWidth - 180)-panel.left, y: Math.min(event.clientY, innerHeight - 230)-panel.top };
   }
   function contextKey(node: BrowserNode, event: KeyboardEvent) {
     if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
     event.preventDefault();
     const box = event.currentTarget instanceof HTMLElement ? event.currentTarget.getBoundingClientRect() : null;
-    menu = { node, x: box?.left ?? 12, y: box?.bottom ?? 60 };
+    const panel=panelHost.getBoundingClientRect();
+    menu = { node, x: (box?.left ?? panel.left+12)-panel.left, y: (box?.bottom ?? panel.top+60)-panel.top };
   }
   async function act(action: "hide" | "isolate" | "fit" | "showAll" | "properties" | "selectChildren") {
     const node = menu?.node; menu = null;
     if (!node || !matchesActiveModel()) return;
     const ids = descendantIds(node);
-    if (action === "selectChildren") { onSelect(ids); return; }
+    if (action === "selectChildren") { try {await onSelect(ids);} catch(failure){error=String(failure);} return; }
     if (action === "properties" && node.localId !== null) { await onAction(action, [node.localId]); return; }
     if (!ids.length && action !== "showAll") return;
     try { await onAction(action, ids); if (action === "hide" || action === "isolate" || action === "showAll") await refreshVisibility(); }
@@ -160,7 +143,7 @@
     } for(const child of node.children) stack.push({node:child,path:[...path,node.id]}); }
   }
 </script>
-<aside class="project-browser" aria-label="Project Browser" transition:panelMotion={"left"}>
+<aside bind:this={panelHost} class="project-browser workspace-panel" class:panel-open={open} aria-label="Project Browser" aria-hidden={!open} inert={!open}>
   <header><strong>Project Browser</strong><button aria-label="Close Project Browser" onclick={onClose}>×</button></header>
   <div class="browser-views"><h3>Views</h3>
     {#each doc?.views ?? [] as item (item.id)}<button disabled={state.busy} class:active={item.id===doc?.activeViewId} onclick={()=>onView(item.id)}>{item.type==="sectionBox"?"◇":"▧"} {item.name}</button>{/each}
@@ -181,18 +164,8 @@
       <option value="all">All</option><option value="visible">Visible</option><option value="selected">Selected</option>
     </select></div>
   </div>
-  <form class="browser-semantic-filter" onsubmit={applySemantic}>
-    <strong>Pset / Qto filter</strong>
-    <div class="browser-filter-row"><select aria-label="Property kind" bind:value={semanticKind}><option value="pset">Pset</option><option value="qto">Qto</option></select>
-      <select aria-label="Property operator" bind:value={semanticOp}><option value="eq">=</option><option value="contains">contains</option>
-        <option value="gt">&gt;</option><option value="gte">≥</option><option value="lt">&lt;</option><option value="lte">≤</option></select></div>
-    <input aria-label="Set name" placeholder="Pset_WallCommon / Qto_..." bind:value={semanticSet} />
-    <input aria-label="Property name" placeholder="FireRating / NetVolume" bind:value={semanticProperty} />
-    <input aria-label="Property value" placeholder="2h / 12.5 (SI units for Qto)" bind:value={semanticValue} />
-    <div class="browser-filter-actions"><button type="submit" disabled={!modelReady || semanticLoading || !semanticSet.trim() || !semanticProperty.trim()}>{semanticLoading?"Searching…":"Apply"}</button>
-      <button type="button" onclick={clearSemantic}>Clear</button></div>
-    {#if semanticMessage}<small role="status">{semanticMessage}</small>{/if}
-  </form>
+  <BimFilter {service} {owner} {open} {modelReady} {ifcType} {locale} reset={filterReset} {eligibleIds}
+    onResults={acceptSemantic} {onSelect} onAction={async (action,ids)=>{await onAction(action,ids);await refreshVisibility();}} />
   {#if modelReady && error}<p role="alert">{error}</p>{/if}
   {#if modelReady && root && coldStatus === "indexing"}<p>INDEX đang lập. Systems, Groups và Classification có thể chưa đầy đủ; bấm Model để tải lại.</p>{/if}
   {#if modelReady && root && viewMode !== "spatial" && !root.length}<p>Không có nhóm trong view này. Semantic index có thể vẫn đang lập; bấm Model để tải lại.</p>{/if}

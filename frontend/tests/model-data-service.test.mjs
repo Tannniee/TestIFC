@@ -2,6 +2,65 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { ModelDataService, buildFacetTree, descendantIds, filterBrowserTree } from "../src/lib/model-data-service.ts";
 
+const filter = { conditions: [{ kind: "pset", setName: "Pset_Test", propertyName: "Rating", op: "eq", value: "A" }], match: "all", ifcType: "" };
+function queryService(read, model = { getItemsIdsWithGeometry: async () => [1, 2, 501, 1001] }, active = () => model) {
+  return new ModelDataService(active, () => "a".repeat(64), async () => {}, async () => {}, async () => {}, read);
+}
+const pageOf = (ids, total, nextCursor) => ({ modelHash: "a".repeat(64), coldStatus: "ready", total,
+  nextCursor, truncated: nextCursor !== null, results: ids.map(localId => ({ localId, name: `Beam ${localId}`, ifcType: "IfcBeam", globalId: null })) });
+
+test("tree visibility uses each geometry occurrence's flag", async () => {
+  const model = { getItemsIdsWithGeometry: async () => [5,43,47], getVisible: async () => [true,true,false],
+    getItemsByVisibility: async () => [5,43,47] };
+  const service = queryService(async () => {}, model);
+  assert.deepEqual(await service.getVisibleIds(true), [5,43]);
+  assert.deepEqual(await service.getVisibleIds(false), [47]);
+});
+
+test("compound BIM selection collects all pages and excludes records without geometry", async () => {
+  const calls = [], progress = [];
+  const service = queryService(async (hash, request) => {
+    calls.push(request.cursor); assert.equal(request.limit, 500);
+    const ids = Array.from({ length: Math.min(500, 1101 - request.cursor) }, (_, i) => request.cursor + i + 1);
+    return pageOf(ids, 1101, ids.at(-1) < 1101 ? ids.at(-1) : null);
+  });
+  const result = await service.searchAllSemantic(filter, (loaded, total) => progress.push([loaded, total]), () => false);
+  assert.equal(result.results.length, 1101);
+  assert.equal(result.truncated, false);
+  assert.deepEqual(result.selectableIds, [1, 2, 501, 1001]);
+  assert.deepEqual(calls, [0, 500, 1000]);
+  assert.deepEqual(progress, [[500, 1101], [1000, 1101], [1101, 1101]]);
+});
+
+test("a failed second page never produces a partial BIM selection", async () => {
+  const service = queryService(async (_, request) => {
+    if (request.cursor) throw new Error("network failure");
+    return pageOf([1, 2], 3, 2);
+  });
+  await assert.rejects(service.searchAllSemantic(filter, () => {}, () => false), /network failure/);
+});
+
+test("BIM queries reject stale owners and edits while awaiting a page", async () => {
+  for (const reason of ["owner", "edit", "hash"]) {
+    let active = {}, cancelled = false, release;
+    const service = queryService(() => new Promise(resolve => { release = resolve; }), active, () => active);
+    const request = service.searchAllSemantic(filter, () => {}, () => cancelled);
+    if (reason === "owner") active = {};
+    if (reason === "edit") cancelled = true;
+    release({ ...pageOf([1], 1, null), modelHash: (reason === "hash" ? "b" : "a").repeat(64) });
+    await assert.rejects(request, /cancelled/);
+  }
+});
+
+test("BIM queries reject incomplete totals and nonadvancing cursors", async () => {
+  for (const page of [pageOf([1], 2, null), pageOf([1], 2, 0)]) {
+    const service = queryService(async () => page);
+    await assert.rejects(service.searchAllSemantic(filter, () => {}, () => false), /Incomplete|Invalid/);
+  }
+  const service = queryService(async (_, request) => pageOf([request.cursor + 1], request.cursor ? 3 : 2, request.cursor ? null : 1));
+  await assert.rejects(service.searchAllSemantic(filter, () => {}, () => false), /result changed/);
+});
+
 test("BIM data retries while the cold index is building and caches a ready record", async () => {
   const model = {};
   const hash = "a".repeat(64);

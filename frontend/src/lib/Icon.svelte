@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let name: "map" | "folder" | "fit" | "zoomBox" | "section" | "sectionBox" | "moon" | "sun" | "globe" | "panel" | "settings" | "help" | "close" | "pan" | "pointer" | "multiSelect" | "measure" | "point" | "edge" | "trash";
+  export let name: "map" | "folder" | "fit" | "zoomBox" | "section" | "sectionBox" | "moon" | "sun" | "globe" | "panel" | "settings" | "help" | "close" | "pan" | "pointer" | "multiSelect" | "measure" | "point" | "edge" | "trash" | "ground" | "rotate" | "reset";
   export let size = 20;
 </script>
 
@@ -14,7 +14,13 @@
   stroke-linecap="round"
   stroke-linejoin="round"
 >
-  {#if name === "folder"}
+  {#if name === "ground"}
+    <path d="M3 20h18M5 7l7-3 7 3-7 3zM12 10v7m-3-3 3 3 3-3" />
+  {:else if name === "rotate"}
+    <path d="M4 9a8 8 0 0 1 15-2M20 15A8 8 0 0 1 5 17M4 4v5h5M20 20v-5h-5" /><circle cx="12" cy="12" r="2" />
+  {:else if name === "reset"}
+    <path d="M4 11a8 8 0 1 1 2 7M4 5v6h6M12 8v5l3 2" />
+  {:else if name === "folder"}
     <path d="M3 7.5h6l2 2h10v8.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     <path d="M3 10V6a2 2 0 0 1 2-2h4l2 2h5" />
   {:else if name === "fit"}

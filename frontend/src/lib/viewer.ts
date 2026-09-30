@@ -533,7 +533,12 @@ export class ViewerService {
     if (!model) return;
     if (action === "showAll") await model.resetVisible();
     else if (localIds.length) {
-      if (action === "isolate") await model.setVisible(undefined, false);
+      if (action === "isolate") {
+        const geometryIds = await model.getItemsIdsWithGeometry();
+        if (model !== this.activeModel) return;
+        await model.setVisible(geometryIds, false);
+      }
+      if (model !== this.activeModel) return;
       await model.setVisible([...new Set(localIds)], action === "isolate");
     }
     if (model === this.activeModel) await this.fragmentUpdates.request(true);

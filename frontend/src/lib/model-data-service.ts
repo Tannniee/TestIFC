@@ -1,5 +1,5 @@
 import type { FragmentsModel, ItemData, SpatialTreeItem } from "@thatopen/fragments";
-import type { BimElementResponse, BrowserView, ModelBrowserResponse, SemanticSearchRequest, SemanticSearchResponse } from "./api-contracts";
+import type { BimElementResponse, BrowserView, ModelBrowserResponse, SemanticSearchRequest, SemanticSearchResponse, SemanticFilterRequest, SemanticFilterResponse, SemanticFieldCatalog } from "./api-contracts";
 import { bimPropertyGroups, type PropertyGroup } from "./bim-properties.ts";
 
 export interface BrowserNode { id: string; localId: number | null; label: string; children: BrowserNode[];
@@ -16,6 +16,8 @@ export class ModelDataService {
   private readonly readBim: (expressId: number, modelHash: string) => Promise<BimElementResponse>;
   private readonly readBrowser: (modelHash: string, view: BrowserView) => Promise<ModelBrowserResponse>;
   private readonly readSemantic: (modelHash: string, filter: SemanticSearchRequest) => Promise<SemanticSearchResponse>;
+  private readonly readFilter?: (modelHash: string, filter: SemanticFilterRequest) => Promise<SemanticFilterResponse>;
+  private readonly readFields?: (modelHash: string) => Promise<SemanticFieldCatalog>;
   private owner: FragmentsModel | null = null;
   private trees = new Map<BrowserView, Promise<BrowserNode[]>>();
   private statuses = new Map<BrowserView, ModelBrowserResponse["coldStatus"]>();
@@ -27,8 +29,10 @@ export class ModelDataService {
     readBim: (expressId: number, modelHash: string) => Promise<BimElementResponse>,
     readBrowser: (modelHash: string, view: BrowserView) => Promise<ModelBrowserResponse>,
     readSemantic: (modelHash: string, filter: SemanticSearchRequest) => Promise<SemanticSearchResponse>,
+    readFilter?: (modelHash: string, filter: SemanticFilterRequest) => Promise<SemanticFilterResponse>,
+    readFields?: (modelHash: string) => Promise<SemanticFieldCatalog>,
   ) { this.active = active; this.activeHash = activeHash; this.readBim = readBim;
-    this.readBrowser = readBrowser; this.readSemantic = readSemantic; }
+    this.readBrowser = readBrowser; this.readSemantic = readSemantic; this.readFilter=readFilter; this.readFields=readFields; }
   private model() {
     const model = this.active();
     if (model !== this.owner) { this.clear(); this.owner = model; }
@@ -48,12 +52,54 @@ export class ModelDataService {
   }
   refreshTree(view: BrowserView) { this.trees.delete(view); return this.getTree(view); }
   getTreeStatus(view: BrowserView) { return this.statuses.get(view) ?? "not_configured"; }
-  async getVisibleIds(visible: boolean) { const model = this.model(); const ids = await model.getItemsByVisibility(visible); this.check(model); return ids; }
+  async getVisibleIds(visible: boolean) {
+    const model = this.model();
+    const ids = await model.getItemsIdsWithGeometry(); this.check(model);
+    const result: number[] = [];
+    // Read visibility by element ID: shared geometry can make the aggregate
+    // getItemsByVisibility response include a hidden occurrence.
+    for (let start = 0; start < ids.length; start += 1000) {
+      const batch = ids.slice(start, start + 1000);
+      const flags = await model.getVisible(batch); this.check(model);
+      batch.forEach((id, index) => { if (flags[index] === visible) result.push(id); });
+    }
+    return result;
+  }
   async searchSemantic(filter: SemanticSearchRequest) {
     const model = this.model(), hash = this.activeHash();
     const result = await this.readSemantic(hash, filter); this.check(model);
     if (result.modelHash !== hash) throw new Error("Model semantic query cancelled");
     return result;
+  }
+  async getSemanticFields() {
+    const model=this.model(), hash=this.activeHash();
+    if(!this.readFields)throw new Error("BIM field catalog unavailable");
+    const result=await this.readFields(hash);this.check(model);
+    if(result.modelHash!==hash)throw new Error("Model semantic query cancelled");
+    return result;
+  }
+  async searchAllSemantic(filter: SemanticFilterRequest, progress: (loaded: number,total: number)=>void, cancelled: ()=>boolean) {
+    const model=this.model(),hash=this.activeHash();
+    if(!this.readFilter)throw new Error("Compound BIM filtering unavailable");
+    const results: SemanticFilterResponse["results"]=[],seen=new Set<number>();let cursor=0,total:number|undefined;
+    for(;;) {
+      if(cancelled())throw new Error("BIM query cancelled");
+      const page=await this.readFilter(hash,{...filter,cursor,limit:500});this.check(model);
+      if(cancelled()||page.modelHash!==hash)throw new Error("BIM query cancelled");
+      if(page.coldStatus!=="ready")return {...page,results:[],selectableIds:[] as number[]};
+      if(total!==undefined&&page.total!==total)throw new Error("BIM result changed; retry query");total=page.total;
+      for(const item of page.results){if(!seen.has(item.localId)){seen.add(item.localId);results.push(item);}}
+      progress(results.length,total);
+      if(page.nextCursor===null) {
+        if(results.length!==total)throw new Error("Incomplete BIM result; retry query");
+        const geometry=await model.getItemsIdsWithGeometry();this.check(model);
+        if(cancelled())throw new Error("BIM query cancelled");
+        const renderable=new Set(geometry);
+        return {...page,results,truncated:false,selectableIds:results.filter(item=>renderable.has(item.localId)).map(item=>item.localId)};
+      }
+      if(!Number.isSafeInteger(page.nextCursor)||page.nextCursor<=cursor)throw new Error("Invalid BIM page cursor");
+      cursor=page.nextCursor;await yieldUI();
+    }
   }
   private async buildTree(model: FragmentsModel, view: BrowserView): Promise<BrowserNode[]> {
     let snapshot: ModelBrowserResponse | null = null;

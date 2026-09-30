@@ -46,6 +46,8 @@ export class AppShellService {
     (expressId, modelHash) => api.bimElement(expressId, modelHash),
     (modelHash, view) => api.modelBrowser(modelHash, view),
     (modelHash, filter) => api.semanticSearch(modelHash, filter),
+    (modelHash, filter) => api.semanticFilter(modelHash, filter),
+    modelHash => api.semanticFields(modelHash),
   );
   private workspaceListeners = new Set<(state: WorkspaceState) => void>();
   subscribeWorkspace(listener: (state: WorkspaceState) => void) {

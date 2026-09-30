@@ -14,6 +14,9 @@ import {
   type ModelBrowserResponse,
   type BrowserView,
   type SemanticSearchRequest,
+  type SemanticFilterRequest,
+  type SemanticFilterResponse,
+  type SemanticFieldCatalog,
   type SemanticSearchResponse,
   type ManualAnchor,
   type GisAnchorResponse,
@@ -81,6 +84,9 @@ export const api = {
       ifcType: filter.ifcType, limit: String(filter.limit ?? 200) });
     return requestJson<SemanticSearchResponse>(`${API_ENDPOINTS.semanticSearch.path}?${params}`);
   },
+  semanticFilter: (modelHash: string, filter: SemanticFilterRequest) => requestJson<SemanticFilterResponse>(API_ENDPOINTS.semanticFilter.path,
+    {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({modelHash,...filter})}),
+  semanticFields: (modelHash: string) => requestJson<SemanticFieldCatalog>(`${API_ENDPOINTS.semanticFields.path}?modelHash=${encodeURIComponent(modelHash)}`),
   gisAnchor: (modelHash: string) => requestJson<GisAnchorResponse>(
     `${API_ENDPOINTS.gisAnchor.path}?modelHash=${encodeURIComponent(modelHash)}`),
   saveGisAnchor: (modelHash: string, anchor: ManualAnchor) => requestJson<GisAnchorResponse>(

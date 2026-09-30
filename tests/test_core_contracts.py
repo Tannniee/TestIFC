@@ -48,7 +48,7 @@ class FakeIndex:
 
 class CoreContractTests(unittest.TestCase):
     def test_version_contract(self):
-        self.assertEqual(APP_VERSION, "1.0.4")
+        self.assertEqual(APP_VERSION, "1.0.5")
 
     def test_content_hash_contract(self):
         sample = bytes(range(256)) * 4

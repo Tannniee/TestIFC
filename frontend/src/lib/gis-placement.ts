@@ -15,7 +15,7 @@ export function modelMercatorMatrix(anchor: ManualAnchor, bounds: GisModelBounds
     .multiply(new THREE.Matrix4().makeScale(meters, -meters, meters))
     .multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2))
     .multiply(new THREE.Matrix4().makeRotationY(-theta))
-    .multiply(new THREE.Matrix4().makeTranslation(-centerEast, -bounds.minHeight, -centerViewerZ));
+    .multiply(new THREE.Matrix4().makeTranslation(-centerEast, -bounds.minHeight - (anchor.groundOffsetMeters ?? 0), -centerViewerZ));
 }
 
 export type GisControlPoints = NonNullable<ModelGeoreferenceResponse["wgs84"]>["controlPoints"];

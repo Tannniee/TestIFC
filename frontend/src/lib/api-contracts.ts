@@ -147,9 +147,17 @@ export interface SemanticSearchResponse {
   results: Array<{ localId: number; globalId: string | null; ifcType: string;
     name: string | null; value: string; unit: string | null }>;
 }
+export type SemanticCondition = Pick<SemanticSearchRequest, "kind" | "setName" | "propertyName" | "op" | "value">;
+export interface SemanticFilterRequest { conditions: SemanticCondition[]; match: "all" | "any"; ifcType: string; cursor?: number; limit?: number }
+export interface SemanticFilterResponse { modelHash: string; coldStatus: ModelRuntimeResponse["coldIndexStatus"]; total: number; truncated: boolean; nextCursor: number | null;
+  results: Array<{localId: number;globalId: string | null;ifcType: string;name: string | null}> }
+export interface SemanticFieldCatalog { modelHash: string; coldStatus: ModelRuntimeResponse["coldIndexStatus"]; truncated: boolean;
+  fields: Array<{kind: "pset" | "qto";setName: string;propertyName: string;unit: string | null;count: number}> }
 export interface ManualAnchor {
   longitude: number; latitude: number; elevationMeters: number;
   rotationDegrees: number; scale: number;
+  /** Selected road datum measured up from the model's bottom, before scale. */
+  groundOffsetMeters?: number;
 }
 export interface GisAnchorResponse {
   modelHash: string; status: "manual" | "unavailable"; source: "manual" | null;
@@ -185,6 +193,8 @@ export const API_ENDPOINTS = {
   modelGeoreference: { method: "GET", path: "/model/georeference" },
   modelBrowser: { method: "GET", path: "/model/browser" },
   semanticSearch: { method: "GET", path: "/model/semantic-search" },
+  semanticFilter: { method: "POST", path: "/model/semantic-search" },
+  semanticFields: { method: "GET", path: "/model/semantic-fields" },
   gisAnchor: { method: "GET", path: "/model/gis-anchor" },
   bimElement: { method: "GET", path: "/element/by-express-id/{expressId}/bim" },
   getFragments: { method: "GET", path: "/model/fragments/{modelHash}" },

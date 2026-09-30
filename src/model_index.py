@@ -549,6 +549,14 @@ class ModelIndex:
                              "name": row[3], "value": row[4], "unit": row[5]}
                             for row in rows[:limit]]}
 
+    def semantic_filter(self, conditions: list[dict], match: str, ifc_type: str, cursor: int, limit: int):
+        from semantic_query import filter_values
+        return filter_values(self._path, self.cold_status, conditions, match, ifc_type, cursor, limit)
+
+    def semantic_fields(self):
+        from semantic_query import field_catalog
+        return field_catalog(self._path, self.cold_status)
+
     def _query(self, sql: str, params=()):
         with closing(sqlite3.connect(self._path.resolve().as_uri() + "?mode=ro", uri=True, timeout=0.75)) as connection:
             return connection.execute(sql, params).fetchall()
