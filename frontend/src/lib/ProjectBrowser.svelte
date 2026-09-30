@@ -1,25 +1,16 @@
 <script lang="ts">
   import { panelMotion } from "./panel-motion";
-  import GisAnchorPanel from "./GisAnchorPanel.svelte";
-  import type { FragmentsModel } from "@thatopen/fragments";
   import { onDestroy } from "svelte";
   import { activeDocument, activeView, type WorkspaceState } from "./workspace-contracts";
   import { descendantIds, filterBrowserTree, visibleTreeRows, type BrowserNode, type ModelDataService } from "./model-data-service";
-  import type { BrowserView, GisAnchorResponse, ManualAnchor, ModelGeoreferenceResponse } from "./api-contracts";
-  import type { GisModelBounds } from "./gis-footprint";
+  import type { BrowserView } from "./api-contracts";
   export let state: WorkspaceState;
   export let modelKey: string;
   export let activeModelHash: string;
-  export let modelBounds: GisModelBounds | null;
-  export let model: FragmentsModel | null;
   export let service: ModelDataService;
   export let onView: (id: string) => void;
   export let onSelect: (ids: number[]) => void;
   export let onAction: (action: "hide" | "isolate" | "fit" | "showAll" | "properties", ids: number[]) => Promise<void>;
-  export let onReadAnchor: (hash: string) => Promise<GisAnchorResponse>;
-  export let onReadGeoreference: (hash: string) => Promise<ModelGeoreferenceResponse>;
-  export let onSaveAnchor: (hash: string, anchor: ManualAnchor) => Promise<GisAnchorResponse>;
-  export let onDeleteAnchor: (hash: string) => Promise<GisAnchorResponse>;
   export let onExpanded: (ids: string[]) => void;
   export let onClose: () => void;
   export let onResize: (event: PointerEvent) => void;
@@ -174,9 +165,6 @@
   <div class="browser-views"><h3>Views</h3>
     {#each doc?.views ?? [] as item (item.id)}<button disabled={state.busy} class:active={item.id===doc?.activeViewId} onclick={()=>onView(item.id)}>{item.type==="sectionBox"?"◇":"▧"} {item.name}</button>{/each}
   </div>
-    <GisAnchorPanel modelHash={modelReady ? doc?.modelHash ?? null : null} {modelBounds} {model} selectedIds={[...selected]}
-      onSelect={localId => onSelect([localId])} onRead={onReadAnchor}
-      onReadGeoreference={onReadGeoreference} onSave={onSaveAnchor} onDelete={onDeleteAnchor} />
   <div class="browser-model-heading"><button disabled={!modelReady || loading} onclick={openTree}>{loading?"Loading…":"Model"}</button>
     {#if modelReady && root && selected.size}<button onclick={reveal} title="Reveal selected element">↳ {selected.size}</button>{/if}
     {#if modelReady && root}<button onclick={()=>void showAll()} title="Show all elements" aria-label="Show all elements">◉</button>{/if}

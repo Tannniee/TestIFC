@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import re
 import tempfile
 from pathlib import Path
 from threading import Lock
@@ -19,12 +20,18 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "viewportBackground": "gray",
     "wheelZoomSpeed": 1.0,
     "rotationSpeed": 1.0,
+    "mapboxPublicToken": "",
 }
 
 
 def normalize_settings(value: Any) -> dict[str, Any]:
     source = value if isinstance(value, dict) else {}
     result = dict(DEFAULT_SETTINGS)
+    token = source.get("mapboxPublicToken")
+    if isinstance(token, str):
+        token = token.strip()
+        if len(token) <= 2048 and re.fullmatch(r"pk\.[A-Za-z0-9._-]+", token):
+            result["mapboxPublicToken"] = token
     if source.get("locale") in {"vi", "en"}:
         result["locale"] = source["locale"]
     if source.get("mode") in {"light", "dark"}:

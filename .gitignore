@@ -40,3 +40,7 @@ input/
 pyinstxtractor-*/
 reports/
 tools/
+
+# Isolated IFC.js / Mapbox runtime build
+frontend/gis-runtime/node_modules/
+frontend/public/vendor/bim-gis/

@@ -1,5 +1,6 @@
 import type { Locale } from "./i18n";
 import type { ViewportBackground } from "./viewer-contracts";
+import { normalizeMapboxToken } from "./mapbox-token";
 
 export interface AppSettings {
   schemaVersion: 1;
@@ -9,6 +10,7 @@ export interface AppSettings {
   viewportBackground: ViewportBackground;
   wheelZoomSpeed: number;
   rotationSpeed: number;
+  mapboxPublicToken: string;
 }
 
 interface DesktopSettingsApi {
@@ -64,6 +66,7 @@ function normalizeSettings(value: unknown): AppSettings | null {
   if (source.wheelZoomSpeed < 0.25 || source.wheelZoomSpeed > 3) return null;
   return {
     schemaVersion: 1,
+    mapboxPublicToken: normalizeMapboxToken(source.mapboxPublicToken),
     locale: source.locale,
     mode: source.mode,
     gridVisible: source.gridVisible,

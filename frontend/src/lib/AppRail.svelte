@@ -22,6 +22,8 @@
   export let onLanguage: () => void;
   export let onInspector: () => void;
   export let onHelp: () => void;
+  export let mapActive = false;
+  export let onMap: () => void;
 </script>
 
 <nav class="qn-rail" aria-label={text.rail}>
@@ -31,6 +33,7 @@
   <button class:qn-rail-button-active={boxZoomActive} class="qn-rail-button" title={text.boxZoom} aria-label={text.boxZoom} aria-pressed={boxZoomActive} data-tooltip={text.boxZoom} disabled={!hasModel} onclick={onBoxZoom}><Icon name="zoomBox" /></button>
   <button class:qn-rail-button-active={sectionActive} class="qn-rail-button" title={text.sectionPlane} aria-label={text.sectionPlane} aria-pressed={sectionActive} data-tooltip={text.sectionPlane} disabled={!hasModel} onclick={onSection}><Icon name="section" /></button>
   <button class:qn-rail-button-active={sectionBoxActive} class="qn-rail-button" title="Section Box" aria-label="Section Box" aria-pressed={sectionBoxActive} data-tooltip="Section Box" disabled={!hasModel} onclick={onSectionBox}><Icon name="sectionBox" /></button>
+  <button class="qn-rail-button" class:qn-rail-button-active={mapActive} title="BIM–GIS Mapbox" aria-label="BIM–GIS Mapbox" aria-pressed={mapActive} data-tooltip="BIM–GIS Mapbox" onclick={onMap}><Icon name="map" /></button>
   <button class:qn-rail-button-active={displaySettingsOpen} class="qn-rail-button" title={text.displaySettings} aria-label={text.displaySettings} aria-pressed={displaySettingsOpen} data-tooltip={text.displaySettings} onclick={onDisplaySettings}><Icon name="settings" /></button>
   <button class="qn-rail-button" title={themeLabel} aria-label={themeLabel} data-tooltip={themeLabel} onclick={onTheme}><Icon name={mode === "light" ? "moon" : "sun"} /></button>
   <button class="qn-rail-button" title={text.language} aria-label={text.language} data-tooltip={text.language} onclick={onLanguage}><Icon name="globe" /></button>

@@ -46,3 +46,11 @@ class InternalApiTests(unittest.IsolatedAsyncioTestCase):
         remote = httpx.ASGITransport(app=app_module.app, client=("192.0.2.1", 12))
         async with httpx.AsyncClient(transport=remote, base_url="http://127.0.0.1") as client:
             self.assertEqual((await client.get("/health")).status_code, 403)
+
+    async def test_only_local_bim_gis_page_can_be_embedded(self):
+        response = await self.client.get("/vendor/bim-gis/index.html")
+        self.assertEqual(response.headers["X-Frame-Options"], "SAMEORIGIN")
+        response = await self.client.get("/health")
+        self.assertEqual(response.headers["X-Frame-Options"], "DENY")
+        response = await self.client.get("/vendor/bim-gis/index.html", headers={"Origin": "https://evil.example"})
+        self.assertEqual(response.status_code, 403)

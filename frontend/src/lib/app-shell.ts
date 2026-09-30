@@ -5,6 +5,7 @@ import { WorkspaceManager } from "./workspace-manager";
 import { ModelDataService } from "./model-data-service";
 import { activeView, emptyWorkspace, type WorkspaceState } from "./workspace-contracts";
 import { isLoadCancelledError } from "./viewer-contracts";
+import { normalizeMapboxToken } from "./mapbox-token";
 import type {
   SectionPlaneDefinition,
   SectionBoxState,
@@ -67,6 +68,7 @@ export class AppShellService {
   deleteGisAnchor(modelHash: string) { return api.deleteGisAnchor(modelHash); }
   get activeModel() { return this.viewer?.model ?? null; }
   get activeModelHash() { return this.viewer?.modelHash ?? ""; }
+  get activeSourceFile() { return this.workspace?.activeSourceFile ?? null; }
   setExpandedNodes(ids: string[]) { this.workspace?.setExpandedNodes(ids); }
   private settingsInitialized = false;
   private settingsSaveTimer: number | null = null;
@@ -79,6 +81,7 @@ export class AppShellService {
     const savedRotationSpeed = Number(localStorage.getItem("ifc-viewer-rotation-speed"));
     return {
       schemaVersion: 1,
+      mapboxPublicToken: normalizeMapboxToken(localStorage.getItem("ifc-viewer-mapbox-public-token")),
       locale: savedLocale === "en" ? "en" : "vi",
       mode: savedMode === "dark" ? "dark" : "light",
       gridVisible: localStorage.getItem("ifc-viewer-grid") !== "hidden",
@@ -118,6 +121,7 @@ export class AppShellService {
   }
 
   persistSettings(settings: AppSettings, delay = 0) {
+    localStorage.setItem("ifc-viewer-mapbox-public-token", settings.mapboxPublicToken);
     localStorage.setItem("ifc-viewer-locale", settings.locale);
     localStorage.setItem("ifc-viewer-theme", settings.mode);
     localStorage.setItem("ifc-viewer-grid", settings.gridVisible ? "visible" : "hidden");

@@ -65,44 +65,32 @@ test("Project Browser switches semantic views and tree actions update model visi
     await panel.getByLabel("View by").selectOption(view);
     await expect(panel.getByRole("tree")).toContainText("Unassigned (1)");
   }
-  await panel.getByText("GIS · Manual anchor").click();
-  await panel.getByLabel("GIS longitude").fill("105.8");
-  await panel.getByLabel("GIS latitude").fill("21.0");
-  await panel.getByLabel("GIS elevation").fill("12.5");
-  await panel.getByLabel("GIS rotation").fill("30");
-  await expect(panel.getByLabel("GIS longitude")).toHaveValue("105.8");
-  await panel.getByRole("button", { name: "Save anchor" }).click();
-  await expect(panel).toContainText("Vị trí thủ công");
-  const readAnchor = () => page.evaluate(async () => {
-    const hash = (window as any).viewer.modelHash;
-    return (await fetch(`/model/gis-anchor?modelHash=${hash}`)).json();
+  // The GIS entry moved out of the tree into the main Mapbox workspace.
+  // Live tiles, map picking and all placement controls are exercised by
+  // mapbox-smoke.mjs; keep the tree/anchor boundary covered here.
+  const anchor = await page.evaluate(async () => {
+    const modelHash = (window as any).viewer.modelHash;
+    const response = await fetch("/model/gis-anchor", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modelHash, longitude: 105.8, latitude: 21,
+        elevationMeters: 12.5, rotationDegrees: 30, scale: 1 }) });
+    return response.json();
   });
-  await expect.poll(async () => (await readAnchor()).anchor?.longitude).toBe(105.8);
-  const anchor = await readAnchor();
   expect(anchor).toMatchObject({ status: "manual", source: "manual",
     anchor: { longitude: 105.8, latitude: 21, elevationMeters: 12.5, rotationDegrees: 30, scale: 1 } });
-  await panel.getByRole("button", { name: "Xem trên bản đồ" }).click();
-  const map = panel.getByLabel("GIS anchor map preview");
-  await expect(map).toContainText("21.000000°, 105.800000°");
-  await expect(map.locator(".maplibregl-marker")).toHaveCount(1);
-  await expect(map).toContainText(/Demo tiles|MapTiler vệ tinh|Nền trống/, { timeout: 15_000 });
-  if (process.env.IFC_GIS_SCREENSHOT) await map.screenshot({ path: process.env.IFC_GIS_SCREENSHOT });
-  await map.getByRole("button", { name: "Offline view" }).click();
-  await expect(map).toContainText("Nền trống");
-  await panel.getByRole("button", { name: "Delete anchor" }).click();
-  await expect(panel).toContainText("Chưa có vị trí thủ công");
-  await panel.getByRole("button", { name: "Chọn vị trí trên bản đồ" }).click();
-  const picker = panel.getByLabel("GIS anchor map preview");
-  await picker.locator(".maplibregl-canvas").click({ position: { x: 120, y: 120 } });
-  await expect(panel.getByLabel("GIS longitude")).not.toHaveValue("");
-  await expect(panel.getByLabel("GIS latitude")).not.toHaveValue("");
-  await expect(panel.getByRole("status")).toContainText("Vị trí nháp");
-  await picker.getByRole("button", { name: "Lưu vị trí" }).click();
-  await expect(panel.getByRole("status")).toContainText("Vị trí thủ công");
-  await expect(picker.locator(".maplibregl-marker")).toHaveCount(1);
-  await picker.getByRole("button", { name: "Đóng bản đồ GIS" }).click();
-  await panel.getByRole("button", { name: "Delete anchor" }).click();
-  await expect(panel).toContainText("Chưa có vị trí thủ công");
+  await expect(panel.getByText("GIS · Manual anchor")).toHaveCount(0);
+  await page.getByRole("button", { name: "BIM–GIS Mapbox", exact: true }).click();
+  const frame = page.frameLocator('iframe[title="Mapbox BIM–GIS"]');
+  await expect(frame.locator("html")).toHaveAttribute("data-model-state", "ready", { timeout: 30000 });
+  await expect(frame.locator("html")).toHaveAttribute("data-model-yaw", "30");
+  await page.getByRole("button", { name: "Về IFC viewer", exact: true }).click();
+  await expect(panel.getByLabel("View by")).toHaveValue("classification");
+  await expect(panel.getByRole("tree")).toContainText("Unassigned (1)");
+  const deleted = await page.evaluate(async () => {
+    const hash = (window as any).viewer.modelHash;
+    return (await fetch(`/model/gis-anchor?modelHash=${hash}`, { method: "DELETE" })).json();
+  });
+  expect(deleted.status).toBe("unavailable");
   expect(pageErrors).toEqual([]);
 });
 

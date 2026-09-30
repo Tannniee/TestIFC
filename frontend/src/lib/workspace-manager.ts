@@ -16,6 +16,7 @@ export class WorkspaceManager {
   subscribe(listener: (state: WorkspaceState) => void) { this.listeners.add(listener); listener(structuredClone(this.state)); return () => { this.listeners.delete(listener); }; }
   private emit() { const snapshot = structuredClone(this.state); for (const listener of this.listeners) listener(snapshot); }
   snapshot() { return structuredClone(this.state); }
+  get activeSourceFile() { return this.sources.get(this.state.activeDocumentId ?? "") ?? null; }
   saveActive() {
     const doc = activeDocument(this.state), view = activeView(this.state);
     if (doc && view && this.viewer.modelHash === doc.modelHash && !this.viewer.sectionBoxCreationActive) view.state = this.viewer.captureViewState();

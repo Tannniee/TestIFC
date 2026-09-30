@@ -1,6 +1,6 @@
 import { chromium } from "@playwright/test";
 import { spawn, spawnSync } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -32,6 +32,7 @@ const child = spawn(executable, [], {
   env: {
     ...process.env,
     IFC_MODEL_CACHE_DIR: path.join(userDataDir, "model-cache"),
+    LOCALAPPDATA: userDataDir,
     WEBVIEW2_USER_DATA_FOLDER: userDataDir,
     WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:
       `--remote-debugging-port=${cdpPort} --enable-unsafe-swiftshader --no-first-run`,
@@ -62,7 +63,7 @@ try {
   const page = browser.contexts().flatMap((context) => context.pages())[0];
   if (!page) throw new Error("WebView2 did not expose an application page");
   const diagnostics = [];
-  page.on("console", (message) => diagnostics.push(`console.${message.type()}: ${message.text()}`));
+  page.on("console", (message) => diagnostics.push(`console.${message.type()}: ${message.text().replace(/pk\.[A-Za-z0-9._-]+/g, '[public-token]').replace(/access_token=[^&\s]+/g, 'access_token=[redacted]')}`));
   page.on("pageerror", (error) => diagnostics.push(`pageerror: ${error.message}`));
   try {
     await page.waitForSelector(".viewer-mount canvas", { timeout: 30_000 });
@@ -104,40 +105,72 @@ try {
       || !['projected', 'unavailable'].includes(georeference.body.status)) {
       throw new Error(`Packaged GIS metadata query failed: ${JSON.stringify(georeference)}`);
     }
-    await page.getByRole('button', { name: 'Project Browser' }).click();
-    const panel = page.getByRole('complementary', { name: 'Project Browser' });
-    await panel.getByText('GIS · Manual anchor').click();
-    if (process.env.IFC_E2E_EXPECT_IFC_CRS) {
-      if (!georeference.body.wgs84?.controlPoints?.origin?.longitude) {
-        throw new Error(`Packaged CRS projection missing: ${JSON.stringify(georeference.body)}`);
-      }
-      await panel.getByText(/IFC CRS: EPSG:/).waitFor({ timeout: 30000 });
-      await panel.getByRole('button', { name: 'Xem trên bản đồ' }).click();
-      await panel.getByRole('button', { name: 'Offline view' }).click();
-      try { await panel.locator('.gis-map-canvas[data-gis3d="ready"]').waitFor({ timeout: 30000 }); }
-      catch (error) {
-        process.stderr.write(`Packaged GIS state: ${(await panel.locator('.gis-map-preview').innerText()).slice(0, 900)}\n`);
-        throw error;
-      }
-      await panel.getByRole('button', { name: 'Đóng bản đồ GIS' }).click();
+    let publicToken = process.env.MAPBOX_TEST_TOKEN;
+    if (!publicToken) {
+      const local = await readFile(new URL('../.env.local', import.meta.url), 'utf8');
+      publicToken = local.match(/^VITE_MAPBOX_ACCESS_TOKEN=(.+)$/m)?.[1]?.trim();
     }
-    await panel.getByLabel('GIS longitude').fill(process.env.IFC_E2E_GIS_LONGITUDE || '105.8');
-    await panel.getByLabel('GIS latitude').fill(process.env.IFC_E2E_GIS_LATITUDE || '21');
-    await panel.getByLabel('GIS scale').fill(process.env.IFC_E2E_GIS_SCALE || '100');
-    await panel.getByRole('button', { name: 'Save anchor' }).click();
-    await panel.getByRole('button', { name: 'Xem trên bản đồ' }).click();
-    await panel.locator('.maplibregl-marker').waitFor({ timeout: 30000 });
-    await panel.locator('.maplibregl-canvas').waitFor({ timeout: 30000 });
+    if (!publicToken?.startsWith('pk.')) throw new Error('Missing public Mapbox test token');
+    await page.getByRole('button', { name: 'BIM–GIS Mapbox', exact: true }).click();
+    await page.getByRole('button', { name: 'Mở Cài đặt Mapbox' }).click();
+    await page.getByLabel('Public access token (pk.)').fill(publicToken);
+    await page.getByRole('button', { name: 'Kiểm tra key', exact: true }).click();
+    await page.getByText('Key hợp lệ · Light v10 tải được', { exact: true }).waitFor({ timeout: 15000 });
+    await page.getByRole('button', { name: 'Lưu key', exact: true }).click();
+    await page.waitForFunction(async () => Boolean((await window.pywebview.api.load_settings())?.mapboxPublicToken));
+    await page.locator('.viewer-settings__header button').click();
+    const frame = page.frameLocator('iframe[title="Mapbox BIM–GIS"]');
+    await frame.locator('html[data-model-state="ready"]').waitFor({ timeout: 120000 });
     if (process.env.IFC_E2E_GIS_SCREENSHOT) {
-      await panel.locator('.gis-map-canvas[data-gis3d="ready"]').waitFor({ timeout: 30000 });
-      await page.waitForTimeout(4000);
-      await panel.locator('.gis-map-preview').screenshot({ path: process.env.IFC_E2E_GIS_SCREENSHOT });
-      process.stdout.write(`Packaged GIS screenshot saved; diagnostics: ${diagnostics.slice(-15).join(' | ').replace(/key=[^& ]+/g, 'key=REDACTED')}\n`);
+      await page.waitForTimeout(2500);
+      await page.screenshot({ path: process.env.IFC_E2E_GIS_SCREENSHOT.replace(/\.png$/, '-globe.png') });
     }
-    await panel.getByRole('button', { name: 'Offline view' }).click();
-    await panel.locator('.gis-map-canvas[data-gis3d="ready"]').waitFor({ timeout: 30000 });
-    await panel.getByText(/Mô hình IFC 3D · \d+ phần hình học/).waitFor({ timeout: 30000 });
-    await panel.getByRole('button', { name: 'Delete anchor' }).click();
+    await page.getByRole('button', { name: 'Bay tới mô hình', exact: true }).click();
+    await frame.locator('html[data-model-layer="ready"]').waitFor({ timeout: 30000 });
+    await page.waitForFunction(() => {
+      const html = document.querySelector('iframe[title="Mapbox BIM–GIS"]').contentDocument.documentElement;
+      return Number(html.dataset.renderedTriangles) > 0;
+    });
+    await page.waitForTimeout(2500);
+    if (process.env.IFC_E2E_GIS_SCREENSHOT) await page.screenshot({ path: process.env.IFC_E2E_GIS_SCREENSHOT });
+    await page.getByRole('button', { name: 'Đặt / xoay IFC', exact: true }).click();
+    await page.getByLabel('Xoay IFC (°)', { exact: true }).fill('35');
+    await frame.locator('html[data-model-yaw="35"]').waitFor();
+    await page.getByRole('button', { name: 'Lưu vị trí', exact: true }).click();
+    await page.getByText('Đã lưu vị trí thủ công', { exact: true }).waitFor();
+    const placement = await page.evaluate(async () => {
+      const {token} = await window.pywebview.api.get_api_session();
+      const modelHash = window.__packageMetrics[0].modelHash;
+      return (await fetch(`/model/gis-anchor?modelHash=${modelHash}`, {headers:{'X-IFC-Session':token}})).json();
+    });
+    if (placement.anchor?.rotationDegrees !== 35) throw new Error('Packaged placement was not persisted');
+    await page.getByRole('button', { name: 'Ẩn marker', exact: true }).click();
+    await frame.locator('.mapboxgl-marker').waitFor({ state: 'detached' });
+    await page.getByRole('button', { name: 'Hiện marker', exact: true }).click();
+    await frame.locator('.mapboxgl-marker').waitFor();
+    for (let n = 0; n < 4; n++) await frame.locator('.mapboxgl-ctrl-zoom-out').click();
+    await page.waitForTimeout(2500);
+    if (process.env.IFC_E2E_GIS_SCREENSHOT) await page.screenshot({ path: process.env.IFC_E2E_GIS_SCREENSHOT.replace(/\.png$/, '-city.png') });
+    const rectangle = await frame.locator('.mapboxgl-canvas').boundingBox();
+    await page.mouse.move(rectangle.x + rectangle.width * .6, rectangle.y + rectangle.height * .55);
+    await page.mouse.down({button:'right'});
+    await page.mouse.move(rectangle.x + rectangle.width * .6 + 160, rectangle.y + rectangle.height * .55 - 50,{steps:10});
+    await page.mouse.up({button:'right'});
+    await page.waitForTimeout(1500);
+    await frame.locator('html[data-model-yaw="35"]').waitFor();
+    if (process.env.IFC_E2E_GIS_SCREENSHOT) await page.screenshot({ path: process.env.IFC_E2E_GIS_SCREENSHOT.replace(/\.png$/, '-orbit.png') });
+    await page.getByRole('button', { name: 'Về IFC viewer', exact: true }).click();
+    await page.locator('.viewer-mount canvas').waitFor({ state: 'visible' });
+    await page.getByRole('button', { name: 'Cài đặt hiển thị', exact: true }).click();
+    await page.getByRole('button', { name: 'Xóa key', exact: true }).click();
+    await page.waitForFunction(async () => (await window.pywebview.api.load_settings())?.mapboxPublicToken === '');
+    await page.getByLabel('Public access token (pk.)').fill(publicToken);
+    await page.getByRole('button', { name: 'Lưu key', exact: true }).click();
+    await page.waitForFunction(async () => Boolean((await window.pywebview.api.load_settings())?.mapboxPublicToken));
+    await page.locator('.viewer-settings__header button').click();
+    await page.getByRole('button', { name: 'BIM–GIS Mapbox', exact: true }).click();
+    await frame.locator('html[data-model-state="ready"]').waitFor();
+    process.stdout.write("packaged Mapbox live tiles, IFC.js GLB/JSON, actual draw, yaw, placement, key persistence and viewer switch passed\n");
     process.stdout.write("packaged IFC geometry, semantic index and GIS 3D layer passed\n");
   }
   process.stdout.write("packaged WebView2 CDP smoke test passed\n");

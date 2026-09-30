@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let name: "folder" | "fit" | "zoomBox" | "section" | "sectionBox" | "moon" | "sun" | "globe" | "panel" | "settings" | "help" | "close" | "pan" | "pointer" | "multiSelect" | "measure" | "point" | "edge" | "trash";
+  export let name: "map" | "folder" | "fit" | "zoomBox" | "section" | "sectionBox" | "moon" | "sun" | "globe" | "panel" | "settings" | "help" | "close" | "pan" | "pointer" | "multiSelect" | "measure" | "point" | "edge" | "trash";
   export let size = 20;
 </script>
 
@@ -33,6 +33,8 @@
     <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
   {:else if name === "globe"}
     <circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+  {:else if name === "map"}
+    <path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 3v16M15 5v16" />
   {:else if name === "panel"}
     <rect x="3" y="4" width="18" height="16" rx="1.5" /><path d="M14 4v16" />
   {:else if name === "settings"}

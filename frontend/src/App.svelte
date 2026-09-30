@@ -1,4 +1,6 @@
 <script lang="ts">
+  import MapboxWorkspace from "./lib/MapboxWorkspace.svelte";
+  import MapboxSettings from "./lib/MapboxSettings.svelte";
   import SemanticStatus from "./lib/SemanticStatus.svelte";
   import ProjectBrowser from "./lib/ProjectBrowser.svelte";
   import PropertiesPanel from "./lib/PropertiesPanel.svelte";
@@ -18,12 +20,14 @@
   import { copy, helpTopics, type CopyText, type Locale } from "./lib/i18n";
   import { applyGeometryProgress, applySemanticProgress, beginModelLoad, emptyModelReadiness, geometryReady } from "./lib/model-readiness";
   import { MAX_IFC_BYTES } from "./lib/model-limits";
-  import type { GisModelBounds } from "./lib/gis-footprint";
 
   const sectionAxes = ["x", "y", "z"] as const;
 
   let locale: Locale = "vi";
   let mode: "light" | "dark" = "light";
+  let mapActive = false;
+  let mapInitialized = false;
+  let mapboxPublicToken = "";
   let inspectorOpen = false;
   let displaySettingsOpen = false;
   let boxZoomActive = false;
@@ -54,13 +58,9 @@
   $: workspaceDocument = activeDocument(workspace);
   $: workspaceView = activeView(workspace);
   $: runtimeModelKey = `${workspace.activeDocumentId ?? ""}:${shell.activeModel?.modelId ?? ""}`;
-  $: runtimeModel = runtimeModelKey && workspace.activeDocumentId ? shell.activeModel : null;
-  $: runtimeModelHash = workspace.activeDocumentId ? shell.activeModelHash : "";
-  $: gisBounds = runtimeModelKey && shell.activeModel ? {
-    minEast: shell.activeModel.box.min.x, maxEast: shell.activeModel.box.max.x,
-    minNorth: -shell.activeModel.box.max.z, maxNorth: -shell.activeModel.box.min.z,
-    minHeight: shell.activeModel.box.min.y, maxHeight: shell.activeModel.box.max.y,
-  } satisfies GisModelBounds : null;
+  $: runtimeModelHash = workspaceDocument?.modelHash === shell.activeModelHash ? shell.activeModelHash : "";
+  $: mapModelHash = workspace.busy && workspace.requestedDocumentId ? "" : runtimeModelHash;
+  $: sourceFile = mapModelHash ? shell.activeSourceFile : null;
   let appVersion = "1.0.4";
   let modelStatus: string | null = null;
   let errorMessage: string | null = null;
@@ -207,12 +207,13 @@
     viewportBackground = settings.viewportBackground;
     wheelZoomSpeed = settings.wheelZoomSpeed;
     rotationSpeed = settings.rotationSpeed;
+    mapboxPublicToken = settings.mapboxPublicToken;
     document.documentElement.lang = locale;
     shell.applyViewerSettings(settings);
   }
 
   function currentSettings(): AppSettings {
-    return { schemaVersion: 1, locale, mode, gridVisible, viewportBackground, wheelZoomSpeed, rotationSpeed };
+    return { schemaVersion: 1, locale, mode, gridVisible, viewportBackground, wheelZoomSpeed, rotationSpeed, mapboxPublicToken };
   }
 
   function persistSettings(delay = 0) {
@@ -578,7 +579,9 @@
   <AppRail
     text={t}
     {mode}
-    hasModel={hasModel && !workspace.busy}
+    {mapActive}
+    onMap={() => { mapInitialized = true; mapActive = !mapActive; }}
+    hasModel={hasModel && !workspace.busy && !mapActive}
     {boxZoomActive}
     sectionActive={sectionPanelOpen || sectionPickActive || Boolean(sectionDefinition)}
     sectionBoxActive={sectionBoxPicking || Boolean(sectionBox?.enabled)}
@@ -602,7 +605,7 @@
     class:viewer-drop-active={dragActive}
     class:browser-resizing={browserResizing}
     class="viewer-surface"
-    style={`--workspace-top: ${workspaceDocument ? 68 : 34}px; --browser-width: ${browserWidth}px; --properties-width: ${drawerWidth}px; --workspace-left: ${browserOpen ? browserWidth : 0}px; --workspace-right: ${inspectorOpen ? drawerWidth : 0}px`}
+    style={`--workspace-top: ${workspaceDocument ? 68 : 34}px; --browser-width: ${browserWidth}px; --properties-width: ${drawerWidth}px; --workspace-left: ${browserOpen && !mapActive ? browserWidth : 0}px; --workspace-right: ${inspectorOpen && !mapActive ? drawerWidth : 0}px`}
     aria-label={t.workspace}
     ondragenter={handleDragEnter}
     ondragover={handleDragOver}
@@ -614,16 +617,21 @@
       onCloseDocument={id => void shell.closeDocument(id).catch(reportWorkspaceError)}
       onCloseView={id => void shell.closeView(id).catch(reportWorkspaceError)} onOpen={openFilePicker} onBrowser={() => (browserOpen = !browserOpen)} />
     {#if browserOpen}
+      <div hidden={mapActive}>
       <ProjectBrowser state={workspace} modelKey={runtimeModelKey} activeModelHash={runtimeModelHash} service={shell.modelData}
-        modelBounds={gisBounds} model={runtimeModel}
         onView={id=>void shell.activateView(id).catch(reportWorkspaceError)} onSelect={ids=>void shell.selectItems(ids).catch(reportWorkspaceError)}
         onAction={handleTreeAction}
-        onReadAnchor={hash=>shell.gisAnchor(hash)} onSaveAnchor={(hash,anchor)=>shell.saveGisAnchor(hash,anchor)}
-        onReadGeoreference={hash=>shell.gisGeoreference(hash)}
-        onDeleteAnchor={hash=>shell.deleteGisAnchor(hash)}
         onExpanded={ids=>shell.setExpandedNodes(ids)} onClose={()=>browserOpen=false} onResize={startBrowserResize} />
+      </div>
     {/if}
-    <div bind:this={viewerHost} class="viewer-mount"></div>
+    <div bind:this={viewerHost} class="viewer-mount" style:visibility={mapActive ? "hidden" : "visible"}></div>
+    {#if mapInitialized}
+      <MapboxWorkspace token={mapboxPublicToken} modelHash={mapModelHash} file={sourceFile}
+        filename={workspaceDocument?.filename ?? ""} visible={mapActive} {locale}
+        onSettings={() => displaySettingsOpen = true} onViewer={() => mapActive = false}
+        onRead={hash => shell.gisAnchor(hash)} onSave={(hash,anchor) => shell.saveGisAnchor(hash,anchor)} />
+    {/if}
+    {#if !mapActive}
     {#if sectionBoxPicking}<p class="viewer-sweep-hint">{locale === "vi" ? "Section Box · Quét vùng trên Top View · Esc để hủy" : "Section Box · Drag a region in Top View · Esc to cancel"}</p>{/if}
     <ViewerToolbar
       text={t}
@@ -643,12 +651,14 @@
         onOrbit={orbitFromViewCube}
       />
     </div>
+    {/if}
     {#if displaySettingsOpen}
       <section class="viewer-settings" aria-label={t.displaySettings}>
         <header class="viewer-settings__header">
           <h2>{t.displaySettings}</h2>
           <button aria-label={t.close} onclick={() => (displaySettingsOpen = false)}>×</button>
         </header>
+        <MapboxSettings token={mapboxPublicToken} {locale} onSave={token => { mapboxPublicToken = token; persistSettings(); }} />
         <CacheSettings {locale} busy={isOpeningModel(viewerProgress)} loadInventory={() => shell.cacheInventory()} clearCache={scope => shell.clearCache(scope)} />
         <label class="viewer-settings__toggle">
           <input type="checkbox" checked={gridVisible} onchange={(event) => changeGridVisibility(event.currentTarget.checked)} />
@@ -690,7 +700,7 @@
         </fieldset>
       </section>
     {/if}
-    {#if sectionPanelOpen}
+    {#if sectionPanelOpen && !mapActive}
       <section class="viewer-section-panel" aria-label={t.sectionPlane}>
         <header class="viewer-settings__header">
           <h2>{t.sectionPlane}</h2>
@@ -746,7 +756,7 @@
         <strong>{t.dropIfc}</strong>
       </div>
     {/if}
-    {#if (!hasModel || errorMessage) && !isOpeningModel(viewerProgress) && !cancellingLoad}
+    {#if !mapActive && (!hasModel || errorMessage) && !isOpeningModel(viewerProgress) && !cancellingLoad}
       <div class:viewer-empty-state-error={Boolean(errorMessage)} class="viewer-empty-state" role={errorMessage ? "alert" : undefined}>
         <p>{errorMessage ?? progressText(viewerProgress, t) ?? modelStatus ?? t.empty}</p>
       </div>
@@ -759,7 +769,7 @@
       <span>{t.version} {appVersion}</span>
     </footer>
 
-    <PropertiesPanel open={inspectorOpen} view={workspaceView} selection={selectedElement} count={multiSelectionCount}
+    <PropertiesPanel open={inspectorOpen && !mapActive} view={workspaceView} selection={selectedElement} count={multiSelectionCount}
       box={sectionBox} {locale} bind:preferView={propertiesViewContext} busy={workspace.busy || sectionBoxPicking} service={shell.modelData}
       onClose={()=>inspectorOpen=false} onResizeStart={startDrawerResize} onResizeKeydown={resizeDrawerByKeyboard}
       onBox={box=>shell.setSectionBox(box)} onDraw={()=>void shell.beginSectionBox(true).catch(reportWorkspaceError)}
