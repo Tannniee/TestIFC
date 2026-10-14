@@ -1,0 +1,43 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+@keyframes viewer-panel-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes viewer-disclosure-open {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-collapsible-content-height); opacity: 1; }
+}
+@keyframes viewer-disclosure-close {
+  from { height: var(--radix-collapsible-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+}
+.viewer-panel-enter,
+.viewer-tab-content[data-state="active"] {
+  animation: viewer-panel-enter 140ms cubic-bezier(.2, .8, .2, 1);
+}
+.viewer-disclosure { overflow: hidden; }
+.viewer-disclosure[data-state="open"] {
+  animation: viewer-disclosure-open 160ms cubic-bezier(.2, .8, .2, 1);
+}
+.viewer-disclosure[data-state="closed"] {
+  animation: viewer-disclosure-close 140ms cubic-bezier(.2, .8, .2, 1);
+}
+/* Animate the dock itself in both directions. The resizable library puts its
+   flex sizing on the outer data-panel, not on Panel's inner className. */
+.viewer-main-split > [data-panel] {
+  transition: flex-grow 300ms cubic-bezier(.25, .1, .25, 1);
+}
+.viewer-sidebar-reveal {
+  transition: width 300ms cubic-bezier(.25, .1, .25, 1);
+}
+.viewer-main-split:has(> [data-separator="active"]) > [data-panel],
+.viewer-sidebar-reveal[data-resizing="true"] {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .viewer-panel-enter, .viewer-tab-content[data-state], .viewer-disclosure[data-state] { animation: none; }
+  .hierarchy-item, .hierarchy-item svg, .properties-tab-trigger { transition: none; }
+  .viewer-main-split > [data-panel], .viewer-sidebar-reveal { transition: none; }
+}

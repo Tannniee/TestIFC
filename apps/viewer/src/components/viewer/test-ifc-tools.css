@@ -1,0 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+.testifc-quick-tools { position:absolute; left:16px; top:50%; transform:translateY(-50%); z-index:20; display:flex; align-items:flex-start; gap:8px; pointer-events:none; }
+.testifc-quick-tools__rail { pointer-events:auto; display:flex; flex-direction:column; gap:6px; padding:7px; border:1px solid var(--color-border); background:color-mix(in srgb,var(--color-background) 92%,transparent); border-radius:24px; box-shadow:0 8px 24px #0002; }
+.testifc-quick-tools__rail button { display:grid; place-items:center; width:46px; height:52px; border:1px solid transparent; border-radius:15px; color:var(--color-muted-foreground); transition:background-color 150ms,border-color 150ms,color 150ms; }
+.testifc-quick-tools button:hover:not(:disabled) { background:var(--color-muted); color:var(--color-foreground); }
+.testifc-quick-tools button[aria-pressed=true] { background:color-mix(in srgb,var(--color-primary) 13%,var(--color-background)); border-color:var(--color-primary); color:var(--color-primary); }
+.testifc-quick-tools button:focus-visible { outline:2px solid var(--color-primary); outline-offset:3px; }
+.testifc-quick-tools button:disabled { opacity:.35; cursor:not-allowed; }
+.testifc-quick-tools__hint,.testifc-quick-tools__options { pointer-events:auto; max-width:230px; padding:12px; border:1px solid var(--color-border); border-radius:12px; background:var(--color-background); color:var(--color-foreground); font-size:var(--text-xs); box-shadow:0 8px 24px #0002; }
+.testifc-quick-tools__options { display:flex; flex-direction:column; gap:8px; }
+.testifc-quick-tools__options button { padding:8px; border-radius:8px; border:1px solid var(--color-border); }
+@media (max-height:540px) { .testifc-quick-tools__rail button { height:38px; } }
+@media (max-width:600px) { .testifc-quick-tools { left:8px; } .testifc-quick-tools__hint { max-width:160px; } }
+@media (prefers-reduced-motion:reduce) { .testifc-quick-tools button { transition:none; } }

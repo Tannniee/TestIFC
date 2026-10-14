@@ -1,0 +1,41 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+[package]
+name = "ifc-lite-desktop"
+version = "10.3.0"
+edition = "2021"
+license = "MPL-2.0"
+description = "Desktop host for the IFC-Lite v10.3.0 viewer"
+default-run = "ifc-lite-desktop"
+
+[workspace]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+ifc-lite-processing = { path = "../../rust/processing" }
+ifc-lite-geometry = { path = "../../rust/geometry" }
+ifc-lite-core = { path = "../../rust/core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+uuid = { version = "1", features = ["v4"] }
+rayon = "1"
+rustc-hash = "2.1"
+tracing = "0.1"
+
+[[bin]]
+name = "ifc-lite-desktop"
+path = "src/main.rs"
+test = false
+
+[[bin]]
+name = "native-semantic-probe"
+path = "src/semantic_probe.rs"
+test = false
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
