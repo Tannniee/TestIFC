@@ -55,3 +55,12 @@ WASM type declarations remain available for source typechecking. Original source
 private models and old executable deliveries are not modified by publication.
 
 The upstream MPL-2.0 license, notices and package attributions are retained.
+
+## Post-push automation correction
+
+GitHub Dependabot version-update tasks started automatically despite Actions
+permissions being disabled and all workflows archived. Outstanding tasks were
+cancelled. The Dependabot configuration is now archived as
+.github/dependabot-disabled.yml.disabled to stop future version-update jobs.
+No application or package source changed. Tag v2.0.1 retains the original audited
+source snapshot; main adds this automation-only correction. No build was run.
