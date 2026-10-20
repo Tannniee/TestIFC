@@ -1,0 +1,97 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+@keyframes viewer-panel-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes viewer-disclosure-open {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-collapsible-content-height); opacity: 1; }
+}
+@keyframes viewer-sidebar-content-enter {
+  from { opacity: .45; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+/* The backing surface never fades with the content mounted above it. */
+.viewer-sidebar-surface { position: relative; isolation: isolate; }
+.viewer-sidebar-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-background);
+  pointer-events: none;
+}
+.viewer-panel-surface { isolation: isolate; }
+@media (prefers-reduced-motion: no-preference) {
+  .viewer-panel-surface .viewer-panel-enter,
+  .viewer-panel-surface .viewer-tab-content[data-state="active"] {
+    animation: viewer-sidebar-content-enter 320ms cubic-bezier(.4, 0, .2, 1);
+  }
+}
+@keyframes viewer-disclosure-close {
+  from { height: var(--radix-collapsible-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+}
+.viewer-panel-enter,
+.viewer-tab-content[data-state="active"] {
+  animation: viewer-panel-enter 140ms cubic-bezier(.2, .8, .2, 1);
+}
+.viewer-disclosure { overflow: hidden; }
+.viewer-disclosure[data-state="open"] {
+  animation: viewer-disclosure-open 160ms cubic-bezier(.2, .8, .2, 1);
+}
+.viewer-disclosure[data-state="closed"] {
+  animation: viewer-disclosure-close 140ms cubic-bezier(.2, .8, .2, 1);
+}
+.viewer-ribbon-band {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: inherit;
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 240ms cubic-bezier(.2, .8, .2, 1), opacity 140ms ease;
+}
+.viewer-ribbon-band[data-state="closed"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+/* Animate the dock itself in both directions. The resizable library puts its
+   flex sizing on the outer data-panel, not on Panel's inner className. */
+.viewer-main-split > [data-panel] {
+  transition: flex-grow 240ms cubic-bezier(.2, .8, .2, 1);
+}
+.viewer-sidebar-reveal {
+  transition: width 240ms cubic-bezier(.2, .8, .2, 1);
+}
+.viewer-bottom-reveal { transition: height 240ms cubic-bezier(.2, .8, .2, 1); }
+.viewer-bottom-reveal:active { transition: none; }
+/* Docks cover the camera surface; changing their size never resizes its canvas. */
+[data-stable-stage] > .viewer-stage-docks { position: relative; z-index: 10; pointer-events: none; padding-top: var(--viewer-ribbon-overlay, 0px); }
+[data-stable-viewport] [data-hud-region^="top-"] { top: var(--viewer-hud-top, 0px); }
+[data-stable-viewport] [data-hud-region="top-left"] { left: var(--viewer-hud-left, 0px); }
+[data-stable-viewport] [data-hud-region="top-right"] { right: var(--viewer-hud-right, 0px); }
+[data-stable-viewport] .viewer-viewcube-anchor { translate: calc(-1 * var(--viewer-hud-right, 0px)) var(--viewer-hud-top, 0px); }
+[data-stable-viewport] .testifc-quick-tools { left: calc(16px + var(--viewer-hud-left, 0px)); }
+[data-stable-viewport] [data-model-tool-rail],
+[data-stable-viewport] [data-model-plan-pane],
+[data-stable-viewport] [data-bottom-strip] { padding-top: var(--viewer-ribbon-overlay, 0px); }
+[data-stable-stage] .viewer-main-split > [data-panel]:first-child,
+[data-stable-stage] .viewer-main-split > [data-separator],
+[data-stable-stage] .viewer-sidebar-dock,
+[data-stable-stage] [data-model-tool-rail] { pointer-events: auto; }
+[data-stable-stage] > [data-bottom-strip] { z-index: 20; background: var(--color-background); }
+.viewer-main-split:has(> [data-separator="active"]) > [data-panel],
+.viewer-sidebar-reveal[data-resizing="true"] {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .viewer-panel-enter, .viewer-tab-content[data-state], .viewer-disclosure[data-state] { animation: none; }
+  .hierarchy-item, .hierarchy-item svg, .properties-tab-trigger { transition: none; }
+  .viewer-main-split > [data-panel], .viewer-sidebar-reveal { transition: none; }
+  .viewer-ribbon-band, .viewer-bottom-reveal { transition: none; }
+}

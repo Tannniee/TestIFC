@@ -1,0 +1,206 @@
+# Clash Detection
+
+The `@ifc-lite/clash` package finds geometric interferences between building elements, ducts through walls, pipes through beams, columns overlapping slabs, and turns them into a coordination workflow with review status and BCF export. The engine is representation-agnostic: it operates on plain world-frame triangle meshes plus a durable element key, so the same core serves IFC (STEP), IFCx, and anything else behind a small source adapter.
+
+## Concepts
+
+A clash run takes a list of **elements** (each with geometry and identity) and a list of **rules**, and returns classified **clashes**.
+
+- **Mode** decides what a rule looks for. `hard` finds interpenetration beyond a tolerance; `clearance` finds elements that are separated but closer than a required gap.
+- **Status** classifies a detected pair as `hard`, `clearance`, or `touch` (touching is suppressed unless a rule opts in).
+- **Severity** (`critical`, `major`, `minor`, `info`) is set explicitly on a rule or inferred from the discipline matrix.
+- **Identity is split.** Each element carries a durable `key` (IfcGUID or USD prim path) used for persistence, dedup, and BCF, and a runtime `ref` (federated globalId or express id) used for selection and coloring in a renderer.
+
+## Library usage
+
+The core entry point is `createClashEngine`. Feed it elements and rules; it returns a `ClashResult` with the classified clashes and a summary.
+
+```ts
+import { createClashEngine, type ClashElement, type ClashRule } from '@ifc-lite/clash';
+
+// Elements carry world-frame triangles plus identity. A source adapter builds
+// these from your store (see below); here is the shape it produces.
+const elements: ClashElement[] = [
+  {
+    key: '2O2Fr$t4X7Zf8NOew3FLKr',   // durable IfcGUID
+    ref: 42,                          // runtime handle for the renderer
+    model: 'mep.ifc',
+    tag: 'IfcDuctSegment',
+    bounds: ductBounds,
+    positions: ductPositions,         // Float32Array, world frame
+    indices: ductIndices,             // Uint32Array
+  },
+  // ...walls, pipes, beams
+];
+
+const rules: ClashRule[] = [
+  { id: 'duct-vs-wall', name: 'Ducts vs walls', a: 'IfcDuct*', b: 'IfcWall*', mode: 'hard' },
+];
+
+const engine = createClashEngine({ backend: 'ts' });
+const result = await engine.run(elements, rules);
+
+console.log(`${result.summary.total} clashes`);
+console.log(result.summary.bySeverity); // { critical, major, minor, info }
+```
+
+Selectors are glob-and-union patterns matched against the element `tag`: `IfcDuct*|IfcPipe*` matches either family, and a leading `!` negates (`!IfcSpace`). Omit a rule's `b` to run a self-clash within selection `a`.
+
+!!! note "Backends"
+    `createClashEngine({ backend: 'ts' })` uses the in-process TypeScript
+    reference engine. A Rust/WASM backend is opt-in via a separate subpath
+    import (`@ifc-lite/clash/wasm`) because it needs an async module init; the
+    TS backend applies a deterministic per-rule candidate-pair cap (reported in
+    `result.truncated`) while the WASM kernel runs every pair uncapped.
+
+### Source adapters
+
+Elements rarely come hand-built. The package ships adapters that map a parsed store plus its meshes into `ClashElement`s, and return a pair-exclusion set (voids, hosts, assemblies that should never be reported as clashing):
+
+```ts
+import { elementsFromStep } from '@ifc-lite/clash/step';
+
+const { elements, exclusions } = elementsFromStep({ store, meshes, modelId });
+const result = await engine.run(elements, rules, { exclusions });
+```
+
+The STEP adapter lives at `@ifc-lite/clash/step` and the IFCx adapter at `@ifc-lite/clash/ifcx`, kept behind subpath exports so the core import graph stays free of version-specific dependencies. That boundary is what keeps IFC5 support a new adapter rather than a rewrite.
+
+### The discipline matrix
+
+Instead of writing rules by hand, generate the standard coordination matrix. `disciplineMatrixRules(mode, clearance?)` expands the built-in discipline definitions (ARCH, STR, MEP, HVAC, ELEC, FIRE, GEO) into a cross-discipline rule set with inferred severities:
+
+```ts
+import { disciplineMatrixRules } from '@ifc-lite/clash';
+
+const rules = disciplineMatrixRules('hard');
+const result = await engine.run(elements, rules, { exclusions });
+```
+
+## CLI usage
+
+The [`clash` command](cli.md#clash-clash-detection) meshes the model headlessly, maps it through the STEP adapter, and runs the engine, so you never touch the library for a one-shot check.
+
+```bash
+# Standard discipline matrix
+ifc-lite clash model.ifc --matrix
+ifc-lite clash model.ifc --matrix --json
+
+# Ad-hoc rule: ducts and pipes vs walls, 5 cm clearance
+ifc-lite clash model.ifc --a "IfcDuct*|IfcPipe*" --b "IfcWall*" --mode clearance --clearance 0.05
+
+# Self-clash within a selection (omit --b)
+ifc-lite clash model.ifc --a "IfcPipeSegment*"
+
+# Export clashes as a BCF archive
+ifc-lite clash model.ifc --matrix --bcf clashes.bcfzip
+
+# Export every clash as one CSV row for Excel / Power BI
+ifc-lite clash model.ifc --matrix --csv clashes.csv
+```
+
+| Flag | Description |
+|------|-------------|
+| `--matrix` | Run the standard discipline matrix rules |
+| `--a <pattern>` | Type pattern for set A (glob, `\|`-separated; default `*`) |
+| `--b <pattern>` | Type pattern for set B (omit for a self-clash within A) |
+| `--mode <m>` | `hard` (default) or `clearance` |
+| `--tolerance <m>` | Penetration tolerance in metres (hard mode) |
+| `--clearance <m>` | Required clearance in metres (clearance mode) |
+| `--bcf <file>` | Write results as a BCF archive (viewpoint cameras in IFC world coordinates) |
+| `--group <g>` | BCF topic grouping: `cluster` (default), `rule`, `typePair`, `element` |
+| `--bcf-status <s>` | Topic status for exported BCF topics |
+| `--max-topics <N>` | Cap the number of BCF topics |
+| `--csv <file>` | Write every clash as one row of a CSV table (see [CSV table export](#csv-table-export)) |
+| `--json` | JSON output |
+
+The human summary reports the total, a severity breakdown, and the top clashes with their signed distance (`penetration 0.043m` or `gap 0.012m`). `--json` emits the full summary and clash list (capped for display).
+
+## Review workflow
+
+Detection tells you a clash exists; **review** records what the team decided about it. That coordination state is deliberately separate from the detection `status`:
+
+- Each clash gets a review status of `open`, `resolved`, or `accepted`, plus an optional free-text comment.
+- Review state is persisted against a **durable key**, `clashReviewKey(clash)`, built from the rule id and the two elements' durable keys, order-independent. Because it never embeds the ephemeral runtime model id, a review re-attaches to the same clash after a page reload, a re-run, or a new model revision, the Navisworks "status carries across versions" behaviour.
+- When a BCF topic bundles several clashes, `aggregateReviewStatus` collapses them least-resolved-wins: a topic is only done once every member is, and a single still-open member keeps the whole topic open.
+
+```ts
+import { clashReviewKey, aggregateReviewStatus, reviewStatusToBcfTopicStatus } from '@ifc-lite/clash';
+
+const key = clashReviewKey(clash);          // durable, survives reload / revision
+reviews.set(key, { status: 'accepted', comment: 'Coordinated with structural' });
+
+const topicStatus = aggregateReviewStatus(members.map((c) => reviews.get(clashReviewKey(c))?.status ?? 'open'));
+```
+
+### Saved reports
+
+A new run replaces the result on screen. To keep one, open **Saved clash
+reports** in the viewer's Clash panel header, give the result a name and
+choose **Save current result**. The report records the clashes as the panel
+shows them (after your exclusions), each with the review status, comment,
+group and storey it had at that moment, together with the rules and settings
+of the run and the names and source identities of the models it ran on.
+Later reviews, regrouping and re-runs leave a saved report unchanged; only
+its name can be edited.
+
+The dialog says before you save when the result is not a complete, current
+run, and the report keeps that fact: a run that stopped at its candidate-pair
+limit is saved as a **Partial run**, a result whose model was edited or
+moved after the run is saved as **Models changed before saving**, and a
+result your exclusion rules are narrowing is saved as **N hidden by
+exclusions**, with the number of clashes they hide. Run the check again
+first if you want a current result, and switch the exclusions off first if
+you want the whole run.
+
+Saved reports are stored in this browser's saved content library with saved
+validation reports and comparisons. They survive a reload and are part of
+**Storage and backup → Download library backup**; importing a backup brings
+them back, and a report that conflicts with one you already have arrives as a
+separate copy. Deleting a report warns that charts reading it will show it as
+unavailable.
+
+The dialog also says whether the reports are stored. If the browser refuses a
+write (storage full or blocked), the report stays in the list for this tab
+only, the dialog says so and offers **Retry save**; if the saved reports
+cannot be read, it says that instead of showing an empty list. **Storage and
+backup** is in the same dialog.
+
+Each [clash chart](charts.md#saved-clash-report-charts) can read the current
+result or one saved report, which is how two charts show two runs side by
+side. A saved report is evidence of the model it ran on. It is never matched
+to a different revision: when the loaded model is another revision, charts
+label the report as historical and keep showing the recorded results.
+
+### BCF export
+
+In the viewer, once a result is on screen the panel header offers **Re-run**, the same place IDS and Compare keep theirs. It repeats the run that produced the result ("Detect all clashes", the enabled rule set, a single rule, or "Find duplicates"), with the current mode and tolerance settings, and its tooltip names what it will repeat. While a run is in flight it reads **Cancel**. The status bar's **Activity** tray also offers **Cancel** for clash detection, rule preparation and duplicate scanning. It stops the owned run and records **Cancelled**, retaining the previous completed result. Closing the Clash panel leaves the job running and its tray cancellation available. A newer run supersedes the previous one; an older row cannot stop the newer run. Detection stops at the native engine's next cancellation checkpoint; a duplicate scan can be stopped before its synchronous scan begins. Before the first run, with no model of your own open, **Try with demo data** loads the demo revision B, which carries one injected clash.
+
+`groupClashes` clusters related clashes into the unit of a single BCF topic, and `createBCFFromClashResult` (from `@ifc-lite/clash/bcf`) turns those groups into a BCF project you write with `@ifc-lite/bcf`. On export, review status maps to a BCF 2.1 `TopicStatus` through `reviewStatusToBcfTopicStatus`, using only the two universally supported statuses (`Open` and `Closed`) so any BCF tool round-trips the archive. Both `resolved` and `accepted` are terminal and close the topic; the finer distinction is preserved in the topic description rather than the status field. Clash bounds are in the mesher's shifted render frame, so pass `worldOffset: renderFrameWorldOffset(geometryResult.coordinateInfo)` (from `@ifc-lite/geometry/world-frame`) to write world-coordinate cameras; the CLI and the viewer do. See the [BCF Collaboration](bcf.md) guide for the round-trip and the coordinate frames.
+
+### CSV table export
+
+For spreadsheets and BI tools the run is also a flat table: one row per clash, both elements on the row, keyed by their bare IfcGUIDs so the rows join back to the model's own element tables. In the viewer, the **CSV** format of the clash panel's export split button (beside **BCF**, the archive) downloads the whole run (after exclusions — the panel's review-status and "hide touching" filters are for reading, and a BI reader filters in their own tool); on the CLI it is `--csv <file>`. Both go through `clashTableRows` and the shared `tableToCsv` writer, so the file has the same columns everywhere:
+
+| Column | Meaning |
+|--------|---------|
+| `ClashId`, `Rule`, `Status`, `Severity` | The detection: `Status` is `hard` / `clearance` / `touch` |
+| `Review`, `ReviewComment`, `ReviewUpdatedAt` | The coordinator's triage (`open` / `resolved` / `accepted`), joined by `clashReviewKey`; `open` when never reviewed |
+| `GlobalIdA`, `GlobalIdB` | Bare IfcGUIDs — empty for an element without one (a model whose roots carry no GlobalId, or an IFCx prim) |
+| `KeyA`, `KeyB` | The adapter's durable key as the run saw it (`IfcGUID`, `IfcGUID:occurrence`, `expressid:model:n`, or a USD prim path) |
+| `ModelA`, `ModelB`, `TypeA`, `TypeB`, `NameA`, `NameB`, `StoreyA`, `StoreyB` | Where and what; the storey is resolved from the loaded model's spatial hierarchy and left empty when the element no longer resolves |
+| `PointX`, `PointY`, `PointZ`, `Distance`, `DistanceKind` | The contact point in the run's world frame and the signed distance (`<0` penetration, `>0` gap), with its provenance (`mesh` / `estimate`) |
+| `Group` | Title of the cluster / rule / type-pair group the clash was put in, when groups were computed |
+
+```typescript
+import { clashTableRows, CLASH_TABLE_COLUMNS } from '@ifc-lite/clash';
+import { tableToCsv } from '@ifc-lite/export';
+
+const storeys = new Map<string, string>(); // element key -> storey name, from your own model index
+
+// `storeyOf` / `modelNameOf` are the consumer's lookups: the result carries a model id and no storey.
+const rows = clashTableRows(clashResult.clashes, { reviews, storeyOf: (ref) => storeys.get(ref.key) });
+const csv = tableToCsv(CLASH_TABLE_COLUMNS, rows);
+```
+
+For the full API, see the [`@ifc-lite/clash` README](https://github.com/LTplus-AG/ifc-lite/tree/main/packages/clash).

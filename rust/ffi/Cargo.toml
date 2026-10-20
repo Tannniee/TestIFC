@@ -1,0 +1,43 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+[package]
+name = "ifc-lite-ffi"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "C FFI bindings for ifc-lite — native DLL for in-process IFC parsing"
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+# `mimalloc` (default): route this native DLL's Rust allocations through mimalloc
+# instead of the platform system heap. The Windows system heap (`ntdll` RtlHeap)
+# has a global lock that dominated native geometry self-time (~70%) and capped
+# rayon scaling to ~1.8x on IfcMappedItem-heavy models (#1623); mimalloc's
+# per-thread heaps remove the lock. Off ⇒ the platform allocator, unchanged.
+default = ["mimalloc"]
+mimalloc = ["dep:mimalloc"]
+
+[dependencies]
+# Native global allocator (see the `mimalloc` feature). Optional so a consumer
+# can opt back out with `--no-default-features`. Never reaches wasm (this crate
+# is a native cdylib only).
+mimalloc = { workspace = true, optional = true }
+# The workspace entry carries an explicit `version` alongside `path` so the crate
+# is publishable to crates.io (`cargo publish` strips the path and keeps the
+# version requirement). `scripts/sync-versions.js` keeps that literal aligned
+# with the workspace version on every `changeset version` bump.
+ifc-lite-processing.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+# Test-only: drives `par_iter` jobs through `run_in_pool` to pin which pool runs them.
+rayon.workspace = true
+
+[lints]
+workspace = true

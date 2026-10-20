@@ -1,0 +1,24 @@
+{
+  "base_head": "471284f476d64a659ae607eeec2115ca3afcb9fe",
+  "local_snapshot": "0074241838dd52f456ac88c274700c09a9754cc6",
+  "production_pin": "61d209288c1b117d405628ead302d0ee700bd2a0",
+  "candidate_rust_commit": "142de48a",
+  "compiler": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "logical_processors": 24,
+  "iterations_per_batch": 5,
+  "order": [
+    "base-house",
+    "branch-house",
+    "branch-voids",
+    "base-voids",
+    "branch-house",
+    "base-house",
+    "base-voids",
+    "branch-voids"
+  ],
+  "launcher": "Git Bash -o igncr scripts/perf/probe.sh <same absolute candidate fixture> --iters 5 --json --fingerprint",
+  "agent_builds_tests_and_gpu_evidence_closed": true,
+  "unrelated_user_apps_left_open": true,
+  "interpretation": "bounded native warm pipeline comparison; no browser worker-pool, cold UI load or visible-pixel performance claim"
+}

@@ -1,0 +1,138 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# SDK canary — runs the bundled `tests/extensions/canaries/` set against the
+# current `@ifc-lite/extensions` library on every PR. The goal is to catch
+# SDK-shape regressions early: if a canary bundle's manifest.tests no longer
+# pass against the candidate SDK, the PR is flagged before merge.
+#
+# This is the Phase 4 / RFC §06 §5 canary loop. The hosted registry version
+# (T18 full) substitutes the canary set with extensions pulled from the
+# registry; for v1 we use a curated fixture set checked into the repo.
+
+name: SDK canary
+
+# `paths:` below names every package `pnpm turbo build --filter=@ifc-lite/extensions
+# --filter=@ifc-lite/cli` transitively builds (turbo's `build` task depends on
+# `^build`, so it walks the full `dependencies` + `devDependencies` workspace
+# graph of both, in topological order) plus the canary fixtures and this file
+# itself. `scripts/check-sdk-canary-coverage.mjs` derives that closure from the
+# real package.json graph on every CI run and fails if this list falls behind
+# it -- so this is a snapshot of a derived fact, not a maintained one; if the
+# list and the gate disagree, trust the gate and regenerate the list from its
+# output. Note `@ifc-lite/viewer-core` lives in `packages/viewer`, not
+# `packages/viewer-core` -- the package NAME and its directory diverge.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/bcf/**'
+      - 'packages/bcf-api/**'
+      - 'packages/cache/**'
+      - 'packages/clash/**'
+      - 'packages/cli/**'
+      - 'packages/codegen/**'
+      - 'packages/collab/**'
+      - 'packages/create/**'
+      - 'packages/data/**'
+      - 'packages/diff/**'
+      - 'packages/documents-api/**'
+      - 'packages/drawing-2d/**'
+      - 'packages/encoding/**'
+      - 'packages/export/**'
+      - 'packages/extensions/**'
+      - 'packages/flow/**'
+      - 'packages/flow-nodes/**'
+      - 'packages/geometry/**'
+      - 'packages/ids/**'
+      - 'packages/ifcx/**'
+      - 'packages/lens/**'
+      - 'packages/lists/**'
+      - 'packages/mcp/**'
+      - 'packages/merge/**'
+      - 'packages/mutations/**'
+      - 'packages/opencde-foundation/**'
+      - 'packages/parser/**'
+      - 'packages/pointcloud/**'
+      - 'packages/query/**'
+      - 'packages/rules/**'
+      - 'packages/regex-guard/**'
+      - 'packages/sandbox/**'
+      - 'packages/sdk/**'
+      - 'packages/spatial/**'
+      - 'packages/timing-ladder/**'
+      - 'packages/viewer/**'
+      - 'packages/wasm/**'
+      - 'packages/wasm-lifecycle/**'
+      - 'packages/world-frame-fixtures/**'
+      - 'scripts/ci-run-sdk-canaries.mjs'
+      - 'tests/extensions/canaries/**'
+      - '.github/workflows/sdk-canary.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  canary:
+    name: Run canary bundles
+    runs-on: ${{ (vars.SELF_HOSTED_CI == 'true' && (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'ci:hosted')))) && fromJSON('["self-hosted","linux","x64","ifclite"]') || 'ubuntu-latest' }}
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: false
+
+      - name: Setup pnpm
+        # v6 reads the pnpm version from the `packageManager` field in
+        # package.json (`pnpm@10.8.1`); passing `with.version` would conflict.
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # @ifc-lite/cli transitively type-depends on @ifc-lite/wasm (its deps'
+      # .d.ts files reference it), and @ifc-lite/wasm's build is wasm-pack —
+      # so this job needs the full wasm toolchain too.
+      - name: Setup WASM build toolchain
+        uses: ./.github/actions/setup-wasm-build
+        with:
+          cache-prefix: sdk-canary
+          # This workflow runs on pull requests only, so nothing on main would
+          # ever seed its shared key; let the first PR write it and every later
+          # PR restore it. The write is skipped when the key already exists.
+          # Goes away when this job moves into test.yml on the build artifact
+          # (CI redesign, step 8).
+          save-if: 'true'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build WASM
+        run: bash scripts/build-wasm.sh
+
+      # `turbo build` honours `^build`, so this builds every workspace
+      # dependency of cli/extensions in topological order. The previous
+      # `pnpm -F @ifc-lite/cli build` built cli alone and failed because
+      # @ifc-lite/create, query, data, parser, export, sdk and viewer-core
+      # had no dist/ to resolve against.
+      - name: Build extensions + CLI
+        run: pnpm turbo build --filter=@ifc-lite/extensions --filter=@ifc-lite/cli
+
+      # Canaries are a curated fixture set. Each subdirectory under
+      # tests/extensions/canaries/ is a bundle. We run the CLI's
+      # `ext test` against every one; non-zero exit fails the job.
+      - name: Run canary bundles
+        run: node scripts/ci-run-sdk-canaries.mjs

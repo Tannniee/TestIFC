@@ -1,208 +1,331 @@
-# IFC Viewer Alternative
+> TestIFC custom desktop source, tag v2.0.1. See [publication identity and audit scope](PUBLICATION-v2.0.1.md) and [desktop instructions](desktop/README.md). GitHub Actions are disabled; workflow definitions are archived.
 
-This repository contains the maintained IFC Viewer application. It is an independent
-desktop product built from the recovered codebase; the active source no longer uses
-the original executable or extracted bytecode as a behavioral reference.
+<table align="center">
+<tr>
+<td valign="top">
+<h1>
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=48&duration=2000&pause=5000&color=6366F1&vCenter=true&width=300&height=55&lines=IFClite" alt="IFClite">
+</h1>
+Open, view, and work with IFC files. Right in the browser.
+</td>
+<td width="120" align="center" valign="middle">
+<img src="docs/assets/logo.png" alt="" width="100">
+</td>
+</tr>
+</table>
 
-## Project layout
+<p align="center">
+  <a href="https://www.ifclite.com/"><img src="https://img.shields.io/badge/🚀_Try_it_Live-ifclite.com-ff6b6b?style=for-the-badge&labelColor=1a1a2e" alt="Try it Live"></a>
+</p>
 
-- `desktop/`: PyWebView platform adapters and the desktop composition root.
-- `src/`: FastAPI bridge, IFC services, takeoff, exports, and settings.
-- `frontend/`: Svelte and Three.js viewer.
-- `backend/reference_data/`: material reference data packaged with the app.
-- `tests/`: source-level regression and contract tests.
-- `packaging/`: historical packaging inputs retained for traceability.
-- `vendor/`: native modules required by the packaged application.
+<p align="center">
+  <a href="https://github.com/LTplus-AG/ifc-lite/actions"><img src="https://img.shields.io/github/actions/workflow/status/LTplus-AG/ifc-lite/release.yml?branch=main&style=flat-square&logo=github" alt="Build Status"></a>
+  <a href="https://github.com/LTplus-AG/ifc-lite/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MPL--2.0-blue?style=flat-square" alt="License"></a>
+  <a href="https://www.npmjs.com/package/@ifc-lite/parser"><img src="https://img.shields.io/npm/v/@ifc-lite/parser?style=flat-square&logo=npm&label=parser" alt="npm parser"></a>
+  <a href="https://crates.io/crates/ifc-lite-core"><img src="https://img.shields.io/crates/v/ifc-lite-core?style=flat-square&logo=rust&label=core" alt="crates.io"></a>
+</p>
 
-The repository root is the only project root. Build scripts and tests resolve all
-paths from this directory.
+---
 
-The backend keeps HTTP contracts in `src/api_contracts.py` and thread-safe bridge
-state in `src/api_state.py`. Route groups live under `src/api_routes/`; `src/app.py`
-only configures middleware, creates shared state, and composes the application.
-`src/model_operations.py` owns model use cases that can serve HTTP or future desktop
-adapters. The IFC foundation is split into four services:
+# IFClite
 
-- `src/ifc_units.py`: unit resolution and quantity normalization.
-- `src/ifc_georeference.py`: read-only projected CRS and map conversion metadata.
-- `src/model_cache.py`: persistent IFC, fragment, index, and store cache paths.
-- `src/model_runtime.py`: active-model lifecycle, index preparation, and live IFC access.
-- `src/ifc_elements.py`: semantic records and optional element geometry.
+Parse, view, query, edit, validate, and export IFC files, entirely client-side. A Rust core compiled to WASM does the parsing and geometry, a WebGPU renderer puts it on screen, and 57 npm packages let you pick exactly the pieces you need. Geometry runs on an exact-arithmetic CSG kernel, verified element-by-element against IfcOpenShell across the public benchmark corpus.
 
-`src/ifc_service.py` remains a compatibility facade. Production modules import the
-smaller services directly. Domain and IFC modules do not depend on FastAPI request
-objects.
+Works with **IFC2X3**, **IFC4 / IFC4X3** and **IFC5 (IFCX)**. Live demo at [ifclite.com](https://www.ifclite.com/) and more info at [ifclite.dev](https://www.ifclite.dev/).
 
-Application orchestration also stays outside the HTTP and bridge-state modules:
+## Get Started
 
-- `src/takeoff_service.py`: synchronous takeoff, Excel handoff, and background jobs.
-- `src/member_scan_service.py`: IDEA scan execution and latest-result lifecycle.
-- `src/fragment_service.py`: streamed fragment storage and cache lookup.
-- `src/api_errors.py`: shared HTTP mapping for model-state failures.
-
-`src/api_state.py` owns selection state only. Mass policy lives in `src/mass.py`;
-wire serialization lives in `src/mass_wire.py`. Architecture tests enforce these
-boundaries, and versioned golden fixtures protect takeoff exports.
-
-The frontend follows the same composition boundary:
-
-- `frontend/src/lib/app-shell.ts` owns settings, viewer lifecycle, and commands.
-- `App.svelte` composes the rail, dialogs, inspector, and viewer workspace.
-- `viewer.ts` coordinates the camera, selection and render-on-demand scheduler.
-- `viewer-model-loader.ts` owns file reads, conversion, fragment models and
-  backend preparation. Conversion workers are created on demand and terminated
-  after completion, cancellation or failure.
-- The Properties panel reads Pset, Qto, type, material, classification, spatial
-  ancestry, and group/system memberships from
-  the backend semantic index. Its BIM request is bound to the active model hash;
-  the panel reports when cold indexing is still in progress. Fragment metadata
-  continues to supply immediate attributes and location details.
-- `viewcube-math.ts` owns the pure ViewCube geometry, naming, and orientation math.
-- `api-contracts.ts` is the typed frontend endpoint manifest. Contract tests compare
-  it with the backend OpenAPI document, and Vite derives its proxy prefixes from it.
-
-Frontend architecture tests prevent `App.svelte` and the renderer from importing
-HTTP or persistence adapters directly.
-
-The desktop layer is split by platform concern:
-
-- `desktop/main.py` only composes the window, bridges, logger, and server host.
-- `desktop/server_host.py` owns port selection, SPA mounting, readiness, and graceful
-  Uvicorn shutdown.
-- `desktop/desktop_bridges.py` exposes the stable taskbar and settings JavaScript API.
-- `desktop/platform_paths.py` resolves source, packaged, cache, and user-data paths.
-- `desktop/logging_config.py` writes rotating structured logs to
-  `%LOCALAPPDATA%\IFC Viewer\logs\desktop.jsonl`.
-
-## Environment
-
-Create the Python environment and install the pinned dependencies:
-
-```powershell
-py -3.14 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+```bash
+npx create-ifc-lite my-viewer --template react
+cd my-viewer && npm install && npm run dev
 ```
 
-The frontend uses pnpm. `frontend\BuildFrontend.cmd` uses the bundled Codex Node and
-pnpm runtimes when they are not already available in `PATH`.
+That gets you a working WebGPU IFC viewer with drag-and-drop loading and orbit/pan/zoom. Other templates: `basic`, `threejs`, `babylonjs`, `server`, `server-native`.
 
-## Validate
+To add IFClite to an existing project:
 
-Run the Python suite:
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -v -s tests -p "test_*.py"
+```bash
+npm install @ifc-lite/parser @ifc-lite/geometry @ifc-lite/renderer
 ```
 
-Check the frontend during refactoring without creating a package:
+Prefer the terminal? The whole toolkit is also a CLI:
 
-```powershell
-cd frontend
-node .\node_modules\typescript\bin\tsc --noEmit
-node .\node_modules\svelte-check\bin\svelte-check --tsconfig .\tsconfig.json
+```bash
+npm install -g @ifc-lite/cli
+ifc-lite info model.ifc
 ```
 
-## Performance baseline
+## Parse an IFC file
 
-The repository contains a repeatable backend benchmark contract under
-`benchmarks/`. Copy `corpus.example.json` to `corpus.local.json`, point it at
-sanitized or locally controlled IFC files, then run:
+```typescript
+import { IfcParser } from '@ifc-lite/parser';
 
-```powershell
-.\.venv\Scripts\python.exe .\benchmarks\run_backend_baseline.py
+const parser = new IfcParser();
+const buffer = await fetch('model.ifc').then(r => r.arrayBuffer());
+const t0 = performance.now();
+const store = await parser.parseColumnar(buffer, {
+  onProgress: ({ phase, percent }) => console.log(`${phase}: ${percent}%`),
+});
+
+console.log(`${store.entityCount} entities, schema ${store.schemaVersion}`);
+console.log(`Parsed in ${(performance.now() - t0).toFixed(0)}ms`);
 ```
 
-The runner verifies optional SHA-256 expectations and records hashing, IFC open,
-semantic-index preparation, and search timings as JSON under
-`benchmarks/results/`. The local corpus and generated results are ignored by Git;
-no private IFC model is committed to this repository.
+## View in 3D
 
-For fragment metadata A/B testing, follow
-`benchmarks/fragment-ab.md`. The `full` profile remains the default until the
-lighter profiles pass the real-model feature matrix.
+```typescript
+import { IfcParser } from '@ifc-lite/parser';
+import { GeometryProcessor } from '@ifc-lite/geometry';
+import { Renderer } from '@ifc-lite/renderer';
 
-Semantic DB v2, facts-cache versioning, and take-off schema v6 are documented in
-`benchmarks/phase4-5.md`.
+const parser = new IfcParser();
+const geometry = new GeometryProcessor();
+const renderer = new Renderer(canvas);
 
-Semantic DB v3 search, byte-aware cache retention, browser lifecycle E2E, and CI
-are documented in `benchmarks/phase6.md`.
+await Promise.all([geometry.init(), renderer.init()]);
 
-The cache keeps at most three model bundles and 10 GiB by default. Override the
-limits with `IFC_CACHE_KEEP_MODELS` and `IFC_CACHE_MAX_BYTES`. Active, pinned,
-uploading, and building bundles remain protected even when they exceed a limit.
+const arrayBuffer = await file.arrayBuffer();
+const store = await parser.parseColumnar(arrayBuffer);
+const meshes = [];
+for await (const event of geometry.processAdaptive(new Uint8Array(arrayBuffer))) {
+  if (event.type === 'batch') meshes.push(...event.meshes);
+}
 
-## Run from source
+renderer.loadGeometry(meshes);
+renderer.requestRender();
 
-Build the frontend once, then start the integrated desktop host:
-
-```powershell
-.\.venv\Scripts\python.exe .\desktop\main.py
+// Pick an entity at (x, y) in canvas pixels
+const hit = await renderer.pick(120, 240);
+if (hit) console.log(`Picked expressId ${hit.expressId}`);
 ```
 
-Set `IFC_VIEWER_PORT` only when an isolated instance must run beside another copy.
-The desktop keeps its bound socket through server startup, so an automatically
-selected port cannot be taken between selection and startup.
+For Three.js or Babylon.js, parse and extract geometry the same way and feed `meshes` to your engine. See [Three.js integration](https://ifclite.dev/docs/tutorials/threejs-integration/) and [Babylon.js integration](https://ifclite.dev/docs/tutorials/babylonjs-integration/).
 
-Each desktop launch creates an internal API session. The viewer receives its
-credential through the desktop bridge; API calls require `X-IFC-Session` and
-validate loopback Host and browser Origin. Credentials are not written into the
-frontend bundle, URLs, settings or logs.
+## Query entities
 
-For browser development, generate `IFC_API_SESSION_TOKEN` (at least 32 ASCII
-characters) in the parent environment and pass the same value to Uvicorn and
-Vite. Vite reads this server-only variable and injects the header for requests
-from its own origin. Do not use a `VITE_` variable for the credential. The
-integrated desktop generates and transfers its own session automatically.
+```typescript
+import { IfcQuery } from '@ifc-lite/query';
 
-`benchmarks/run_foundation_smoke.mjs` creates a temporary shared session for the
-live backend and browser tests. `benchmarks/run_desktop_session_smoke.mjs` tests
-the source desktop and built frontend with isolated settings and a real IFC;
-neither command builds an executable. Render comparison against a Git revision
-uses `benchmarks/run_render_navigation.mjs` and existing local fragment caches.
+const query = new IfcQuery(store);
 
-## Semantic progress and measurements
+// All external load-bearing walls
+const walls = query
+  .ofType('IfcWall', 'IfcWallStandardCase')
+  .whereProperty('Pset_WallCommon', 'IsExternal', '=', true)
+  .whereProperty('Pset_WallCommon', 'LoadBearing', '=', true)
+  .execute();
 
-Semantic indexing reports its phase and record counts in the footer. If work
-stops advancing, Retry cancels the owned worker and resumes committed cold-index
-batches. Cold indexing uses SQLite WAL with one writer/checkpointer and short
-read-only queries. Keep the model cache on a local filesystem.
+console.log(`${walls.length} external load-bearing walls`);
 
-For a fixed-distance measurement, pick the first point and type a distance.
-The compact input stays at the bottom of the viewport; choose mm or m, then
-press Enter or click a direction. Snap to the red X, green Y or blue Z axis
-(either sign), or a second model point. Click the number to edit it; Escape
-clears the fixed distance while retaining the first point.
-
-## Package
-
-`BuildExe.cmd` runs the Python tests, checks and builds the frontend, and creates one
-PyInstaller executable:
-
-```powershell
-.\BuildExe.cmd
+for (const wall of walls) {
+  console.log(wall.name, wall.globalId);
+}
 ```
 
-The executable name and Windows version metadata come from `APP_VERSION` in
-`src\version.py`. Version 1.0.4 is written to `dist\IFC Viewer 1.0.4.exe` by default.
+For more complex queries, use SQL via DuckDB-WASM:
 
-Project Browser now supports Spatial, Systems, Types, Groups, Classification,
-and Material views. Use its search and filters for Name, GlobalId, IFC type,
-visibility, selection, or indexed Pset/Qto values. Right-click a row for
-Hide, Isolate, Fit, Select children, and Show Properties. Spatial storeys group
-products by IFC category and show an Uncontained bucket when needed.
+```typescript
+const result = await query.sql(`
+  SELECT type, COUNT(*) AS n FROM entities GROUP BY type ORDER BY n DESC LIMIT 10
+`);
+console.table(result.rows);
+```
 
-The GIS section saves a manual WGS84 anchor per model hash and previews a map
-marker. The preview uses MapLibre demo tiles when online and offers an offline
-blank background. A manual anchor does not establish IFC survey accuracy;
-projected IFC CRS conversion and a 3D map overlay are still pending.
-Set `IFC_BUILD_DIST` to choose another output directory, such as `BUILD RELEASE`.
-Release changes are recorded in `CHANGELOG.md`. The application requires no license,
-account or sign-in; its internal API uses a per-launch session credential.
-Follow `packaging\RELEASE.md` for the real-model and artifact
-gates.
+## Validate against IDS
 
-## Historical material
+```typescript
+import { parseIDS, validateIDS, createTranslationService } from '@ifc-lite/ids';
+import { createDataAccessor } from '@ifc-lite/ids/bridge';
 
-Recovery artifacts, extracted files, legacy parity tests, and older package specs are
-retained outside the active source paths. They do not participate in normal testing or
-packaging.
+const idsSpec = parseIDS(idsXmlContent);
+const accessor = createDataAccessor(store);
+const modelInfo = {
+  modelId: 'my-model',
+  schemaVersion: store.schemaVersion,
+  entityCount: store.entityCount,
+};
+const translator = createTranslationService('en');
+const report = await validateIDS(idsSpec, accessor, modelInfo, { translator });
+
+for (const spec of report.specificationResults) {
+  console.log(`${spec.specification.name}: ${spec.passRate}% passed`);
+}
+```
+
+## Edit properties (with undo)
+
+```typescript
+import { MutablePropertyView } from '@ifc-lite/mutations';
+import { PropertyValueType } from '@ifc-lite/data';
+
+const view = new MutablePropertyView(store.properties, 'my-model');
+
+view.setProperty(
+  wallExpressId,
+  'Pset_WallCommon',
+  'FireRating',
+  'REI 120',
+  PropertyValueType.Label,
+);
+
+console.log(view.getMutations()); // change history for undo / export
+```
+
+## Export
+
+```typescript
+import { exportToStep, ParquetExporter, Ifc5Exporter } from '@ifc-lite/export';
+import { GeometryProcessor } from '@ifc-lite/geometry';
+
+// Assumes the earlier parse/geometry steps: `store` (parsed IfcDataStore),
+// `bytes` (raw IFC Uint8Array), `meshes` + `geometryResult` (from geometry).
+
+// IFC STEP, applies any pending mutations
+const stepText = exportToStep(store, { schema: 'IFC4', applyMutations: true });
+
+// glTF / GLB, CSV and JSON-LD are assembled in Rust (ifc-lite-export)
+// via the GeometryProcessor
+const gp = new GeometryProcessor();
+await gp.init();
+const glb = gp.exportGlbFromMeshes(meshes);  // Uint8Array (no re-mesh)
+const csv = gp.exportCsv(bytes, 'entities', ',', /* includeProperties */ true);
+const jsonld = gp.exportJsonld(bytes);
+
+// Parquet: columnar, queryable from DuckDB / Polars
+const parquet = await new ParquetExporter(store).exportTable('entities');
+
+// IFC5 / IFCX: JSON + USD geometry
+const ifcx = new Ifc5Exporter(store, geometryResult).export({ includeGeometry: true });
+```
+
+## Work from the terminal
+
+The [`ifc-lite` CLI](https://ifclite.dev/docs/guide/cli/) covers the full toolkit: inspect, query, schedule, validate, export, create, diff, clash-check, merge, convert, and script IFC models without writing a line of app code.
+
+```bash
+ifc-lite info model.ifc                                  # schema, entities, storeys
+ifc-lite query model.ifc --type IfcWall --json           # entities with properties
+ifc-lite schedule model.ifc --preset door                # door schedule, csv/json/md/html
+ifc-lite ids model.ifc requirements.ids                  # IDS validation
+ifc-lite clash model.ifc --matrix --bcf clashes.bcfzip   # clash detection to BCF
+ifc-lite diff model-v1.ifc model-v2.ifc                  # model comparison
+ifc-lite merge arch.ifc struct.ifc mep.ifc --out fed.ifc # federation
+ifc-lite convert model.ifc --schema IFC4 --out out.ifc   # schema conversion
+ifc-lite view model.ifc                                  # 3D viewer + REST API
+ifc-lite eval model.ifc "bim.query().byType('IfcWall').count()"
+```
+
+Building AI tooling? `ifc-lite mcp model.ifc` starts a [Model Context Protocol](https://ifclite.dev/docs/guide/cli/) server (stdio or HTTP) so agents can query and edit BIM data directly, and `ifc-lite ask model.ifc "how many walls?"` answers natural-language questions.
+
+## Choose your setup
+
+| Setup | Best for | You get |
+|-------|----------|---------|
+| [**Browser (WebGPU)**](https://ifclite.dev/docs/guide/quickstart/) | Viewing and inspecting models | Full-featured 3D viewer, runs entirely client-side |
+| [**Three.js / Babylon.js**](https://ifclite.dev/docs/tutorials/threejs-integration/) | Adding IFC support to an existing 3D app | IFC parsing + geometry, rendered by your engine |
+| [**CLI**](https://ifclite.dev/docs/guide/cli/) | Scripting, CI pipelines, AI agents | The whole toolkit from the terminal, JSON output everywhere |
+| [**Server**](https://ifclite.dev/docs/guide/server/) | Teams, large files, repeat access | Rust backend with caching, parallel processing, streaming |
+| [**Build for Desktop**](https://ifclite.dev/docs/guide/desktop/) | Your own offline native app, very large files (500 MB+) | Extension points to wrap the packages in Tauri, with an optional native-Rust geometry fast path |
+| [**Python (native wheel)**](https://ifclite.dev/docs/api/python/) | Analysis, scripting, scientific Python | `pip install ifclite-geom` runs the geometry kernel in-process, meshes straight to numpy |
+
+Not sure? Start with the browser setup. You can add a server or switch engines later.
+
+## Pick your packages
+
+| I want to... | Packages |
+|--------------|----------|
+| Parse an IFC file | `@ifc-lite/parser` |
+| View a 3D model (WebGPU) | + `@ifc-lite/geometry` + `@ifc-lite/renderer` |
+| Use Three.js or Babylon.js | + `@ifc-lite/geometry` (you handle the rendering) |
+| Query properties and types | + `@ifc-lite/query` |
+| Edit properties (with undo) | + `@ifc-lite/mutations` |
+| Validate against IDS rules | + `@ifc-lite/ids` |
+| Generate 2D drawings | + `@ifc-lite/drawing-2d` |
+| Create IFC files from scratch | `@ifc-lite/create` |
+| Export to glTF / IFC / Parquet | + `@ifc-lite/export` |
+| Detect clashes | + `@ifc-lite/clash` |
+| Diff two model versions | + `@ifc-lite/diff` |
+| BCF topic tracking | + `@ifc-lite/bcf` |
+| Filter and colorize in 3D by rules | + `@ifc-lite/lens` |
+| Build schedules and property tables | + `@ifc-lite/lists` |
+| Script models with the `bim.*` API | + `@ifc-lite/sdk` |
+| Real-time collaboration (CRDT on IFCX) | + `@ifc-lite/collab` + `@ifc-lite/collab-server` |
+| Embed the viewer in any page (iframe) | + `@ifc-lite/embed-sdk` |
+| Connect to a server backend | + `@ifc-lite/server-client` |
+| Give AI agents BIM access (MCP) | + `@ifc-lite/mcp` |
+
+Full list: [API Reference](https://ifclite.dev/docs/api/typescript/) (57 npm packages, 7 Rust crates on crates.io, and the `ifclite-geom` Python wheel on PyPI).
+
+## Performance
+
+- **Streaming first render:** geometry is processed in batches, so the first triangles are on screen while the rest of the file is still parsing.
+- **Geometry correctness:** exact-arithmetic boolean kernel — every opening is cut exactly, and the output is verified element-by-element against IfcOpenShell (99.9%+ agreement on the public benchmark corpus). Engines with approximate booleans are faster on boolean-heavy models; that trade is deliberate.
+- **Geometry speed:** native (server/CLI, multi-threaded) beats `web-ifc` on most of the benchmark corpus; in the browser the viewer streams geometry across workers so the first triangles render long before the file finishes processing.
+- **Parse speed:** STEP tokenization runs at roughly 1.2 GB/s; a full parse lands around 50 MB/s.
+- **Schema coverage:** 100% of IFC4 (776 entities) and IFC4X3 (876 entities).
+- **Footprint:** one lazily fetched WASM module (~2.6 MB gzipped) plus small per-package JS wrappers.
+
+See [benchmarks](https://ifclite.dev/docs/guide/performance/) for full numbers across model sizes and hardware.
+
+## Examples
+
+Ready-to-run projects in [`examples/`](examples/):
+
+- [**Three.js Viewer**](examples/threejs-viewer/) - IFC viewer using Three.js (WebGL)
+- [**Babylon.js Viewer**](examples/babylonjs-viewer/) - IFC viewer using Babylon.js (WebGL)
+- [**Collab Demo**](examples/collab-demo/) - real-time collaborative editing over websockets
+- [**Three.js Collab**](examples/threejs-collab/) - collaborative 3D viewing in Three.js
+
+## Documentation
+
+| | |
+|---|---|
+| **Start here** | [Quick Start](https://ifclite.dev/docs/guide/quickstart/) · [Installation](https://ifclite.dev/docs/guide/installation/) · [CLI Toolkit](https://ifclite.dev/docs/guide/cli/) · [Browser Requirements](https://ifclite.dev/docs/guide/browser-requirements/) |
+| **Guides** | [Parsing](https://ifclite.dev/docs/guide/parsing/) · [Geometry](https://ifclite.dev/docs/guide/geometry/) · [Rendering](https://ifclite.dev/docs/guide/rendering/) · [Querying](https://ifclite.dev/docs/guide/querying/) · [Exporting](https://ifclite.dev/docs/guide/exporting/) |
+| **BIM features** | [Federation](https://ifclite.dev/docs/guide/federation/) · [BCF](https://ifclite.dev/docs/guide/bcf/) · [IDS Validation](https://ifclite.dev/docs/guide/ids/) · [2D Drawings](https://ifclite.dev/docs/guide/drawing-2d/) · [Property Editing](https://ifclite.dev/docs/guide/mutations/) |
+| **Customization** | [Extensions](https://ifclite.dev/docs/guide/extensions/) · [Authoring Extensions](https://ifclite.dev/docs/guide/extension-authoring/) · [Flavors](https://ifclite.dev/docs/guide/flavors/) |
+| **Tutorials** | [Build a Viewer](https://ifclite.dev/docs/tutorials/building-viewer/) · [Three.js](https://ifclite.dev/docs/tutorials/threejs-integration/) · [Babylon.js](https://ifclite.dev/docs/tutorials/babylonjs-integration/) · [Custom Queries](https://ifclite.dev/docs/tutorials/custom-queries/) · [Extending the Parser](https://ifclite.dev/docs/tutorials/extending-parser/) |
+| **Deep dives** | [Architecture](https://ifclite.dev/docs/architecture/overview/) · [Data Flow](https://ifclite.dev/docs/architecture/data-flow/) · [Performance](https://ifclite.dev/docs/guide/performance/) |
+| **API** | [TypeScript](https://ifclite.dev/docs/api/typescript/) · [Rust](https://ifclite.dev/docs/api/rust/) · [WASM](https://ifclite.dev/docs/api/wasm/) · [Python](https://ifclite.dev/docs/api/python/) |
+
+## Contributing
+
+The WASM bundle is built from `rust/` on every fresh build, so a Rust
+toolchain is required. `rust-toolchain.toml` pins the nightly channel
+and the `wasm32-unknown-unknown` target. `rustup show` (or the
+contributing setup guide) installs everything needed.
+
+```bash
+# 1. Rust toolchain (one-time)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo install wasm-pack   # or: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+# 2. Clone and build
+git clone https://github.com/LTplus-AG/ifc-lite.git
+cd ifc-lite
+pnpm install && pnpm build && pnpm dev   # opens viewer at localhost:3000
+```
+
+If you need IFC fixtures for tests, benchmarks, or stress tests, fetch them with:
+
+```bash
+pnpm fixtures           # download every fixture (idempotent, hash-verified)
+pnpm fixtures:check     # CI-friendly: exit 1 if anything is missing or stale
+```
+
+The fixtures are stored on a GitHub Release and catalogued in
+[`tests/models/manifest.json`](tests/models/manifest.json). See
+[`tests/models/README.md`](tests/models/README.md) for the full design and
+maintainer workflow.
+
+See the [Contributing Guide](https://ifclite.dev/docs/contributing/setup/) and [Release Process](RELEASE.md).
+
+## Community
+
+- [GitHub Discussions](https://github.com/LTplus-AG/ifc-lite/discussions) - questions, ideas, show-and-tell
+- [Issues](https://github.com/LTplus-AG/ifc-lite/issues) - bug reports and feature requests
+- [Releases](https://github.com/LTplus-AG/ifc-lite/releases) - changelog and version notes
+
+## License
+
+[MPL-2.0](LICENSE) - use, modify, redistribute. Source files modified under MPL must remain MPL.

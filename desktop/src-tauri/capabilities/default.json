@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-window",
+  "description": "Core window lifecycle for the local IFC-Lite viewer",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

@@ -1,0 +1,64 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/* OLED inherits the app's dark variants, with neutral black surfaces.
+   Re-map the shared palette so legacy panels using Tokyo tokens follow too. */
+html.dark.oled {
+  --tokyo-storm: #000000;
+  --tokyo-night: #000000;
+  --tokyo-bg-dark: #000000;
+  --tokyo-bg-highlight: #141414;
+  --tokyo-terminal-black: #404040;
+  --tokyo-comment: #808080;
+  --tokyo-dark3: #303030;
+  --tokyo-fg: #e5e5e5;
+  --tokyo-fg-dark: #a3a3a3;
+  --tokyo-fg-gutter: #303030;
+  --color-muted-foreground: #a3a3a3;
+  --hierarchy-selected-bg: #1c1c1c;
+  --hierarchy-selected-text: #e5e5e5;
+  --hierarchy-text: #a3a3a3;
+  --hierarchy-hover-bg: #141414;
+  --tabs-bg: #101010;
+  --tabs-border: #303030;
+  --tab-text: #a3a3a3;
+  --tab-active-bg: #000000;
+  --tab-active-text: #e5e5e5;
+}
+
+/* Cover every scrollable surface, including the dock and ActivityBar which
+   do not carry scrollbar-thin. color-scheme also themes native arrows/inputs. */
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
+html.dark,
+html.dark * {
+  scrollbar-color: var(--tokyo-terminal-black) var(--tokyo-night);
+}
+html.dark ::-webkit-scrollbar { width: 10px; height: 10px; }
+html.dark ::-webkit-scrollbar-track,
+html.dark ::-webkit-scrollbar-corner { background: var(--tokyo-night); }
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--tokyo-terminal-black);
+  border: 2px solid var(--tokyo-night);
+  border-radius: 6px;
+}
+html.dark ::-webkit-scrollbar-thumb:hover { background: var(--tokyo-comment); }
+
+/* CodeMirror's own tooltip theme uses a literal background. */
+html.oled .cm-tooltip { background-color: #000000; border-color: #303030; }
+
+/* The location map ships its own light control surfaces outside app tokens. */
+html.oled .maplibregl-ctrl-group,
+html.oled .maplibregl-popup-content {
+  background-color: #000000;
+  color: var(--color-foreground);
+}
+html.oled .maplibregl-ctrl-group button + button { border-color: #303030; }
+html.oled .maplibregl-ctrl-group button:hover { background-color: #141414; }
+html.oled .maplibregl-ctrl-icon { filter: invert(1); }
+
+/* Let the operating system supply high contrast controls when requested. */
+@media (forced-colors: active) {
+  html.dark, html.dark * { scrollbar-color: auto; }
+}

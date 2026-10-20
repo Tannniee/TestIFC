@@ -1,0 +1,6 @@
+!package-lock.json
+dist/
+reports/
+release/
+src-tauri/target/
+src-tauri/gen/
