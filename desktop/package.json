@@ -1,0 +1,20 @@
+{
+  "name": "ifc-lite-desktop",
+  "version": "10.3.0",
+  "private": true,
+  "type": "module",
+  "license": "MPL-2.0",
+  "scripts": {
+    "build": "node run-tauri.mjs build",
+    "build:native-preview": "node build-native-preview.mjs",
+    "dev": "node run-tauri.mjs dev",
+    "test:packaged": "node smoke-webview2.mjs",
+    "frontend:build": "node prepare-viewer.mjs",
+    "frontend:dev": "node prepare-viewer.mjs --dev"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.1",
+    "pnpm": "10.8.1",
+    "vite": "8.3.1"
+  }
+}

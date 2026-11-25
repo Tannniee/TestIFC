@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "IFC-Lite",
+  "version": "10.3.0",
+  "identifier": "com.testifc.ifclite.desktop",
+  "build": {
+    "beforeBuildCommand": "npm run frontend:build",
+    "beforeDevCommand": "npm run frontend:dev",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../../apps/viewer/dist"
+  },
+  "app": {
+    "windows": [{
+      "label": "main",
+      "title": "IFC-Lite 10.3.0",
+      "width": 1440,
+      "height": 960,
+      "minWidth": 1024,
+      "minHeight": 700,
+      "dragDropEnabled": false
+    }],
+    "security": {
+      "headers": {
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "credentialless"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["../../apps/viewer/public/favicon.ico"],
+    "windows": { "nsis": { "installMode": "currentUser" } }
+  }
+}
