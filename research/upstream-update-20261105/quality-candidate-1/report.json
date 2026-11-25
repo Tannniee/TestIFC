@@ -1,0 +1,388 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite-Upgrade20261105\\desktop\\src-tauri\\target\\release\\ifc-lite-desktop.exe",
+  "model": "F:\\Steel\\VBA\\IFC COLO\\hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-quality-audit-HolNww",
+  "hostPid": 66476,
+  "cases": [
+    {
+      "name": "Info shows the complete source package catalogue and exact versions",
+      "ok": true,
+      "evidence": {
+        "count": 65,
+        "versions": {
+          "ai": "0.2.0",
+          "bcf": "5.2.1",
+          "bcf-api": "0.4.0",
+          "cache": "3.7.4",
+          "charts": "0.9.1",
+          "clash": "2.4.7",
+          "cli": "0.45.1",
+          "codegen": "1.19.1",
+          "collab": "0.10.0",
+          "collab-server": "0.9.1",
+          "create": "5.1.3",
+          "data": "6.4.0",
+          "diff": "0.13.1",
+          "documents-api": "0.2.1",
+          "drawing-2d": "5.0.0",
+          "embed-protocol": "1.15.0",
+          "embed-sdk": "1.15.1",
+          "encoding": "2.4.0",
+          "export": "4.13.3",
+          "extensions": "0.12.0",
+          "flow": "0.7.1",
+          "flow-nodes": "0.12.2",
+          "geometry": "8.1.0",
+          "ids": "3.4.4",
+          "ids-agent": "0.2.11",
+          "ids-authoring": "0.3.4",
+          "ifcx": "4.6.0",
+          "lens": "2.2.1",
+          "lists": "3.2.0",
+          "load-trace": "0.3.0",
+          "mcp": "0.29.0",
+          "merge": "0.5.0",
+          "mutations": "3.2.0",
+          "oauth-pkce": "0.3.0",
+          "oci": "0.2.0",
+          "opencde-foundation": "0.3.0",
+          "parser": "9.9.0",
+          "plugin-api": "0.5.0",
+          "pointcloud": "0.14.0",
+          "provenance": "0.2.0",
+          "query": "2.5.4",
+          "regex-guard": "0.3.0",
+          "renderer": "7.1.0",
+          "report-contract": "0.1.0",
+          "rules": "0.8.0",
+          "sandbox": "2.12.1",
+          "sdk": "9.6.1",
+          "semantic": "0.2.3",
+          "server-bin": "3.0.1",
+          "server-client": "5.1.1",
+          "solar": "1.15.5",
+          "source-autodesk": "0.2.1",
+          "source-bimcollab": "0.2.0",
+          "source-buildagil": "0.2.0",
+          "source-dalux": "0.4.1",
+          "source-dropbox": "0.4.0",
+          "source-fixture": "0.3.1",
+          "source-msgraph": "0.4.0",
+          "spatial": "1.15.1",
+          "timing-ladder": "0.1.0",
+          "viewer-core": "0.2.28",
+          "wasm": "12.2.0",
+          "wasm-lifecycle": "0.2.0",
+          "world-frame-fixtures": "0.1.5",
+          "create-ifc-lite": "1.16.0"
+        }
+      }
+    },
+    {
+      "name": "all side panels render with no loaded model",
+      "ok": true,
+      "evidence": [
+        {
+          "id": "properties",
+          "text": "PROPERTIES\n\nNO SELECTION\n\nSelect an element to view details"
+        },
+        {
+          "id": "collab",
+          "text": "Work on this model together\n\nCreate a session to edit live with others: shared cursors, presence, an"
+        },
+        {
+          "id": "sources",
+          "text": "Cloud Sources\n\nOpen a connected source to find models. Star sources and folders to keep them within "
+        },
+        {
+          "id": "zones",
+          "text": "You can import zone sets from JSON now; generating zones from storeys needs a model. Load demo proje"
+        },
+        {
+          "id": "placement",
+          "text": "Placement\n\nSTART WITH A MODEL\n\nMove the model locally or edit its georeference. Load a model to plac"
+        },
+        {
+          "id": "assistant",
+          "text": "Assistant\n\nWhat do you want to discuss?\n\nThe assistant explains native results. Attach one, or run o"
+        },
+        {
+          "id": "semantic",
+          "text": "Connect building logbooks, product passports and evidence to loaded models.\n\nLoad pilot models and r"
+        },
+        {
+          "id": "review",
+          "text": "Review\nSource:\nFindings across analyses\nPopulation:\n0 analyses\n\nNo analysis results to review\n\nLoad "
+        },
+        {
+          "id": "compare",
+          "text": "Compare models\nSaved comparisons\nStorage and backup\nSave comparison\nSaved comparison\nChoose a saved "
+        },
+        {
+          "id": "bcf",
+          "text": "BCF Topics\nSource:\nBCF topics · Unnamed workspace\nPopulation:\n0 topics in this workspace\nCoverage\nOu"
+        },
+        {
+          "id": "validation",
+          "text": "Data validation\nStorage and backup\nSaved reports (0)\nIDS validation\n\nCheck the model against a build"
+        },
+        {
+          "id": "lens",
+          "text": "Lens\n\nSTART WITH A MODEL\n\nColor the model by class, material, classification or any property. Load a"
+        },
+        {
+          "id": "clash",
+          "text": "Clash detection\nHard\nClearance\ntol\nDetect all clashes\nFind duplicates\nDiscipline matrix\nMEP vs Struc"
+        },
+        {
+          "id": "layers",
+          "text": "Layers: version your model like code\n\nAn IFC5 model composes from immutable layers. Inspect who chan"
+        },
+        {
+          "id": "loadReport",
+          "text": "Load report\n\nSTART WITH A MODEL\n\nParse warnings and timings for the last load. Load a model to see i"
+        },
+        {
+          "id": "changes",
+          "text": "Changes\n\nSTART WITH A MODEL\n\nEvery edit you make, with undo. Load a model to record changes against."
+        },
+        {
+          "id": "idsStudio",
+          "text": "Author an IDS\n\nWrite an Information Delivery Specification with pickers grounded in the IFC schema. "
+        },
+        {
+          "id": "cost",
+          "text": "Cost\n\nSTART WITH A MODEL\n\nBrowse cost schedules and their items. Load a model to see its costs.\n\nLoa"
+        },
+        {
+          "id": "measurements",
+          "text": "Measurements\nList\nPoint\nQty\nSource\nNo measurements\nStart measuring"
+        },
+        {
+          "id": "extensions",
+          "text": "Extensions\nDEFAULT\nImport\nInstalled\nIdeas\nRepair\nAudit\nNo extensions installed\nExtensions are sandbo"
+        },
+        {
+          "id": "appearance",
+          "text": "Appearance\n\nImages and PDF pages across the surfaces you choose.\n\nApply to IFC\nPlace as reference\nCr"
+        },
+        {
+          "id": "environment",
+          "text": "Environment\n\nSTART WITH A MODEL\n\nSky, sun position, exposure and shadows. Load a model to light it.\n"
+        },
+        {
+          "id": "pointclouds",
+          "text": "Point Cloud\nLoad a point cloud to use its display and deviation controls."
+        },
+        {
+          "id": "influx",
+          "text": "InfluxDB 2\nExperimental\n\nRead-only synthetic or live telemetry, matched by IFC GlobalId. Select an I"
+        },
+        {
+          "id": "model",
+          "text": "Model inspector\n\nSTART WITH A MODEL\n\nPlace and edit elements in the Model workspace. Load a model, o"
+        },
+        {
+          "id": "changeSets",
+          "text": "Change sets\n\nSTART WITH A MODEL\n\nGroup edits into named sets to export or import. Load a model to re"
+        },
+        {
+          "id": "colorizer",
+          "text": "Colorizer\n\nOpen an IFC file to start colouring.\n\nPaint whole model gray\nGroup by\nSection\nIFC class\nM"
+        }
+      ]
+    },
+    {
+      "name": "all side panels toggle without opening Properties or moving the camera",
+      "ok": true,
+      "evidence": [
+        "properties",
+        "collab",
+        "sources",
+        "zones",
+        "placement",
+        "assistant",
+        "semantic",
+        "review",
+        "compare",
+        "bcf",
+        "validation",
+        "lens",
+        "clash",
+        "layers",
+        "loadReport",
+        "changes",
+        "idsStudio",
+        "cost",
+        "measurements",
+        "extensions",
+        "appearance",
+        "environment",
+        "pointclouds",
+        "influx",
+        "model",
+        "changeSets",
+        "colorizer"
+      ]
+    },
+    {
+      "name": "bottom panels render, switch and close on the fixed 3D surface",
+      "ok": true,
+      "evidence": [
+        "script",
+        "gantt",
+        "lists",
+        "charts",
+        "flow",
+        "document",
+        "drawing",
+        "presentation"
+      ]
+    },
+    {
+      "name": "rapid side switches settle on the last requested panel",
+      "ok": true,
+      "evidence": {
+        "id": "clash",
+        "mode": "expanded"
+      }
+    },
+    {
+      "name": "Measurements List releases its latch and closes only its split half",
+      "ok": true
+    },
+    {
+      "name": "docking Drawing beside the scene keeps the same live 3D canvas",
+      "ok": true
+    },
+    {
+      "name": "real mouse gestures reach the 3D canvas after dock transitions",
+      "ok": true
+    },
+    {
+      "name": "opaque panel pixels remain fixed over camera motion in every theme",
+      "ok": true,
+      "evidence": [
+        {
+          "theme": "light",
+          "width": 297,
+          "height": 178,
+          "identicalPng": true
+        },
+        {
+          "theme": "dark",
+          "width": 297,
+          "height": 178,
+          "identicalPng": true
+        },
+        {
+          "theme": "colorful",
+          "width": 297,
+          "height": 178,
+          "identicalPng": true
+        }
+      ]
+    },
+    {
+      "name": "Colorizer draft survives switching to Properties and returning",
+      "ok": true,
+      "evidence": {
+        "before": 14509,
+        "whileHidden": 14509,
+        "after": 14509
+      }
+    },
+    {
+      "name": "Colorizer draft survives a dock split and rejoin",
+      "ok": true,
+      "evidence": {
+        "products": 14509
+      }
+    },
+    {
+      "name": "Colorizer select-group checkboxes and 3D selection stay consistent",
+      "ok": true,
+      "evidence": {
+        "selected": 1968
+      }
+    },
+    {
+      "name": "adding and removing a federated model preserves the existing source draft",
+      "ok": true,
+      "evidence": {
+        "paintedProducts": 14509,
+        "selectedProducts": 1968,
+        "resolvedOwner": "ba982c09-ac09-4a96-ad41-e9b9afef4ac6"
+      }
+    },
+    {
+      "name": "Save as completes with the same draft when switching away during export",
+      "ok": true,
+      "evidence": {
+        "bytes": 11873913,
+        "suggestedFilename": "hangarvd_f10_ tan base_f01_colored_colored.ifc",
+        "busyWhenLeaving": "true"
+      }
+    },
+    {
+      "name": "closing all models clears preview and pending source sessions",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "console": [
+    "[usage] quota snapshot unavailable: response carried no usage"
+  ],
+  "registry": {
+    "sides": [
+      "properties",
+      "collab",
+      "sources",
+      "zones",
+      "placement",
+      "assistant",
+      "semantic",
+      "review",
+      "compare",
+      "bcf",
+      "validation",
+      "lens",
+      "clash",
+      "layers",
+      "loadReport",
+      "changes",
+      "idsStudio",
+      "cost",
+      "measurements",
+      "extensions",
+      "appearance",
+      "environment",
+      "pointclouds",
+      "influx",
+      "model",
+      "changeSets",
+      "colorizer"
+    ],
+    "bottom": [
+      "script",
+      "gantt",
+      "lists",
+      "charts",
+      "flow",
+      "document",
+      "drawing",
+      "presentation"
+    ]
+  },
+  "loaded": {
+    "id": "ba982c09-ac09-4a96-ad41-e9b9afef4ac6",
+    "vertices": 1917264,
+    "triangles": 1681800
+  },
+  "draftLifetime": {
+    "before": 14509,
+    "whileHidden": 14509,
+    "after": 14509
+  },
+  "ok": true
+}

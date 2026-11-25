@@ -1,0 +1,5160 @@
+{
+  "pin": "2cf5d2fa7f7831aa8282c944d7a2a67fa3cf878e",
+  "snapshot": "8c065043",
+  "scope": "packages",
+  "applied": true,
+  "changes": [
+    {
+      "path": "packages/ai/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ai/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf-api/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf-api/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf-api/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf-api/src/sync.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf-api/src/topic-paging.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf-api/src/topic-paging.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf-api/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/component-parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/ids-reporter.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/ids-reporter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/placeholder-snapshot.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/reader-components.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/section-plane-conversion.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/viewpoint.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/viewpoint.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/xml-illegal-chars.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/src/xml-text.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/bcf/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cache/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cache/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cache/src/writer.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cache/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/charts/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/charts/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/charts/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/clash/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/clash/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/clash/src/contact/min-distance.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/clash/src/engine-ts/obb-detect.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/clash/src/engine-ts/obb.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/clash/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/THIRD_PARTY_NOTICES.txt",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/__golden__/ids/diff-json.txt",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/__golden__/ids/diff-md.txt",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/__golden__/ids/diff-text.txt",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/__golden__/ids/explain-md-de.txt",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/__golden__/ids/explain-text.txt",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/clash.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/delivery-checks.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diagnose-geometry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-content-io.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-content.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-content.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-engine.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-initialization.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-lineage.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-oracle.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-predefined-type.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-property-unit-scale.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/diff-type-own-data.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/export-kernel-exact.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/export-retained.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/export-retained.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/export-rust-formats.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/export.empty-model.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/export.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/extract-entities.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/flow.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/gym-type-own-data.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/gym.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/gym.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/layer-diff.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/layer-history.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/layer-history.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/layer-merge.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/layer.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/lod.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/mcp.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/mutate-type-own-data.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/mutate.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/mutation-base.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/oci-model-commands.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/oci-push-input.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/oci-push-refusals.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/oci-push.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/oci-push.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/oci.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/rekey.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/simplify.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/step-args.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/step-args.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/storey-selection.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/storey-selection.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/commands/test-fixtures/type-mutation.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/headless-backend.dfjson.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/help.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/loader.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/model-input.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/model-input.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/oci-input.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/oci-push-test-registry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/oci-test-helpers.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/retained/engine.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/retained/obj.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/retained/report.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/retained/run.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/src/retained/smlib-hooks.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/cli/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/schemas/attribute-renames.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/src/cli.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/src/generator.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/src/rust-attribute-flags.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/src/rust-generator.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/src/rust-schema-queries.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/src/rust-slot-emitter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/src/rust-slot-renames.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/src/rust-type-name-parser.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/test/rust-attribute-flags.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/test/rust-generator.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/test/rust-slot-emitter.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/codegen/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/collab-server/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/collab-server/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/collab-server/src/layer-registry-http.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/collab-server/src/layer-registry-route.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/collab-server/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/collab/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/collab/test/color.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/collab/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create-ifc-lite/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create-ifc-lite/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create-ifc-lite/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/in-store/element-transform-frames.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/in-store/extract-grids.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/in-store/extract-grids.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/in-store/grid-column-samesense.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/in-store/grid-column.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/in-store/host-geometry-frame.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/in-store/placement-frame.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/in-store/storey-plan-frame.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/landxml/ifcopenshell-conformance.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/landxml/landxml-to-ifc-vertical.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/landxml/profile-geometry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/src/placement-axes.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/create/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/scripts/proj4-overrides.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/axis2-placement.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/axis2-placement.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/effective-entities.ifc5.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/effective-entities.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/entity-table.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/entity-table.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/generated/epsg-index.generated.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/placement-chain.parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/placement-chain.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/step-numeric-literal.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/step-serializers.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/src/step-serializers.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/data/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/scripts/clean-dist.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/class-families.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/class-families.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/component-fingerprint.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/content-match-position.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/content-match-tiers.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/content-match.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/content-match.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/content-tiers.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/diff-options.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/diff.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/diff.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/fingerprint-projections.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/fingerprint.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/fingerprint.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/geometry-compare.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/handle-parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/identity-map.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/identity-map.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/identity-sidecar.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/identity-sidecar.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/internal.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/key-aliases.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/key-aliases.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/lineage-sidecar.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/lineage.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/lineage.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/mutual-nearest.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/mutual-nearest.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/nonfinite-value.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/prepared-model.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/prepared-model.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/public-lineage-accepted-main.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/public-share-guard-observations.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/public-sidecar-signature-observations.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/respecified-match.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/respecified-match.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/sidecar-common.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/sidecar-dedup.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/split-merge-claim.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge-conflicts.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge-evidence.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge-evidence.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge-geometry.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge-geometry.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge-lanes.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge-settings.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/split-merge.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/successor-match.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/successor-match.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/diff/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-batch.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-binary.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-binary.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-columns.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-columns.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-diff.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-diff.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-fingerprint-order.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-fingerprint-sparse.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-fingerprint.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-fingerprint.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-identity-sidecar.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-lineage-observations.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-lineage-sidecar.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-lineage.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-lineage.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-normalize-errors.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-projections.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-provenance.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-provenance.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-result.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-runtime-race.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-runtime-sync-first.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-runtime.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-runtime.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-sidecar-observations.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-sidecar.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-sidecar.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/src/wasm-utf16.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/class-families.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/class-families.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/component-fingerprint.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/content-match-position.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/content-match-tiers.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/content-match-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/content-match.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/content-match.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/content-tiers.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/diff-options.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/diff.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/diff.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/fingerprint-projections.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/fingerprint.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/fingerprint.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/geometry-compare.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/identity-map.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/identity-map.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/identity-sidecar.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/identity-sidecar.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/key-aliases.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/key-aliases.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/lineage-sidecar.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/lineage.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/lineage.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/mutual-nearest.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/mutual-nearest.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/nonfinite-value.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/respecified-match.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/respecified-match.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/sidecar-common.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-claim.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-conflicts.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-evidence.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-evidence.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-geometry.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-geometry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-lanes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-settings.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/split-merge.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/successor-match.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/successor-match.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/successor-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/oracle/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/published-artifacts.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/wasm-fingerprint-deep.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/test/wasm-fingerprint-sparse.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/tsconfig.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/diff/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/documents-api/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/documents-api/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/drawing-generator.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/edge-extractor.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/edge-extractor.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/edge-weld.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/gpu-section-cutter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/line-classification.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/line-merger.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/open-chains.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/open-chains.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/open-surface.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/open-surface.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/openings/opening-relationship-builder.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/openings/opening-relationship-builder.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/polygon-builder.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/polygon-builder.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/polygon-helpers.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/section-cutter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/section-exclusions.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/symbols/door-arc.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/symbols/door-symbol.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/symbols/door-symbol.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/drawing-2d/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/embed-protocol/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/embed-protocol/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/embed-sdk/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/embed-sdk/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/encoding/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/encoding/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/encoding/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/encoding/src/step-top-level-split.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/encoding/src/step-top-level-split.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/encoding/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/anonymize-placement.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/anonymize-placement.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/declared-property-type.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/edit-ownership.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/edit-ownership.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/ifc5-effective-rows.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/ifc5-exporter.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/ifc5-exporter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/ifcopenshell-schema-conformance.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/ifcx-derived-roundtrip.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/ifcx-roundtrip.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/lod-geometry-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/lod0-generator.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/lod0-generator.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/lod1-generator.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/lod1-generator.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/merged-exporter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/obj.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/parquet-exporter.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/parquet-exporter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/presentation-map-closure.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/property-value-serialization.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/reference-collector.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-conversion-loss-report.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-conversion-loss-report.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-attr-remap.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-downgrade-trim.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-ifc4-entity-table.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-mep.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-mep.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-mep.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-product-proxy.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-renames.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-renames.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-untranslatable.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter-upgrade-trim.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-converter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-mep-geometry.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-style-flatten-editor.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-style-flatten.parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-style-flatten.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-unrepresented.parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/schema-upconvert-sweep.parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/section-export-entry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/section-export-safety.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/section-export.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/section-export.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/select-qualification.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/select-qualification.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-argument-parser.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-argument-parser.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-export-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-exporter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-overlay-entities.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-pass-builder.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-refs-comment.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-serialization.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-serialization.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-slot-grammar.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-slot-vectors.parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/step-source-iteration.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/style-closure.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/texture-map-closure.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/export/src/zero-content.parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/src/zero-content.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/test/fixtures/mep-occurrences.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/test/fixtures/mesh-mep-fixture.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/export/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/authority/attribute-path.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/authority/authority.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/authority/charter.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/authority/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/authority/resolve.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/capability/parse.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/capability/scope-claim.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/capability/scope-claim.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/host/loader.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/host/memory-factory.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/extensions/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/README.md",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/src/bcf-publication-local-capacity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/src/csv-parse.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/src/influx-query.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/src/influx-table.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/src/influx.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/src/influx.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/src/xlsx-io-lazy.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/src/xlsx-io.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow-nodes/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/flow/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/adversarial-skew.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/byte-streaming-prepass-result.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/diagnostics.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/domain-export-call.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/domain-export-call.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-coordinate.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-parallel-empty-stitch.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-parallel-omitted-type-records.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-parallel-options.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-parallel-warm-pool.test.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/geometry/src/geometry-parallel.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-processor-streaming.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-worker-init.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-worker-omitted-type-records.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/geometry-worker-pool.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/geometry/src/geometry.worker.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/huge-file-error.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/huge-file-error.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/ifc-lite-bridge.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/index.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/main-engine-init.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/map-normalization-capability.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/omitted-type-records.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/omitted-type-records.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/perf-flags.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/perf-flags.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/prepass-source-fingerprint.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/style-finishes.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/style-finishes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/warm-pool.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/geometry/src/wasm-init-retry.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/wasm-panic-forward.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/world-frame.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/src/world-frame.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/geometry/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids-agent/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids-agent/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids-agent/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids-authoring/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids-authoring/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids-authoring/src/diff/changelog-ru.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids-authoring/src/diff/changelog-text.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids-authoring/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/constraints/describe.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/constraints/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/facets/attribute-facet.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/facets/property-facet.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/translation/catalogue.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/translation/describe-constraint.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/translation/locales/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/translation/locales/ru.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/translation/pset-missing-message.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/translation/self-quoted.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/translation/self-quoted.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/translation/service.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/src/validation/format-failure-reason.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ids/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/composition.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/definitions.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/detect-format.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/entity-extractor.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/federated-composition.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/federated-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/generated/imported-geometry-static.d.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/generated/imported-geometry-static.js",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/generated/imported-geometry.provenance.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/generated/imported-geometry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/geometry-extractor.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/geometry-extractor.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/geometry-normals.ts",
+      "strategy": "upstream",
+      "action": "delete"
+    },
+    {
+      "path": "packages/ifcx/src/hello-wall-definitions.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/hierarchy-builder.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-graph-source.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-graph.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-kernel.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-kernel.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-packet.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-scene.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-snapshot.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-source.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-source.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/imported-wire.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/names.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/opinions.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/opinions.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/parse-result.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/placement.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/pointcloud-extractor.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/storey-elevation-names.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/traversal.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/units.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/writer-entities.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/ifcx/src/writer.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lens/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lens/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lens/src/engine.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lens/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/src/engine.custom-grouping.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/src/engine.geometry.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/src/engine.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/src/engine.zone.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/src/legacy-condition-migration.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/lists/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/load-trace/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/load-trace/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/cli.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/export-overlay.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/loaded-source.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/loader.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/safe-path.test.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/safe-path.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/bcf-publication-native.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/diff-fingerprints.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/diff-fingerprints.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/diff.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/diff.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/export-init-dispose.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/export-usd.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/export.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/layer-review.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/layer-store.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/layer-store.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/tools/mutate-type-owned.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/transport/stdio-console-routing.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/transport/stdio-console.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/transport/stdio-stdout-purity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/src/transport/stdio.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/test/integration.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mcp/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/scripts/bench-three-way.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/component-state.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/fast-path-differential.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/merge-layer.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/real-model-fuzz.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/ref-flow-policy-ancestor.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/ref-flow-resolutions.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/resurrect.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/state-diff.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/src/three-way.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/merge/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mutations/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/mutations/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oauth-pkce/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oauth-pkce/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/auth.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/build-manifest.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/client.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/digest.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/errors.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/fetch-blob.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/manifest-shape.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/push.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/reference.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/session.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/transport.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/auth.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/blob.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/fake-registry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/manifest.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/push-auth.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/push-blob.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/push-manifest.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/push-registry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/reference.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/test/tags.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/tsconfig.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/oci/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/opencde-foundation/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/opencde-foundation/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/columnar-parser-attributes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/columnar-parser.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/compact-entity-index-columns.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/compact-entity-index-duplicates.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/compact-entity-index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/complex-property-store.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/cost-step-lexemes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/declared-length-unit.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/georef-coordinate-operation.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/georef-extractor.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/georef-projected-crs.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/georef.parity.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/map-unit-label.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/material-properties-extractor.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/on-demand-extractors.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/on-demand-georeferencing.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/property-complex-value.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/property-value-parser.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/relationship-schema-slots.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/source-compress.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/source-header.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/spatial-hierarchy-attributes.placement-elevation.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/spatial-hierarchy-attributes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/unit-extractor.declared.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/unit-extractor.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/wasm-init-retry.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/src/wasm-panic-forward.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/test/columnar-parser-attributes-trivia.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/test/complex-property-budget.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/test/complex-property-shared-set.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/test/fixtures/complex-property-budget-7675.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/test/georef-rigid-operation.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/test/schema-version-parity-7691.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/test/source-header-read-vectors.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/test/source-header.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/parser/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/plugin-api/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/plugin-api/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/formats/ifcx-points.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/formats/pcd-header.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/formats/pcd.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/from-ifcx-attributes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/point-source.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/point-source.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/spatial-wkt.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/spatial-wkt.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/decode-worker.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/decode-worker.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/host.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/host.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/las-source.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/las-source.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/ply-source.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/ply-source.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/ply-stream-decode.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/protocol.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/worker-client.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/src/streaming/worker-client.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/pointcloud/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/provenance/SPEC.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/provenance/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/provenance/test/merge-battery.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/provenance/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/query/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/query/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/query/src/entity-query.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/query/src/ifc-query.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/query/test/oftype-unknown-type.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/query/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/regex-guard/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/regex-guard/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/ao-params.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/ao-params.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/ao-pass.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/appearance-preview.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-animation.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-controls.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-degenerate-pose-matrix.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-fit-viewport-shape.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-frame-corner-fit.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-frame-padding.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-guards.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-lens-shift.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-matrices.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-preset-direction.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-preset-view.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-state.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-tween-signal.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera-zoom.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/camera.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/clip-half-spaces.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/clip-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/depth-nudge.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/depth-reconstruct.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/device-recovery.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/device-request-fallback.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/device.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/edge-params.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/edge-params.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/extra-clip-planes.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/extra-clip-planes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/frame-depth-probe.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/frame-depth-probe.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian-attributes.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian-glass-split.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian-placement.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian-renderer-bounds.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian-splat-layer.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-attributes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-backend.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-composition.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-device-slot.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-errors.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-frame-translation.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-frame.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-glass-frame.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-glass-split.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-lazy.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-luma-backend.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-pack.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-pass-recorder.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-placement.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-public.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-readiness.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-serial.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-splat-layer.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gaussian/gaussian-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/ghost-shader.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gpu-counters.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/gpu-counters.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/instanced-rte.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/instanced-vertex-layout.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/main-opaque-fast.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/main-shader-edges.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/mesh-rte-uniforms.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/mesh-uniform-arena.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/mesh-uniform-arena.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/mesh-uniform-resources.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/mesh-uniform-resources.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/model-bounds-tracker.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/opaque-draw-order.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/opaque-draw-order.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/opaque-draw-variants.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/opaque-draw-variants.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/opaque-visibility-commands.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/opaque-visibility-pass.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/opaque-visibility-pass.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/overlay-section-clip.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/pick-types.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/picker-depth-sample.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/picker-rte-uniforms.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/picker-shaders.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/picker.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/pipeline.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/pointcloud/point-cloud-spatial-index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/post-pass-chain.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/post-pass-chain.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/quantized-lifecycle.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/raycast-engine.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/raycast-engine.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/raycast-point-cloud-query.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/render-section-draw.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/render-section-draw.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/render-section-plane.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/render-stats.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/render-target-bytes.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/render-target-bytes.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-color-readback.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-color-readback.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-device-loss-latch.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-device-recovery.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-device-replacements.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-frame-timing.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-init-reentry.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-overlays.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-render-paths.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-symbolic-overlays.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/renderer-viewport.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-batch-buffer-leak.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-bucket-routing.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-contents.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-count-uploads.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-device-recovery.test.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-fragment-budget.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-geometry.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-raycaster-clip.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-raycaster.ts",
+      "strategy": "three-way",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-rect-select.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-snapshot-batches.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-snapshot-lifecycle.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-snapshot-lifecycle.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-snapshot.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-snapshot.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-textured-origin.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-topology-memo.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/scene-topology-scans.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-2d-lift.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-2d-lift.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-2d-line-buffer.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-2d-overlay.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-2d-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-box-caps.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-cap-geometry.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-cap-set.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-cap-set.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-cap-style.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-exclusions.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/section-exclusions.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/selection-mask-pass.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/selection-mask-pass.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/selection-mask-pipelines.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/selection-outline-frame.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/selection-outline-frame.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/ao.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/depth-nudge.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/depth-reconstruct.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/edges.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/main-opaque-fast.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/main.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/mesh-uniforms.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/opaque-visibility.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/section-2d-overlay.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/selection-mask.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/shadow.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/sky.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shaders/symbolic-overlay.wgsl.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shadow-light-matrix.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shadow-occluders.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shadow-pass-rte-envelope.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shadow-pass.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/shadow-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/sky-pass.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/sky-shader.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/snap-clip.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/snap-clip.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/snap-detector.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/snap-edge-runs.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/source-curve-clipping.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/source-curve-snap.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/symbolic-fill-pipeline.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/symbolic-fill-triangulate.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/symbolic-fill-upload.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/symbolic-overlay-pipelines.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/symbolic-text-rte.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/renderer/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/report-contract/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/report-contract/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/filter-custom-grouping.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/filter-evaluate-complex-member-cut.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/filter-evaluate-custom-grouping.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/filter-evaluate-groups.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/filter-evaluate.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/filter-iteration-source.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/filter-rule-guards.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/filter-rules.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/filter/read-measure-subject.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/ids/rule-to-ids-facets.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/rules/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sandbox/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sandbox/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sandbox/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sdk/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sdk/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sdk/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sdk/src/headless.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sdk/src/headless/backend.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sdk/src/headless/mutation-base.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/sdk/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/semantic/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/semantic/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/semantic/src/core.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/semantic/src/graph-import.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/semantic/src/n3-writer-end.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/semantic/src/profile-artifacts.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/semantic/src/resolver.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/semantic/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-bin/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-bin/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-bin/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-client/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-client/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-client/src/client.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-client/src/geometry-diagnostics-types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-client/src/georeferencing.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-client/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/server-client/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/solar/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/solar/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-autodesk/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-autodesk/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/http-client.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/legacy-download.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/lite.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/manifest.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/mapping.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/provider.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/session.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/test/provider.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/tsconfig.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-bimcollab/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/src/auth.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/src/http-client.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/src/identity.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/src/index.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/src/manifest.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/src/provider.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/src/scan.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/src/types.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/test/auth.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/test/buildagil-api-mock.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/test/conformance.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/test/provider.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/test/refresh-race.test.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/tsconfig.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-buildagil/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-dalux/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-dalux/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-dalux/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-dropbox/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-dropbox/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-fixture/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-fixture/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-msgraph/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/source-msgraph/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/spatial/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/spatial/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/spatial/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/timing-ladder/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/timing-ladder/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/viewer/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/viewer/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm-lifecycle/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm-lifecycle/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/.gitignore",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/README.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/THIRD_PARTY_NOTICES.txt",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/pkg-diff/ifc-lite-diff.d.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/pkg-retained/.gitignore",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/pkg-retained/ifc-lite.d.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/pkg/ifc-lite.d.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/retained.d.ts",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/retained.js",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-boundaries.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-date.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-deleted-filter-cases.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-deleted-filter.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-helpers.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-helpers.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-lineage.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-share-callbacks.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-share-validation.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-host-sidecar.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-lineage-parity.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-parity.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-placement.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-runtime-unicode-parity.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/diff-runtime-unicode-vectors.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/retained-browser.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/wasm/test/sloped-coplanar-difference.test.mjs",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/world-frame-fixtures/CHANGELOG.md",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/world-frame-fixtures/package.json",
+      "strategy": "upstream",
+      "action": "write"
+    },
+    {
+      "path": "packages/world-frame-fixtures/vitest.config.ts",
+      "strategy": "upstream",
+      "action": "write"
+    }
+  ],
+  "conflicts": [
+    {
+      "path": "packages/data/package.json",
+      "reason": "content",
+      "regions": 1
+    },
+    {
+      "path": "packages/flow-nodes/src/bcf-publication-local-bounds.test.ts",
+      "reason": "content",
+      "regions": 1
+    },
+    {
+      "path": "packages/renderer/README.md",
+      "reason": "content",
+      "regions": 1
+    },
+    {
+      "path": "packages/renderer/src/instanced-rte.ts",
+      "reason": "content",
+      "regions": 1
+    },
+    {
+      "path": "packages/renderer/src/scene-batch-upload.ts",
+      "reason": "content",
+      "regions": 6
+    },
+    {
+      "path": "packages/renderer/src/scene-precision.ts",
+      "reason": "content",
+      "regions": 4
+    },
+    {
+      "path": "packages/renderer/src/scene.ts",
+      "reason": "content",
+      "regions": 6
+    }
+  ]
+}

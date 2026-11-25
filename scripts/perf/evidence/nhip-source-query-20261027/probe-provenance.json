@@ -1,0 +1,28 @@
+{
+  "source": "F:\\Steel\\VBA\\IFC-Lite-Core104",
+  "baseCommit": "13e402c42884c479fc22437c2e8f7a8c5dad53c5",
+  "comparisonBase": "staged r6 source before this turn; includes prior uncommitted r5/r6 repairs",
+  "files": {
+    "rust/geometry/src/kernel/arrangement/mod.rs": {
+      "baseSha256": "0f5460003f301b54ece1ab649a3397813d3e43ade9ccafde70e7d82b0e6facc7",
+      "branchSha256": "12340b0a4d9f0a0d6b0fd934b2c8d506b66d22b48249927e035c5b5cfa449303"
+    },
+    "rust/geometry/src/kernel/arrangement/classify.rs": {
+      "baseSha256": "40e9a6dfb81f3bdcf654abf15c5ba2218d54dcb4498ef3c2561d541853d2fb01",
+      "branchSha256": "6c299f5a1119b782c614aed5a63a7be37b2ffbf6cbf834ba0b00bfbc0e483e75"
+    },
+    "rust/geometry/src/kernel/arrangement/surface.rs": {
+      "baseSha256": "253a395c03314e86e1014810ed50d59fb1d24f4289634e0ad64ec43c2a678873",
+      "branchSha256": "68b25692c93e382920e9338b6e46e6f56413082b176e7e631b25e4247561f8af"
+    },
+    "rust/geometry/src/kernel/arrangement/strict_union.rs": {
+      "baseSha256": "04ebe5204599537b05f43d372ec0585de400692481e0d74ffff1b3ce600d4406",
+      "branchSha256": "8f1aeadde456ec16f44e88032f52364c15a8d591ca43051ae6d89380a0273972"
+    },
+    "rust/geometry/src/kernel/arrangement/finite_difference.rs": {
+      "baseSha256": "599537344766ebbd45fcb30ccfb8cc396024275e2c237574cb6cd891b5618b5b",
+      "branchSha256": "ac3964d14b43c035939666f7e969c97783cbdc58d53584a35ec48bb04f3530fd"
+    }
+  },
+  "toolchain": "cargo 1.99.0 (5f94df478 2026-08-27)"
+}

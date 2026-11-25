@@ -1,0 +1,286 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! Pure B-spline / NURBS surface and curve math, plus B-spline attribute parsing.
+
+use crate::math::tol;
+use super::bspline_budget::MAX_BSPLINE_DEGREE;
+use crate::Point3;
+
+/// Evaluate every basis function `N_{i,degree}(u)` for `i` in `0..count` in
+/// one bottom-up (memoized) pass — see `bspline_budget.rs` for why the old
+/// naive-recursive form was exponential in `degree`. Bit-identical to calling
+/// it once per `i` (same recurrence, same epsilon guard), just computing each
+/// `(level, index)` cell once. Local support bounds the table to level-0
+/// width `count + degree` regardless of `knots.len()`. `degree` is clamped to
+/// [`MAX_BSPLINE_DEGREE`] here, not just at call sites, so every caller is
+/// protected (#4901).
+fn bspline_basis_table(degree: usize, u: f64, knots: &[f64], count: usize) -> Vec<f64> {
+    let degree = degree.min(MAX_BSPLINE_DEGREE);
+    if count == 0 || knots.len() < 2 {
+        return vec![0.0; count];
+    }
+    // Level-0 span count: N_{i,0} needs knots[i] and knots[i+1].
+    let max_level0 = knots.len() - 1;
+    let width = count.saturating_add(degree).saturating_add(1).min(max_level0);
+
+    let mut cur: Vec<f64> = (0..width)
+        .map(|i| if knots[i] <= u && u < knots[i + 1] { 1.0 } else { 0.0 })
+        .collect();
+    close_end_span(&mut cur, degree, u, knots);
+
+    for k in 1..=degree {
+        if cur.len() <= 1 {
+            cur.clear();
+            break;
+        }
+        let next_len = cur.len() - 1;
+        let mut next = vec![0.0; next_len];
+        for (i, slot) in next.iter_mut().enumerate() {
+            let left = if i + k < knots.len() {
+                let denom = knots[i + k] - knots[i];
+                if denom.abs() < tol::BASIS_EPS { 0.0 } else { (u - knots[i]) / denom * cur[i] }
+            } else {
+                0.0
+            };
+            let right = if i + k + 1 < knots.len() && i + 1 < cur.len() {
+                let denom = knots[i + k + 1] - knots[i + 1];
+                if denom.abs() < tol::BASIS_EPS {
+                    0.0
+                } else {
+                    (knots[i + k + 1] - u) / denom * cur[i + 1]
+                }
+            } else {
+                0.0
+            };
+            *slot = left + right;
+        }
+        cur = next;
+    }
+    cur.resize(count, 0.0);
+    cur
+}
+
+/// Close the last non-empty level-0 span at the domain end `t_max =
+/// knots[len - degree - 1]` (#7687, PROC-S2). Spans are half-open, and a
+/// clamped knot vector (end multiplicity degree+1, the normal case) has no
+/// span starting at `t_max`, so `u == t_max` set no span, every basis value
+/// was 0 and the curve evaluated to the ORIGIN. This is the standard special
+/// case (Piegl & Tiller, A2.1). It fires only when no half-open span already
+/// holds `u`, so an unclamped end, where one does, keeps its single span.
+fn close_end_span(level0: &mut [f64], degree: usize, u: f64, knots: &[f64]) {
+    let Some(&t_max) = knots.len().checked_sub(degree + 1).and_then(|i| knots.get(i)) else {
+        return;
+    };
+    if u != t_max || level0.contains(&1.0) {
+        return;
+    }
+    if let Some(i) = (0..level0.len()).rev().find(|&i| knots[i] < knots[i + 1] && knots[i + 1] == u) {
+        level0[i] = 1.0;
+    }
+}
+
+/// Evaluate a single B-spline basis function `N_{i,p}(u)`. Test-only:
+/// production callers use [`bspline_basis_table`] directly so they build the
+/// table once per sample point and reuse it across every `i`.
+#[cfg(test)]
+fn bspline_basis(i: usize, p: usize, u: f64, knots: &[f64]) -> f64 {
+    bspline_basis_table(p, u, knots, i + 1)
+        .get(i)
+        .copied()
+        .unwrap_or(0.0)
+}
+
+/// Keep authored index order and discard only exact zeros, NOT small values.
+/// The acceptance threshold applies to the U*V product, so filtering each axis
+/// by that threshold would change malformed/non-normalized knot behavior.
+fn surface_basis(degree: usize, t: f64, knots: &[f64], count: usize) -> Vec<(usize, f64)> {
+    bspline_basis_table(degree, t, knots, count)
+        .into_iter()
+        .enumerate()
+        .filter(|(_, value)| *value != 0.0)
+        .collect()
+}
+
+/// Evaluate the same ordered weighted sum using precomputed axis samples (#5321).
+/// Skipping a zero factor is safe even with nonfinite values on the other axis:
+/// their product is zero or NaN, neither of which passes the existing threshold.
+fn evaluate_bspline_surface(
+    u_basis: &[(usize, f64)],
+    v_basis: &[(usize, f64)],
+    control_points: &[Vec<Point3<f64>>],
+    weights: Option<&[Vec<f64>]>,
+) -> Point3<f64> {
+    let mut result = Point3::new(0.0, 0.0, 0.0);
+    let mut weight_sum = 0.0;
+    for &(i, n_i) in u_basis {
+        let Some(row) = control_points.get(i) else { continue };
+        for &(j, n_j) in v_basis {
+            let Some(cp) = row.get(j) else { continue };
+            let basis = n_i * n_j;
+            if basis.abs() > tol::BASIS_EPS {
+                let w = weights
+                    .and_then(|ws| ws.get(i))
+                    .and_then(|row_w| row_w.get(j))
+                    .copied()
+                    .unwrap_or(1.0);
+                let weighted_basis = basis * w;
+                result.x += weighted_basis * cp.x;
+                result.y += weighted_basis * cp.y;
+                result.z += weighted_basis * cp.z;
+                weight_sum += weighted_basis;
+            }
+        }
+    }
+    if weights.is_some() && weight_sum.abs() > tol::BASIS_EPS {
+        result.x /= weight_sum;
+        result.y /= weight_sum;
+        result.z /= weight_sum;
+    }
+    result
+}
+
+/// Tessellate a B-spline surface into triangles.
+/// Returns `None` if the knot data is inconsistent (prevents index panics).
+pub(super) fn tessellate_bspline_surface(
+    u_degree: usize,
+    v_degree: usize,
+    control_points: &[Vec<Point3<f64>>],
+    u_knots: &[f64],
+    v_knots: &[f64],
+    weights: Option<&[Vec<f64>]>,
+    u_segments: usize,
+    v_segments: usize,
+) -> Option<(Vec<f32>, Vec<u32>)> {
+    let mut positions = Vec::new();
+    let mut indices = Vec::new();
+
+    // Validate knot vector lengths: expanded knot vector must have at least
+    // (num_control_points + degree + 1) entries. At minimum we need to be
+    // able to index [degree] and [len - degree - 1] safely.
+    let n_u = control_points.len();
+    let n_v = control_points.first().map_or(0, |r| r.len());
+    let min_u_knots = n_u + u_degree + 1;
+    let min_v_knots = n_v + v_degree + 1;
+
+    if u_knots.len() < min_u_knots || v_knots.len() < min_v_knots {
+        return None;
+    }
+    if u_degree >= u_knots.len() || v_degree >= v_knots.len() {
+        return None;
+    }
+    if u_knots.len() - u_degree > u_knots.len()
+        || v_knots.len() - v_degree > v_knots.len()
+    {
+        return None;
+    }
+
+    // Get parameter domain
+    let u_min = u_knots[u_degree];
+    let u_max = u_knots[u_knots.len() - u_degree - 1];
+    let v_min = v_knots[v_degree];
+    let v_max = v_knots[v_knots.len() - v_degree - 1];
+
+    // U is reused across a row; V is reused across all rows. Store only the
+    // nonzero entries of each V sample, retaining the original summation order.
+    // Use the longest row just as the dense evaluator did for ragged grids.
+    let n_v_max = control_points.iter().map(Vec::len).max().unwrap_or(0);
+    // Malformed non-monotone knots can have dense support. Bound retained
+    // samples independently of the existing input-work limit; uncached samples
+    // use the same evaluator and are recomputed one at a time.
+    const MAX_CACHED_BASIS_ENTRIES: usize = 4096;
+    let mut remaining = MAX_CACHED_BASIS_ENTRIES;
+    let v_bases: Vec<_> = (0..=v_segments)
+        .map(|j| {
+            let v = v_min + (v_max - v_min) * (j as f64 / v_segments as f64);
+            let v = v.min(v_max - tol::PARAM_END_MARGIN).max(v_min);
+            let basis = surface_basis(v_degree, v, v_knots, n_v_max);
+            let cached = if basis.len() <= remaining {
+                remaining -= basis.len();
+                Some(basis)
+            } else {
+                None
+            };
+            (v, cached)
+        })
+        .collect();
+    for i in 0..=u_segments {
+        let u = u_min + (u_max - u_min) * (i as f64 / u_segments as f64);
+        let u = u.min(u_max - tol::PARAM_END_MARGIN).max(u_min);
+        let u_basis = surface_basis(u_degree, u, u_knots, n_u);
+        for (j, (v, cached)) in v_bases.iter().enumerate() {
+            let scratch;
+            let v_basis = match cached {
+                Some(basis) => basis,
+                None => {
+                    scratch = surface_basis(v_degree, *v, v_knots, n_v_max);
+                    &scratch
+                }
+            };
+            let point = evaluate_bspline_surface(&u_basis, v_basis, control_points, weights);
+
+            positions.push(point.x as f32);
+            positions.push(point.y as f32);
+            positions.push(point.z as f32);
+
+            // Create triangles
+            if i < u_segments && j < v_segments {
+                let base = (i * (v_segments + 1) + j) as u32;
+                let next_u = base + (v_segments + 1) as u32;
+
+                // Two triangles per quad
+                indices.push(base);
+                indices.push(base + 1);
+                indices.push(next_u + 1);
+
+                indices.push(base);
+                indices.push(next_u + 1);
+                indices.push(next_u);
+            }
+        }
+    }
+
+    Some((positions, indices))
+}
+
+/// Evaluate a B-spline CURVE at parameter t (1D, not surface).
+///
+/// With `weights` (one per control point) the curve is rational (NURBS): the
+/// de Boor sum runs in homogeneous coordinates, `sum(N_i w_i P_i) / sum(N_i
+/// w_i)` (Piegl & Tiller eq. 4.9), as `evaluate_bspline_surface` does (#7750).
+pub(super) fn evaluate_bspline_curve(
+    t: f64,
+    degree: usize,
+    control_points: &[Point3<f64>],
+    weights: Option<&[f64]>,
+    knots: &[f64],
+) -> Point3<f64> {
+    let mut result = Point3::new(0.0, 0.0, 0.0);
+    let mut weight_sum = 0.0;
+    // One table build for the whole curve point, not one per control point
+    // (see `evaluate_bspline_surface` — same reasoning, #4901).
+    let table = bspline_basis_table(degree, t, knots, control_points.len());
+    for (i, cp) in control_points.iter().enumerate() {
+        let basis = table.get(i).copied().unwrap_or(0.0);
+        if basis.abs() > tol::BASIS_EPS {
+            let weighted = basis * weights.and_then(|ws| ws.get(i)).copied().unwrap_or(1.0);
+            result.x += weighted * cp.x;
+            result.y += weighted * cp.y;
+            result.z += weighted * cp.z;
+            weight_sum += weighted;
+        }
+    }
+    // Weights are validated > 0, so any positive sum is a real denominator:
+    // a fixed floor collapsed a NURBS whose weights are all uniformly tiny.
+    if weights.is_some() && weight_sum > 0.0 {
+        result.x /= weight_sum;
+        result.y /= weight_sum;
+        result.z /= weight_sum;
+    }
+    result
+}
+
+#[cfg(test)]
+#[path = "bspline_tests.rs"]
+mod tests;

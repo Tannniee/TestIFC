@@ -1,0 +1,777 @@
+{
+  ".gitattributes": [
+    "theirs"
+  ],
+  ".github/workflows/ifcopenshell-parity.yml": [
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  ".github/workflows/release.yml": [
+    "theirs"
+  ],
+  ".github/workflows/server-binaries.yml": [
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  ".github/workflows/test.yml": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  ".gitignore": [
+    "theirs"
+  ],
+  "AGENTS.md": [
+    "theirs"
+  ],
+  "apps/viewer-embed/CHANGELOG.md": [
+    "theirs"
+  ],
+  "apps/viewer-embed/package.json": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "docs/architecture/mesh-determinism.md": [
+    "theirs"
+  ],
+  "examples/babylonjs-viewer/package.json": [
+    "theirs",
+    "theirs"
+  ],
+  "examples/collab-demo/package.json": [
+    "theirs"
+  ],
+  "examples/threejs-collab/package.json": [
+    "theirs"
+  ],
+  "examples/threejs-viewer/package.json": [
+    "theirs"
+  ],
+  "package.json": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "playwright.config.ts": [
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "pnpm-lock.yaml": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "scripts/add-sourcemap-refs.mjs": [
+    "theirs"
+  ],
+  "scripts/agents-md-budget.txt": [
+    "theirs",
+    "theirs"
+  ],
+  "scripts/api-surface.json": [
+    "theirs"
+  ],
+  "scripts/augment-epsg-proj4.ts": [
+    "theirs"
+  ],
+  "scripts/check-refwalk-guards.mjs": [
+    "theirs"
+  ],
+  "scripts/check-tla-chunk-await.mjs": [
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "scripts/check-tla-chunk-await.test.mjs": [
+    "theirs",
+    "theirs"
+  ],
+  "scripts/check-workflow-report-paths.mjs": [
+    "theirs"
+  ],
+  "scripts/fetch-prebuilt-wasm.mjs": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "scripts/generate-epsg-index.ts": [
+    "theirs",
+    "theirs"
+  ],
+  "scripts/lib/ci-path-coverage.mjs": [
+    "theirs"
+  ],
+  "scripts/lib/pr-review-signal.test.mjs": [
+    "theirs",
+    "theirs"
+  ],
+  "scripts/perf/ab.sh": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "scripts/sync-versions.test.mjs": [
+    "theirs",
+    "theirs"
+  ],
+  "scripts/unused-locals-baseline.json": [
+    "theirs"
+  ],
+  "scripts/vercel-build.sh": [
+    "theirs"
+  ],
+  "tests/benchmark/README.md": [
+    "theirs"
+  ],
+  "tests/e2e/model-reposition.e2e.spec.ts": [
+    "theirs"
+  ],
+  "tools/ifcopenshell_reference/README.md": [
+    "theirs"
+  ],
+  "turbo.json": [
+    "theirs",
+    "theirs"
+  ],
+  "packages/data/package.json": [
+    "    \"vitest\": \"^5.0.5\",\n    \"tsx\": \"^4.23.15\"\n"
+  ],
+  "packages/renderer/README.md": [
+    "both"
+  ],
+  "packages/renderer/src/instanced-rte.ts": [
+    "theirs"
+  ],
+  "packages/flow-nodes/src/bcf-publication-local-bounds.test.ts": [
+    "ours"
+  ],
+  "packages/renderer/src/scene.ts": [
+    "import { PickOrderMap } from './pick-order-map.js';\nimport { createSceneBatchSteps } from './scene-batch-upload.js';\nimport { finishBatchSteps, sliceBatchSteps } from './batch-slicing.js';\nimport { batchGeometryStaging, type GeometryStagingAllocator } from './geometry-staging.js';\nimport { topologySafeBatchOriginSteps } from './scene-precision.js';\nimport { snapshotBatchMeshes, reconcilePreparedBatch } from './scene-batch-placement.js';\nimport { ResidencyRestore } from './residency-restore.js';\nimport { SceneSnapshotLifecycle, type SceneSnapshotHost } from './scene-snapshot-lifecycle.js';\nimport type { SceneSnapshot } from './scene-snapshot.js';\n",
+    "both",
+    "  prepareDeviceRecovery(): SceneDeviceRecoveryPreparation { this.snapshots.onDeviceLost(); return prepareSceneDeviceRecovery(this as unknown as SceneRecoveryHost); }\n  discardGpuResourcesForRecovery(): void { this.residencyRestore.clear(); discardSceneGpuResourcesForRecovery(this as unknown as SceneRecoveryHost); }\n",
+    "theirs",
+    "              yieldTask(() => { void processChunk(); });\n",
+    "      onMerged: this.snapshots.mergedSink(bucketKey, batchId),\n    }, bucketKey, allocate);\n    if (reserveId) reconcilePreparedBatch(result, this.modelTranslations, modelIndex, offset, yaw);\n    if (!reserveId) this.nextBatchId++;\n"
+  ],
+  "packages/renderer/src/scene-precision.ts": [
+    "ours",
+    "ours",
+    "ours",
+    "ours"
+  ],
+  "packages/renderer/src/scene-batch-upload.ts": [
+    "both",
+    "ours",
+    "ours",
+    "ours",
+    "ours",
+    "ours"
+  ],
+  "Cargo.toml": [
+    "theirs"
+  ],
+  "Cargo.lock": [
+    "theirs"
+  ],
+  "rust/geometry/src/lib.rs": [
+    "both"
+  ],
+  "rust/geometry/src/processors/mod.rs": [
+    "theirs"
+  ],
+  "rust/geometry/src/processors/boolean/mod.rs": [
+    "ours"
+  ],
+  "rust/geometry/src/profiles/curves_2d.rs": [
+    "ours"
+  ],
+  "rust/geometry/src/profiles/mod.rs": [
+    "ours"
+  ],
+  "rust/geometry/src/router/mod.rs": [
+    "theirs",
+    "    length_unit_refused: bool,\n    config: RouterConfig,\n    precision_frame: Option<f64>,\n    source_frame_active: bool,\n    source_boundary_verdict: std::cell::Cell<Option<(u32, crate::OrientVerdict)>>,\n",
+    "theirs"
+  ],
+  "rust/geometry/src/router/construction.rs": [
+    "theirs"
+  ],
+  "rust/geometry/src/router/processing.rs": [
+    "theirs",
+    "theirs"
+  ],
+  "rust/geometry/src/router/rtc_offset.rs": [
+    "theirs",
+    "theirs"
+  ],
+  "rust/geometry/src/router/layers.rs": [
+    "theirs"
+  ],
+  "rust/geometry/src/router/voids/representation.rs": [
+    "theirs"
+  ],
+  "rust/geometry/src/router/voids/geom.rs": [
+    "theirs"
+  ],
+  "rust/geometry/src/router/voids/synthesis.rs": [
+    "theirs"
+  ],
+  "rust/geometry/src/router/voids/mod.rs": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "both"
+  ],
+  "rust/geometry/src/router/voids/prism_cut.rs": [
+    "theirs",
+    "both",
+    "ours",
+    "theirs"
+  ],
+  "rust/geometry/src/router/voids/probe.rs": [
+    "        let processor = if let Some(precision) = self.precision_frame {\n            ProfileProcessor::with_chord_tolerance(self.schema.clone(), precision * 0.25 / self.unit_scale())\n        } else { ProfileProcessor::new(self.schema.clone()) };\n        let [profile] = <[_; 1]>::try_from(processor.process_regions(&profile_entity, decoder, self.tessellation_quality()).ok()?).ok()?;\n"
+  ],
+  "rust/geometry/src/kernel/arrangement/mod.rs": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "rust/geometry/src/kernel/tritri.rs": [
+    "theirs",
+    "theirs"
+  ],
+  "rust/geometry/src/kernel/arrangement/boolean.rs": [
+    "    let arr = super::binary::arrange_components_with_policy(a, comps, policy);\n",
+    "    let result = classify_difference(&arr, a, comps, policy);\n    (!super::super::budget::tripped()).then_some(result)\n",
+    "    difference_all_lenient_with_conformity_and_policy(a, comps, SurfacePolicy::ImportReconciled)\n}\n\npub(crate) fn difference_all_lenient_with_conformity_and_policy(a: &[Tri], comps: &[&[Tri]], policy: SurfacePolicy) -> (Vec<Tri>, bool, bool) {\n    if comps.is_empty() { return (a.to_vec(), false, true); }\n    let arr = super::binary::arrange_components_with_policy(a, comps, policy);\n    let (tris, changed) = classify_difference(&arr, a, comps, policy);\n    (tris, changed, arr.unrecovered == 0 && !super::super::budget::tripped())\n"
+  ],
+  "rust/processing/src/element.rs": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "rust/processing/src/element_degenerate.rs": [
+    "both"
+  ],
+  "rust/processing/src/element_mesh_build.rs": [
+    "ours"
+  ],
+  "rust/geometry/src/kernel/arrangement/classify.rs": [
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "rust/processing/src/data_model/mod.rs": [
+    "    DecodedEntity, EntityDecoder, EntityScanner,\n",
+    "theirs",
+    "                        || extract_properties(&buckets.property_sets, content, &entity_index, cancel),\n                        || extract_quantities(&buckets.quantity_sets, content, &entity_index, cancel),\n",
+    "both",
+    "    let project_ids = ifc_lite_core::find_project_ids(content);\n    let length_unit_scale = unit_decoder.length_unit_scale();\n    let project_units = project_ids.iter().map(|&id| (id, ProjectUnitAssignment::from(\n        ifc_lite_core::project_units::ProjectUnits::resolve(&mut unit_decoder, id)))).collect();\n",
+    "        &project_ids, &relationships, &mut unit_decoder, length_unit_scale, cancel,\n",
+    "                || extract_classifications(&buckets.rel_classifications, content, &entity_index, cancel),\n",
+    "        || extract_documents(&buckets.rel_documents, content, &entity_index, cancel),\n",
+    "    let (materials, refused) = match materials {\n        Ok(rows) => (rows, None),\n        Err(reason) => (Vec::new(), Some(reason)),\n    };\n    cancel.check()?;\n    let mut model = DataModel { project_units, entities, property_sets, quantity_sets, relationships,\n        classifications, materials, documents, refused, spatial_hierarchy: SpatialHierarchyData {\n            nodes: Vec::new(), project_id: 0, element_to_storey: Vec::new(),\n            element_to_building: Vec::new(), element_to_site: Vec::new(), element_to_space: Vec::new(),\n        } };\n    if scope == DataModelEntities::Rooted {\n        // Keep non-rooted relation/material endpoints too. Recover their jobs\n        // from a bounded scan, rather than decoding all non-rooted instances.\n        let mut missing = rooted::referenced_ids_cancellable(&model, cancel);\n        cancel.check()?;\n        for entity in &model.entities { cancel.check()?; missing.remove(&entity.entity_id); }\n        let mut jobs = Vec::new();\n        for id in missing {\n            cancel.check()?;\n            if let Some(&(start, end)) = entity_index.get(&id) {\n                // Scan just this indexed record so unknown schema names and raw\n                // byte offsets remain identical to the full-file scanner.\n                let mut scanner = EntityScanner::new(&content[start..end]);\n                if let Some((_, type_name, _, _)) = scanner.next_entity() {\n                    jobs.push(EntityJob { id, type_name, start, end });\n                }\n            }\n        }\n        model.entities.extend(extract_entity_metadata(&jobs, content, &entity_index, cancel));\n        cancel.check()?;\n        model.entities.sort_by_key(|entity| entity_index.get(&entity.entity_id).map(|range| range.0));\n    }\n    cancel.check()?;\n    // Build spatial hierarchy after resolving all referenced endpoints.\n    let spatial_hierarchy = build_spatial_hierarchy_cancellable(\n        &model.relationships,\n        &model.entities,\n",
+    "ours"
+  ],
+  "rust/processing/src/data_model/classifications.rs": [
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "rust/processing/src/data_model/documents.rs": [
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "rust/processing/src/data_model/metadata.rs": [
+    "theirs"
+  ],
+  "rust/processing/src/data_model/properties.rs": [
+    "theirs",
+    "theirs"
+  ],
+  "rust/processing/src/data_model/quantities.rs": [
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "rust/processing/src/data_model/relationships.rs": [
+    "theirs",
+    "theirs",
+    "theirs"
+  ],
+  "rust/processing/src/data_model/materials.rs": [
+    "    cancel: Cancellation<'_>,\n) -> Result<Vec<MaterialAssociation>, String> {\n",
+    "theirs"
+  ],
+  "rust/processing/src/data_model/material_units.rs": [
+    "use super::cancellation::Cancellation;\nuse super::types::Relationship;\n",
+    "theirs",
+    "        for &project_id in project_ids {\n            if cancel.is_cancelled() { return context; }\n"
+  ],
+  "rust/processing/src/data_model/rooted.rs": [
+    "use super::cancellation::Cancellation;\nuse super::slots::RootSlots;\n"
+  ],
+  "apps/server/src/routes/parse/upload.rs": [
+    "theirs"
+  ],
+  "rust/export/src/parquet_bos_tests.rs": [
+    "theirs"
+  ],
+  "rust/processing/src/element_tests.rs": [
+    "theirs"
+  ]
+}

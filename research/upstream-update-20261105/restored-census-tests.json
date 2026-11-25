@@ -1,0 +1,9 @@
+[
+  "issue_7949_fold_retention_keeps_openings_walls_54549_and_43810_watertight",
+  "issue_7292_rvt_void_cut_hygiene_preserves_exact_closed_boundaries",
+  "issue_8047_rvt26681_supported_thin_patches_preserve_exact_closure",
+  "issue_7631_cap_recovery_does_not_increase_rvt13797_open_edges",
+  "issue_6940_subgrid_coaxial_depths_keep_dental_hosts_closed",
+  "issue_8051_office_thin_patch_retention_preserves_existing_hosts",
+  "issue_8051_office_979333_retains_isolated_cell_baseline"
+]

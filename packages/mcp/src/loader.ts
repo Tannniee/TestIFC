@@ -1,0 +1,122 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * IFC file loader for the MCP server. Wraps `IfcParser.parseColumnar`,
+ * mounts a `HeadlessLikeBackend` on top of the resulting `IfcDataStore`,
+ * and produces a `LoadedModel` ready to drop into the registry.
+ *
+ * The SDK owns the shared headless backend. This adapter supplies MCP's
+ * native geometry preparation and registry/file-loading behavior.
+ */
+
+import { open, realpath } from 'node:fs/promises';
+import { basename, resolve } from 'node:path';
+import { IfcParser, validateStepInput, type IfcDataStore } from '@ifc-lite/parser';
+import { sourceModelIdentity } from '@ifc-lite/cache';
+import { createBimContext, type BimContext } from '@ifc-lite/sdk';
+import type { LoadedModel } from './context.js';
+import { HeadlessLikeBackend } from './headless-backend.js';
+import { rememberLoadedSource } from './loaded-source.js';
+
+export interface LoadIfcOptions {
+  /** Override the registered model ID (default = file basename without extension). */
+  modelId?: string;
+  /** Restrict reads to these absolute path prefixes. Used by the stdio CLI. */
+  allowedPaths?: string[];
+}
+
+/** Load IFC bytes and retain the opened file identity for source-write protection. */
+export async function loadIfcModel(filePath: string, opts: LoadIfcOptions = {}): Promise<LoadedModel> {
+  const absolute = resolve(filePath);
+  if (opts.allowedPaths && opts.allowedPaths.length > 0) {
+    const ok = opts.allowedPaths.some((p) => absolute === p || absolute.startsWith(p + '/'));
+    if (!ok) {
+      throw new Error(`Path '${absolute}' is outside the allowed roots`);
+    }
+  }
+
+  const canonical = await realpath(absolute);
+  const handle = await open(canonical, 'r');
+  let buffer: Buffer;
+  let identity: { path: string; dev: bigint; ino: bigint };
+  try {
+    const info = await handle.stat({ bigint: true });
+    identity = { path: canonical, dev: info.dev, ino: info.ino };
+    buffer = await handle.readFile();
+  } finally {
+    await handle.close();
+  }
+  const loaded = await loadIfcModelFromBytes(buffer, basename(absolute), opts.modelId, absolute);
+  const model = { ...loaded, filePath: absolute };
+  rememberLoadedSource(model, identity);
+  return model;
+}
+
+/**
+ * Parse IFC bytes already in memory (a flow's `model.openFromSource`) into a
+ * `LoadedModel` — the same unwrap, signature check and parser setup as
+ * {@link loadIfcModel}, which reads the file and calls this. `label` names the
+ * source in errors; it defaults to `name`.
+ */
+export async function loadIfcModelFromBytes(bytes: Uint8Array, name: string, modelId?: string, label = name): Promise<LoadedModel> {
+  // Preserve this existing loader's recovery behavior; new parseModel sessions
+  // validate complete envelopes. A partial scan still carries scanWarnings.
+  const buffer = Buffer.from(await validateStepInput(bytes, label, { envelope: 'signature' }));
+
+  const parser = new IfcParser();
+  // The parser writes progress to console.* — silence it during MCP loads
+  // so the JSON-RPC channel on stdout isn't polluted.
+  const origLog = console.log;
+  const origWarn = console.warn;
+  const silent = (): void => undefined;
+  console.log = silent;
+  console.warn = silent;
+  let store: IfcDataStore;
+  // Kept, not silenced with the console: a `scan:` line says the model is
+  // missing records, which the caller has to hear (#7610).
+  const scanWarnings: string[] = [];
+  try {
+    const arrayBuffer = buffer.buffer.slice(
+      buffer.byteOffset,
+      buffer.byteOffset + buffer.byteLength,
+    ) as ArrayBuffer;
+    store = await parser.parseColumnar(arrayBuffer, {
+      onDiagnostic: (m) => { if (m.startsWith('scan: ')) scanWarnings.push(m); },
+    });
+    store.fileSize = buffer.byteLength;
+  } finally {
+    // Restore only what is still ours: a stdio transport that connected
+    // mid-load has re-pointed console.log at stderr, and that must stay.
+    if (console.log === silent) console.log = origLog;
+    if (console.warn === silent) console.warn = origWarn;
+  }
+
+  const id = modelId ?? deriveModelId(name);
+  const backend = new HeadlessLikeBackend(store, name, id);
+  const bim: BimContext = createBimContext({ backend });
+
+  return {
+    id,
+    name,
+    bim,
+    store,
+    backend,
+    // Computed from the POST-unwrap bytes, so an .ifcZIP is fingerprinted by
+    // the STEP it contains — the viewer's rule (#5138).
+    sourceFingerprint: sourceModelIdentity(name, buffer),
+    ...(scanWarnings.length > 0 ? { scanWarnings } : {}),
+    loadedAt: Date.now(),
+  };
+}
+
+export function deriveModelId(name: string): string {
+  // Strip extension, replace spaces with underscores, lowercase. Keeps the
+  // ID URL-safe so it round-trips through `Mcp-Session-Id` headers and
+  // resource URIs.
+  return name
+    .replace(/\.(ifc|ifcxml|ifczip)$/i, '')
+    .replace(/[^a-zA-Z0-9_-]+/g, '_')
+    .toLowerCase() || 'model';
+}

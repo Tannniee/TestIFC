@@ -1,0 +1,11 @@
+{
+  "extends": "F:\\Steel\\VBA\\IFC-Lite-Upgrade20261105\\tsconfig.packages.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./oracle.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

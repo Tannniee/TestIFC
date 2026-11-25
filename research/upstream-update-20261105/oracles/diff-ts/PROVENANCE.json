@@ -1,0 +1,5 @@
+{
+  "sourceCommit": "97d8add207104d5801c0c8d62e40fa7066e848f8",
+  "packageTree": "5eff48e64077f8f3a9bff776f6a92e252b782ab0",
+  "purpose": "Independent pre-facade production TypeScript oracle required by raw WASM tests; production app imports do not use it."
+}

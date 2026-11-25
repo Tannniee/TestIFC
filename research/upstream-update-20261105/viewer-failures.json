@@ -1,0 +1,170 @@
+[
+  {
+    "shard": "viewer-shard-10",
+    "file": "src\\lib\\assistant\\artifacts\\analysis-chart.test.ts",
+    "failures": 4,
+    "error": "Error: apps/viewer/public/samples/building-architecture-rev-b.ifc changed since the native clash result was captured; regenerate tests/ai-eval/native"
+  },
+  {
+    "shard": "viewer-shard-11",
+    "file": "src\\components\\viewer\\assistant\\ArtifactProposalReview.analysis-chart.test.tsx",
+    "failures": 2,
+    "error": "Error: apps/viewer/public/samples/building-architecture-rev-b.ifc changed since the native clash result was captured; regenerate tests/ai-eval/native"
+  },
+  {
+    "shard": "viewer-shard-11",
+    "file": "src\\components\\viewer\\useTouchControls.depthPivot.test.tsx",
+    "failures": 1,
+    "error": "AssertionError [ERR_ASSERTION]: the finger really orbited before the probe landed"
+  },
+  {
+    "shard": "viewer-shard-11",
+    "file": "src\\lib\\assistant\\ai-eval-capture.test.ts",
+    "failures": 3,
+    "error": "Error: apps/viewer/public/samples/building-architecture-rev-b.ifc changed since the native clash result was captured; regenerate tests/ai-eval/native"
+  },
+  {
+    "shard": "viewer-shard-11",
+    "file": "src\\test\\contrast\\panel-text-compare-properties.contrast.test.tsx",
+    "failures": 22,
+    "error": ""
+  },
+  {
+    "shard": "viewer-shard-12",
+    "file": "src\\test\\contrast\\panel-text-tours-misc.contrast.test.tsx",
+    "failures": 42,
+    "error": ""
+  },
+  {
+    "shard": "viewer-shard-13",
+    "file": "src\\components\\viewer\\useAnimationLoop.capture-lifecycle.test.tsx",
+    "failures": 1,
+    "error": "AssertionError [ERR_ASSERTION]: capture preserves visualEnhancement"
+  },
+  {
+    "shard": "viewer-shard-13",
+    "file": "src\\lib\\model-placement\\spatial-index.test.ts",
+    "failures": 1,
+    "error": "AssertionError [ERR_ASSERTION]: a rebuild after the load is not recorded on it"
+  },
+  {
+    "shard": "viewer-shard-13",
+    "file": "src\\test\\contrast\\bulk-action-config.contrast.test.tsx",
+    "failures": 4,
+    "error": "name: 'Error',"
+  },
+  {
+    "shard": "viewer-shard-14",
+    "file": "src\\lib\\commands\\modeling\\authored-kinds.test.ts",
+    "failures": 1,
+    "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:"
+  },
+  {
+    "shard": "viewer-shard-14",
+    "file": "src\\test\\gaussian-startup.test.ts",
+    "failures": 1,
+    "error": "AssertionError [ERR_ASSERTION]: Dependency outside repository: apps\\viewer\\src\\main.tsx -> ./bootstrap"
+  },
+  {
+    "shard": "viewer-shard-15",
+    "file": "src\\components\\viewer\\hierarchy\\treeDataBuilder.cooperative.test.ts",
+    "failures": 3,
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+    "shard": "viewer-shard-15",
+    "file": "src\\components\\viewer\\measureHandlers.distance-click.test.tsx",
+    "failures": 1,
+    "error": "AssertionError [ERR_ASSERTION]: the camera moved"
+  },
+  {
+    "shard": "viewer-shard-15",
+    "file": "src\\lib\\assistant\\adapters\\selection-materials.test.tsx",
+    "failures": 4,
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:"
+  },
+  {
+    "shard": "viewer-shard-15",
+    "file": "src\\test\\contrast\\panel-text-measure.contrast.test.tsx",
+    "failures": 29,
+    "error": ""
+  },
+  {
+    "shard": "viewer-shard-2",
+    "file": "src\\components\\viewer\\useMouseControls.depthPivot.test.tsx",
+    "failures": 3,
+    "error": "AssertionError [ERR_ASSERTION]: BUG: pivot null is not the ground under the cursor {\"x\":439.1113357071783,\"y\":-512.2966294108548,\"z\":0}"
+  },
+  {
+    "shard": "viewer-shard-2",
+    "file": "src\\lib\\assistant\\adapters\\registry.test.ts",
+    "failures": 1,
+    "error": "AssertionError [ERR_ASSERTION]: colorizer must be exactly one of mapped or boundary"
+  },
+  {
+    "shard": "viewer-shard-2",
+    "file": "src\\test\\contrast\\semantic-surface-contrast.test.ts",
+    "failures": 41,
+    "error": "name: 'Error',"
+  },
+  {
+    "shard": "viewer-shard-2",
+    "file": "src\\test\\contrast\\tooltip-secondary-text.test.ts",
+    "failures": 19,
+    "error": "name: 'Error',"
+  },
+  {
+    "shard": "viewer-shard-4",
+    "file": "src\\lib\\assistant\\ai-eval-replay.test.ts",
+    "failures": 16,
+    "error": "Error: apps/viewer/public/samples/building-architecture-rev-b.ifc changed since the native clash result was captured; regenerate tests/ai-eval/native"
+  },
+  {
+    "shard": "viewer-shard-5",
+    "file": "src\\test\\contrast\\document-composed-glyph.contrast.test.tsx",
+    "failures": 12,
+    "error": "name: 'Error',"
+  },
+  {
+    "shard": "viewer-shard-6",
+    "file": "src\\test\\contrast\\panel-text-chat.contrast.test.tsx",
+    "failures": 27,
+    "error": ""
+  },
+  {
+    "shard": "viewer-shard-7",
+    "file": "src\\test\\contrast\\panel-window-host-translucent.test.ts",
+    "failures": 13,
+    "error": "name: 'Error',"
+  },
+  {
+    "shard": "viewer-shard-8",
+    "file": "src\\components\\viewer\\useAnimationLoop.gpuBacklog.test.tsx",
+    "failures": 8,
+    "error": "TypeError [Error]: camera.getViewProjMatrix is not a function"
+  },
+  {
+    "shard": "viewer-shard-8",
+    "file": "src\\lib\\assistant\\ai-eval-expanded.test.ts",
+    "failures": 1,
+    "error": "Error: apps/viewer/public/samples/building-architecture-rev-b.ifc changed since the native clash result was captured; regenerate tests/ai-eval/native"
+  },
+  {
+    "shard": "viewer-shard-8",
+    "file": "src\\test\\native-ifc-graph.test.ts",
+    "failures": 1,
+    "error": "AssertionError [ERR_ASSERTION]: the real SketchUp fixture must contain the native control"
+  },
+  {
+    "shard": "viewer-shard-9",
+    "file": "src\\components\\viewer\\useAnimationLoop.capture.test.tsx",
+    "failures": 3,
+    "error": "AssertionError [ERR_ASSERTION]: settled quality is restored"
+  },
+  {
+    "shard": "viewer-shard-9",
+    "file": "src\\lib\\llm\\request-service.direct-load.test.ts",
+    "failures": 6,
+    "error": "Error: Isolated openai host exited before held: node:internal/modules/esm/load:193"
+  }
+]

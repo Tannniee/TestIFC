@@ -1,0 +1,378 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Restriction & cardinality coherence checks.
+ *
+ * Catches authoring mistakes that aren't strictly XSD violations but
+ * make a specification ill-formed in practice — empty enumerations,
+ * inverted bounds, regex patterns that don't compile, prohibited
+ * cardinality on applicability blocks, etc.
+ */
+
+import type {
+  IDSConstraint,
+  IDSDocument,
+  IDSFacet,
+  IDSSpecification,
+} from '../../types.js';
+import type { IDSAuditIssue } from '../types.js';
+import { isValidLexicalForXsType } from '../../constraints/xsd-lexical.js';
+import { compareOrdered } from '../../constraints/xsd-order.js';
+import { compileXsdRegex } from './regex.js';
+import { auditRequirementCardinality } from './cardinality.js';
+
+export function runCoherenceAudit(doc: IDSDocument): IDSAuditIssue[] {
+  const issues: IDSAuditIssue[] = [];
+  doc.specifications.forEach((spec, i) => {
+    auditSpec(spec, `specifications[${i}]`, issues);
+  });
+  return issues;
+}
+
+function auditSpec(
+  spec: IDSSpecification,
+  path: string,
+  issues: IDSAuditIssue[]
+): void {
+  // minOccurs / maxOccurs sanity. Spec parses them as numbers (or
+  // 'unbounded'); both must be >= 0 and the order must hold.
+  const min = spec.minOccurs;
+  const max = spec.maxOccurs;
+  if (min !== undefined && (!Number.isInteger(min) || min < 0)) {
+    issues.push({
+      severity: 'error',
+      code: 'E_CARDINALITY_INVALID',
+      message: `minOccurs must be a non-negative integer; got ${min}`,
+      path: `${path}.minOccurs`,
+      detail: { value: String(min) },
+    });
+  }
+  if (max !== undefined && max !== 'unbounded') {
+    if (!Number.isInteger(max) || max < 0) {
+      issues.push({
+        severity: 'error',
+        code: 'E_CARDINALITY_INVALID',
+        message: `maxOccurs must be a non-negative integer or "unbounded"; got ${max}`,
+        path: `${path}.maxOccurs`,
+        detail: { value: String(max) },
+      });
+    }
+  }
+  if (
+    typeof min === 'number' &&
+    typeof max === 'number' &&
+    min > max
+  ) {
+    issues.push({
+      severity: 'error',
+      code: 'E_CARDINALITY_INVALID',
+      message: `minOccurs (${min}) is greater than maxOccurs (${max})`,
+      path: `${path}.minOccurs`,
+      detail: { min: min, max: max },
+    });
+  }
+
+  // A prohibited specification (maxOccurs="0") says "no element may be
+  // applicable"; requirements on elements that must not exist are
+  // meaningless, and the IDS corpus treats them as invalid (IDS-008;
+  // ids/invalid-prohibited_specifications_invalid_if_requirements_are_specified).
+  if (max === 0 && spec.requirements.length > 0) {
+    issues.push({
+      severity: 'error',
+      code: 'E_CARDINALITY_INVALID',
+      message: `a prohibited specification (maxOccurs="0") cannot have requirements; it has ${spec.requirements.length}`,
+      path: `${path}.requirements`,
+      detail: { requirements: spec.requirements.length },
+    });
+  }
+
+  // Upstream IDS-Audit-tool flags `cardinality` on `<applicability>` —
+  // it's meaningless there. (Report 202)
+  if (spec.applicability.cardinality) {
+    issues.push({
+      severity: 'warning',
+      code: 'W_CARDINALITY_PROHIBITED_APPLICABILITY',
+      message: `cardinality="${spec.applicability.cardinality}" has no effect on <applicability>`,
+      path: `${path}.applicability.cardinality`,
+    });
+  }
+
+  spec.applicability.facets.forEach((facet, fi) => {
+    auditFacetConstraints(
+      facet,
+      `${path}.applicability.facets[${fi}]`,
+      issues
+    );
+  });
+
+  spec.requirements.forEach((req, ri) => {
+    auditFacetConstraints(req.facet, `${path}.requirements[${ri}]`, issues);
+    auditRequirementCardinality(
+      req,
+      `${path}.requirements[${ri}]`,
+      issues
+    );
+  });
+}
+
+function auditFacetConstraints(
+  facet: IDSFacet,
+  path: string,
+  issues: IDSAuditIssue[]
+): void {
+  switch (facet.type) {
+    case 'entity':
+      check(facet.name, `${path}.name`, issues, facet.type);
+      if (facet.predefinedType) {
+        check(facet.predefinedType, `${path}.predefinedType`, issues, facet.type);
+      }
+      break;
+    case 'attribute':
+      check(facet.name, `${path}.name`, issues, facet.type);
+      if (facet.value) check(facet.value, `${path}.value`, issues, facet.type);
+      break;
+    case 'property':
+      check(facet.propertySet, `${path}.propertySet`, issues, facet.type);
+      check(facet.baseName, `${path}.baseName`, issues, facet.type);
+      if (facet.dataType) check(facet.dataType, `${path}.dataType`, issues, facet.type);
+      if (facet.value) check(facet.value, `${path}.value`, issues, facet.type);
+      break;
+    case 'classification':
+      if (facet.system) check(facet.system, `${path}.system`, issues, facet.type);
+      if (facet.value) check(facet.value, `${path}.value`, issues, facet.type);
+      break;
+    case 'material':
+      if (facet.value) check(facet.value, `${path}.value`, issues, facet.type);
+      break;
+    case 'partOf':
+      if (facet.entity) {
+        auditFacetConstraints(facet.entity, `${path}.entity`, issues);
+      }
+      break;
+  }
+}
+
+function check(
+  c: IDSConstraint,
+  path: string,
+  issues: IDSAuditIssue[],
+  facetType: IDSFacet['type']
+): void {
+  switch (c.type) {
+    case 'enumeration':
+      if (c.values.length === 0) {
+        issues.push({
+          severity: 'error',
+          code: 'E_RESTRICTION_EMPTY',
+          message: 'xs:enumeration must have at least one value',
+          path,
+          facetType,
+        });
+      } else if (c.values.some((v) => v === '' || v == null)) {
+        issues.push({
+          severity: 'warning',
+          code: 'E_RESTRICTION_EMPTY',
+          message: 'xs:enumeration has an empty entry',
+          path,
+          facetType,
+        });
+      }
+      // When the restriction base is a typed primitive
+      // (`xs:double`/`xs:integer`/`xs:boolean`/…), every enumeration
+      // value must match the base's lexical space — upstream's
+      // `Report 305 BadConstraintValue`. Otherwise an `xs:double`
+      // restriction can carry strings like `"12,0"` or `"a"` that
+      // would never compare equal to a real numeric value.
+      if (c.base) {
+        for (const v of c.values) {
+          if (v == null || v === '') continue;
+          if (!isValidLexicalForXsType(v, c.base)) {
+            issues.push({
+              severity: 'error',
+              code: 'E_RESTRICTION_VALUE_MISMATCH',
+              message: `xs:enumeration value "${v}" is not valid for xs:restriction @base="${c.base}"`,
+              path,
+              facetType,
+              detail: { value: v, base: c.base },
+            });
+          }
+        }
+      }
+      break;
+    case 'bounds':
+      checkBounds(c, path, issues, facetType);
+      break;
+    case 'pattern':
+      checkPattern(c.pattern, path, issues, facetType);
+      break;
+    case 'simpleValue':
+      // No coherence check beyond the XSD's required-non-empty check,
+      // which we already do in the XSD audit.
+      break;
+  }
+  // XSD facets in one restriction are conjunctive (IDS-010): a malformed
+  // regex or an inverted bound in a sibling family is as fatal as in the
+  // primary one, so each sibling gets the same checks.
+  if (c.type !== 'simpleValue') {
+    c.and?.forEach((sibling, i) => check(sibling, `${path}.and[${i}]`, issues, facetType));
+  }
+}
+
+function checkBounds(
+  c: Extract<IDSConstraint, { type: 'bounds' }>,
+  path: string,
+  issues: IDSAuditIssue[],
+  facetType: IDSFacet['type']
+): void {
+  const lo = c.minInclusive ?? c.minExclusive;
+  const hi = c.maxInclusive ?? c.maxExclusive;
+  if (
+    typeof lo === 'number' &&
+    typeof hi === 'number' &&
+    lo > hi
+  ) {
+    issues.push({
+      severity: 'error',
+      code: 'E_RESTRICTION_RANGE',
+      message: `xs:restriction bounds inverted: lower (${lo}) > upper (${hi})`,
+      path,
+      facetType,
+      detail: { min: lo, max: hi },
+    });
+  }
+  // Date, time and duration bounds order in their base's own value space
+  // (#7399); an unordered pair (`P1Y` vs `P365D`) is not reported.
+  const t = c.temporalBounds;
+  const tLo = t?.minInclusive ?? t?.minExclusive;
+  const tHi = t?.maxInclusive ?? t?.maxExclusive;
+  if (tLo !== undefined && tHi !== undefined && compareOrdered(tLo, tHi, c.base) === 1) {
+    issues.push({
+      severity: 'error',
+      code: 'E_RESTRICTION_RANGE',
+      message: `xs:restriction bounds inverted: lower (${tLo}) > upper (${tHi})`,
+      path,
+      facetType,
+      detail: { min: tLo, max: tHi },
+    });
+  }
+  if (
+    typeof c.minLength === 'number' &&
+    typeof c.maxLength === 'number' &&
+    c.minLength > c.maxLength
+  ) {
+    issues.push({
+      severity: 'error',
+      code: 'E_RESTRICTION_RANGE',
+      message: `xs:restriction lengths inverted: minLength (${c.minLength}) > maxLength (${c.maxLength})`,
+      path,
+      facetType,
+      detail: { min: c.minLength, max: c.maxLength },
+    });
+  }
+  if (
+    typeof c.length === 'number' &&
+    (typeof c.minLength === 'number' || typeof c.maxLength === 'number')
+  ) {
+    issues.push({
+      severity: 'warning',
+      code: 'E_RESTRICTION_RANGE',
+      message: 'xs:length is mutually exclusive with xs:minLength/xs:maxLength',
+      path,
+      facetType,
+    });
+  }
+  if (c.unparseableFacets !== undefined && c.unparseableFacets.length > 0) {
+    for (const f of c.unparseableFacets) {
+      issues.push({
+        severity: 'error',
+        code: 'E_RESTRICTION_FACET_UNPARSEABLE',
+        message: `xs:${f.facet} @value="${f.rawValue}" ${unparseableReason(f.facet, c.base)} — this facet is dropped and, until fixed, the whole restriction rejects every value (it does not fall back to unbounded)`,
+        path,
+        facetType,
+        detail: { facet: f.facet, rawValue: f.rawValue },
+      });
+    }
+  }
+  // A facet that failed to parse already produced the more precise
+  // `E_RESTRICTION_FACET_UNPARSEABLE` above; don't also report the
+  // constraint as merely "empty" (misleading — something WAS
+  // authored, it just didn't parse).
+  const empty =
+    (c.unparseableFacets === undefined || c.unparseableFacets.length === 0) &&
+    c.minInclusive === undefined &&
+    c.minExclusive === undefined &&
+    c.maxInclusive === undefined &&
+    c.maxExclusive === undefined &&
+    c.temporalBounds === undefined &&
+    c.length === undefined &&
+    c.minLength === undefined &&
+    c.maxLength === undefined &&
+    c.totalDigits === undefined &&
+    c.fractionDigits === undefined;
+  if (empty) {
+    issues.push({
+      severity: 'error',
+      code: 'E_RESTRICTION_EMPTY',
+      message: 'xs:restriction has no min/max bounds, length or digit facets',
+      path,
+      facetType,
+    });
+  }
+}
+
+/**
+ * Why a facet's `@value` was not read: a min/max bound must be in the
+ * lexical space of the restriction's `@base` (#7399), a length or digit
+ * count is a non-negative integer.
+ */
+function unparseableReason(facet: string, base: string | undefined): string {
+  if (!/^(min|max)(In|Ex)clusive$/.test(facet)) return 'is not a non-negative integer';
+  return base
+    ? `is not a valid value for xs:restriction @base="${base}"`
+    : 'could not be parsed as a number';
+}
+
+/**
+ * Validate `pattern` against XSD regex semantics by translating XSD-only
+ * escape codes to JS regex equivalents (cf. upstream `XmlRegex.cs`).
+ *
+ * Translation follows XML Schema Part 2 Appendix F (multi-char and block
+ * escapes, char-class subtraction, literal `^` / `$`; see
+ * `constraints/xsd-regex.ts`). A construct with no exact translation, which
+ * validation refuses, surfaces as `W_REGEX_UNVERIFIED`. Any remaining syntactic errors are real
+ * authoring mistakes and surface as `E_RESTRICTION_EMPTY` (upstream
+ * Report 109).
+ */
+function checkPattern(
+  pattern: string,
+  path: string,
+  issues: IDSAuditIssue[],
+  facetType: IDSFacet['type']
+): void {
+  const result = compileXsdRegex(pattern);
+  if (result.ok) return;
+  if (result.severity === 'error') {
+    issues.push({
+      severity: 'error',
+      code: pattern === '' ? 'E_RESTRICTION_EMPTY' : 'E_RESTRICTION_EMPTY',
+      message:
+        pattern === ''
+          ? 'xs:pattern @value is empty'
+          : `xs:pattern is not a valid regular expression: ${result.reason}`,
+      path,
+      facetType,
+      detail: pattern === '' ? undefined : { pattern },
+    });
+    return;
+  }
+  issues.push({
+    severity: 'warning',
+    code: 'W_REGEX_UNVERIFIED',
+    message: `xs:pattern cannot be evaluated exactly, so validation will refuse it: ${result.reason}`,
+    path,
+    facetType,
+    detail: { pattern },
+  });
+}

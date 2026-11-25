@@ -1,0 +1,478 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! Canonical prepass resolution — the single post-scan step that turns the
+//! entity spans a scan collected into the style / material / void context the
+//! per-element producer ([`crate::element`]) consumes.
+//!
+//! Both pipelines run this exact code:
+//! - the native orchestrator (`processor/`) span-stashes during its scan and
+//!   resolves here before the rayon loop;
+//! - the browser prepasses (`buildPrePassOnce` / `buildPrePassStreaming` in
+//!   `wasm-bindings`) span-stash during their scans and resolve here before
+//!   serialising the flat wire arrays.
+//!
+//! Native and browser serial/once scans share `discovery::Discovery` and
+//! `scan::ScanClass`; streaming class columns retain their accepted adapter.
+//! Metadata decoration and incremental emission remain scheduler-owned.
+//! Styled-item precedence, indexed colours, material chains, aggregate voids
+//! and unit scales resolve here once, avoiding the historic #858/#913 drift.
+
+use crate::scan::ScanClass;
+use crate::style::{FullIndexedColourMap, GeometryStyleInfo, SpecularMaterial};
+use ifc_lite_core::{DecodedEntity, EntityDecoder};
+use rustc_hash::FxHashMap;
+
+/// One stashed entity span: `(express_id, start, end)`.
+pub type Span = (u32, usize, usize);
+
+/// Entity spans a scan collected for post-scan resolution (no mid-scan decode).
+#[derive(Debug, Default, Clone)]
+pub struct PrepassSpans {
+    /// `IFCSTYLEDITEM` — geometry-attached AND orphan (material appearance);
+    /// the resolver classifies them (decoding is the cost of telling them apart).
+    pub styled_items: Vec<Span>,
+    /// `IFCINDEXEDCOLOURMAP` (#663/#858 — CATIA/3DEXPERIENCE per-triangle palettes).
+    pub indexed_colour_maps: Vec<Span>,
+    /// `IFCMATERIALDEFINITIONREPRESENTATION` (#407 material chain).
+    pub material_def_reprs: Vec<Span>,
+    /// `IFCRELASSOCIATESMATERIAL` (#407 material chain).
+    pub rel_associates_material: Vec<Span>,
+    /// `IFCRELVOIDSELEMENT` — host → opening.
+    pub void_rels: Vec<Span>,
+    /// `IFCRELFILLSELEMENT` — opening → filling (window/door); drives the
+    /// native opening filter. Cheap to collect everywhere.
+    pub fills_rels: Vec<Span>,
+    /// `IFCRELAGGREGATES` — parent → children, for aggregate void
+    /// propagation (#845, IfcWallElementedCase etc.).
+    pub aggregate_rels: Vec<Span>,
+    pub defines_by_type: Vec<Span>, // IFCRELDEFINESBYTYPE, for prepass_type_material.
+}
+
+impl PrepassSpans {
+    /// Stash `(id, start, end)` under the list `type_name` belongs to, and say
+    /// whether it belonged to one at all.
+    ///
+    /// `type_name` is the raw keyword from `EntityScanner::next_entity`, in
+    /// whatever case the file wrote it, so the dispatch goes through
+    /// [`ScanClass::classify`]. Every scan loop that only needs the span lists
+    /// calls this instead of spelling the same keyword table again; the native
+    /// scan classifies once for its other arms too and calls
+    /// [`Self::stash_class`].
+    pub fn stash(&mut self, type_name: &str, id: u32, start: usize, end: usize) -> bool {
+        self.stash_class(ScanClass::classify(type_name), id, start, end)
+    }
+
+    /// [`Self::stash`] for a scan that has already classified the keyword.
+    pub fn stash_class(&mut self, class: ScanClass, id: u32, start: usize, end: usize) -> bool {
+        let list = match class {
+            ScanClass::StyledItem => &mut self.styled_items,
+            ScanClass::IndexedColourMap => &mut self.indexed_colour_maps,
+            ScanClass::MaterialDefinitionRepresentation => &mut self.material_def_reprs,
+            ScanClass::RelAssociatesMaterial => &mut self.rel_associates_material,
+            ScanClass::RelVoidsElement => &mut self.void_rels,
+            ScanClass::RelFillsElement => &mut self.fills_rels,
+            ScanClass::RelAggregates => &mut self.aggregate_rels,
+            ScanClass::RelDefinesByType => &mut self.defines_by_type,
+            _ => return false,
+        };
+        list.push((id, start, end));
+        true
+    }
+}
+
+/// Resolution switches (both pipelines share the resolver).
+#[derive(Debug, Clone, Copy)]
+pub struct ResolveOptions {
+    /// Collect the FULL per-triangle palette maps (#858). The native pipeline
+    /// consumes them in-process; the browser prepass leaves this off (each
+    /// process worker rebuilds its own copy — shipping full palettes over the
+    /// JS boundary would dwarf the styles arrays).
+    pub collect_indexed_colour_full: bool,
+    /// Defer geometry-attached styled items: classify and resolve ORPHAN
+    /// styled items now (#913 §2c — the material chain needs them up front),
+    /// but return attached spans unresolved on
+    /// [`ResolvedPrepass::deferred_attached_styled_spans`] for a later
+    /// [`resolve_styled_item_spans`] replay. Native `fast_first_batch` mode.
+    pub defer_attached_styles: bool,
+}
+
+impl Default for ResolveOptions {
+    fn default() -> Self {
+        Self {
+            collect_indexed_colour_full: true,
+            defer_attached_styles: false,
+        }
+    }
+}
+
+/// Everything the post-scan resolution produces.
+#[derive(Debug, Default)]
+pub struct ResolvedPrepass {
+    /// Geometry item id → resolved style (styled items first in file order,
+    /// then IfcIndexedColourMap dominant colours fill the gaps — styled items
+    /// win, #913 precedence).
+    pub geometry_style_index: FxHashMap<u32, GeometryStyleInfo>,
+    /// Geometry item id → dominant palette colour (#858).
+    pub indexed_colour_index: FxHashMap<u32, [f32; 4]>,
+    /// Geometry item id → full per-triangle palette (#858); empty unless
+    /// [`ResolveOptions::collect_indexed_colour_full`].
+    pub indexed_colour_full: FxHashMap<u32, FullIndexedColourMap>,
+    /// Orphan `IfcStyledItem` colours (material appearances, #407).
+    pub orphan_styled_items: FxHashMap<u32, [f32; 4]>,
+    /// Material id → styled representation ids (#407).
+    pub material_def_reprs: FxHashMap<u32, Vec<u32>>,
+    /// Element id → material(-select) id (#407).
+    pub element_to_material: FxHashMap<u32, u32>,
+    /// Element id → material colour list (#407/#913 §2.3 transparent/opaque
+    /// alternation for window/door parts). The canonical join.
+    pub element_material_colors: FxHashMap<u32, Vec<[f32; 4]>>,
+    /// Host element id → opening ids, AFTER aggregate propagation (#845).
+    pub void_index: FxHashMap<u32, Vec<u32>>,
+    /// Opening id → filling element id (native opening filter input).
+    pub filling_by_opening: FxHashMap<u32, u32>,
+    /// Geometry-attached styled spans left unresolved under
+    /// [`ResolveOptions::defer_attached_styles`]; replay via [`resolve_styled_item_spans`].
+    pub deferred_attached_styled_spans: Vec<(usize, usize)>,
+}
+
+pub use crate::prepass_styled::{resolve_geometry_finishes, resolve_styled_items_into, StyleSeeds};
+
+/// THE canonical post-scan resolution (file-order, first-wins precedence).
+pub fn resolve_prepass(
+    spans: &PrepassSpans,
+    decoder: &mut EntityDecoder,
+    opts: ResolveOptions,
+) -> ResolvedPrepass {
+    resolve_prepass_with_style_seeds(spans, decoder, opts, None)
+}
+
+/// [`resolve_prepass`] with PRE-RESOLVED styled maps (sharded pre-pass). Seeds
+/// MUST install before the material/void loops: the material chain consults
+/// `orphan_styled_items` — injecting after loses material-dependent styles.
+pub fn resolve_prepass_with_style_seeds(
+    spans: &PrepassSpans,
+    decoder: &mut EntityDecoder,
+    opts: ResolveOptions,
+    style_seeds: Option<StyleSeeds>,
+) -> ResolvedPrepass {
+    let mut out = ResolvedPrepass::default();
+
+    if let Some((orphan, geom)) = style_seeds {
+        out.orphan_styled_items = orphan;
+        out.geometry_style_index = geom;
+    }
+    // ── Styled items: orphan (material appearance) vs geometry-attached ──
+    resolve_styled_items_into(
+        &spans.styled_items,
+        decoder,
+        opts.defer_attached_styles,
+        &mut out.orphan_styled_items,
+        &mut out.geometry_style_index,
+        &mut out.deferred_attached_styled_spans,
+    );
+
+    // ── IfcIndexedColourMap (#663/#858) ──
+    for &(id, start, end) in &spans.indexed_colour_maps {
+        let Ok(icm) = decoder.decode_at_with_id(id, start, end) else {
+            continue;
+        };
+        let Some(full) = crate::style::resolve_indexed_colour_map_full(&icm, decoder) else {
+            continue;
+        };
+        let geometry_id = full.geometry_id;
+        out.indexed_colour_index
+            .entry(geometry_id)
+            .or_insert(full.dominant().to_array());
+        if opts.collect_indexed_colour_full {
+            out.indexed_colour_full.entry(geometry_id).or_insert(full);
+        }
+    }
+
+    // ── Material chain inputs (#407) ──
+    for &(id, start, end) in &spans.material_def_reprs {
+        if let Ok(entity) = decoder.decode_at_with_id(id, start, end) {
+            // RepresentedMaterial (attr 3) → Representations (attr 2).
+            if let Some(material_id) = entity.get_ref(3) {
+                if let Some(reprs) = entity.get_refs(2) {
+                    out.material_def_reprs
+                        .entry(material_id)
+                        .or_default()
+                        .extend(reprs);
+                }
+            }
+        }
+    }
+    for &(id, start, end) in &spans.rel_associates_material {
+        if let Ok(entity) = decoder.decode_at_with_id(id, start, end) {
+            // RelatingMaterial (attr 5) ← RelatedObjects (attr 4).
+            if let Some(material_select_id) = entity.get_ref(5) {
+                if let Some(related) = entity.get_refs(4) {
+                    for element_id in related {
+                        out.element_to_material.insert(element_id, material_select_id);
+                    }
+                }
+            }
+        }
+    }
+
+    crate::prepass_type_material::propagate_type_material(&spans.defines_by_type, decoder, &mut out.element_to_material);
+    // ── Fills + voids with aggregate propagation (#845) ──
+    for &(id, start, end) in &spans.fills_rels {
+        if let Ok(entity) = decoder.decode_at_with_id(id, start, end) {
+            // attr 4 = RelatingOpeningElement, attr 5 = RelatedBuildingElement.
+            if let (Some(opening_id), Some(filling_id)) = (entity.get_ref(4), entity.get_ref(5)) {
+                out.filling_by_opening.insert(opening_id, filling_id);
+            }
+        }
+    }
+    // Shared geometry kernel: void fold, bare-tolerant aggregate fold and
+    // canonical opening order (#2019) live in one place.
+    out.void_index =
+        ifc_lite_geometry::resolve_void_index(&spans.void_rels, &spans.aggregate_rels, decoder);
+
+    // ── Material chain join (#407): element id → colour list ──
+    out.element_material_colors = crate::style::build_element_material_colors(
+        &out.material_def_reprs,
+        &out.orphan_styled_items,
+        &out.element_to_material,
+        decoder,
+    );
+
+    out
+}
+
+/// Resolve geometry-attached styled-item spans into a style index — the
+/// defer-mode replay (`fast_first_batch`), and the building block
+/// [`resolve_prepass`] uses internally.
+pub fn resolve_styled_item_spans(
+    spans: &[(usize, usize)],
+    decoder: &mut EntityDecoder,
+) -> FxHashMap<u32, GeometryStyleInfo> {
+    let mut styles: FxHashMap<u32, GeometryStyleInfo> = FxHashMap::default();
+    for &(start, end) in spans {
+        if let Ok(styled_item) = decoder.decode_at(start, end) {
+            if styled_item.get_ref(0).is_some() {
+                collect_geometry_style_info(&mut styles, &styled_item, decoder);
+            }
+        }
+    }
+    styles
+}
+
+/// Fold `IfcIndexedColourMap` dominant colours into the style index, keyed by
+/// target geometry id. `or_insert` preserves IFCSTYLEDITEM precedence: a
+/// geometry that already has a direct style keeps it; the indexed colour only
+/// fills the gaps (#913).
+pub fn merge_indexed_colours(
+    geometry_styles: &mut FxHashMap<u32, GeometryStyleInfo>,
+    indexed_colours: &FxHashMap<u32, [f32; 4]>,
+) {
+    for (&geometry_id, &color) in indexed_colours {
+        geometry_styles
+            .entry(geometry_id)
+            .or_insert_with(|| GeometryStyleInfo::from_color(color));
+    }
+}
+
+/// The file's unit scales, resolved exactly once per parse. The type and its
+/// resolution ladder live in `ifc-lite-core` ([`ifc_lite_core::UnitScales`],
+/// F3a #7775); this is its historic path.
+pub use ifc_lite_core::UnitScales;
+
+/// Resolve BOTH unit scales once against the decoder's (possibly partial)
+/// entity index; see [`UnitScales::resolve`] for the fallback ladder. Kept as
+/// the processing-side entry point every pipeline calls.
+pub fn resolve_unit_scales(
+    content: &[u8],
+    project_id_hint: Option<u32>,
+    decoder: &mut EntityDecoder,
+) -> UnitScales {
+    UnitScales::resolve(content, project_id_hint, decoder)
+}
+
+/// The model's `IFCPROJECT` express id (the first in file order), found by
+/// SIMD substring search with no entity scan. The one locator lives in
+/// `ifc-lite-core` ([`ifc_lite_core::find_project_id`]); this is its historic
+/// path.
+pub use ifc_lite_core::find_project_id as find_ifcproject_id;
+
+pub use crate::prepass_wire::{
+    flat_material_colors, flat_voids, material_colors_from_flat, style_colors_from_flat,
+    voids_from_flat,
+};
+
+/// Flat wire encodings of the resolved styles for the browser's
+/// `styleIds`/`styleColors` arrays: the rich style index flattened to
+/// `(ids, rgba8)`, with IfcIndexedColourMap dominants, flat material colours,
+/// and each element's material fallback colour
+/// ([`crate::style::element_material_fallback_color`], the native rule)
+/// filling the gaps — the layered precedence the browser prepasses ship.
+/// Inverse: [`style_colors_from_flat`].
+pub fn flat_styles_rgba8(resolved: &ResolvedPrepass, decoder: &mut EntityDecoder) -> (Vec<u32>, Vec<u8>) {
+    let mut merged: FxHashMap<u32, [f32; 4]> = resolved
+        .geometry_style_index
+        .iter()
+        .map(|(&id, info)| (id, info.color))
+        .collect();
+    for (&geometry_id, &color) in &resolved.indexed_colour_index {
+        merged.entry(geometry_id).or_insert(color);
+    }
+    // Flat material_id → colour, then element id → its material fallback
+    // colour, so `processGeometryBatch`'s per-element fallback picks up the
+    // colour the native pipeline uses (PROCESSING-4, #7691).
+    let material_styles = crate::style::build_material_style_index(
+        &resolved.material_def_reprs,
+        &resolved.orphan_styled_items,
+        decoder,
+    );
+    for (&mat_id, &color) in crate::style::flatten_material_color_index(&material_styles).iter() {
+        merged.entry(mat_id).or_insert(color);
+    }
+    for (&element_id, colors) in &resolved.element_material_colors {
+        if let Some(color) = crate::style::element_material_fallback_color(colors) {
+            merged.entry(element_id).or_insert(color);
+        }
+    }
+
+    // Emit id-ascending: hashmap iteration order is an implementation detail,
+    // and these arrays are wire output. Consumers rebuild a map (see the sort
+    // rationale on `flat_voids`), so the order is free to pin.
+    let mut entries: Vec<(u32, [f32; 4])> = merged.into_iter().collect();
+    entries.sort_unstable_by_key(|&(id, _)| id);
+    let mut ids: Vec<u32> = Vec::with_capacity(entries.len());
+    let mut rgba: Vec<u8> = Vec::with_capacity(entries.len() * 4);
+    for (id, color) in entries {
+        ids.push(id);
+        rgba.extend_from_slice(&crate::style::Rgba::from_array(color).to_rgba8());
+    }
+    (ids, rgba)
+}
+
+/// [`flat_styles_rgba8`] plus the parallel `styleFinishes` wire (#5582): two
+/// `f32` per style id, `[metallic, roughness]`, in the SAME order as `ids`,
+/// `f32::NAN` for an unauthored field. The id order is decided once, by the
+/// rgba8 flatten; the finishes are a per-id lookup over it into
+/// `geometry_finishes` ([`crate::prepass_styled::resolve_geometry_finishes`]
+/// over the same styled items). A geometry style always wins its id in that
+/// flatten, so only geometry-style entries can carry a finish; the
+/// indexed-colour, material and element-colour fallbacks are colour-only and
+/// get `[NAN, NAN]`.
+pub fn flat_styles_with_finishes(
+    resolved: &ResolvedPrepass,
+    geometry_finishes: &FxHashMap<u32, SpecularMaterial>,
+    decoder: &mut EntityDecoder,
+) -> (Vec<u32>, Vec<u8>, Vec<f32>) {
+    let (ids, rgba) = flat_styles_rgba8(resolved, decoder);
+    let finishes = style_finishes_for_ids(&ids, |id| geometry_finishes.get(&id).copied());
+    (ids, rgba, finishes)
+}
+
+/// The `styleFinishes` wire for an already-ordered id list: `finish_of(id)`'s
+/// [`finish_to_wire`] pair per id, in `ids` order. Shared by the serial
+/// flatten and the sharded finalize so both encode identically.
+pub fn style_finishes_for_ids(
+    ids: &[u32],
+    mut finish_of: impl FnMut(u32) -> Option<SpecularMaterial>,
+) -> Vec<f32> {
+    let mut out = Vec::with_capacity(ids.len() * 2);
+    for &id in ids {
+        out.extend_from_slice(&finish_to_wire(finish_of(id)));
+    }
+    out
+}
+
+/// One style's `[metallic, roughness]` wire pair; `f32::NAN` marks a field the
+/// file did not author. Inverse: [`finish_from_wire`].
+pub fn finish_to_wire(finish: Option<SpecularMaterial>) -> [f32; 2] {
+    let f = finish.unwrap_or_default();
+    [f.metallic.unwrap_or(f32::NAN), f.roughness.unwrap_or(f32::NAN)]
+}
+
+/// Decode one `[metallic, roughness]` wire pair. A non-finite field is
+/// unauthored; a pair with neither field authored is no finish at all.
+pub fn finish_from_wire(pair: [f32; 2]) -> Option<SpecularMaterial> {
+    let field = |v: f32| v.is_finite().then_some(v);
+    let (metallic, roughness) = (field(pair[0]), field(pair[1]));
+    (metallic.is_some() || roughness.is_some()).then_some(SpecularMaterial { metallic, roughness })
+}
+
+// ── Styled-item resolution chain (moved from processor.rs — shared) ──
+
+/// Resolve a geometry-attached `IfcStyledItem` into the style index with
+/// first-wins precedence per geometry id (file order = authored intent).
+pub(crate) fn collect_geometry_style_info(
+    geometry_styles: &mut FxHashMap<u32, GeometryStyleInfo>,
+    styled_item: &DecodedEntity,
+    decoder: &mut EntityDecoder,
+) {
+    let Some(geometry_id) = styled_item.get_ref(0) else {
+        return;
+    };
+    if geometry_styles.contains_key(&geometry_id) {
+        return;
+    }
+    if let Some(style_info) = extract_style_info_from_styled_item(styled_item, decoder) {
+        geometry_styles.insert(geometry_id, style_info);
+    }
+}
+
+/// Extract colour + name from an `IfcStyledItem` by traversing its style
+/// references (directly or through `IfcPresentationStyleAssignment`).
+pub(crate) fn extract_style_info_from_styled_item(
+    styled_item: &DecodedEntity,
+    decoder: &mut EntityDecoder,
+) -> Option<GeometryStyleInfo> {
+    surface_style_from_styled_item(styled_item, decoder).map(|(_, info)| info)
+        .or_else(|| crate::style::fill::fill_style_from_styled_item(styled_item, decoder))
+}
+
+/// Canonical first valid rendering style, also used when authoring clones its
+/// non-albedo properties instead of discarding them (#4260).
+pub(crate) fn surface_style_from_styled_item(
+    styled_item: &DecodedEntity,
+    decoder: &mut EntityDecoder,
+) -> Option<(u32, GeometryStyleInfo)> {
+    for style_id in styled_item.get_refs(1)? {
+        if let Ok(style) = decoder.decode_by_id(style_id) {
+            if let Some(inner_refs) = style.get_refs(0) {
+                for inner_id in inner_refs {
+                    if let Some(info) = extract_surface_style_info(inner_id, decoder) { return Some((inner_id, info)); }
+                }
+            }
+            if let Some(info) = extract_surface_style_info(style_id, decoder) { return Some((style_id, info)); }
+        }
+    }
+    None
+}
+
+/// Extract colour + style name from an `IfcSurfaceStyle`. Colour resolution is
+/// the canonical [`crate::style::extract_surface_style_colors`], shared with
+/// the browser pre-pass so the server and viewer can't disagree on
+/// `SurfaceColour` vs `DiffuseColour` precedence (#997).
+fn extract_surface_style_info(
+    style_id: u32,
+    decoder: &mut EntityDecoder,
+) -> Option<GeometryStyleInfo> {
+    let style = decoder.decode_by_id(style_id).ok()?;
+    let material_name = normalize_style_name(style.get_string(0));
+    let (color, shading_color) = crate::style::extract_surface_style_colors(style_id, decoder)?;
+    Some(GeometryStyleInfo {
+        color,
+        shading_color,
+        material_name,
+    })
+}
+
+fn normalize_style_name(raw: Option<&str>) -> Option<String> {
+    let name = ifc_lite_core::optional_text(raw)?;
+    if name.eq_ignore_ascii_case("<unnamed>") || name.eq_ignore_ascii_case("unnamed") {
+        return None;
+    }
+    Some(name.to_string())
+}
+
+#[cfg(test)]
+#[path = "prepass_tests.rs"]
+mod tests;

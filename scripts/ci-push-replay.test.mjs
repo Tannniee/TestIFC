@@ -1,0 +1,282 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { delimiter, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { TREE_ARTIFACT_PREFIX, decidePushReplay } from './ci-push-replay.mjs';
+
+const h = (c) => c.repeat(40);
+const PUSH = h('a');
+const TREE = h('b');
+const BEFORE = h('c');
+const HEAD = h('d');
+
+function base(over = {}) {
+  return {
+    pushSha: PUSH,
+    pushTree: TREE,
+    parentSha: BEFORE,
+    before: BEFORE,
+    changedFiles: ['apps/viewer/src/x.ts'],
+    pulls: [{ number: 7, merged_at: '2026-10-14T10:00:00Z', merge_commit_sha: PUSH, base: { ref: 'main' }, head: { sha: HEAD } }],
+    runs: [
+      { id: 1, head_sha: HEAD, event: 'pull_request', status: 'completed', conclusion: 'success', path: '.github/workflows/test.yml', created_at: '2026-10-14T09:00:00Z' },
+    ],
+    artifactNamesByRun: { 1: [`${TREE_ARTIFACT_PREFIX}${TREE}`, 'build-output'] },
+    ...over,
+  };
+}
+
+test('replays when a green run of the merged head tested exactly this tree', () => {
+  assert.deepEqual(decidePushReplay(base()), { replay: true, runId: 1, pr: 7 });
+});
+
+test('main moved: the green run tested a different tree, so the push runs in full', () => {
+  const d = decidePushReplay(base({ artifactNamesByRun: { 1: [`${TREE_ARTIFACT_PREFIX}${h('e')}`] } }));
+  assert.equal(d.replay, false);
+  assert.match(d.reason, /tested tree/);
+});
+
+test('a run that recorded no tree (or a no-op replay run) is never evidence', () => {
+  assert.equal(decidePushReplay(base({ artifactNamesByRun: { 1: ['build-output'] } })).replay, false);
+  assert.equal(decidePushReplay(base({ artifactNamesByRun: {} })).replay, false);
+});
+
+test('an admin merge over a red, cancelled or pending head runs in full', () => {
+  for (const conclusion of ['failure', 'cancelled', null]) {
+    const runs = [{ ...base().runs[0], conclusion, status: conclusion ? 'completed' : 'in_progress' }];
+    assert.equal(decidePushReplay(base({ runs })).replay, false, String(conclusion));
+  }
+});
+
+test('a green run of an EARLIER head of the PR does not count', () => {
+  const runs = [{ ...base().runs[0], head_sha: h('f') }];
+  assert.equal(decidePushReplay(base({ runs })).replay, false);
+});
+
+test('only pull_request runs of the Test workflow count', () => {
+  assert.equal(decidePushReplay(base({ runs: [{ ...base().runs[0], event: 'push' }] })).replay, false);
+  assert.equal(decidePushReplay(base({ runs: [{ ...base().runs[0], path: '.github/workflows/benchmark.yml' }] })).replay, false);
+});
+
+test('a multi-commit push, or one not on the previous tip, runs in full', () => {
+  assert.equal(decidePushReplay(base({ parentSha: h('9') })).replay, false);
+  assert.equal(decidePushReplay(base({ before: '0'.repeat(39) })).replay, false);
+});
+
+test('the commit must come from exactly one PR merged into main', () => {
+  assert.equal(decidePushReplay(base({ pulls: [] })).replay, false);
+  assert.equal(decidePushReplay(base({ pulls: [{ ...base().pulls[0], merged_at: null }] })).replay, false);
+  assert.equal(decidePushReplay(base({ pulls: [{ ...base().pulls[0], base: { ref: 'release' } }] })).replay, false);
+  assert.equal(decidePushReplay(base({ pulls: [{ ...base().pulls[0], merge_commit_sha: h('1') }] })).replay, false);
+  const two = [base().pulls[0], { ...base().pulls[0], number: 8 }];
+  assert.equal(decidePushReplay(base({ pulls: two })).replay, false);
+});
+
+test('changes that key main-only caches always get a full run', () => {
+  for (const f of ['Cargo.lock', 'Cargo.toml', 'rust/core/Cargo.toml', 'rust-toolchain.toml', '.github/workflows/test.yml', '.github/actions/setup-wasm-build/action.yml']) {
+    const d = decidePushReplay(base({ changedFiles: ['README.md', f] }));
+    assert.equal(d.replay, false, f);
+    assert.ok(d.reason.includes(f), d.reason);
+  }
+});
+
+test('the newest matching green run is the one replayed', () => {
+  const runs = [
+    { ...base().runs[0], id: 1, created_at: '2026-10-14T08:00:00Z' },
+    { ...base().runs[0], id: 2, created_at: '2026-10-14T09:00:00Z' },
+  ];
+  const names = [`${TREE_ARTIFACT_PREFIX}${TREE}`];
+  assert.equal(decidePushReplay(base({ runs, artifactNamesByRun: { 1: names, 2: names } })).runId, 2);
+});
+
+test('malformed hashes refuse rather than guess', () => {
+  assert.equal(decidePushReplay(base({ pushTree: 'abc' })).replay, false);
+  assert.equal(decidePushReplay(base({ pushSha: '' })).replay, false);
+});
+
+// #7944: exercise the real CLI, Git input, gh subprocess and Actions outputs.
+// A failed optimization must schedule tests, while verification still refuses.
+const REPO = 'fixture/replay';
+const batchRun = (over = {}) => ({
+  id: 9, event: 'pull_request', status: 'completed', conclusion: 'success',
+  path: '.github/workflows/test.yml', head_branch: 'mergify/merge-queue/abc123',
+  head_repository: { full_name: REPO }, created_at: '2026-11-01T03:45:00Z', ...over,
+});
+// A fast PR run: green, but it recorded no tree, so only the queue can prove the push.
+const queued = (queueEvidence, over = {}) => base({ artifactNamesByRun: { 1: ['build-output'] }, repo: REPO, queueEvidence, ...over });
+
+test('the last commit of a batch replays on the batch run that tested its tree', () => {
+  assert.deepEqual(decidePushReplay(queued([{ tree: TREE, runs: [batchRun()] }])), { replay: true, runId: 9, pr: 7, queue: true });
+});
+
+test('an earlier commit of a batch replays on the run that tested a later main tree', () => {
+  const d = decidePushReplay(queued([{ tree: TREE, runs: [] }, { tree: h('e'), runs: [] }, { tree: h('0'), runs: [batchRun()] }]));
+  assert.deepEqual(d, { replay: true, runId: 9, pr: 7, queue: true });
+});
+
+test('with no later tree proven the push runs in full', () => {
+  assert.equal(decidePushReplay(queued([{ tree: TREE, runs: [] }])).replay, false);
+  assert.equal(decidePushReplay(queued([])).replay, false);
+  assert.equal(decidePushReplay(base({ artifactNamesByRun: {} })).replay, false);
+});
+
+test('only a green batch run of this repository proves a push', () => {
+  for (const over of [
+    { conclusion: 'failure' },
+    { conclusion: 'cancelled' },
+    { conclusion: null, status: 'in_progress' },
+    { event: 'push' },
+    { path: '.github/workflows/benchmark.yml' },
+    { head_branch: 'feature/merge-queue' },
+    { head_repository: { full_name: 'attacker/ifc-lite' } },
+    { head_repository: undefined },
+  ]) {
+    const d = decidePushReplay(queued([{ tree: TREE, runs: [batchRun(over)] }]));
+    assert.equal(d.replay, false, JSON.stringify(over));
+  }
+  assert.equal(decidePushReplay(queued([{ tree: TREE, runs: [batchRun()] }], { repo: undefined })).replay, false);
+});
+
+test('the queue route keeps every guard the PR route has', () => {
+  const evidence = [{ tree: TREE, runs: [batchRun()] }];
+  assert.equal(decidePushReplay(queued(evidence, { before: h('9') })).replay, false, 'not a single commit on the tip');
+  assert.equal(decidePushReplay(queued(evidence, { changedFiles: ['Cargo.lock'] })).replay, false, 'main-only cache key');
+  assert.equal(decidePushReplay(queued(evidence, { changedFiles: ['.github/workflows/test.yml'] })).replay, false, 'workflow edit');
+  assert.equal(decidePushReplay(queued(evidence, { pulls: [] })).replay, false, 'no merged PR');
+});
+
+test('a cache-keying commit replays only when a later main commit re-keys the caches', () => {
+  const evidence = [{ tree: TREE, runs: [] }, { tree: h('e'), runs: [batchRun()] }];
+  const workflow = { changedFiles: ['.github/workflows/test.yml'] };
+  assert.deepEqual(
+    decidePushReplay(queued(evidence, { ...workflow, laterChangedFiles: ['.github/workflows/test.yml', 'x.ts'] })),
+    { replay: true, runId: 9, pr: 7, queue: true },
+  );
+  // A workflow-only full run does not run the Rust lanes, so it cannot re-key for Cargo.lock.
+  const cargo = { changedFiles: ['Cargo.lock'], laterChangedFiles: ['.github/workflows/cancel-closed-pr-runs.yml'] };
+  assert.match(decidePushReplay(queued(evidence, cargo)).reason, /re-keyed/, 'a different cache-keying file');
+  const both = { changedFiles: ['Cargo.lock', '.github/workflows/test.yml'], laterChangedFiles: ['Cargo.lock'] };
+  assert.match(decidePushReplay(queued(evidence, both)).reason, /re-keyed/, 'every such file must change again');
+  assert.match(decidePushReplay(queued(evidence, { ...workflow, laterChangedFiles: ['x.ts'] })).reason, /re-keyed/, 'nothing later re-keys');
+  assert.match(decidePushReplay(queued(evidence, workflow)).reason, /re-keyed/, 'it is the newest');
+  assert.match(
+    decidePushReplay(queued([{ tree: TREE, runs: [] }], { ...workflow, laterChangedFiles: workflow.changedFiles })).reason,
+    /re-keyed/,
+    'a later re-key without a proven tree is still a full run',
+  );
+  // A PR run never ran the push-only lanes, so it cannot stand in for a queue run here.
+  assert.equal(decidePushReplay(base({ ...workflow, laterChangedFiles: workflow.changedFiles })).replay, false);
+});
+
+test('a full page of later files may be truncated, so it does not count as a re-key', () => {
+  const evidence = [{ tree: TREE, runs: [batchRun()] }];
+  const changedFiles = ['Cargo.lock'];
+  const page = (n) => ['Cargo.lock', ...Array.from({ length: n - 1 }, (_, i) => `f${i}`)];
+  assert.equal(decidePushReplay(queued(evidence, { changedFiles, laterChangedFiles: page(99) })).replay, true);
+  assert.equal(decidePushReplay(queued(evidence, { changedFiles, laterChangedFiles: page(100) })).replay, false);
+});
+
+test('--verify does not re-judge the re-key, however many files the push changed', () => {
+  const evidence = [{ tree: TREE, runs: [batchRun()] }];
+  const changedFiles = ['Cargo.lock', ...Array.from({ length: 99 }, (_, i) => `f${i}`)];
+  assert.equal(decidePushReplay(queued(evidence, { changedFiles, rekeyAlreadyJudged: true })).replay, true);
+  assert.equal(decidePushReplay(queued(evidence, { changedFiles })).replay, false);
+  assert.equal(decidePushReplay(queued([{ tree: TREE, runs: [batchRun({ conclusion: 'failure' })] }], { changedFiles, rekeyAlreadyJudged: true })).replay, false, 'a run gone red still refuses');
+});
+
+test('a PR run that tested the tree wins, so it skips only the lanes it ran', () => {
+  const d = decidePushReplay(base({ repo: REPO, queueEvidence: [{ tree: TREE, runs: [batchRun()] }] }));
+  assert.deepEqual(d, { replay: true, runId: 1, pr: 7 });
+});
+
+test('the newest green batch run of the nearest tree is replayed, so --verify re-reads the same one', () => {
+  const older = batchRun({ id: 8, created_at: '2026-11-01T01:00:00Z' });
+  assert.equal(decidePushReplay(queued([{ tree: TREE, runs: [older, batchRun()] }, { tree: h('e'), runs: [batchRun({ id: 7 })] }])).runId, 9);
+});
+
+test('unreadable replay evidence selects full validation only in probe mode', {
+  skip: process.platform === 'win32' ? 'POSIX gh executable fixture requires a Unix shell environment' : false,
+}, (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'push-replay-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const bin = join(root, 'bin');
+  mkdirSync(bin);
+  const git = (...args) => execFileSync('git', [
+    '-c', 'user.name=Replay fixture', '-c', 'user.email=replay@example.invalid',
+    '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', ...args,
+  ], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  git('init', '-q');
+  writeFileSync(join(root, 'model.txt'), 'before');
+  git('add', 'model.txt');
+  git('commit', '-qm', 'before');
+  const before = git('rev-parse', 'HEAD');
+  writeFileSync(join(root, 'model.txt'), 'after');
+  git('commit', '-qam', 'after');
+  const head = git('rev-parse', 'HEAD');
+  const script = fileURLToPath(new URL('./ci-push-replay.mjs', import.meta.url));
+  const output = join(root, 'output');
+  const gh = join(bin, 'gh');
+  const env = {
+    ...process.env, PATH: `${bin}${delimiter}${process.env.PATH}`,
+    GITHUB_REPOSITORY: 'fixture/replay', GITHUB_SHA: head,
+    PUSH_BEFORE: before, GITHUB_OUTPUT: output,
+  };
+  const apiResponse = (pulls, workflow_runs = [], artifacts = []) => `
+    const path = process.argv[3];
+    const response = path.includes('/commits/') ? ${JSON.stringify(pulls)}
+      : path.includes('/artifacts?') ? ${JSON.stringify({ artifacts })}
+      : ${JSON.stringify({ workflow_runs })};
+    process.stdout.write(JSON.stringify(response));
+  `;
+  const merged = { ...base().pulls[0], merge_commit_sha: head };
+  for (const [failure, response] of [
+    ['GH_ERROR', 'console.error("unexpected end of JSON input"); process.exitCode = 1;'],
+    ['GH_BAD_JSON', 'process.stdout.write("{");'],
+    ['GH_BAD_SHAPE', 'process.stdout.write("{}");'],
+    // #7944 review: nested records must not escape as unclassified TypeErrors.
+    ...[undefined, {}, { sha: 42 }, { sha: 'short' }].map((head) => [
+      'GH_BAD_SHAPE', apiResponse([{ ...merged, head }]),
+    ]),
+    ...[null, {}, { id: 'not-a-run-id' }].map((run) => [
+      'GH_BAD_SHAPE', apiResponse([merged], [run]),
+    ]),
+    ...[null, {}, { name: 42, expired: false }].map((artifact) => [
+      'GH_BAD_SHAPE', apiResponse([merged], [{ id: 1 }], [artifact]),
+    ]),
+    // The queue route's reads fail closed too: no compare shape, no tree.
+    ['GH_BAD_SHAPE', apiResponse([merged])],
+    ['GH_BAD_SHAPE', `
+      const path = process.argv[3];
+      process.stdout.write(JSON.stringify(path.includes('/compare/')
+        ? { status: 'ahead', commits: [{ commit: {} }] }
+        : path.includes('/commits/') ? ${JSON.stringify([merged])} : { workflow_runs: [] }));
+    `],
+  ]) {
+    writeFileSync(gh, `#!/usr/bin/env node\n${response}\n`);
+    chmodSync(gh, 0o755);
+    writeFileSync(output, '');
+    const probe = spawnSync(process.execPath, [script, '--probe'], { cwd: root, env, encoding: 'utf8' });
+    assert.equal(probe.status, 0, probe.stderr);
+    assert.match(probe.stderr, new RegExp(failure));
+    assert.equal(readFileSync(output, 'utf8'), 'replay=false\nreplay_run=\nreplay_queue=false\n');
+    assert.match(probe.stdout, /full validation is required/);
+
+    writeFileSync(output, '');
+    const verify = spawnSync(process.execPath, [script, '--verify', '--run', '1'], { cwd: root, env, encoding: 'utf8' });
+    assert.equal(verify.status, 1, failure);
+    assert.match(verify.stderr, new RegExp(failure));
+    assert.equal(readFileSync(output, 'utf8'), '', 'verification must not publish replay success');
+  }
+  const invalidSource = spawnSync(process.execPath, [script, '--probe'], {
+    cwd: root, env: { ...env, GITHUB_SHA: 'missing-source-7944' }, encoding: 'utf8',
+  });
+  assert.equal(invalidSource.status, 1, 'invalid Git input must still fail');
+  assert.equal(readFileSync(output, 'utf8'), '');
+});

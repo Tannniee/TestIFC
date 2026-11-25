@@ -1,0 +1,75 @@
+[
+  {
+    "path": "rust/processing/src/data_model/cancellation.rs",
+    "status": "local-module-moved"
+  },
+  {
+    "path": "rust/processing/src/data_model/classifications.rs",
+    "status": "conflict",
+    "regions": 3
+  },
+  {
+    "path": "rust/processing/src/data_model/documents.rs",
+    "status": "conflict",
+    "regions": 3
+  },
+  {
+    "path": "rust/processing/src/data_model/material_units.rs",
+    "status": "conflict",
+    "regions": 3
+  },
+  {
+    "path": "rust/processing/src/data_model/materials.rs",
+    "status": "conflict",
+    "regions": 2
+  },
+  {
+    "path": "rust/processing/src/data_model/metadata.rs",
+    "status": "conflict",
+    "regions": 1
+  },
+  {
+    "path": "rust/processing/src/data_model/mod.rs",
+    "status": "conflict",
+    "regions": 10
+  },
+  {
+    "path": "rust/processing/src/data_model/project_units.rs",
+    "status": "local-module-moved"
+  },
+  {
+    "path": "rust/processing/src/data_model/properties.rs",
+    "status": "conflict",
+    "regions": 2
+  },
+  {
+    "path": "rust/processing/src/data_model/quantities.rs",
+    "status": "conflict",
+    "regions": 3
+  },
+  {
+    "path": "rust/processing/src/data_model/relationships.rs",
+    "status": "conflict",
+    "regions": 3
+  },
+  {
+    "path": "rust/processing/src/data_model/rooted.rs",
+    "status": "conflict",
+    "regions": 1
+  },
+  {
+    "path": "rust/processing/src/data_model/rooted_tests.rs",
+    "status": "merged",
+    "regions": 0
+  },
+  {
+    "path": "rust/processing/src/data_model/spatial.rs",
+    "status": "merged",
+    "regions": 0
+  },
+  {
+    "path": "rust/processing/src/data_model/types.rs",
+    "status": "merged",
+    "regions": 0
+  }
+]

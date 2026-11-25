@@ -1,0 +1,230 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { sectionExclusions, withSectionExclusions } from './section-exclusions.js';
+/**
+ * The selection/hover mask pipelines (#5390), and the instanced variant that
+ * outlines GPU-instanced occurrences (#5745): repeated windows, doors,
+ * furniture and fasteners, whose "selected" flag lives in the per-instance
+ * record rather than in a mesh uniform.
+ *
+ * Both variants write the same three outputs into the same targets, so
+ * `edge-pass.ts`'s `encodeOutline` sees one mask whatever drew it. The
+ * instanced one differs only in its vertex stage (`vs_instanced` over
+ * `INSTANCED_VERTEX_BUFFERS`, exactly as the main instanced draw, so the
+ * mask lands where the occurrence was drawn) and in a per-occurrence filter
+ * in the fragment stage (`selection-mask.wgsl.ts`). Each template draws the
+ * same in-envelope instance runs the colour pass draws, over the same
+ * camera-relative delta stream (#6393); the fragment keeps the selected
+ * occurrences, or the hovered id's.
+ */
+
+import { INSTANCED_RTE_DELTA_SLOT, INSTANCED_VERTEX_BUFFERS } from './instanced-vertex-layout.js';
+import { drawInstanceRuns, uploadInstancedRteDeltas, type InstanceRun } from './instanced-rte.js';
+import type { WorldPoint } from './relative-to-eye.js';
+import type { InstancedTemplateGPU } from './scene-instance-types.js';
+import { mainShaderSource } from './shaders/main.wgsl.js';
+import { PIPELINE_CONSTANTS } from './constants.js';
+import { opaqueVisibilityLayout } from './opaque-visibility-pass.js';
+import { OPAQUE_VISIBILITY_GROUP } from './shaders/opaque-visibility.wgsl.js';
+import {
+  SELECTION_MASK_HOVER_GROUP,
+  selectionMaskFragmentSource,
+} from './shaders/selection-mask.wgsl.js';
+
+export const MASK_VISIBLE_FORMAT: GPUTextureFormat = 'rg8unorm';
+export const MASK_ALL_FORMAT: GPUTextureFormat = 'r8unorm';
+
+/** Additive blend: two draws to the same target OR their channels together (binary flags, unorm-clamped). */
+const ADDITIVE_BLEND: GPUBlendState = {
+  color: { srcFactor: 'one', dstFactor: 'one' },
+  alpha: { srcFactor: 'one', dstFactor: 'one' },
+};
+
+/** Which mask output a draw writes. */
+export type MaskKind = 'selectedVisible' | 'hoverVisible' | 'selectedAll';
+
+export type MaskPipelines = Record<MaskKind, GPURenderPipeline>;
+
+export function createGeometricMaskPipelines(device: GPUDevice, meshLayout: GPUBindGroupLayout, samples: number, hoverLayout?: GPUBindGroupLayout): MaskPipelines {
+  const instanced = hoverLayout !== undefined;
+  const layout = device.createPipelineLayout({ bindGroupLayouts: withSectionExclusions(device, [meshLayout, hoverLayout ?? device.createBindGroupLayout({ entries: [] }), opaqueVisibilityLayout(device, samples)]) });
+  const vertex: GPUVertexState = {
+    module: device.createShaderModule({ code: mainShaderSource.replace('@location(8) @interpolate(linear)', '@location(8) @interpolate(linear, sample)') }),
+    entryPoint: instanced ? 'vs_instanced' : 'vs_main', buffers: instanced ? INSTANCED_VERTEX_BUFFERS : [INSTANCED_VERTEX_BUFFERS[0]],
+  };
+  return createMaskPipelines(device, 'geometric-mask', layout, vertex, device.createShaderModule({ code: selectionMaskFragmentSource(instanced, samples) }), samples);
+}
+
+const MASK_OUTPUTS: Record<MaskKind, { label: string; entryPoint: string; format: GPUTextureFormat }> = {
+  selectedVisible: { label: 'selected-visible', entryPoint: 'fs_mask_selected_visible', format: MASK_VISIBLE_FORMAT },
+  hoverVisible: { label: 'hover-visible', entryPoint: 'fs_mask_hover_visible', format: MASK_VISIBLE_FORMAT },
+  selectedAll: { label: 'selected-all', entryPoint: 'fs_mask_selected_all', format: MASK_ALL_FORMAT },
+};
+
+/** The three mask pipelines over one vertex stage and one fragment module. */
+export function createMaskPipelines(
+  device: GPUDevice,
+  labelPrefix: string,
+  layout: GPUPipelineLayout,
+  vertex: GPUVertexState,
+  fragmentModule: GPUShaderModule,
+  sampleCount: number,
+): MaskPipelines {
+  const make = (kind: MaskKind) => {
+    const out = MASK_OUTPUTS[kind];
+    return device.createRenderPipeline({
+      label: `${labelPrefix}-${out.label}`,
+      layout,
+      vertex,
+      fragment: { module: fragmentModule, entryPoint: out.entryPoint, targets: [{ format: out.format, blend: ADDITIVE_BLEND }] },
+      primitive: { topology: 'triangle-list', cullMode: 'none' },
+      ...(kind === 'selectedAll' ? {} : {
+        depthStencil: { format: PIPELINE_CONSTANTS.DEPTH_FORMAT, depthWriteEnabled: false, depthCompare: 'greater-equal' as const },
+        multisample: { count: sampleCount },
+      }),
+    });
+  };
+  return { selectedVisible: make('selectedVisible'), hoverVisible: make('hoverVisible'), selectedAll: make('selectedAll') };
+}
+
+/** What the instanced mask draws of a template: its geometry and its instance records. */
+export type InstancedMaskTemplate = Pick<
+  InstancedTemplateGPU,
+  'vertexBuffer' | 'indexBuffer' | 'indexCount' | 'instanceBuffer' | 'instanceCount' | 'canonicalAnchors' | 'rteDeltas'
+>;
+
+export interface InstancedMaskFrame {
+  /**
+   * Packed mesh uniform for `vs_instanced` and the section/clip cut: the
+   * frame's RTE view-projection, section plane, clip box and flags, as the
+   * main instanced draw sees them (`selection-outline-frame.ts`).
+   */
+  uniforms: Float32Array;
+  /**
+   * The frame's RTE camera, the one the colour pass uploaded the delta streams
+   * for. The mask shares that submission, so it must not use another (see
+   * `instanced-rte.ts`); in practice every upload here is a cache hit, except
+   * for templates the colour pass culled.
+   */
+  rteCamera: WorldPoint;
+  /** Templates holding at least one selected occurrence. */
+  selected: readonly InstancedMaskTemplate[];
+  /** Templates holding an occurrence of `hoveredId`; empty when nothing is hovered. */
+  hovered: readonly InstancedMaskTemplate[];
+  hoveredId: number;
+}
+
+/** True when the instanced frame has nothing to draw. */
+export function isInstancedMaskEmpty(frame: InstancedMaskFrame | null | undefined): boolean {
+  return !frame || (frame.selected.length === 0 && frame.hovered.length === 0);
+}
+
+/**
+ * The instanced mask pipelines plus the two small uniforms they read: the
+ * mesh uniform (group 0, owned so no other draw's write can race it) and the
+ * hovered entity id (group `SELECTION_MASK_HOVER_GROUP`). Built on the first
+ * frame that has an instanced selection or hover.
+ */
+export class InstancedSelectionMask {
+  private geometricPipelines: MaskPipelines | null = null;
+  private readonly hoverLayout: GPUBindGroupLayout;
+  private readonly sampleCount: number;
+  private readonly device: GPUDevice;
+  private readonly pipelines: MaskPipelines;
+  private readonly meshBindGroupLayout: GPUBindGroupLayout;
+  private meshUniform: { buffer: GPUBuffer; bindGroup: GPUBindGroup } | null = null;
+  private readonly hoverBuffer: GPUBuffer;
+  private readonly hoverBindGroup: GPUBindGroup;
+  private readonly hoverScratch = new Uint32Array(4);
+  /** This frame's drawable runs per template, from `prepare`. */
+  private runs = new Map<InstancedMaskTemplate, readonly InstanceRun[]>();
+
+  constructor(device: GPUDevice, meshBindGroupLayout: GPUBindGroupLayout, sampleCount: number) {
+    this.sampleCount = sampleCount;
+    this.device = device;
+    this.meshBindGroupLayout = meshBindGroupLayout;
+    const hoverLayout = device.createBindGroupLayout({
+      label: 'selection-mask-instanced-hover-bgl',
+      entries: [{ binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }],
+    });
+    this.hoverLayout = hoverLayout;
+    const groups: GPUBindGroupLayout[] = [];
+    groups[0] = meshBindGroupLayout;
+    groups[SELECTION_MASK_HOVER_GROUP] = hoverLayout;
+    const layout = device.createPipelineLayout({ label: 'selection-mask-instanced-layout', bindGroupLayouts: withSectionExclusions(device, groups) });
+    const vertex: GPUVertexState = {
+      module: device.createShaderModule({ label: 'selection-mask-instanced-vs', code: mainShaderSource }),
+      entryPoint: 'vs_instanced',
+      buffers: INSTANCED_VERTEX_BUFFERS,
+    };
+    const fragmentModule = device.createShaderModule({
+      label: 'selection-mask-instanced-fs',
+      code: selectionMaskFragmentSource(true),
+    });
+    this.pipelines = createMaskPipelines(device, 'selection-mask-instanced', layout, vertex, fragmentModule, sampleCount);
+
+    this.hoverBuffer = device.createBuffer({
+      label: 'selection-mask-instanced-hover',
+      size: this.hoverScratch.byteLength,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    this.hoverBindGroup = device.createBindGroup({
+      layout: hoverLayout,
+      entries: [{ binding: 0, resource: { buffer: this.hoverBuffer } }],
+    });
+  }
+
+  /** Upload this frame's uniforms. Call once per frame, before `draw`. */
+  prepare(frame: InstancedMaskFrame): void {
+    const { uniforms } = frame;
+    if (!this.meshUniform || this.meshUniform.buffer.size < uniforms.byteLength) {
+      this.meshUniform?.buffer.destroy();
+      const buffer = this.device.createBuffer({
+        label: 'selection-mask-instanced-uniforms',
+        size: uniforms.byteLength,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+      const bindGroup = this.device.createBindGroup({
+        layout: this.meshBindGroupLayout,
+        entries: [{ binding: 0, resource: { buffer } }],
+      });
+      this.meshUniform = { buffer, bindGroup };
+    }
+    this.device.queue.writeBuffer(this.meshUniform.buffer, 0, uniforms);
+    this.hoverScratch[0] = frame.hoveredId >>> 0;
+    this.device.queue.writeBuffer(this.hoverBuffer, 0, this.hoverScratch);
+    // Without this a template the colour pass culled this frame would read a
+    // delta stream packed for an older camera (or never packed at all).
+    const templates = [...new Set([...frame.selected, ...frame.hovered])];
+    const runs = uploadInstancedRteDeltas(this.device, templates, frame.rteCamera);
+    this.runs = new Map(templates.map((t, i) => [t, runs[i]!]));
+  }
+
+  /** Draw `templates` into the open mask pass, one instanced draw per in-envelope run. */
+  draw(pass: GPURenderPassEncoder, kind: MaskKind, templates: readonly InstancedMaskTemplate[], geometricVisibility?: GPUBindGroup): void {
+    if (templates.length === 0 || !this.meshUniform) return;
+    if (geometricVisibility && kind !== 'selectedAll') {
+      this.geometricPipelines ??= createGeometricMaskPipelines(this.device, this.meshBindGroupLayout, this.sampleCount, this.hoverLayout);
+      pass.setPipeline(this.geometricPipelines[kind]); pass.setBindGroup(OPAQUE_VISIBILITY_GROUP, geometricVisibility);
+    } else pass.setPipeline(this.pipelines[kind]);
+    pass.setBindGroup(3, sectionExclusions(this.device).bindGroup);
+    pass.setBindGroup(0, this.meshUniform.bindGroup);
+    pass.setBindGroup(SELECTION_MASK_HOVER_GROUP, this.hoverBindGroup);
+    for (const t of templates) {
+      pass.setVertexBuffer(0, t.vertexBuffer);
+      pass.setVertexBuffer(1, t.instanceBuffer);
+      pass.setVertexBuffer(INSTANCED_RTE_DELTA_SLOT, t.rteDeltas.buffer);
+      pass.setIndexBuffer(t.indexBuffer, 'uint32');
+      drawInstanceRuns(pass, t.indexCount, this.runs.get(t) ?? []);
+    }
+  }
+
+  destroy(): void {
+    this.meshUniform?.buffer.destroy();
+    this.meshUniform = null;
+    this.runs.clear();
+    this.hoverBuffer.destroy();
+  }
+}

@@ -1,0 +1,344 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { offerErrorReport } from '@/lib/error-reports/context';
+import { flushPlacementGeometry } from '@/lib/model-placement/bounds-revision';
+/**
+ * THE render loop for the 3D viewport.
+ *
+ * This is the single place where renderer.render() is called during normal
+ * operation.  Everything else (mouse, touch, keyboard, streaming, visibility
+ * changes, theme, lens) calls renderer.requestRender() to set a dirty flag.
+ *
+ * Each frame:
+ *   1. Drain the scene's mesh queue (streaming uploads with time budget).
+ *   2. Update camera (animation / inertia).
+ *   3. If dirty OR animating â†’ render with current state from refs.
+ *   4. Sync ViewCube, scale bar, measurements.
+ */
+import { useEffect, type MutableRefObject, type RefObject } from 'react';
+import type { Renderer, VisualEnhancementOptions, LightingEnvironment } from '@ifc-lite/renderer';
+import type { CoordinateInfo } from '@ifc-lite/geometry';
+import { useViewerStore, type SectionPlane } from '@/store';
+import { projectToCssScreen } from '../../utils/projectScreen.js';
+import { getContributionCullConfig } from '../../utils/renderCullConfig.js';
+import { getLodScreenPx } from '../../utils/lodConfig.js';
+import { runGpuUpload } from './gpu-upload-guard';
+import { NavigationRenderQuality } from './navigationRenderQuality.js';
+import { InteractionRenderBudget } from './interactionRenderBudget.js';
+import { registerViewportCapture, viewportCaptureOwnsFrame } from '@/lib/viewport-capture';
+import { viewportRenderOptions } from './viewport-render-options';
+import { fieldTelemetry } from '@/lib/perf/fieldTelemetryLoader';
+import { GpuFramePacer } from './gpuFramePacer';
+/** Sun cast-shadow render options, driven by the Environment panel (#2670). */
+export interface SunShadowSettings {
+  enabled: boolean;
+  resolution: number;
+  sunAngleDeg: number;
+}
+
+export interface UseAnimationLoopParams {
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+  rendererRef: MutableRefObject<Renderer | null>;
+  isInitialized: boolean;
+  animationFrameRef: MutableRefObject<number | null>;
+  lastFrameTimeRef: MutableRefObject<number>;
+  mouseIsDraggingRef: MutableRefObject<boolean>;
+  activeToolRef: MutableRefObject<string>;
+  /** When set, clips model below this Y value (terrain clipping for Cesium overlay). */
+  terrainClipYRef: MutableRefObject<number | null>;
+  hiddenEntitiesRef: MutableRefObject<Set<number>>;
+  isolatedEntitiesRef: MutableRefObject<Set<number> | null>;
+  /** X-Ray context: ghost every entity NOT in this set (null = no ghosting). */
+  ghostExceptEntitiesRef: MutableRefObject<Set<number> | null>;
+  selectedEntityIdRef: MutableRefObject<number | null>;
+  selectedModelIndexRef: MutableRefObject<number | undefined>;
+  clearColorRef: MutableRefObject<[number, number, number, number]>;
+  visualEnhancementRef: MutableRefObject<VisualEnhancementOptions>;
+  /** Lighting environment (sun, hemisphere ambient, exposure, sky pass). */
+  environmentRef: MutableRefObject<LightingEnvironment>;
+  /** Sun cast-shadow settings (Environment panel), or null when disabled. */
+  sunShadowsRef: MutableRefObject<SunShadowSettings | null>;
+  sectionPlaneRef: MutableRefObject<SectionPlane>;
+  sectionRangeRef: MutableRefObject<{ min: number; max: number } | null>;
+  /** The bounds `sectionRangeRef` is read from, for the other cutting planes' own axes (#7545). */
+  sectionBoundsRef?: MutableRefObject<{ min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } } | null>;
+  /**
+   * Mirror of the renderer's model bounds, written each frame after
+   * render. Read by the section face-pick handler so the cardinal-
+   * fallback `position` % can be computed against the live extents.
+   */
+  modelBoundsRef?: MutableRefObject<{ min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } } | null>;
+  selectedEntityIdsRef: MutableRefObject<Set<number> | undefined>;
+  /** Non-empty while a clash is focused â†’ emphasize (pop) the override colours. */
+  clashHighlightColorsRef: MutableRefObject<Map<number, [number, number, number, number]> | null | undefined>;
+  coordinateInfoRef: MutableRefObject<CoordinateInfo | undefined>;
+  isInteractingRef: MutableRefObject<boolean>;
+  lastCameraStateRef: MutableRefObject<{
+    position: { x: number; y: number; z: number };
+    rotation: { azimuth: number; elevation: number };
+    distance: number;
+    canvasWidth: number;
+    canvasHeight: number;
+  } | null>;
+  updateCameraRotationRealtime: (rotation: { azimuth: number; elevation: number }) => void;
+  calculateScale: () => void;
+  updateMeasurementScreenCoords: (projector: (worldPos: { x: number; y: number; z: number }) => { x: number; y: number } | null) => void;
+  hasPendingMeasurements: () => boolean;
+}
+
+export function useAnimationLoop(params: UseAnimationLoopParams): void {
+  const {
+    canvasRef,
+    rendererRef,
+    isInitialized,
+    animationFrameRef,
+    lastFrameTimeRef,
+    mouseIsDraggingRef,
+    activeToolRef,
+    modelBoundsRef,
+    isInteractingRef,
+    lastCameraStateRef,
+    updateCameraRotationRealtime,
+    calculateScale,
+    updateMeasurementScreenCoords,
+    hasPendingMeasurements,
+  } = params;
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    const canvas = canvasRef.current;
+    if (!renderer || !canvas || !isInitialized) return;
+
+    const camera = renderer.getCamera();
+    const scene = renderer.getScene();
+    let aborted = false;
+    const unregisterCapture = registerViewportCapture(renderer, canvas, () => viewportRenderOptions(renderer, params, false));
+
+    // Contribution culling + LOD (issue #1682): resolved once per session â€”
+    // the knobs are load-time A/B switches, not live settings. Only this loop
+    // passes them; snapshot renders (clash/IDS/BCF) stay exhaustive and
+    // full-detail.
+    const contributionCull = getContributionCullConfig();
+    const lodScreenPx = getLodScreenPx();
+    const lod = lodScreenPx !== null ? { screenPx: lodScreenPx } : undefined;
+
+    let lastRotationUpdate = 0;
+    let lastScaleUpdate = 0;
+    const renderBudget = new InteractionRenderBudget();
+    const navigationQuality = new NavigationRenderQuality(camera.getViewProjMatrix().m);
+    let residencyRestoreErrorLogged = false;
+    let renderErrorLogged = false;
+
+    const framePacer = new GpuFramePacer();
+    const animate = (currentTime: number) => {
+      if (aborted) return;
+
+      const deltaTime = currentTime - lastFrameTimeRef.current;
+      lastFrameTimeRef.current = currentTime;
+      if (viewportCaptureOwnsFrame(renderer)) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      fieldTelemetry?.noteNavigateFrame(deltaTime, isInteractingRef.current); // #6961 ifc_navigate (null until a load)
+
+      // 1. Drain mesh queue (streaming GPU uploads)
+      let queueFlushed = false;
+      if (scene.hasQueuedMeshes()) {
+        const device = renderer.getGPUDevice();
+        const pipeline = renderer.getPipeline();
+        if (device && pipeline) {
+          // Contained like the residency drain below: an uncaught throw here
+          // skips the tail-position requestAnimationFrame(animate) that re-arms
+          // this loop, so rendering would stop permanently.
+          queueFlushed = runGpuUpload('flushPending:raf', () => flushPlacementGeometry(scene, device, pipeline, isInteractingRef.current)) ?? false;
+          if (queueFlushed) {
+            renderer.clearCaches();
+          }
+        }
+      }
+
+      // 1b. Rebuild GPU-evicted batches the last frame asked for (residency
+      // budget, issue #1682 phase 3a). Time-budgeted; requests a render so
+      // the restored batches appear on the next frame. Guarded like the
+      // instanced-shard drain: an uncaught throw here (e.g. buffer creation on a lost device) would kill the rAF loop.
+      if (scene.hasResidencyRestoreWork()) {
+        try {
+          const device = renderer.getGPUDevice();
+          const pipeline = renderer.getPipeline();
+          if (device && pipeline && scene.processResidencyRestores(device, pipeline) > 0) {
+            renderer.requestRender();
+          }
+        } catch (err) {
+          if (!residencyRestoreErrorLogged) {
+            residencyRestoreErrorLogged = true;
+            console.warn('[useAnimationLoop] residency restore failed (will keep rendering):', err);
+          }
+        }
+      }
+
+      // 2. Camera update (animation / inertia)
+      const isAnimating = camera.update(deltaTime);
+
+      // Motion, not pointer release, owns the 250 ms quiet period. This also
+      // catches direct camera writers (wheel, keyboard, SpaceMouse, view cube).
+      const quality = navigationQuality.frame(currentTime, camera.getViewProjMatrix().m,
+        isAnimating || isInteractingRef.current, useViewerStore.getState().fastView);
+      if (quality.requestRender) renderer.requestRender();
+
+      // 3. Render if anything changed
+      // Peek first â€” only consume the flag when we actually commit to rendering.
+      // This prevents a throttled frame from eating the dirty flag.
+      const renderRequested = renderer.peekRenderRequest();
+
+      // Heavy moving frames leave a bounded recovery gap for input. Cheap
+      // frames use the next available display tick, with no sticky FPS tiers.
+      const isContinuousRender = isInteractingRef.current || isAnimating;
+      const throttled = !renderBudget.shouldRender(currentTime, isContinuousRender);
+      // Render continuously while the user is interacting (issue #1394), not
+      // just when a pointermove happens to set the dirty flag. Pointer events
+      // can arrive sparsely (coalesced / slow drag), which left the swap chain
+      // unrefreshed for hundreds of ms between renders. Compositors that don't
+      // preserve canvas contents between frames then show BLANK while orbiting
+      // and only "reappear" on release â€” the reported bug. The large-model
+      // interaction throttle still caps the cadence via `throttled`.
+      const wantsRender = (isAnimating || renderRequested || queueFlushed || isInteractingRef.current) && !throttled;
+      const gpuBacklogged = wantsRender && framePacer.saturated(renderer.getGPUDevice(), performance.now());
+      // A held-back frame keeps its request; queueFlushed is per-iteration only.
+      if (gpuBacklogged && queueFlushed) renderer.requestRender();
+      const willRender = wantsRender && !gpuBacklogged;
+      if (willRender) {
+        renderer.consumeRenderRequest();
+        const renderStart = performance.now();
+        // Belt for the renderer's own device-loss latch (#2229). render()
+        // contains its failures and degrades to a quiet skip, but this loop
+        // must survive even a render-path throw it does not yet contain:
+        // anything escaping here skips the tail-position
+        // requestAnimationFrame(animate) below, and the viewer freezes for the
+        // rest of the session with nothing on screen to say why. Latched to one
+        // warning per session â€” a dead device fails every frame.
+        let submitted = false;
+        try {
+          const options = viewportRenderOptions(renderer, params, quality.lowDetail, renderBudget.intervalMs, contributionCull, lod);
+          if (quality.lowDetail) {
+            options.visualEnhancement = { ...options.visualEnhancement, enabled: false };
+            options.sunShadows = undefined;
+          }
+          submitted = renderer.renderWithResult(options);
+        } catch (err) {
+          if (!renderErrorLogged) {
+            renderErrorLogged = true;
+            offerErrorReport({ errorCode: 'renderer_frame_failed' });
+            // The dirty flag was consumed on the way in, so this failed frame
+            // spent it. Ask for one more, or an idle viewer stays on the stale
+            // frame until the user happens to interact. Deliberately inside the
+            // once-per-session guard: a throw reaching here means renderer
+            // containment failed, which is a code fault and so likely
+            // permanent â€” one retry recovers a transient escape without
+            // self-perpetuating a failing frame every rAF forever.
+            renderer.requestRender();
+            // Wording matters: this line fires exactly when someone is
+            // debugging a frozen viewer, so it must not send them down the
+            // device-loss path. `render()` is contracted never to throw â€” it
+            // latches a DOMException as a device loss and degrades anything
+            // else, rethrowing on NEITHER branch â€” so reaching here means the
+            // throw was never contained by the renderer at all. It also may
+            // never have entered `render()`: the try covers the argument
+            // literal above, whose ref reads (`sectionRenderClip(...)` and
+            // friends) run before the call.
+            console.warn(
+              '[useAnimationLoop] render() threw (keeping the loop alive). ' +
+              'render() is contracted never to throw, so this escaped renderer ' +
+              'containment â€” check Renderer.render(), and the argument reads at ' +
+              'this call site, which are inside this try:',
+              err,
+            );
+          }
+        }
+        renderBudget.rendered(currentTime, performance.now() - renderStart, isContinuousRender);
+        if (submitted) framePacer.noteSubmit(renderer.getGPUDevice(), performance.now());
+        // Snapshot the renderer's current model bounds so the section
+        // face-pick handler can compute a correct cardinal-fallback
+        // `position` percentage. Cheap (a few field reads) and avoids a
+        // race where the click handler reads stale bounds during the
+        // first few frames after a model loads.
+        if (modelBoundsRef) {
+          modelBoundsRef.current = renderer.getModelBounds() ?? modelBoundsRef.current;
+        }
+      }
+
+      // 4. Sync UI widgets
+      if (isAnimating || renderRequested || queueFlushed) {
+        updateCameraRotationRealtime(camera.getRotation());
+        calculateScale();
+      } else if (!mouseIsDraggingRef.current && currentTime - lastRotationUpdate > 500) {
+        updateCameraRotationRealtime(camera.getRotation());
+        lastRotationUpdate = currentTime;
+      }
+
+      if (currentTime - lastScaleUpdate > 500) {
+        calculateScale();
+        lastScaleUpdate = currentTime;
+      }
+
+      // 5. Measurement screen coords. Finished measurements are lasting
+      // scene state (#5893): reproject while the Measure tool is open (its
+      // own pending/active point needs it) OR while the visibility toggle
+      // is on (the always-mounted `MeasurementSceneLayer` needs it).
+      if (
+        (activeToolRef.current === 'measure' || useViewerStore.getState().sceneState.measurements.visible) &&
+        hasPendingMeasurements()
+      ) {
+        const cameraPos = camera.getPosition();
+        const cameraRot = camera.getRotation();
+        const cameraDist = camera.getDistance();
+        const currentCameraState = {
+          position: cameraPos,
+          rotation: cameraRot,
+          distance: cameraDist,
+          canvasWidth: canvas.width,
+          canvasHeight: canvas.height,
+        };
+
+        const lastState = lastCameraStateRef.current;
+        const cameraChanged =
+          !lastState ||
+          lastState.position.x !== currentCameraState.position.x ||
+          lastState.position.y !== currentCameraState.position.y ||
+          lastState.position.z !== currentCameraState.position.z ||
+          lastState.rotation.azimuth !== currentCameraState.rotation.azimuth ||
+          lastState.rotation.elevation !== currentCameraState.rotation.elevation ||
+          lastState.distance !== currentCameraState.distance ||
+          lastState.canvasWidth !== currentCameraState.canvasWidth ||
+          lastState.canvasHeight !== currentCameraState.canvasHeight;
+
+        if (cameraChanged) {
+          lastCameraStateRef.current = currentCameraState;
+          updateMeasurementScreenCoords((worldPos) => {
+            // CSS-space coords so the measure line/labels track the geometry
+            // under the cursor (raw coords are drawing-buffer device px, not
+            // CSS px â€” issues #1107, #5383).
+            return projectToCssScreen(camera, canvas, worldPos);
+          });
+        }
+      }
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    lastFrameTimeRef.current = performance.now();
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      aborted = true;
+      unregisterCapture();
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [isInitialized]);
+}
+
+export default useAnimationLoop;

@@ -1,0 +1,134 @@
+{
+  "executable": "F:\\Steel\\VBA\\IFC-Lite-Upgrade20261105\\desktop\\src-tauri\\target\\release\\ifc-lite-desktop.exe",
+  "tests": [
+    {
+      "name": "native preview default engine without URL override"
+    },
+    {
+      "name": "local IFC import",
+      "models": [
+        {
+          "name": "building-architecture.ifc",
+          "meshes": 14,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "TestIFC Top sweep creates canonical Box, restores source orientation, six diamond handles"
+    },
+    {
+      "name": "IFC Y uses negative world Z with exchanged limits; inverted numeric input rejected"
+    },
+    {
+      "name": "Actual face drag changes clipping; Escape restores all bounds and releases capture"
+    },
+    {
+      "name": "Top-view elevation face can be dragged even when its axis projects to a point"
+    },
+    {
+      "name": "Draw again + Escape restores the exact previous camera and section state"
+    },
+    {
+      "name": "Explicit blur interruption cancels a draft and restores clipping and camera"
+    },
+    {
+      "name": "Outline and handle visibility are independent of active clipping"
+    },
+    {
+      "name": "Reset Bounds uses placed model bounds; Fit View preserves bounds and orientation"
+    },
+    {
+      "name": "Actual WebGPU cut toggle changes canvas pixels without changing bounds or camera"
+    },
+    {
+      "name": "Close/reopen preserves native cut; Front exits Box and keeps native plane controls"
+    },
+    {
+      "name": "ViewCube retains fixed dimensions, 26 surfaces and six quick views",
+      "layout": {
+        "cluster": [
+          204,
+          234
+        ],
+        "stage": [
+          158,
+          158
+        ],
+        "quickViews": 6,
+        "surfaces": 26
+      }
+    },
+    {
+      "name": "Properties activity icon closes and reopens, including rapid clicks"
+    },
+    {
+      "name": "real wheel TestIFC ratio, no inertia, reversibility"
+    },
+    {
+      "name": "actual pointer orbit damping and stable pivot"
+    },
+    {
+      "name": "real screen pan retains all pointer movement and damping tail"
+    },
+    {
+      "name": "selection preserves the view and real orbit retains the stable TestIFC target"
+    },
+    {
+      "name": "actual viewport click selects an IFC component without reframing the stationary view"
+    },
+    {
+      "name": "Multi quick tool performs GPU rectangle selection",
+      "count": 7
+    }
+  ],
+  "errors": [],
+  "diagnostics": [
+    "warning: [Viewport] frameSelection: No selection or geometry",
+    "warning: [Viewport] frameSelection: No selection or geometry",
+    "warning: [Viewport] frameSelection: No selection or geometry"
+  ],
+  "nativeBackend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "28.2.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "runtime": {
+    "url": "http://tauri.localhost/",
+    "secureContext": true,
+    "crossOriginIsolated": true,
+    "webgpu": true,
+    "adapter": {},
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0"
+  },
+  "passed": false,
+  "failure": "page.waitForFunction: Timeout 30000ms exceeded.\n    at testTestIfcNavigation (F:\\Steel\\VBA\\IFC-Lite-Upgrade20261105\\desktop\\testifc-navigation-smoke.mjs:150:14)\n    at async file:///F:/Steel/VBA/IFC-Lite-Upgrade20261105/desktop/smoke-webview2.mjs:120:5",
+  "sectionBoxEvents": [
+    {
+      "type": "pointerdown",
+      "focused": true,
+      "enabled": false,
+      "phase": "drawing",
+      "x": 481.6000061035156,
+      "y": 308.29998779296875
+    },
+    {
+      "type": "pointerup",
+      "focused": true,
+      "enabled": false,
+      "phase": "drawing",
+      "x": 963.2000122070312,
+      "y": 664.7000122070312
+    },
+    {
+      "type": "lostpointercapture",
+      "focused": true,
+      "enabled": true,
+      "x": 963.2000122070312,
+      "y": 664.7000122070312
+    }
+  ]
+}

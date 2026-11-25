@@ -1,0 +1,243 @@
+{
+  "executable": "F:\\Steel\\VBA\\IFC-Lite-Upgrade20261105\\desktop\\src-tauri\\target\\release\\ifc-lite-desktop.exe",
+  "tests": [
+    {
+      "name": "native preview default engine without URL override"
+    },
+    {
+      "name": "local IFC import",
+      "models": [
+        {
+          "name": "building-architecture.ifc",
+          "meshes": 14,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "six native Y-up camera views",
+      "directions": [
+        [
+          "left",
+          [
+            -1,
+            0,
+            0
+          ]
+        ],
+        [
+          "right",
+          [
+            1,
+            0,
+            0
+          ]
+        ],
+        [
+          "top",
+          [
+            0,
+            1,
+            0
+          ]
+        ],
+        [
+          "bottom",
+          [
+            0,
+            -1,
+            0
+          ]
+        ],
+        [
+          "front",
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        [
+          "back",
+          [
+            0,
+            0,
+            -1
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "keyboard preset and camera roll sync"
+    },
+    {
+      "name": "cube pointer drag orbits the model"
+    },
+    {
+      "name": "pointer corner and edge clicks move the native camera"
+    },
+    {
+      "name": "two-model import completes and clears loading overlay",
+      "models": [
+        {
+          "name": "building-architecture.ifc",
+          "meshes": 14,
+          "visible": true
+        },
+        {
+          "name": "building-architecture-rev-b.ifc",
+          "meshes": 14,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "native IFC source stays outside WebView2; BIM tables and federation",
+      "wasmInstantiations": 0,
+      "models": [
+        {
+          "loadPath": "native",
+          "sourceBytes": 0,
+          "entityCount": 127,
+          "propertySets": [
+            {
+              "name": "Pset_SlabCommon",
+              "globalId": "",
+              "properties": [
+                {
+                  "name": "Status",
+                  "type": 0,
+                  "value": "UNSET",
+                  "dataType": "IFCLABEL",
+                  "values": [
+                    "UNSET"
+                  ]
+                },
+                {
+                  "name": "IsExternal",
+                  "type": 3,
+                  "value": true,
+                  "dataType": "IFCBOOLEAN"
+                },
+                {
+                  "name": "LoadBearing",
+                  "type": 3,
+                  "value": false,
+                  "dataType": "IFCBOOLEAN"
+                },
+                {
+                  "name": "FireRating",
+                  "type": 0,
+                  "value": "REI30",
+                  "dataType": "IFCLABEL"
+                },
+                {
+                  "name": "AcousticRating",
+                  "type": 0,
+                  "value": "29dB Rw",
+                  "dataType": "IFCLABEL"
+                }
+              ]
+            }
+          ],
+          "hierarchy": true,
+          "bounds": {
+            "min": {
+              "x": -29.642534255981445,
+              "y": -1.2999999523162842,
+              "z": -9.300000190734863
+            },
+            "max": {
+              "x": 8.90000057220459,
+              "y": 5.700000286102295,
+              "z": 14.985715866088867
+            }
+          }
+        },
+        {
+          "loadPath": "native",
+          "sourceBytes": 0,
+          "entityCount": 127,
+          "propertySets": [
+            {
+              "name": "Pset_SlabCommon",
+              "globalId": "",
+              "properties": [
+                {
+                  "name": "Status",
+                  "type": 0,
+                  "value": "UNSET",
+                  "dataType": "IFCLABEL",
+                  "values": [
+                    "UNSET"
+                  ]
+                },
+                {
+                  "name": "IsExternal",
+                  "type": 3,
+                  "value": true,
+                  "dataType": "IFCBOOLEAN"
+                },
+                {
+                  "name": "LoadBearing",
+                  "type": 3,
+                  "value": false,
+                  "dataType": "IFCBOOLEAN"
+                },
+                {
+                  "name": "FireRating",
+                  "type": 0,
+                  "value": "REI30",
+                  "dataType": "IFCLABEL"
+                },
+                {
+                  "name": "AcousticRating",
+                  "type": 0,
+                  "value": "29dB Rw",
+                  "dataType": "IFCLABEL"
+                }
+              ]
+            }
+          ],
+          "hierarchy": true,
+          "bounds": {
+            "min": {
+              "x": -29.642534255981445,
+              "y": -1.2999999523162842,
+              "z": -9.300000190734863
+            },
+            "max": {
+              "x": 9.100000381469727,
+              "y": 5.700000286102295,
+              "z": 14.985715866088867
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "native Properties component displays selected slab Pset without source bytes"
+    }
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "nativeBackend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "28.2.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "runtime": {
+    "url": "http://tauri.localhost/",
+    "secureContext": true,
+    "crossOriginIsolated": true,
+    "webgpu": true,
+    "adapter": {},
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0"
+  },
+  "passed": false,
+  "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-tool-bar=\"section\"]').getByRole('button', { name: 'Add plane', exact: true })\u001b[22m\n\n    at addSectionPlane (F:\\Steel\\VBA\\IFC-Lite-Upgrade20261105\\desktop\\testifc-section-box-smoke.mjs:8:107)\n    at F:\\Steel\\VBA\\IFC-Lite-Upgrade20261105\\desktop\\smoke-webview2.mjs:228:9",
+  "sectionBoxEvents": []
+}

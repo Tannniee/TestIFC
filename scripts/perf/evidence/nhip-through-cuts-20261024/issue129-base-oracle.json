@@ -1,0 +1,42 @@
+{
+  "method": "Symmetric sampled point-to-triangle distances, not an exact Hausdorff bound",
+  "evidence": "Meshes captured from the exact packaged EXE after full original IFC reached Ready",
+  "rows": [
+    {
+      "id": 12381,
+      "native": {
+        "vertices": 10166,
+        "triangles": 7565,
+        "volume": 1437.0998258568077,
+        "area": 2918.5190813470986
+      },
+      "oracle": {
+        "vertices": 1870,
+        "triangles": 3868,
+        "volume": 1437.1123237457978,
+        "area": 2906.0648670296837
+      },
+      "sampledMaxSurfaceDistanceMm": 900.0345299620897,
+      "maxBoundsDeltaMm": 0.5679852329194546,
+      "relativeVolumeErrorPercent": 0.0008696528993299317
+    },
+    {
+      "id": 32810,
+      "native": {
+        "vertices": 3522,
+        "triangles": 3207,
+        "volume": 881.2594693106827,
+        "area": 1257.4453913125435
+      },
+      "oracle": {
+        "vertices": 1136,
+        "triangles": 2304,
+        "volume": 881.3038037897683,
+        "area": 1257.5004441087644
+      },
+      "sampledMaxSurfaceDistanceMm": 1.3856107247020624,
+      "maxBoundsDeltaMm": 0.36140973679721355,
+      "relativeVolumeErrorPercent": 0.005030555739683107
+    }
+  ]
+}
