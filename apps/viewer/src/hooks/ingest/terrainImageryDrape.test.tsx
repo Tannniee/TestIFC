@@ -1,0 +1,287 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * #5942 — the drape through the canonical load path. The terrain is LandXML
+ * TEXT loaded by `useIfcLoader.loadFile`, so the real Rust parser decides the
+ * coordinate order; the image is a real PNG + world file + `.prj`; the
+ * renderer is observed at its two seams (`removeMeshesForEntities`,
+ * `addMeshes`), the same way the other loader tests observe the GPU.
+ *
+ * Only the pixel decode is outside this test: happy-dom has no
+ * `createImageBitmap`, so the raster's texture step returns a stand-in bitmap
+ * of the real size. The UVs, coverage, store and GPU hand-off are all real.
+ */
+
+import '@/test/setup-dom.js';
+import { afterEach, beforeEach, describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import type { RefObject } from 'react';
+import { act } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import type { MeshData } from '@ifc-lite/geometry';
+import type { Renderer } from '@ifc-lite/renderer';
+import { toast } from '@/components/ui/toast';
+import { useViewerStore } from '@/store';
+import { fixtureModel, fixtureModels } from '@/test/store-fixture';
+import { georeferencedPlacementFrameKey } from '@/lib/model-placement/persistence';
+import { spatialReferenceFromIfc } from '@/lib/geo/ifc-spatial-reference';
+import { setGlobalRendererRef } from '../useBCF.js';
+import { useIfcLoader } from '../useIfcLoader.js';
+import { GeoRasterBundle } from '@/lib/terrain-imagery/raster-bundle.js';
+import { readGeoRasterBundle } from '@/lib/terrain-imagery/read-raster.js';
+import {
+  FEATURE, ORTHO, orthoPng, orthoTerrainXml, orthoWorldFile, type OrthoCrsDeclaration,
+} from '@/lib/terrain-imagery/synthetic-orthophoto.fixture.js';
+import { drapeRasterOnTerrains, type DrapeRaster } from './terrainImageryDrape.js';
+
+const LV95_WKT = 'PROJCS["CH1903+ / LV95",AUTHORITY["EPSG","2056"]]';
+
+function orthoBundle(): GeoRasterBundle {
+  return new GeoRasterBundle(
+    new File([orthoPng().slice()], 'ortho.png', { type: 'image/png' }),
+    new File([orthoWorldFile()], 'ortho.pgw'),
+    [new File([LV95_WKT], 'ortho.prj')],
+  );
+}
+
+async function orthoRaster(): Promise<DrapeRaster> {
+  const read = await readGeoRasterBundle(orthoBundle());
+  assert.ok(read.ok, read.ok ? '' : read.reason);
+  const loaded = read.value;
+  return {
+    name: loaded.name, source: 'file', placement: loaded.placement,
+    image: { bytes: loaded.bytes, mime: loaded.mime },
+    texture: async () => ({ bitmap: { width: ORTHO.width + 2, height: ORTHO.height + 2 } as ImageBitmap, imageWidth: ORTHO.width, imageHeight: ORTHO.height }),
+  };
+}
+
+let hookApi: ReturnType<typeof useIfcLoader> | null = null;
+function Probe(): null {
+  hookApi = useIfcLoader();
+  return null;
+}
+
+let root: Root | null = null;
+let container: HTMLDivElement | null = null;
+const gpu = { removed: [] as number[], added: [] as MeshData[] };
+
+beforeEach(async () => {
+  hookApi = null;
+  gpu.removed = [];
+  gpu.added = [];
+  useViewerStore.getState().resetViewerState();
+  useViewerStore.getState().clearAllModels();
+  container = document.createElement('div');
+  document.body.appendChild(container);
+  root = createRoot(container);
+  await act(async () => root!.render(<Probe />));
+  assert.ok(hookApi);
+});
+
+afterEach(async () => {
+  setGlobalRendererRef({ current: null });
+  const current = root;
+  root = null;
+  if (current) await act(async () => current.unmount());
+  container?.remove();
+  container = null;
+});
+
+function installRenderer(): void {
+  const renderer = {
+    isReady: () => true,
+    getScene: () => ({ removeMeshesForEntities: (ids: Iterable<number>) => { gpu.removed.push(...ids); return 0; } }),
+    addMeshes: (meshes: MeshData[]) => { gpu.added.push(...meshes); return { ok: true, value: undefined }; },
+    requestRender: () => {},
+  };
+  setGlobalRendererRef({ current: renderer as unknown as Renderer } as RefObject<Renderer | null>);
+}
+
+async function loadTerrain(
+  pointOrder: 'northing-first' | 'easting-first' = 'northing-first',
+  crsDeclaration: OrthoCrsDeclaration = 'horizontalDatum',
+): Promise<string> {
+  const file = new File([orthoTerrainXml(pointOrder, crsDeclaration)], 'terrain.xml', { type: 'application/xml' });
+  await act(async () => hookApi!.loadFile(file, { kind: 'primary' }));
+  const model = [...useViewerStore.getState().models.values()][0];
+  assert.ok(model?.geometryResult?.meshes.length, 'the terrain loaded and rendered');
+  return model.id;
+}
+
+describe('draping imagery through the load path (#5942)', () => {
+  it('routes a raster bundle through loadFile without creating a model or resetting the scene', async () => {
+    const terrainId = await loadTerrain();
+    const errors: string[] = [];
+    const original = toast.error;
+    toast.error = (message: string) => { errors.push(message); };
+    try {
+      // No renderer is installed: the drape is refused at the GPU step, and
+      // everything before it must have left the store alone.
+      await act(async () => hookApi!.loadFile(orthoBundle(), { kind: 'federated', modelId: 'raster-model' }));
+    } finally {
+      toast.error = original;
+    }
+    const state = useViewerStore.getState();
+    assert.deepEqual([...state.models.keys()], [terrainId], 'a raster is imagery, never a model');
+    assert.equal(state.models.get(terrainId)?.terrainImagery, undefined);
+    assert.equal(state.loading, false);
+    assert.equal(errors.length, 1);
+    assert.match(errors[0], /viewport is not ready/);
+  });
+
+  // #5942: the drape never owns the shared load UI. A raster added while an
+  // IFC streams must not end that load's spinner (it gates picking), yet the
+  // spinner `addModel` raised for the raster itself must still come down.
+  for (const owner of ['another streaming load', 'a point-cloud stream', 'no load'] as const) {
+    it(`a drape leaves the load UI ${owner === 'no load' ? 'idle when no load owns it' : `to ${owner}`} (#5942)`, async () => {
+      await loadTerrain();
+      const streaming = { phase: 'Processing geometry', percent: 40 };
+      act(() => {
+        const s = useViewerStore.getState();
+        // A point-cloud stream holds only the stream slot, yet still owns the card.
+        if (owner === 'another streaming load') s.setActiveLoadCanceller(() => {});
+        if (owner === 'a point-cloud stream') s.setActiveStreamCanceller(() => {});
+        s.setLoading(true);
+        s.setProgress(streaming);
+      });
+      const original = toast.error;
+      toast.error = () => {};
+      try {
+        await act(async () => hookApi!.loadFile(orthoBundle(), { kind: 'federated', modelId: 'raster-model' }));
+      } finally {
+        toast.error = original;
+        useViewerStore.getState().setActiveLoadCanceller(null);
+        useViewerStore.getState().setActiveStreamCanceller(null);
+      }
+      const state = useViewerStore.getState();
+      if (owner === 'no load') {
+        assert.equal(state.loading, false, 'the raster add ends its own spinner');
+        assert.equal(state.progress, null);
+      } else {
+        assert.equal(state.loading, true, 'the streaming load keeps its spinner');
+        assert.equal(state.progress?.phase, streaming.phase, 'and its progress');
+        assert.equal(state.progress?.percent, streaming.percent);
+      }
+    });
+  }
+
+  it('routes IFC orthophotos through loadFile and refuses unfinished geometry with retry guidance (#8552)', async () => {
+    const model = { ...fixtureModel('streaming-ifc'), loadState: 'streaming-geometry' as const, geometryResult: null };
+    const spatialReference = spatialReferenceFromIfc({
+      mapConversion: { id: 1, sourceCRS: 1, targetCRS: 2, eastings: 2600000, northings: 1200000, orthogonalHeight: 500, scale: 1 },
+      projectedCRS: { id: 2, name: 'EPSG:2056', mapUnitScale: 1 }, lengthUnitScale: 1,
+    });
+    useViewerStore.setState({ ...fixtureModels(model), geometryStreamingActive: true,
+      modelPlacement: { ...useViewerStore.getState().modelPlacement,
+        realignedFrameKey: georeferencedPlacementFrameKey({ spatialReference }) },
+    });
+    const before = useViewerStore.getState();
+    const errors: string[] = [];
+    const original = toast.error;
+    toast.error = message => { errors.push(message); };
+    try {
+      // The actual PNG/world-file/PRJ reader and canonical file loader run.
+      // Import no new orthophoto module: this entrypoint survives a feature revert.
+      await act(async () => hookApi!.loadFile(orthoBundle(), { kind: 'primary' }));
+    } finally { toast.error = original; }
+    assert.equal(errors.length, 1);
+    assert.match(errors[0], /Wait for all models to finish loading, then open the orthophoto again/);
+    const after = useViewerStore.getState();
+    assert.equal(after.models, before.models, 'refusal preserves the loading IFC');
+    assert.equal(after.appearanceReferences.size, before.appearanceReferences.size, 'no guessed background is registered');
+    assert.equal(after.appearanceSources.length, before.appearanceSources.length, 'no image source is retained after refusal');
+  });
+
+  it('keeps incomplete LandXML on the terrain path rather than placing an IFC background (#8552)', async () => {
+    const id = await loadTerrain();
+    const terrain = useViewerStore.getState().models.get(id)!;
+    for (const incomplete of [
+      { ...terrain, geometryResult: null },
+      { ...terrain, landXmlDocument: undefined },
+      { ...terrain, loadState: 'streaming-geometry' as const },
+    ]) {
+      useViewerStore.setState({ models: new Map([[id, incomplete]]) });
+      const before = useViewerStore.getState();
+      const errors: string[] = [];
+      const original = toast.error;
+      toast.error = message => { errors.push(message); };
+      try {
+        await act(async () => hookApi!.loadFile(orthoBundle(), { kind: 'primary' }));
+      } finally { toast.error = original; }
+      assert.equal(errors.length, 1);
+      assert.match(errors[0], /Terrain data is not ready/);
+      assert.equal(useViewerStore.getState().models, before.models);
+      assert.equal(useViewerStore.getState().appearanceReferences.size, before.appearanceReferences.size);
+      assert.equal(useViewerStore.getState().appearanceSources.length, before.appearanceSources.length);
+    }
+  });
+
+  it('refuses a raster when no terrain is loaded, naming what to do', async () => {
+    await assert.rejects(async () => drapeRasterOnTerrains(await orthoRaster()), /load a LandXML terrain first/);
+  });
+
+  it('drapes the parsed terrain: the feature vertex samples the marked texel, the rest keeps its geometry', async () => {
+    const terrainId = await loadTerrain();
+    installRenderer();
+    const before = useViewerStore.getState().models.get(terrainId)!.geometryResult!.meshes;
+    const [outcome] = await drapeRasterOnTerrains(await orthoRaster());
+    assert.ok(outcome.result.ok, outcome.result.ok ? '' : outcome.result.reason);
+    const drape = outcome.result.value;
+    assert.equal(drape.coveredVertices, 67);
+    assert.equal(drape.totalVertices, 105);
+    assert.equal(drape.imageCrs, 'EPSG:2056');
+    assert.equal(drape.reprojected, false);
+    assert.equal(drape.image?.sha256.length, 64);
+
+    // The GPU received textured copies of exactly the meshes it gave up.
+    assert.deepEqual(new Set(gpu.removed), new Set(before.map((mesh) => mesh.expressId)));
+    assert.equal(gpu.added.length, before.length);
+    const after = useViewerStore.getState().models.get(terrainId)!;
+    assert.equal(after.terrainImagery, drape);
+    const shift = after.geometryResult!.coordinateInfo.originShift;
+    let featureTexel: [number, number] | null = null;
+    for (const mesh of after.geometryResult!.meshes) {
+      const original = before.find((candidate) => candidate.expressId === mesh.expressId)!;
+      assert.equal(mesh.positions, original.positions, 'the drape never touches geometry');
+      assert.deepEqual(mesh.color.slice(0, 3), [1, 1, 1]);
+      assert.equal(mesh.textureRef?.url, 'ortho.png');
+      assert.equal(mesh.textureRef?.repeatS, false);
+      assert.ok(mesh.uvs && mesh.uvs.length === (mesh.positions.length / 3) * 2);
+      const origin = mesh.origin ?? [0, 0, 0];
+      for (let vertex = 0; vertex < mesh.positions.length / 3; vertex += 1) {
+        const east = mesh.positions[vertex * 3] + origin[0] + shift.x;
+        const north = -(mesh.positions[vertex * 3 + 2] + origin[2] + shift.z);
+        if (Math.hypot(east - FEATURE.easting, north - FEATURE.northing) > 0.01) continue;
+        // The bordered texture is 202 × 102 texels with the image at (1, 1).
+        featureTexel = [Math.floor(mesh.uvs[vertex * 2] * (ORTHO.width + 2)) - 1, Math.floor(mesh.uvs[vertex * 2 + 1] * (ORTHO.height + 2)) - 1];
+      }
+    }
+    assert.deepEqual(featureTexel, [ORTHO.marked.col, ORTHO.marked.row]);
+  });
+
+  // Follow-up to #5942: real producers (Civil 3D 2021/2022, 3D-Win 6.6.4)
+  // declare the CRS as LandXML 1.2's `epsgCode`. It was dropped by the parser,
+  // so every real terrain was refused as having no coordinate system.
+  it('drapes a terrain whose CRS is declared as producers write it, in epsgCode', async () => {
+    const terrainId = await loadTerrain('northing-first', 'epsgCode');
+    const model = useViewerStore.getState().models.get(terrainId)!;
+    assert.equal(model.landXmlDocument?.coordinateSystem?.epsgCode, '2056', 'the real parser keeps epsgCode');
+    installRenderer();
+    const [outcome] = await drapeRasterOnTerrains(await orthoRaster());
+    assert.ok(outcome.result.ok, outcome.result.ok ? '' : outcome.result.reason);
+    assert.equal(outcome.result.value.coveredVertices, 67);
+    assert.equal(outcome.result.value.reprojected, false);
+  });
+
+  it('refuses the correctly placed image on an easting-first terrain read by the real parser', async () => {
+    const terrainId = await loadTerrain('easting-first');
+    installRenderer();
+    const [outcome] = await drapeRasterOnTerrains(await orthoRaster());
+    assert.equal(outcome.result.ok, false);
+    assert.match(outcome.result.ok ? '' : outcome.result.reason, /covers no vertex/);
+    assert.equal(gpu.added.length, 0, 'nothing is uploaded for a refused drape');
+    assert.equal(useViewerStore.getState().models.get(terrainId)?.terrainImagery, undefined);
+  });
+});

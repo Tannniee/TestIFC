@@ -1,0 +1,36 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { configureAuthoredQuantityReader } from '@ifc-lite/create';
+import type { MutablePropertyView } from '@ifc-lite/mutations';
+import {
+  extractPropertiesOnDemand,
+  extractQuantitiesOnDemand,
+  extractTypeEntityOwnQuantities,
+  getInheritanceChainAcrossSchemas,
+  type IfcDataStore,
+} from '@ifc-lite/parser';
+
+/** Mutation overlays must include the full source set before rewriting it (#8056). */
+export function configureSourceMutationView(store: IfcDataStore, view: MutablePropertyView): void {
+  if (!store.source?.length) return;
+  const typeClasses = new Map<string, boolean>();
+  const isTypeObject = (id: number): boolean => {
+    // @raw-entity-enumeration-ok this callback supplies the immutable source baseline; MutablePropertyView applies live edits and creations above it
+    const name = store.entityIndex.byId.get(id)?.type;
+    if (!name) return false;
+    let result = typeClasses.get(name);
+    if (result === undefined) {
+      // IFC2X3 IfcWindowStyle carries HasPropertySets too; a Type suffix
+      // test misses it and incorrectly includes IfcRelDefinesByType.
+      result = getInheritanceChainAcrossSchemas(name).includes('IfcTypeObject');
+      typeClasses.set(name, result);
+    }
+    return result;
+  };
+  view.setOnDemandExtractor((id, current = view, occurrenceId = id) => extractPropertiesOnDemand(store, id, current, occurrenceId));
+  configureAuthoredQuantityReader(store, view, id => isTypeObject(id)
+    ? extractTypeEntityOwnQuantities(store, id)
+    : extractQuantitiesOnDemand(store, id));
+}

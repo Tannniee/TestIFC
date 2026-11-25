@@ -1,0 +1,147 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! Tests for `api::mod` — extracted from an inline `#[cfg(test)]` block so
+//! `mod.rs` stays under the module-size ratchet budget. As a child of the
+//! `api` module (`#[cfg(test)] mod mod_tests;` in `mod.rs`), `super`
+//! resolves to `api`, so these tests keep private-field access to `IfcAPI`.
+//!
+//! ## Poisoned-mutex recovery (the contract this file guards)
+//!
+//! Every `.lock()` on `IfcAPI`'s cache `Mutex` fields recovers via
+//! `.unwrap_or_else(std::sync::PoisonError::into_inner)` instead of
+//! `.expect(...)`-panicking, so one malformed file's panic no longer bricks a
+//! long-lived / multi-tenant `IfcAPI` (e.g. a parser worker reused across many
+//! `parse` calls) for the rest of its lifetime. This is safe for the cache
+//! slots (`cached_entity_index`, `cached_item_dedup`, `cached_parts_to_skip`,
+//! and friends): each is read and then replaced wholesale
+//! (`*slot = <freshly built value>` / `slot.take()`), never mutated
+//! field-by-field, so a panic while the lock is *held* necessarily happens
+//! before that one assignment runs — the guarded value is never torn, only
+//! ever the last known-good value or its untouched initial default.
+//! `pipeline_diagnostics` is the one exception (`record_batch` mutates its
+//! counters in place), but it is best-effort observability only (surfaced via
+//! `getPipelineDiagnostics`), never read for control flow or geometry
+//! correctness, so recovering there risks at most a one-batch counter
+//! undercount versus permanently losing the whole diagnostics channel.
+
+use super::IfcAPI;
+
+// Keep centerline regressions wired when the production module is reverted by
+// the changed-test oracle; the old module had its own inline tests.
+#[path = "alignment_lines_tests.rs"]
+mod alignment_lines_tests;
+
+/// A panic on another thread while it holds one of the cache mutexes
+/// (e.g. a malformed entity deep in a lazy cache rebuild) must not
+/// brick every later call on this `IfcAPI` instance. Poison
+/// `cached_entity_index` directly, exactly like a real panicking
+/// rebuild would, then assert `clearPrePassCache` — which locks every
+/// cache mutex in turn — still returns normally instead of panicking
+/// on `.expect("... Mutex poisoned")` (the pre-fix behaviour).
+#[test]
+fn clear_pre_pass_cache_recovers_from_a_poisoned_cache_mutex() {
+    let api = IfcAPI::new();
+
+    // Poison cached_entity_index: hold the lock on a spawned thread and
+    // panic while holding it. Unwinding through the MutexGuard's Drop
+    // is what marks a std::sync::Mutex poisoned.
+    let join_result = std::thread::scope(|scope| {
+        scope
+            .spawn(|| {
+                let _guard = api.content.cached_entity_index.lock().unwrap();
+                panic!("intentional poison for the poison-recovery test");
+            })
+            .join()
+    });
+    assert!(
+        join_result.is_err(),
+        "the spawned thread must have panicked while holding the lock"
+    );
+    assert!(
+        api.content.cached_entity_index.is_poisoned(),
+        "the mutex must be poisoned after the spawned thread panicked while holding it"
+    );
+
+    // Pre-fix, this call panicked on
+    // `.expect("ifc-lite cached_entity_index Mutex poisoned")`. It must
+    // now recover and clear every cache slot instead.
+    api.clear_pre_pass_cache();
+
+    // Recovering via `unwrap_or_else(PoisonError::into_inner)` does not
+    // clear the mutex's poison flag, so every future `.lock()` on it
+    // still observes `Err(PoisonError)` — the fix is recovering from
+    // that on *every* access, not a one-shot clear. Prove a second call
+    // also succeeds instead of panicking again.
+    api.clear_pre_pass_cache();
+}
+
+/// `IfcAPI::new()` installs the crate's panic hook (`crate::utils::set_panic_hook`,
+/// via `console_error_panic_hook::set_once()` is NOT called directly — see the
+/// comment on `IfcAPI::new()`). That hook's analytics location stash makes
+/// `js-sys`/`wasm-bindgen` calls with no native implementation, so it MUST stay
+/// gated to `target_arch = "wasm32"` — otherwise a panic occurring anywhere
+/// after `IfcAPI::new()` under plain `cargo test` (this crate's native test
+/// leg) double-panics while already unwinding and SIGABRTs the whole test
+/// binary instead of staying a catchable `std::thread::Result::Err`, exactly
+/// like the poison-recovery test above already demonstrates end-to-end.
+#[test]
+fn constructing_an_ifc_api_then_panicking_natively_does_not_abort_the_process() {
+    let _api = IfcAPI::new();
+    let join_result = std::thread::scope(|scope| {
+        scope
+            .spawn(|| panic!("intentional native panic after IfcAPI::new()"))
+            .join()
+    });
+    assert!(
+        join_result.is_err(),
+        "the panic must unwind to a catchable Result, not abort the process"
+    );
+}
+
+/// #7955 E2b: each geometry batch snapshots its maps under the API's model
+/// lifecycle. A later batch of the same content never expires an earlier
+/// snapshot; a content swap (`clearPrePassCache`) expires all of them, and the
+/// next load's batches snapshot afresh.
+#[test]
+fn a_content_swap_expires_every_batch_snapshot_of_the_previous_content() {
+    use ifc_lite_processing::element::{OwnedMeshProductionData, ProductionContextError};
+    let api = IfcAPI::new();
+    let model = &api.content.production_model;
+    let snapshot = || model.snapshot(OwnedMeshProductionData::default());
+    let (first, second) = (snapshot(), snapshot());
+    assert_ne!(first.id(), second.id());
+    assert!(
+        first.validate_source().is_ok(),
+        "a later batch never expires an earlier one"
+    );
+    api.clear_pre_pass_cache();
+    for stale in [&first, &second] {
+        assert_eq!(
+            stale.validate_source(),
+            Err(ProductionContextError::StaleSource)
+        );
+    }
+    assert!(snapshot().validate_source().is_ok());
+    assert!(model.owns_snapshot(&first), "same API load, expired source");
+}
+
+/// #7955 E2b: every index replacement retires the preceding source, including
+/// rejected and empty replacements, which discard the old content caches.
+#[test]
+fn entity_index_replacement_expires_previous_production_snapshots() {
+    use ifc_lite_processing::element::{OwnedMeshProductionData, ProductionContextError};
+    let api = IfcAPI::new();
+    for (ids, starts, lengths, succeeds) in [
+        (vec![1], vec![0], vec![12], true),
+        (vec![2], vec![], vec![12], false),
+        (vec![], vec![], vec![], true),
+    ] {
+        let before = api.content.production_model.snapshot(OwnedMeshProductionData::default());
+        assert_eq!(api.set_entity_index(&ids, &starts, &lengths).is_ok(), succeeds);
+        assert_eq!(before.validate_source(), Err(ProductionContextError::StaleSource));
+        let after = api.content.production_model.snapshot(OwnedMeshProductionData::default());
+        assert!(after.validate_source().is_ok());
+    }
+}

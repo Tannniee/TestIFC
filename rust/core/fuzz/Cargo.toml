@@ -1,0 +1,47 @@
+# Standalone fuzz crate for the STEP entity parser. It is intentionally NOT a
+# member of the workspace (own `[workspace]` table below) so normal
+# `cargo build --workspace` and CI ignore it; run it with `cargo fuzz`.
+[package]
+name = "ifc-lite-core-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.ifc-lite-core]
+path = ".."
+
+[[bin]]
+name = "parse_entity"
+path = "fuzz_targets/parse_entity.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "grammar_differential"
+path = "fuzz_targets/grammar_differential.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "scan_file"
+path = "fuzz_targets/scan_file.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "decode_string"
+path = "fuzz_targets/decode_string.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]

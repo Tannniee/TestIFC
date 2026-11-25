@@ -1,0 +1,181 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/** Static workspace, schedule, preference, and help commands (#5870). */
+import {
+  CalendarPlus, ChevronsRight, Crosshair, Eraser, GraduationCap, Info, LayoutTemplate, Palette,
+  PanelRight, RotateCcw, Settings, SlidersHorizontal, Sparkles, Sun,
+} from 'lucide-react';
+import { EVENT_SHOW_SHORTCUTS } from '@/lib/tours/events';
+import { openSettings } from '@/lib/settings/open-settings';
+import { resetLayout } from '@/store/layoutReset';
+import { useViewerStore } from '@/store';
+import type { SurfaceCommandContext, SurfaceCommandDefinition, SurfaceCommandState } from './surface-commands';
+
+const paletteOnly = ['palette'] as const;
+const paletteAndRibbon = ['palette', 'ribbon'] as const;
+const alwaysEnabled = (_state: SurfaceCommandState): boolean => true;
+
+export const WORKSPACE_SURFACE_COMMANDS = [
+  {
+    id: 'model:copy-to-storeys', labelKey: 'storeyManager.copy.title',
+    keywords: 'copy levels storeys floors repeat selection',
+    category: 'Tools', icon: LayoutTemplate, surfaces: paletteOnly,
+    enabled: (state: SurfaceCommandState) => state.canEditInSession,
+    run: () => {
+      const session = useViewerStore.getState().session;
+      if (!session) return;
+      void import('@/lib/actions/copy-to-storeys-open').then(m => {
+        const now = useViewerStore.getState().session;
+        if (now?.entry === session.entry && now.modelId === session.modelId) m.openCopyToStoreys();
+      });
+    },
+  },
+  {
+    id: 'learn:about', labelKey: 'keyboardShortcuts.tabs.about',
+    keywords: 'about version build privacy licenses dependencies information mcp playground', detailKey: 'commandPalette.paths.about', keywordsKey: 'commandPalette.paths.about', category: 'Learn', icon: Info,
+    surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { window.dispatchEvent(new CustomEvent(EVENT_SHOW_SHORTCUTS, { detail: { tab: 'about' } })); },
+  },
+  {
+    id: 'learn:whatsnew', labelKey: 'keyboardShortcuts.tabs.whatsNew',
+    keywords: 'what new changelog changes release notes', category: 'Learn', icon: Info,
+    surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { window.dispatchEvent(new CustomEvent(EVENT_SHOW_SHORTCUTS, { detail: { tab: 'whatsnew' } })); },
+  },
+  {
+    id: 'learn:shortcuts', labelKey: 'keyboardShortcuts.tabs.shortcuts',
+    keywords: 'keyboard shortcuts hotkeys keybindings commands help', category: 'Learn', icon: Info,
+    surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { window.dispatchEvent(new CustomEvent(EVENT_SHOW_SHORTCUTS, { detail: { tab: 'shortcuts' } })); },
+  },
+  {
+    id: 'extensions:author', labelKey: 'commandPalette.tool.extensionsAuthor.label',
+    keywords: 'create new build plan chat ai extension generate',
+    category: 'Tools', icon: Sparkles, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: (context: SurfaceCommandContext) => {
+      if (!context.activateRightPanel) throw new Error('Cannot author an extension without a panel host');
+      const state = useViewerStore.getState();
+      context.activateRightPanel('extensions');
+      state.setExtensionsRequestedView('ideas');
+      state.setIdeasOpenEmptyPlan(true);
+    },
+  },
+  {
+    id: 'extensions:flavors', labelKey: 'commandPalette.panel.flavors.label',
+    searchLabel: 'Manage flavors…',
+    keywords: 'flavor profile switch export import merge customization',
+    category: 'Panels', icon: Palette, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { useViewerStore.getState().setFlavorDialogRequested(true); },
+  },
+  {
+    id: 'sidebar:toggle', labelKey: 'commandPalette.sidebar.toggle.label',
+    keywords: 'sidebar panels show hide off optional workspace',
+    category: 'Panels', icon: PanelRight, shortcut: 'ui.toggleSidebar',
+    surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { useViewerStore.getState().toggleSidebar(); },
+  },
+  {
+    id: 'sidebar:collapse', labelKey: 'commandPalette.sidebar.collapse.label',
+    keywords: 'sidebar collapse icons rail minimize',
+    category: 'Panels', icon: ChevronsRight, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { useViewerStore.getState().setSidebarMode('collapsed'); },
+  },
+  {
+    id: 'sidebar:customize', labelKey: 'commandPalette.sidebar.customize.label',
+    keywords: 'sidebar customize reorder hide show panels edit arrange',
+    category: 'Panels', icon: SlidersHorizontal, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => {
+      const state = useViewerStore.getState();
+      state.setSidebarMode('expanded');
+      state.setSidebarCustomizing(true);
+    },
+  },
+  {
+    id: 'sidebar:reset', labelKey: 'commandPalette.sidebar.reset.label',
+    keywords: 'layout sidebar floating panels reset default order width restore',
+    category: 'Panels', icon: RotateCcw, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { resetLayout(); },
+  },
+  {
+    // Presets are previewed and applied in the Customize popover, never applied from the palette directly (#6926).
+    id: 'sidebar:layout-presets', labelKey: 'layoutPresets.paletteLabel',
+    keywords: 'layout preset coordinator review workspace arrange clash bcf assistant restore',
+    category: 'Panels', icon: LayoutTemplate, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => {
+      const state = useViewerStore.getState();
+      state.setSidebarMode('expanded');
+      state.setSidebarCustomizing(true);
+    },
+  },
+  {
+    id: 'schedule:generate', labelKey: 'commandPalette.schedule.generate.label',
+    keywords: '4d ifctask construction sequence storey building create gantt',
+    category: 'Tools', icon: CalendarPlus, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: (context: SurfaceCommandContext) => {
+      if (!context.activateBottomPanel) throw new Error('Cannot generate a schedule without a panel host');
+      const state = useViewerStore.getState();
+      if (!state.ganttPanelVisible) context.activateBottomPanel('gantt');
+      useViewerStore.getState().setGenerateScheduleDialogOpen(true);
+    },
+  },
+  {
+    id: 'schedule:toggle-animation', labelKey: 'commandPalette.schedule.toggleAnimation.label',
+    keywords: 'play pause schedule task gantt simulation',
+    category: 'Visibility', icon: Sparkles, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => {
+      const state = useViewerStore.getState();
+      state.setAnimationEnabled(!state.animationEnabled);
+    },
+  },
+  {
+    id: 'schedule:reset', labelKey: 'commandPalette.schedule.reset.label',
+    keywords: 'remove gantt tasks ifctask delete clear',
+    category: 'Tools', icon: Eraser, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => {
+      const state = useViewerStore.getState();
+      state.setScheduleData(null);
+      state.setAnimationEnabled(false);
+      state.pauseSchedule();
+    },
+  },
+  {
+    id: 'pref:theme', labelKey: 'commandPalette.pref.theme.label',
+    keywords: 'dark light mode appearance switch',
+    category: 'Preferences', icon: Sun, shortcut: 'ui.toggleTheme',
+    surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { useViewerStore.getState().toggleTheme(); },
+  },
+  {
+    id: 'pref:colorful', labelKey: 'commandPalette.pref.colorful.label',
+    keywordsKey: 'commandPalette.pref.colorful.aliases',
+    keywords: 'colorful colour color theme rainbow appearance toggle',
+    category: 'Preferences', icon: Palette, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { useViewerStore.getState().toggleColorful(); },
+  },
+  {
+    id: 'pref:tooltips', labelKey: 'commandPalette.pref.tooltips.label', ribbonLabelKey: 'ribbon.elements.hoverTips', ribbonTooltipKey: 'ribbon.elements.hoverTipsTooltip',
+    keywords: 'entity info mouse hover show hide',
+    category: 'Preferences', icon: Info, surfaces: paletteAndRibbon, enabled: alwaysEnabled,
+    run: () => { useViewerStore.getState().toggleHoverTooltips(); },
+  },
+  {
+    id: 'pref:hover-outline', labelKey: 'commandPalette.pref.hoverOutline.label', ribbonLabelKey: 'ribbon.elements.hoverHighlight', ribbonTooltipKey: 'ribbon.elements.hoverHighlightTooltip',
+    keywords: 'hover highlight outline pre-highlight entity mouse',
+    category: 'Preferences', icon: Crosshair, surfaces: paletteAndRibbon, enabled: alwaysEnabled,
+    run: () => { useViewerStore.getState().toggleHoverHighlight(); },
+  },
+  {
+    id: 'pref:settings', labelKey: 'commandPalette.pref.settings.label', ribbonLabelKey: 'ribbon.view.settings', ribbonTooltipKey: 'ribbon.view.settingsTooltip',
+    keywords: 'settings preferences options configure theme toolbar spacemouse',
+    category: 'Preferences', icon: Settings, surfaces: ['palette', 'ribbon', 'mobile'], enabled: alwaysEnabled,
+    run: () => { openSettings(); },
+  },
+  {
+    id: 'learn:hub', labelKey: 'commandPalette.learn.hub.label',
+    keywords: 'tour walkthrough learn tutorials help getting started onboarding sample demo project layer stack', detailKey: 'commandPalette.paths.learn', keywordsKey: 'commandPalette.paths.learn',
+    category: 'Learn', icon: GraduationCap, surfaces: paletteOnly, enabled: alwaysEnabled,
+    run: () => { window.dispatchEvent(new CustomEvent(EVENT_SHOW_SHORTCUTS, { detail: { tab: 'learn' } })); },
+  },
+] as const satisfies readonly SurfaceCommandDefinition[];

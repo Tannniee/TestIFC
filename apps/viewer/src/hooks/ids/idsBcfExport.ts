@@ -1,0 +1,158 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * IDS -> BCF export pipeline: entity bounds collection, optional per-topic
+ * snapshot capture, BCF project assembly, and the file write/download. Pulled
+ * out of `useIDS`'s `exportReportBCF` callback — the logic reads/writes the
+ * viewer store and renderer directly, so it isn't a "pure" function, but it
+ * has exactly one entry point and no other caller, which is what makes it a
+ * coherent module on its own rather than 230 lines inline in the hook.
+ */
+
+import { trackExportCompleted } from '@/lib/analytics';
+import type { ValidationReport } from '@ifc-lite/ids';
+import type { EntityBoundsInput, IDSBCFExportOptions } from '@ifc-lite/bcf';
+import { createBCFFromIDSReport, writeBCF } from '@ifc-lite/bcf';
+import type { GeometryResult } from '@ifc-lite/geometry';
+import { bcfExportFilename, downloadBlob } from '@/lib/export/download';
+import { IDS_BCF_MAX_TOPICS } from '@/lib/ids/bcf-topic-estimate';
+import { collectIdsBcfEntityBounds } from './idsBcfBounds';
+import { getGlobalRenderer } from '@/hooks/useBCF';
+import { bcfWorldOffset, projectViewpointsToWorld } from '@/hooks/bcf/viewpoint-world-frame';
+import type { FederatedModel } from '@/store';
+import { useViewerStore } from '@/store';
+import { completeIdsBcfViewpoints } from './idsBcfViewpoints';
+import type { IDSBCFExportSettings, IDSExportProgress } from '@/components/viewer/IDSExportDialog';
+
+export interface RunIdsBcfExportParams {
+  report: ValidationReport;
+  settings: IDSBCFExportSettings;
+  models: Map<string, FederatedModel>;
+  /** The legacy single-model geometry result, read via a ref in the caller. */
+  legacyGeometryResult: GeometryResult | null;
+  toViewerGlobalId: (modelId: string, expressId: number) => number | undefined;
+  bcfAuthor: string | undefined;
+  setBcfExportProgress: (progress: IDSExportProgress | null) => void;
+  setBcfProject: (project: ReturnType<typeof createBCFFromIDSReport>) => void;
+  setBcfPanelVisible: (visible: boolean) => void;
+}
+
+/**
+ * Runs the full IDS-report-to-BCF export: collects entity bounds, optionally
+ * builds the BCF project, captures a snapshot per exported topic, writes it,
+ * downloads it, and optionally loads it into the
+ * BCF panel. Throws on failure — the caller is responsible for catching and
+ * surfacing the error (and for resetting export progress on catch).
+ */
+export async function runIdsBcfExport({
+  report,
+  settings,
+  models,
+  legacyGeometryResult,
+  toViewerGlobalId,
+  bcfAuthor,
+  setBcfExportProgress,
+  setBcfProject,
+  setBcfPanelVisible,
+}: RunIdsBcfExportParams): Promise<void> {
+  const {
+    topicGrouping,
+    includePassingEntities,
+    includeCamera,
+    includeSnapshots,
+    loadIntoBcfPanel,
+  } = settings;
+  // BCF tools such as BIMcollab ignore viewpoints without a snapshot (#7974).
+  // Grouped topics are few, so they always try a real capture regardless of the
+  // (hidden) switch; if one can't be taken, the reporter's placeholder image
+  // keeps the viewpoint usable.
+  const snapshots = topicGrouping === 'per-specification'
+    ? (getGlobalRenderer() ? 'best-effort' : 'off')
+    : includeSnapshots ? 'required' : 'off';
+
+  // Phase 1: Collect entity bounds (needed for both camera and snapshots)
+  let entityBounds: Map<string, EntityBoundsInput> | undefined;
+
+  if (includeCamera || snapshots !== 'off') {
+    setBcfExportProgress({ phase: 'building', current: 0, total: 1, message: 'Computing entity bounds...' });
+
+    const scene = getGlobalRenderer()?.getScene();
+    entityBounds = collectIdsBcfEntityBounds(
+      report, includePassingEntities, models, legacyGeometryResult, toViewerGlobalId,
+      (id) => scene?.getEntityBoundingBox(id) ?? scene?.getInstancedEntityBounds(id),
+      useViewerStore.getState().cameraCallbacks.resolveHighlightIds,
+    );
+  }
+
+  // Phase 2: Build the capped project before spending GPU work on snapshots
+  setBcfExportProgress({ phase: 'writing', current: 0, total: 1, message: 'Building BCF project...' });
+
+  // Rule-set reports (#5138, PR 3 onward) have no `IDSDocument` to read a
+  // title/author from.
+  const document = report.source.kind === 'ids' ? report.source.document : null;
+
+  // NOT implemented in this PR (plan §6: "one topic per failed SetResult…
+  // if ≤60 lines, else say so"): `SetResult.members` is `{modelId,
+  // expressId}[]`, with no IFC GlobalId to hand `createTopic`'s
+  // `components: [{ ifcGuid }]` directly (`packages/bcf/src/
+  // ids-reporter.ts:719-778`) — every existing entity-result topic gets its
+  // `ifcGuid` from `EntityResult.globalId`, which `SetResult` has no
+  // equivalent of. Resolving one would need either a GlobalId lookup
+  // threaded into the published `@ifc-lite/bcf` package's report input, or
+  // pre-resolving every member's GlobalId in this file before calling
+  // `createBCFFromIDSReport` and widening `IDSReportInput`/
+  // `buildTopicsPerEntity`'s sibling to accept `setResults` — both are a
+  // real package API change (versioning, a changeset, its own tests), not a
+  // ≤60-line addition here. Per-entity topics (including a rule set's
+  // `duplicate` member rows, which land in `entityResults` too) already
+  // export correctly; only the SET-level summary topic is missing.
+
+  const exportOptions: IDSBCFExportOptions = {
+    author: bcfAuthor || document?.info.author || 'ids-validator@ifc-lite',
+    projectName: `IDS Report${report.targetScope ? ` (filtered, ${report.targetScope.entityCount} candidates)` : ''} - ${document?.info.title ?? 'Untitled'}`,
+    topicGrouping,
+    includePassingEntities,
+    maxTopics: IDS_BCF_MAX_TOPICS,
+    entityBounds,
+    aspectRatio: getGlobalRenderer()?.getCamera().getAspect(),
+  };
+
+  const bcfProject = createBCFFromIDSReport(
+    {
+      title: document?.info.title ?? 'Validation Report',
+      description: document?.info.description,
+      specificationResults: report.specificationResults,
+    },
+    exportOptions,
+  );
+  if (report.targetScope) {
+    const note = `Filtered population: ${report.targetScope.entityCount} candidates. This is not a whole-model validation.`;
+    for (const topic of bcfProject.topics.values()) topic.description = [note, topic.description].filter(Boolean).join('\n\n');
+  }
+  await completeIdsBcfViewpoints(
+    bcfProject, report, entityBounds, getGlobalRenderer(), toViewerGlobalId,
+    useViewerStore.getState().cameraCallbacks.resolveHighlightIds,
+    { includeCamera, snapshots }, setBcfExportProgress,
+  );
+  // Entity bounds (and so the framing cameras) are in the render frame; BCF is world (#4806).
+  projectViewpointsToWorld(bcfProject, bcfWorldOffset(models, legacyGeometryResult));
+
+  // Phase 4: Write BCF and download
+  setBcfExportProgress({ phase: 'writing', current: 1, total: 2, message: 'Writing BCF file...' });
+
+  const blob = await writeBCF(bcfProject);
+  downloadBlob(blob, bcfExportFilename(`ids-report-${new Date().toISOString().split('T')[0]}`));
+  trackExportCompleted({ format: 'bcfzip', surface: 'ids_panel' });
+
+  // Phase 5: Load into BCF panel if requested
+  if (loadIntoBcfPanel) {
+    setBcfProject(bcfProject);
+    setBcfPanelVisible(true);
+  }
+
+  // The caller owns clearing this after a delay: it knows whether a newer
+  // export has started since.
+  setBcfExportProgress({ phase: 'done', current: 1, total: 1, message: 'Export complete!' });
+}

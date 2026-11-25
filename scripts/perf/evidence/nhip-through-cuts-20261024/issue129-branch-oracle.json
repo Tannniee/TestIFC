@@ -1,0 +1,38 @@
+[
+  {
+    "id": 12381,
+    "native": {
+      "vertices": 4270,
+      "triangles": 3356,
+      "volume": 1437.085193359854,
+      "area": 2905.749244307419
+    },
+    "oracle": {
+      "vertices": 1870,
+      "triangles": 3868,
+      "volume": 1437.1123237457978,
+      "area": 2906.0648670296837
+    },
+    "sampledMaxDistanceMm": 40.95409530942901,
+    "relativeVolumeErrorPercent": 0.0018878403236482902,
+    "maxBoundsDeltaMm": 0.5644389893859625
+  },
+  {
+    "id": 32810,
+    "native": {
+      "vertices": 2598,
+      "triangles": 1764,
+      "volume": 881.2594578233411,
+      "area": 1257.4453817880953
+    },
+    "oracle": {
+      "vertices": 1136,
+      "triangles": 2304,
+      "volume": 881.3038037897683,
+      "area": 1257.5004441087644
+    },
+    "sampledMaxDistanceMm": 1.3856602893072525,
+    "relativeVolumeErrorPercent": 0.005031859188223493,
+    "maxBoundsDeltaMm": 0.36080298013985157
+  }
+]

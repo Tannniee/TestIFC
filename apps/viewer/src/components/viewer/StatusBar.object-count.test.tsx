@@ -1,0 +1,565 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * StatusBar's "N elements" counts OBJECTS — physical elements that have a
+ * shape — for the whole model and for a selected storey, and the two halves of
+ * "N / M elements" answer the same question (#4655).
+ *
+ * The storey half used to be `spatialHierarchy.byStorey.get(id).length`: the
+ * raw `IfcRelContainedInSpatialStructure` membership, with no schema filter and
+ * no geometry filter. On `Building-Structural.ifc` storey #43 that reads 7
+ * where the hierarchy trees read 6, because
+ *
+ *   #162=IFCBUILDINGELEMENTPROXY('1CjP_CWub368bZVuVHeHs3',#1,'Group#21',$,$,#165,$,…);
+ *
+ * has an ObjectPlacement and `Representation = $` — an authoring-tool group
+ * artifact that cannot be seen, isolated, measured or exported.
+ *
+ * The fixture below reproduces that storey's shape and adds every other case
+ * the rule has to separate, so a pass here cannot come from a fixture that
+ * happens to contain none of them.
+ */
+
+import '@/test/setup-dom.js';
+import 'fake-indexeddb/auto';
+// `__APP_VERSION__` is a vite `define` (see vite.config.ts) baked in at build
+// time; under plain Node it doesn't exist, so StatusBar's footer version
+// string needs a stand-in before it renders.
+(globalThis as unknown as { __APP_VERSION__: string }).__APP_VERSION__ = '0.0.0-test';
+import { describe, it, beforeEach, after, mock } from 'node:test';
+import assert from 'node:assert/strict';
+import { act } from 'react';
+import { expireStoreBusyCap, settleLoadWindow, untilReleased } from '@/test/load-window';
+import { markModelLoadEnded } from '@/hooks/modelLoadEnd';
+import { createRoot, type Root } from 'react-dom/client';
+import { IfcParser, type IfcDataStore } from '@ifc-lite/parser';
+import { MutablePropertyView, StoreEditor } from '@ifc-lite/mutations';
+import type { GeometryResult, MeshData } from '@ifc-lite/geometry';
+import { createBimContext } from '@ifc-lite/sdk';
+import { useViewerStore } from '@/store/index.js';
+import { ExtensionHostService } from '@/services/extensions/host.js';
+import { ExtensionHostContext } from '@/sdk/ExtensionHostProvider.js';
+import { StatusBar } from './StatusBar.js';
+import { guid } from './anonymized-export/anonymized-export-fixture.test-support.js';
+
+/**
+ * Storey #40 contains six entities:
+ *
+ * | id  | type                     | shape         | object? | why                           |
+ * |-----|--------------------------|---------------|---------|-------------------------------|
+ * | #50 | IfcWall                  | own mesh      | yes     | the ordinary case             |
+ * | #51 | IfcBuildingElementProxy  | own mesh      | YES     | a proxy is never excluded     |
+ * | #52 | IfcBuildingElementProxy  | none          | no      | the #4655 `Representation=$`  |
+ * | #53 | IfcAnnotation            | own mesh      | no      | passes shape, fails schema    |
+ * | #54 | IfcSpace                 | own mesh      | no      | IfcProduct, not IfcElement    |
+ * | #55 | IfcRoof                  | via aggregate | YES     | its mesh lives on the beam    |
+ *
+ * plus two entities outside the storey: #56 `IfcBeam` (own mesh), aggregated
+ * under the roof, and #57 `IfcSlab`, contained in the BUILDING. So: 6 contained
+ * rows, 3 objects in the storey, and 4 objects in the whole model (wall,
+ * proxy-with-mesh, roof, beam) when #57 has no mesh. #57 exists so a storey
+ * total of 0 can be told apart from a whole-model total of 0.
+ */
+const FIXTURE = `ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('object-count-fixture.ifc','2020-01-01T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('IFC4'));
+ENDSEC;
+DATA;
+#1=IFCPROJECT('${guid(1)}',$,'Project',$,$,$,$,$,$);
+#2=IFCSITE('${guid(2)}',$,'Site',$,$,$,$,$,.ELEMENT.,$,$,$,$,$);
+#3=IFCBUILDING('${guid(3)}',$,'Building',$,$,$,$,$,.ELEMENT.,$,$,$);
+#4=IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,1.E-05,$,$);
+#5=IFCSHAPEREPRESENTATION(#4,'Body','SweptSolid',());
+#6=IFCPRODUCTDEFINITIONSHAPE($,$,(#5));
+#40=IFCBUILDINGSTOREY('${guid(40)}',$,'00 groundfloor',$,$,$,$,$,.ELEMENT.,0.);
+#50=IFCWALL('${guid(50)}',$,'Wall',$,$,$,#6,$,$);
+#51=IFCBUILDINGELEMENTPROXY('${guid(51)}',$,'Proxy with geometry',$,$,$,#6,$,$);
+#52=IFCBUILDINGELEMENTPROXY('${guid(52)}',$,'Group#21',$,$,$,$,$,$);
+#53=IFCANNOTATION('${guid(53)}',$,'Dimension line',$,$,$,#6);
+#54=IFCSPACE('${guid(54)}',$,'Living room',$,$,$,#6,$,.ELEMENT.,$,$);
+#55=IFCROOF('${guid(55)}',$,'Roof assembly',$,$,$,$,$,$);
+#56=IFCBEAM('${guid(56)}',$,'Girder',$,$,$,#6,$,$);
+#57=IFCSLAB('${guid(57)}',$,'Slab outside the storey',$,$,$,#6,$,$);
+#70=IFCRELAGGREGATES('${guid(70)}',$,$,$,#1,(#2));
+#71=IFCRELAGGREGATES('${guid(71)}',$,$,$,#2,(#3));
+#72=IFCRELAGGREGATES('${guid(72)}',$,$,$,#3,(#40));
+#73=IFCRELAGGREGATES('${guid(73)}',$,$,$,#55,(#56));
+#80=IFCRELCONTAINEDINSPATIALSTRUCTURE('${guid(80)}',$,$,$,(#50,#51,#52,#53,#54,#55),#40);
+#81=IFCRELCONTAINEDINSPATIALSTRUCTURE('${guid(81)}',$,$,$,(#57),#3);
+ENDSEC;
+END-ISO-10303-21;
+`;
+
+const STOREY_ID = 40;
+/** Every fixture entity the geometry pipeline produced a mesh for. #52 (no
+ *  Representation) and #55 (an assembly) are deliberately absent. */
+const MESHED_IDS = [50, 51, 53, 54, 56];
+
+function mesh(expressId: number): MeshData {
+  return {
+    expressId,
+    positions: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]),
+    normals: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1]),
+    indices: new Uint32Array([0, 1, 2]),
+    color: [1, 1, 1, 1],
+  };
+}
+
+function geometry(expressIds: readonly number[]): GeometryResult {
+  return {
+    meshes: expressIds.map(mesh),
+    totalTriangles: expressIds.length,
+    totalVertices: expressIds.length * 3,
+  } as GeometryResult;
+}
+
+const stubHost = new ExtensionHostService({
+  sdk: createBimContext({
+    transport: {
+      send: () => Promise.reject(new Error('SDK transport is not exercised by this test')),
+      subscribe: () => () => {},
+      close: () => {},
+    },
+  }),
+});
+
+async function parseFixture(): Promise<IfcDataStore> {
+  const bytes = new TextEncoder().encode(FIXTURE);
+  return new IfcParser().parseColumnar(
+    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+  );
+}
+
+const mounted: Array<{ root: Root; container: HTMLElement }> = [];
+function render(): HTMLElement {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() => {
+    root.render(
+      <ExtensionHostContext.Provider value={stubHost}>
+        <StatusBar />
+      </ExtensionHostContext.Provider>,
+    );
+  });
+  mounted.push({ root, container });
+  return container;
+}
+function unmountAll(): void {
+  for (const { root, container } of mounted.splice(0)) {
+    act(() => root.unmount());
+    container.remove();
+  }
+}
+after(unmountAll);
+
+let store: IfcDataStore;
+
+beforeEach(async () => {
+  unmountAll();
+  store = await parseFixture();
+  useViewerStore.setState({
+    ifcDataStore: store,
+    geometryResult: geometry(MESHED_IDS),
+    activeModelId: null,
+    models: new Map(),
+    selectedStoreys: new Set<number>(),
+    mutationViews: new Map(),
+    mutationVersion: 0,
+    geometryStreamingActive: false,
+    loading: false,
+    hiddenEntities: new Set<number>(),
+  });
+  await settleLoadWindow(); // a window left open by the previous test closes before this one renders
+});
+
+/** The rendered "… elements" run, e.g. "3 / 4 elements". */
+function elementsText(container: HTMLElement): string {
+  const text = container.textContent ?? '';
+  const match = /((?:\d[\d,.\s/]*|—\s*)elements?)/.exec(text);
+  return match ? match[1].trim() : `<no element count in ${JSON.stringify(text)}>`;
+}
+
+describe('StatusBar — "N elements" counts physical elements that have a shape (#4655)', () => {
+  it('counts a selected storey by the object rule, not by raw containment', () => {
+    useViewerStore.setState({ selectedStoreys: new Set<number>([STOREY_ID]) });
+    const container = render();
+
+    // 6 entities are contained in the storey. 3 are objects: the wall, the
+    // proxy that HAS a mesh, and the roof whose mesh lives on its aggregated
+    // beam. The shapeless proxy, the annotation and the space are not.
+    assert.equal(
+      elementsText(container),
+      '3 / 4 elements',
+      'the storey holds 6 contained entities and 3 objects; the model holds 4 objects',
+    );
+  });
+
+  it('admits a proxy with geometry and rejects one without — never the class, never the name', () => {
+    // Give the shapeless proxy a mesh and the count must rise by exactly one:
+    // the class and the name ("Group#21") are identical either way, so only
+    // the shape can have moved the number.
+    useViewerStore.setState({
+      selectedStoreys: new Set<number>([STOREY_ID]),
+      geometryResult: geometry([...MESHED_IDS, 52]),
+    });
+    const container = render();
+    assert.equal(elementsText(container), '4 / 5 elements');
+  });
+
+  it('drops the assembly when its aggregated part loses its mesh', () => {
+    setMeshedIds(MESHED_IDS.filter((id) => id !== 56));
+    const container = render();
+    // Storey: wall + proxy-with-mesh = 2. Model: the same 2 (the roof has no
+    // shape anywhere now, and the beam lost its own). The "/ N" fraction is
+    // suppressed when the two halves agree, so this renders as one number.
+    assert.equal(elementsText(container), '2 elements');
+  });
+
+  it('reports the whole-model object total with no storey selected', () => {
+    const container = render();
+    assert.equal(elementsText(container), '4 elements', 'no "/ N" fraction without a storey selection');
+  });
+
+  it('updates whole-model and selected-storey counts for live deletes, retypes and creations (#5249)', () => {
+    const view = new MutablePropertyView(store.properties, '__legacy__');
+    view.setExpressIdWatermark(100);
+    const editor = new StoreEditor(store, view);
+    const container = render();
+    assert.equal(elementsText(container), '4 elements');
+
+    editor.removeEntity(50);
+    act(() => useViewerStore.setState({
+      mutationViews: new Map([['__legacy__', view]]), mutationVersion: 1,
+    }));
+    assert.equal(elementsText(container), '3 elements');
+
+    view.setEntityType(51, 'IfcAnnotation');
+    act(() => useViewerStore.setState({ mutationVersion: 2 }));
+    assert.equal(elementsText(container), '2 elements');
+
+    const created = editor.addEntity('IfcWall', []);
+    act(() => useViewerStore.setState({
+      geometryResult: geometry([...MESHED_IDS, created.expressId]),
+      mutationVersion: 3,
+      selectedStoreys: new Set([STOREY_ID]),
+    }));
+    assert.equal(elementsText(container), '1 / 3 element');
+  });
+
+  it('counts a newly contained wall in the selected storey (#5249)', () => {
+    const view = new MutablePropertyView(store.properties, '__legacy__');
+    view.setExpressIdWatermark(100);
+    const created = view.createEntity('IfcWall', [guid(101), null, 'New wall', null, null, null, null, null]);
+    view.createEntity('IfcRelContainedInSpatialStructure', [
+      guid(102), null, null, null, [`#${created.expressId}`], `#${STOREY_ID}`,
+    ]);
+    useViewerStore.setState({
+      mutationViews: new Map([['__legacy__', view]]),
+      geometryResult: geometry([...MESHED_IDS, created.expressId]),
+      selectedStoreys: new Set([STOREY_ID]),
+    });
+    const container = render();
+    assert.equal(elementsText(container), '4 / 5 elements');
+  });
+
+  it('drops source members when their containment relationship moves to a building (#5249)', () => {
+    const view = new MutablePropertyView(store.properties, '__legacy__');
+    view.setAttribute(80, 'RelatingStructure', '#3');
+    useViewerStore.setState({
+      mutationViews: new Map([['__legacy__', view]]),
+      selectedStoreys: new Set([STOREY_ID]),
+    });
+    const container = render();
+    assert.equal(elementsText(container), '0 / 4 elements');
+  });
+
+  it('counts the children of a source building retyped into a storey (#5249 review)', () => {
+    const view = new MutablePropertyView(store.properties, '__legacy__');
+    view.setEntityType(3, 'IfcBuildingStorey');
+    useViewerStore.setState({
+      mutationViews: new Map([['__legacy__', view]]),
+      geometryResult: geometry([...MESHED_IDS, 57]),
+      selectedStoreys: new Set([3]),
+    });
+    const container = render();
+    assert.equal(elementsText(container), '1 / 5 element');
+  });
+
+  it('falls back to the schema test alone before any mesh has arrived', () => {
+    // Mid-stream: no geometry yet. Applying the shape test here would report a
+    // model that plainly has objects as empty.
+    useViewerStore.setState({
+      selectedStoreys: new Set<number>([STOREY_ID]),
+      geometryResult: null,
+    });
+    const container = render();
+    // Storey: wall, both proxies, roof = 4 (annotation and space still fail
+    // the schema test). Model: those 4 plus the beam and the slab = 6.
+    assert.equal(elementsText(container), '4 / 6 elements');
+  });
+
+  it('reports 0 for a storey whose contained entities are all non-objects', () => {
+    // Only the annotation and the space have meshes; nothing in the storey is
+    // an object. The number must be 0, not a silent fallback to the model
+    // total.
+    setMeshedIds([53, 54]);
+    const container = render();
+    assert.equal(
+      elementsText(container),
+      '0 elements',
+      'a resolved storey with no objects must report 0, not fall through to the model total',
+    );
+  });
+
+  it('reports 0 for an empty storey even when the model elsewhere has objects', () => {
+    // The slab sits in the BUILDING, not the storey, and is the only thing
+    // with a mesh besides the annotation and the space. A storey count of 0
+    // must survive: a falsy-zero fallback would print the model's 1 instead.
+    setMeshedIds([53, 54, 57]);
+    const container = render();
+    assert.equal(elementsText(container), '0 / 1 elements');
+  });
+});
+
+function setMeshedIds(expressIds: readonly number[]): void {
+  useViewerStore.setState({
+    selectedStoreys: new Set<number>([STOREY_ID]),
+    geometryResult: geometry(expressIds),
+  });
+}
+
+// #6411: while geometry streams, each publish carries more meshes and the
+// count walks every one of them, twice a second on a large load. The count
+// follows the streaming refresh cadence instead and is exact once streaming
+// ends.
+describe('StatusBar — object count waits for the load to settle (load window; supersedes #6411\'s streaming hold)', () => {
+  it('shows a dash, never a provisional 0, while geometry streams, and the exact count once the load settles', async () => {
+    useViewerStore.setState({
+      geometryStreamingActive: true,
+      geometryResult: geometry(MESHED_IDS.filter((id) => id !== 56)),
+    });
+    const container = render();
+    assert.equal(elementsText(container), '— elements', 'early read: placeholder while the load window is open');
+    act(() => useViewerStore.setState({ geometryResult: geometry(MESHED_IDS) }));
+    assert.equal(elementsText(container), '— elements', 'a publish inside the window computes nothing');
+
+    act(() => useViewerStore.setState({ geometryStreamingActive: false }));
+    assert.equal(elementsText(container), '— elements', 'the settled frame paints before the count is computed');
+    await settleLoadWindow();
+    assert.equal(elementsText(container), '4 elements', 'settled: the exact count');
+  });
+
+  it('keeps the placeholder through a store publication while the load is still loading, then counts the new store', async () => {
+    useViewerStore.setState({
+      loading: true,
+      geometryStreamingActive: false,
+      geometryResult: geometry(MESHED_IDS.filter((id) => id !== 56)),
+    });
+    const container = render();
+    assert.equal(elementsText(container), '— elements');
+    const reparsed = await parseFixture();
+    act(() => useViewerStore.setState({ ifcDataStore: reparsed, geometryResult: geometry(MESHED_IDS) }));
+    assert.equal(elementsText(container), '— elements', 'metadata inside the window waits too');
+
+    act(() => useViewerStore.setState({ loading: false }));
+    await settleLoadWindow();
+    assert.equal(elementsText(container), '4 elements', 'settled on the new store and geometry');
+  });
+
+  it('does not run the whole-model walk while the window is open', async () => {
+    const real = useViewerStore.getState().resolveGlobalIdInModel;
+    let calls = 0;
+    // The model is loading when the window opens, so its walk is held.
+    const model = { id: 'm1', name: 'm1', ifcDataStore: store, geometryResult: geometry(MESHED_IDS), visible: true, idOffset: 0, maxExpressId: 100, loadState: 'streaming-geometry' };
+    useViewerStore.setState({
+      models: new Map([['m1', model as never]]),
+      geometryStreamingActive: true,
+      resolveGlobalIdInModel: (modelId: string, id: number) => { calls++; return real(modelId, id); },
+    } as never);
+    try {
+      const container = render();
+      assert.equal(calls, 0, 'early read: no mesh id was mapped, so no walk ran');
+      act(() => useViewerStore.setState({ geometryStreamingActive: false }));
+      await settleLoadWindow();
+      assert.ok(calls > 0, 'settled: the walk ran');
+      assert.notEqual(elementsText(container), '— elements', 'settled: a number, not the placeholder');
+    } finally {
+      useViewerStore.setState({ resolveGlobalIdInModel: real } as never);
+    }
+  });
+
+  it('keeps one box (tabular figures, a minimum width for the dash and a typical count) in both states', async () => {
+    useViewerStore.setState({ geometryStreamingActive: true, geometryResult: geometry(MESHED_IDS) });
+    const container = render();
+    const count = () => container.querySelector('[data-testid="status-element-count"]');
+    const pending = count()?.className;
+    assert.equal(count()?.getAttribute('aria-busy'), 'true');
+    act(() => useViewerStore.setState({ geometryStreamingActive: false }));
+    await settleLoadWindow();
+    assert.equal(count()?.className, pending, 'the same box classes before and after (a long count may still widen it)');
+    assert.match(String(pending), /(^|\s)min-w-24(\s|$)/, 'a spacing token, not an arbitrary value (UI drift ratchet)');
+    assert.equal(count()?.getAttribute('aria-busy'), null);
+  });
+});
+
+// Main's streaming-hold tests (#6411), unchanged. Inside a load window a loading
+// model is held outright; the throttle still governs a stream that outlives the
+// store-busy limit, so these run after that limit has expired.
+describe('StatusBar — object count while geometry streams (#6411)', () => {
+  it('holds the count between refreshes and lands the exact count when streaming ends', async () => {
+    let clock = 0;
+    mock.method(performance, 'now', () => clock);
+    try {
+      const container = render();
+      await expireStoreBusyCap(() => useViewerStore.setState({
+        geometryStreamingActive: true,
+        geometryResult: geometry(MESHED_IDS.filter((id) => id !== 56)),
+      }), (ms) => { clock = ms; });
+      assert.equal(elementsText(container), '2 elements');
+
+      clock += 1;
+      act(() => useViewerStore.setState({ geometryResult: geometry(MESHED_IDS) }));
+      assert.equal(elementsText(container), '2 elements', 'a publish within the refresh window is held');
+
+      act(() => useViewerStore.setState({ geometryStreamingActive: false }));
+      assert.equal(elementsText(container), '4 elements', 'streaming ended: the exact count');
+    } finally {
+      mock.restoreAll();
+    }
+  });
+
+  it('passes a non-geometry change through at once, even while streaming', async () => {
+    let clock = 0;
+    mock.method(performance, 'now', () => clock);
+    try {
+      const container = render();
+      await expireStoreBusyCap(() => useViewerStore.setState({
+        geometryStreamingActive: true,
+        geometryResult: geometry(MESHED_IDS.filter((id) => id !== 56)),
+      }), (ms) => { clock = ms; });
+      assert.equal(elementsText(container), '2 elements');
+      // Metadata arriving is a new data store, not progress: it must not wait
+      // for the geometry refresh even though geometry changed with it.
+      const reparsed = await parseFixture();
+      clock += 1;
+      act(() => useViewerStore.setState({ ifcDataStore: reparsed, geometryResult: geometry(MESHED_IDS) }));
+      assert.equal(elementsText(container), '4 elements');
+    } finally {
+      mock.restoreAll();
+    }
+  });
+
+  it('refreshes a long stream once the refresh is due', async () => {
+    let clock = 0;
+    mock.method(performance, 'now', () => clock);
+    try {
+      const container = render();
+      await expireStoreBusyCap(() => useViewerStore.setState({
+        geometryStreamingActive: true,
+        geometryResult: geometry(MESHED_IDS.filter((id) => id !== 56)),
+      }), (ms) => { clock = ms; });
+      clock += 60_000;
+      act(() => useViewerStore.setState({ geometryResult: geometry(MESHED_IDS) }));
+      assert.equal(elementsText(container), '4 elements');
+    } finally {
+      mock.restoreAll();
+    }
+  });
+});
+
+/** The "N hidden" pill text, or null when the pill is not shown. */
+function hiddenPill(container: HTMLElement): string | null {
+  const match = /(\d+) hidden/.exec(container.textContent ?? '');
+  return match ? match[1] : null;
+}
+
+describe('StatusBar — a federated add holds only the model that is loading', () => {
+  const federated = (id: string, ds: IfcDataStore, idOffset: number, loadState: string) => ({
+    id, name: id, ifcDataStore: ds, geometryResult: geometry(MESHED_IDS.map((x) => x + idOffset)),
+    visible: true, collapsed: false, idOffset, maxExpressId: 100, loadState, fileSize: 1, loadedAt: 0,
+  });
+
+  it('keeps settled model A\'s count and hidden pill while B loads, and adds B\'s at its settle', async () => {
+    const storeB = await parseFixture();
+    const a = federated('A', store, 0, 'complete');
+    useViewerStore.setState({
+      models: new Map([['A', a as never]]), ifcDataStore: store, activeModelId: 'A',
+      hiddenEntities: new Set([50]),
+    } as never);
+    const container = render();
+    assert.equal(elementsText(container), '4 elements', 'A settled: its count');
+    assert.equal(hiddenPill(container), '1');
+
+    // B is added: the load window opens with A already complete.
+    act(() => useViewerStore.setState({ loading: true }));
+    act(() => useViewerStore.setState({ models: new Map([['A', a as never], ['B', federated('B', storeB, 1000, 'pending') as never]]) }));
+    act(() => useViewerStore.setState({ geometryStreamingActive: true }));
+    assert.equal(elementsText(container), '4 elements', 'A keeps its count while B loads; B is not counted yet');
+    assert.equal(hiddenPill(container), '1', 'A keeps its hidden pill while B loads');
+
+    act(() => useViewerStore.setState({
+      models: new Map([['A', a as never], ['B', federated('B', storeB, 1000, 'complete') as never]]),
+      geometryStreamingActive: false, loading: false,
+    }));
+    assert.equal(elementsText(container), '4 elements', 'the settled frame paints before B is counted');
+    await settleLoadWindow();
+    assert.equal(elementsText(container), '8 elements', 'settled: A and B');
+    assert.equal(hiddenPill(container), '1');
+  });
+
+  it('multi-file open: A\'s count appears at A\'s settle while B, started at once, is held', async () => {
+    const storeB = await parseFixture();
+    act(() => useViewerStore.setState({ loading: true, models: new Map([['A', federated('A', store, 0, 'pending') as never]]), ifcDataStore: store, activeModelId: 'A' } as never));
+    const container = render();
+    assert.equal(elementsText(container), '— elements', 'A is loading');
+    act(() => useViewerStore.setState({ models: new Map([['A', federated('A', store, 0, 'complete') as never]]) }));
+    act(() => markModelLoadEnded('A'));
+    act(() => useViewerStore.setState({ models: new Map([['A', federated('A', store, 0, 'complete') as never], ['B', federated('B', storeB, 1000, 'pending') as never]]) }));
+    await settleLoadWindow(await untilReleased('A'));
+    assert.equal(useViewerStore.getState().loading, true);
+    assert.equal(elementsText(container), '4 elements', 'A settled: its count, although B started loading before its frame');
+    act(() => useViewerStore.setState({ models: new Map([['A', federated('A', store, 0, 'complete') as never], ['B', federated('B', storeB, 1000, 'complete') as never]]), loading: false }));
+    await settleLoadWindow();
+    assert.equal(elementsText(container), '8 elements');
+  });
+
+  for (const path of ['cache hit', 'cold load'] as const) {
+    it(`single-model ${path}: no count walk between the record turning complete and the UI settle`, async () => {
+      const real = useViewerStore.getState().resolveGlobalIdInModel;
+      let calls = 0;
+      useViewerStore.setState({ resolveGlobalIdInModel: (m: string, id: number) => { calls++; return real(m, id); } } as never);
+      try {
+        act(() => useViewerStore.setState({ loading: true, ifcDataStore: store, activeModelId: 'A', models: new Map([['A', federated('A', store, 0, 'pending') as never]]) } as never));
+        const container = render();
+        if (path === 'cold load') {
+          act(() => useViewerStore.setState({ geometryStreamingActive: true, models: new Map([['A', federated('A', store, 0, 'streaming-geometry') as never]]) }));
+          act(() => useViewerStore.setState({ geometryStreamingActive: false }));
+        }
+        act(() => useViewerStore.setState({ models: new Map([['A', federated('A', store, 0, 'complete') as never]]) }));
+        await settleLoadWindow(); await settleLoadWindow();
+        assert.equal(calls, 0, 'record complete, UI not settled: no mesh id mapped, so no walk ran');
+        assert.equal(elementsText(container), '— elements');
+        act(() => { useViewerStore.setState({ loading: false }); markModelLoadEnded('A'); });
+        await settleLoadWindow();
+        assert.ok(calls > 0);
+        assert.equal(elementsText(container), '4 elements');
+      } finally {
+        useViewerStore.setState({ resolveGlobalIdInModel: real } as never);
+      }
+    });
+  }
+
+  it('shows the dash for a loading model that has no store yet, never "0 elements"', async () => {
+    act(() => useViewerStore.setState({ loading: true, ifcDataStore: null, models: new Map([['A', { ...federated('A', store, 0, 'pending'), ifcDataStore: null } as never]]) } as never));
+    const container = render();
+    assert.equal(elementsText(container), '— elements', 'federated/primary placeholder before its store');
+    act(() => useViewerStore.setState({ models: new Map() } as never));
+    assert.equal(elementsText(container), '— elements', 'single-store mode before its store');
+  });
+});
+

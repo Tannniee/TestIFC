@@ -1,0 +1,276 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * BCFTopicList - Topic list with filtering and sorting for the BCF panel.
+ */
+
+import React, { useCallback, useState, useMemo, useId } from 'react';
+import {
+  Plus,
+  MessageSquare,
+  Camera,
+  Filter,
+  Edit2,
+  User,
+  Calendar,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ResultView, ResultSource, ResultCoverage } from '../result/ResultView';
+import { ResultState } from '../result/ResultState';
+import { AnalysisResultList } from '../analysis/AnalysisResultList';
+import { tourAnchor, TOUR_ANCHORS } from '@/lib/tours/anchors';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { BCFTopic } from '@ifc-lite/bcf';
+import { useTranslation } from '@/i18n';
+import { StatusBadge, PriorityBadge, formatDate, TOPIC_STATUSES } from './bcfHelpers';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface BCFTopicListProps {
+  projectName?: string;
+  topics: BCFTopic[];
+  onSelectTopic: (topicId: string) => void;
+  onCreateTopic: () => void;
+  statusFilter: string;
+  onStatusFilterChange: (status: string) => void;
+  author: string;
+  onSetAuthor: (author: string) => void;
+}
+
+// ============================================================================
+// Component
+// ============================================================================
+
+export function BCFTopicList({
+  projectName,
+  topics,
+  onSelectTopic,
+  onCreateTopic,
+  statusFilter,
+  onStatusFilterChange,
+  author,
+  onSetAuthor,
+}: BCFTopicListProps) {
+  const { t } = useTranslation();
+  const emailInputId = useId();
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [emailInput, setEmailInput] = useState(author);
+  const focusEmail = useCallback((input: HTMLInputElement | null) => { input?.focus(); }, []);
+  const isDefaultEmail = author === 'user@example.com';
+
+  const handleSaveEmail = useCallback(() => {
+    if (emailInput.trim() && emailInput.includes('@')) {
+      onSetAuthor(emailInput.trim());
+      setEditingEmail(false);
+    }
+  }, [emailInput, onSetAuthor]);
+  const filteredTopics = useMemo(() => {
+    if (!statusFilter || statusFilter === 'all') return topics;
+    return topics.filter(
+      (t) => t.topicStatus?.toLowerCase() === statusFilter.toLowerCase()
+    );
+  }, [topics, statusFilter]);
+
+  // Sort by creation date (newest first); a topic read back from a
+  // non-conformant source that omitted CreationDate has it undefined
+  // (see @ifc-lite/bcf's reader.ts) and sorts as oldest, never fabricated.
+  const sortedTopics = useMemo(() => {
+    const time = (t: (typeof filteredTopics)[number]) =>
+      t.creationDate ? new Date(t.creationDate).getTime() : 0;
+    return [...filteredTopics].sort((a, b) => time(b) - time(a));
+  }, [filteredTopics]);
+
+  return (
+    <ResultView
+      source={t('bcf.resultChrome.region')}
+      className="h-full"
+      header={<ResultSource source={t('bcf.resultChrome.source', { name: projectName || t('bcf.resultChrome.unnamed') })}
+        models={[]} population={t('bcf.resultChrome.population', { count: topics.length })} />}
+      // An empty workspace has no outcome to qualify: the empty state below says what to do instead.
+      coverage={topics.length > 0 && <ResultCoverage status="uncertain" counts={t('bcf.resultChrome.shown', { count: sortedTopics.length })}
+        incomplete={[t('bcf.resultChrome.coverageUnknown')]} />}
+      filters={(
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+          <SelectTrigger className="h-8 flex-1">
+            <SelectValue placeholder={t('bcf.topicList.allStatuses')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('bcf.topicList.allStatuses')}</SelectItem>
+            {TOPIC_STATUSES.map((status) => (
+              <SelectItem key={status} value={status.toLowerCase()}>
+                {status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="outline" aria-label={t('bcf.topicList.newTopicAria')} onClick={onCreateTopic} {...tourAnchor(TOUR_ANCHORS.bcfNewTopic)}>
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+      )}
+      rows={(
+      <AnalysisResultList
+        className="flex-1 min-h-0"
+        rowClassName="border-b border-border"
+        items={sortedTopics}
+        getKey={(topic) => topic.guid}
+        estimateSize={() => 88}
+        renderRow={(topic) => (
+          <button
+            onClick={() => onSelectTopic(topic.guid)}
+            className="w-full text-left p-3 hover:bg-accent/50 transition-colors"
+          >
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h4 className="font-medium text-sm line-clamp-1 flex-1">
+                {topic.title}
+              </h4>
+              <StatusBadge status={topic.topicStatus} />
+            </div>
+            {topic.description && (
+              <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                {topic.description}
+              </p>
+            )}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <PriorityBadge priority={topic.priority} />
+              {topic.creationAuthor && (
+                <span className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  {topic.creationAuthor.split('@')[0]}
+                </span>
+              )}
+              {topic.creationDate && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {formatDate(topic.creationDate)}
+                </span>
+              )}
+              {topic.comments.length > 0 && (
+                <span className="flex items-center gap-1">
+                  <MessageSquare className="h-3 w-3" />
+                  {topic.comments.length}
+                </span>
+              )}
+              {topic.viewpoints.length > 0 && (
+                <span className="flex items-center gap-1">
+                  <Camera className="h-3 w-3" />
+                  {topic.viewpoints.length}
+                </span>
+              )}
+            </div>
+          </button>
+        )}
+      >
+        {sortedTopics.length === 0 && (
+          <div className="flex flex-col items-center px-4 pb-6">
+            {topics.length > 0 ? (
+              <ResultState kind="filtered" title={t('bcf.resultChrome.filtered')} />
+            ) : (
+              <EmptyState
+                align="start"
+                role="status"
+                data-result-state="no-population"
+                icon={<MessageSquare />}
+                title={t('bcf.topicList.noTopics')}
+                description={t('bcf.topicList.emptyDescription')}
+                action={(
+                  <Button size="sm" className="h-7 gap-1.5" onClick={onCreateTopic}>
+                    <Plus className="h-3.5 w-3.5" />
+                    {t('bcf.topicList.newTopicAria')}
+                  </Button>
+                )}
+              />
+            )}
+
+            {/* Email setup nudge */}
+            <div className="w-full max-w-xs">
+              <div className="border border-border rounded-lg p-3 bg-muted/30">
+                {editingEmail ? (
+                  <div className="space-y-2">
+                    <Label htmlFor={emailInputId} className="text-xs text-muted-foreground">{t('bcf.topicList.emailAuthorshipLabel')}</Label>
+                    <Input
+                      id={emailInputId}
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder={t('bcf.shared.emailPlaceholder')}
+                      className="h-8 text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveEmail();
+                        if (e.key === 'Escape') setEditingEmail(false);
+                      }}
+                      ref={focusEmail}
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEmailInput(author);
+                          setEditingEmail(false);
+                        }}
+                        className="h-7 text-xs"
+                      >
+                        {t('bcf.shared.cancel')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSaveEmail}
+                        disabled={!emailInput.trim() || !emailInput.includes('@')}
+                        className="h-7 text-xs"
+                      >
+                        {t('bcf.shared.save')}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground mb-0.5">{t('bcf.topicList.authorLabel')}</p>
+                      {/* The shipped default is a placeholder, not an identity: say so in muted text. */}
+                      <p className={isDefaultEmail ? 'text-sm italic text-muted-foreground' : 'text-sm truncate text-foreground'}>
+                        {isDefaultEmail ? t('bcf.topicList.authorNotSet') : author}
+                      </p>
+                    </div>
+                    <Button
+                      variant={isDefaultEmail ? 'outline' : 'ghost'}
+                      size="sm"
+                      onClick={() => {
+                        setEmailInput(author);
+                        setEditingEmail(true);
+                      }}
+                      className="h-7 text-xs shrink-0"
+                      aria-label={isDefaultEmail ? undefined : t('bcf.topicList.editAuthorEmailAria')}
+                    >
+                      {isDefaultEmail ? t('bcf.topicList.setEmail') : <Edit2 className="h-3 w-3" />}
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {isDefaultEmail && !editingEmail && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  {t('bcf.topicList.setEmailNudge')}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </AnalysisResultList>
+      )}
+    />
+  );
+}

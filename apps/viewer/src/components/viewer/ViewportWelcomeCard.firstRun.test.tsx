@@ -1,0 +1,116 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * The welcome card's primary action opens the user's own model; the demo
+ * project (#5840) stays on the card as a sample and goes through the SAME
+ * `loadFile` every other open uses (not a bus event or a second pipeline). The Open button names model files, not ".ifc", and
+ * the formats under it come from the one extension list.
+ */
+import '@/test/setup-dom.js';
+import { after, afterEach, describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { act } from 'react';
+import { cleanup, click, render } from '@/test/render.js';
+import { viewportLightingEn } from '@/i18n/catalogues/viewport-lighting.en';
+import { ViewportWelcomeCard } from './ViewportWelcomeCard.js';
+import { fieldTelemetry } from '@/lib/perf/fieldTelemetryLoader.js';
+
+const DEMO_LABEL = viewportLightingEn['viewportLighting.container.emptyState.loadDemo.button'] as string | undefined;
+const OPEN_LABEL = viewportLightingEn['viewportLighting.container.emptyState.openButton.open'];
+
+function buttonWithText(container: HTMLElement, text: string): HTMLButtonElement | undefined {
+  // A sample button carries its label and a one-line hint; match the label.
+  return [...container.querySelectorAll('button')].find((b) =>
+    b.textContent?.trim() === text || [...b.querySelectorAll('span')].some((s) => s.textContent?.trim() === text));
+}
+
+function renderCard(loadFile: (file: File) => Promise<void>, supported = true) {
+  return render(
+    <ViewportWelcomeCard
+      webgpu={{ supported, checking: false }}
+      onOpenClick={() => undefined}
+      onStartBlank={() => undefined}
+      recentFiles={[]}
+      loadFile={loadFile}
+    />,
+  );
+}
+
+const realFetch = globalThis.fetch;
+// The mounted welcome card reports its drop target to field telemetry, which
+// arms the 30 s `viewer_boot` deadline; disarm it so it does not hold this
+// test process open after the last test.
+after(() => fieldTelemetry?.resetFieldEventsForTests());
+
+afterEach(() => {
+  cleanup();
+  globalThis.fetch = realFetch;
+});
+
+describe('welcome card actions (#5840)', () => {
+  it('puts opening your own model first and still offers the demo project', () => {
+    assert.equal(typeof DEMO_LABEL, 'string', 'the demo label must be a catalogue string');
+    const card = renderCard(() => Promise.resolve());
+    const first = card.querySelector('button');
+    assert.equal(first?.textContent?.trim(), OPEN_LABEL, 'opening a model file must be the card\'s first (primary) button');
+    assert.ok(buttonWithText(card, DEMO_LABEL ?? ''), 'the demo project stays on the card as a sample');
+  });
+
+  it('keeps a visible keyboard focus indicator on the primary action (#5826)', () => {
+    const card = renderCard(() => Promise.resolve());
+    const primary = buttonWithText(card, OPEN_LABEL);
+    assert.ok(primary, 'the welcome primary action must render');
+    assert.match(primary.className, /\bfocus-visible:ring-1\b/);
+    assert.match(primary.className, /\bfocus-visible:ring-ring\b/);
+  });
+
+  it('loads the demo sample through the canonical loadFile', async () => {
+    const fetched: string[] = [];
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      fetched.push(String(input));
+      return new Response(new Blob(['ISO-10303-21;']), { status: 200 });
+    }) as typeof fetch;
+    const loaded: File[] = [];
+    const card = renderCard(async (file) => { loaded.push(file); });
+
+    const button = buttonWithText(card, DEMO_LABEL ?? '');
+    assert.ok(button, 'Load demo project button is rendered');
+    click(button);
+    await act(async () => { await new Promise((r) => setTimeout(r, 0)); });
+
+    assert.deepEqual(fetched, ['/samples/building-architecture.ifc']);
+    assert.equal(loaded.length, 1, 'loadFile called once');
+    assert.equal(loaded[0].name, 'building-architecture.ifc');
+  });
+
+  it('disables the demo action without WebGPU, like every other action', () => {
+    const card = renderCard(() => Promise.resolve(), false);
+    assert.equal(buttonWithText(card, DEMO_LABEL ?? '')?.disabled, true);
+  });
+
+  it('names model files, not ".ifc", and lists every format a drop opens, by family', () => {
+    const open = viewportLightingEn['viewportLighting.container.emptyState.openButton.open'] as string;
+    assert.doesNotMatch(open, /\.ifc\b/, 'the picker accepts more than .ifc');
+    const card = renderCard(() => Promise.resolve());
+    const list = card.querySelector('dl[data-welcome-formats]');
+    assert.ok(list, 'the formats render as a definition list');
+    const rows = [...list.querySelectorAll('dt')].map((dt) => [dt.textContent, dt.nextElementSibling?.textContent]);
+    // `.xml` alone does not say which XML, so that row names the format.
+    assert.deepEqual(rows, [
+      ['IFC', '.ifc .ifcx .ifczip'],
+      ['glTF', '.glb .gltf'],
+      ['Rhino', '.3dm'],
+      ['Point clouds', '.las .laz .ply .pcd .e57 .pts .xyz'],
+      ['Terrain', 'LandXML (.xml)'],
+      ['Underlays', '.dxf'],
+      ['Splats', '.splat'],
+    ]);
+  });
+
+  it('offers no format list without WebGPU, where a drop cannot open anything', () => {
+    const card = renderCard(() => Promise.resolve(), false);
+    assert.equal(card.querySelector('[data-welcome-formats]'), null);
+  });
+});

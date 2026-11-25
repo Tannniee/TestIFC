@@ -1,0 +1,402 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { useTranslation } from '@/i18n';
+import type { LayerGrouping } from './presentationLayerGroups';
+
+import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import type { IfcDataStore } from '@ifc-lite/parser';
+import type { GeometryResult } from '@ifc-lite/geometry';
+import { useViewerStore, type FederatedModel } from '@/store';
+import type { TreeNode, UnifiedStorey, HierarchySortMode, ExpansionLookup } from './types';
+import { readStoredSortMode, persistSortMode } from './hierarchy-sort-storage';
+import { useEffectiveMaterialStores } from '@/hooks/useEffectiveMaterialStores';
+import { usePresentationLayerBuilder } from './usePresentationLayerBuilder';
+import { presentationMetadataReady } from './presentationMetadataReady';
+import {
+  buildUnifiedStoreys,
+  getUnifiedStoreyElements as getUnifiedStoreyElementsFn,
+  filterNodes,
+  splitNodes,
+  type GroupSubFilter,
+} from './treeDataBuilder';
+import { buildTreeForGrouping, useRevealGlobalId } from './revealGlobalId';
+import {
+  buildGeometricIdSet,
+  collectAnnotationEntityIds,
+  collectGeometryReadyModelIds,
+} from './hierarchyGeometry';
+import { flattenVisibleHierarchy, indexHierarchyTree } from './treeProjection';
+import { lazyStructure, scheduleIdle } from './lazyStructure';
+import { collectAuthoredProducts } from './authoredProducts';
+import { effectiveSpatialMembers } from '@/lib/effective-spatial-members';
+import { useStructuralHierarchy } from './useStructuralHierarchy';
+
+export type { HierarchyMode } from '@/store';
+
+const EXPAND_ALL = { has: () => true };
+
+interface UseHierarchyTreeParams {
+  models: Map<string, FederatedModel>;
+  ifcDataStore: IfcDataStore | null | undefined;
+  isMultiModel: boolean;
+  geometryResult?: GeometryResult | null;
+}
+
+export function useHierarchyTree({ models, ifcDataStore, isMultiModel, geometryResult }: UseHierarchyTreeParams) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [hasInitializedExpansion, setHasInitializedExpansion] = useState(false);
+  const groupingMode = useViewerStore((state) => state.hierarchyMode);
+  const setGroupingMode = useViewerStore((state) => state.setHierarchyMode);
+  const { t, revision: localeRevision } = useTranslation();
+  const [layerGrouping, setLayerGrouping] = useState<LayerGrouping>('none');
+  const [sortMode, setSortMode] = useState<HierarchySortMode>(readStoredSortMode);
+  // Groups-tab sub-filter (All / Systems / Zones / Other) — session-only state,
+  // deliberately not persisted (#1622).
+  const [groupFilter, setGroupFilter] = useState<GroupSubFilter>('all');
+
+  // Stable mesh count — only changes when models are added/removed, not on color updates.
+  // Used as a dep proxy so the geometric ID set doesn't rebuild on every color change.
+  const meshCount = useMemo(() => {
+    if (models.size > 0) {
+      let count = 0;
+      for (const [, model] of models) {
+        count += model.geometryResult?.meshes.length ?? 0;
+      }
+      return count;
+    }
+    return geometryResult?.meshes.length ?? 0;
+  }, [models, geometryResult?.meshes.length]);
+
+  // Pre-computed set of global IDs with geometry — stable across color changes.
+  // PERF: Skip when no geometry source exists (during initial streaming before
+  // any data is ready). Gate on models OR ifcDataStore so federated scenarios
+  // (models.size > 0 but ifcDataStore is null) still build the set correctly.
+  const hasGeometrySource = models.size > 0 || !!ifcDataStore;
+  const geometricIds = useMemo(
+    () => hasGeometrySource ? buildGeometricIdSet(models, geometryResult) : new Set<number>(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- meshCount is a stable proxy; hasGeometrySource gates streaming
+    [models, hasGeometrySource ? meshCount : 0]
+  );
+
+  // Geometry readiness is per model: one streamed federation member must not
+  // make an unstreamed sibling look known-empty. A completed model with zero
+  // meshes is still known, so its physical-object count legitimately becomes 0.
+  const geometryReadyModelIds = useMemo(
+    () => collectGeometryReadyModelIds(models, geometryResult),
+    [models, geometryResult],
+  );
+
+  const georefMutations = useViewerStore((state) => state.georefMutations); // storey badges only (#4843)
+  // The session's edits; the trees read authored rows' name and class through them (#5249, #6233).
+  const mutationViews = useViewerStore((s) => s.mutationViews);
+  const mutationVersion = useViewerStore((s) => s.mutationVersion);
+
+  // Build unified storey data for multi-model mode (moved before useEffect that depends on it)
+  const unifiedStoreys = useMemo(
+    (): UnifiedStorey[] => buildUnifiedStoreys(models, sortMode, geometricIds, geometryReadyModelIds, georefMutations,
+      (modelId) => mutationViews.get(modelId)),
+    // mutationVersion: the views mutate in place, so their identity alone never changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [models, sortMode, geometricIds, geometryReadyModelIds, georefMutations, mutationViews, mutationVersion]
+  );
+
+  // Auto-expand nodes on initial load based on model count
+  useEffect(() => {
+    // Only run once when data is first loaded
+    if (hasInitializedExpansion) return;
+
+    const newExpanded = new Set<string>();
+
+    if (models.size === 1) {
+      // Single model in federation: expand full hierarchy to show all storeys
+      const [, model] = Array.from(models.entries())[0];
+      const hierarchy = model.ifcDataStore?.spatialHierarchy;
+
+      // Wait until spatial hierarchy is computed before initializing
+      if (!hierarchy?.project) {
+        return; // Don't mark as initialized - will retry when hierarchy is ready
+      }
+
+      // Expand Project -> Site -> Building to reveal storeys
+      const project = hierarchy.project;
+      const projectNodeId = `root-${project.expressId}`;
+      newExpanded.add(projectNodeId);
+
+      for (const site of project.children || []) {
+        const siteNodeId = `${projectNodeId}-${site.expressId}`;
+        newExpanded.add(siteNodeId);
+
+        for (const building of site.children || []) {
+          const buildingNodeId = `${siteNodeId}-${building.expressId}`;
+          newExpanded.add(buildingNodeId);
+        }
+      }
+    } else if (models.size > 1) {
+      // Multi-model: expand all model entries in Models section
+      // But collapse if there are too many items (rough estimate based on viewport)
+      const totalItems = unifiedStoreys.length + models.size;
+      const estimatedRowHeight = 36;
+      const availableHeight = window.innerHeight * 0.6; // Estimate panel takes ~60% of viewport
+      const maxVisibleItems = Math.floor(availableHeight / estimatedRowHeight);
+
+      if (totalItems <= maxVisibleItems) {
+        // Enough space - expand all model entries
+        for (const [modelId] of models) {
+          newExpanded.add(`model-${modelId}`);
+        }
+      }
+      // If not enough space, leave collapsed (newExpanded stays empty for models)
+    } else if (models.size === 0 && ifcDataStore?.spatialHierarchy?.project) {
+      // Legacy single-model mode (loaded via loadFile, not in models Map)
+      const hierarchy = ifcDataStore.spatialHierarchy;
+      const project = hierarchy.project;
+      const projectNodeId = `root-${project.expressId}`;
+      newExpanded.add(projectNodeId);
+
+      for (const site of project.children || []) {
+        const siteNodeId = `${projectNodeId}-${site.expressId}`;
+        newExpanded.add(siteNodeId);
+
+        for (const building of site.children || []) {
+          const buildingNodeId = `${siteNodeId}-${building.expressId}`;
+          newExpanded.add(buildingNodeId);
+        }
+      }
+    } else {
+      // No data loaded yet
+      return;
+    }
+
+    if (newExpanded.size > 0) {
+      setExpandedNodes(newExpanded);
+    }
+    setHasInitializedExpansion(true);
+  }, [models, ifcDataStore, hasInitializedExpansion, unifiedStoreys.length]);
+
+  // Reset expansion state when all data is cleared
+  useEffect(() => {
+    if (models.size === 0 && !ifcDataStore) {
+      setHasInitializedExpansion(false);
+      setExpandedNodes(new Set());
+    }
+  }, [models.size, ifcDataStore]);
+
+  // Get all element IDs for a unified storey (as global IDs)
+  const getUnifiedStoreyElements = useCallback(
+    (unifiedStorey: UnifiedStorey): number[] => getUnifiedStoreyElementsFn(unifiedStorey, models),
+    [models]
+  );
+
+  // `IfcAnnotation` entities are a fixed set per loaded model (independent of
+  // streaming mesh count), so this is keyed on model identity only. Unioned
+  // into the "By Class" inclusion set so curve-only annotations appear as
+  // selectable / hideable rows (issue #1480).
+  const annotationEntityIds = useMemo(
+    () => hasGeometrySource ? collectAnnotationEntityIds(models, ifcDataStore) : new Set<number>(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- static per model; toGlobalId reads live store
+    [models, ifcDataStore, hasGeometrySource]
+  );
+  const classTreeIds = useMemo(() => {
+    if (annotationEntityIds.size === 0) return geometricIds;
+    const merged = new Set(geometricIds);
+    for (const id of annotationEntityIds) merged.add(id);
+    return merged;
+  }, [geometricIds, annotationEntityIds]);
+
+  const toGlobalIdsForModel = useCallback((modelId: string, expressIds: number[]): number[] => {
+    if (modelId === 'legacy') return expressIds;
+    const state = useViewerStore.getState();
+    return expressIds.map((expressId) => state.toGlobalId(modelId, expressId));
+  }, []);
+
+  // Authored (overlay) products with geometry. They live in the mutation overlay,
+  // not the columnar parse the class/type builders scan, so a baked IfcSpace was
+  // absent from the "By Class" tree. Filtering by geometricIds keeps it to real
+  // products (the space has a mesh; its helper points/placements/solids don't).
+  const { stores: materialSourceStores, ready: materialReady } = useEffectiveMaterialStores(
+    models, ifcDataStore, groupingMode === 'material',
+  );
+  const loading = useViewerStore((state) => state.loading);
+  const presentationLayers = usePresentationLayerBuilder(groupingMode === 'presentation-layers');
+  const builderReady = (groupingMode !== 'material' || materialReady) && presentationLayers.ready;
+  const groupingReady = builderReady && (groupingMode !== 'presentation-layers'
+    || presentationMetadataReady(models, ifcDataStore, loading));
+  const authoredProducts = useMemo(
+    () => collectAuthoredProducts(mutationViews, models, ifcDataStore, geometricIds),
+    // mutationVersion bumps on every authoring edit; geometricIds tracks the mesh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mutationViews, models, ifcDataStore, geometricIds, mutationVersion],
+  );
+  // One builder call per model/mode/mutation input, at any expansion.
+  // hiddenEntities intentionally NOT in deps - visibility computed lazily.
+  const buildFor = useCallback(
+    (expansion: ExpansionLookup): TreeNode[] => !builderReady ? [] : buildTreeForGrouping(
+      groupingMode, models, ifcDataStore, expansion, isMultiModel, unifiedStoreys, sortMode,
+      geometricIds, classTreeIds, authoredProducts, groupFilter, geometryReadyModelIds,
+      georefMutations, mutationViews, materialSourceStores, presentationLayers.builder, layerGrouping, t('hierarchy.layerGrouping.unclassified'), t('hierarchy.layerGrouping.unavailable'), source => t('hierarchy.layerGrouping.noCode', { source: source || t('hierarchy.layerGrouping.classification') }),
+    ),
+    [groupingMode, models, ifcDataStore, isMultiModel, unifiedStoreys, sortMode,
+      geometricIds, classTreeIds, authoredProducts, groupFilter, geometryReadyModelIds,
+      georefMutations, mutationViews, mutationVersion, materialSourceStores, builderReady, presentationLayers.builder, layerGrouping, localeRevision, t],
+  );
+  // The complete structure (every branch expanded) is what search and reveal
+  // walk and what expansion projects (#5886). It is built lazily: the first
+  // commit of a populated store builds only the rows that can be seen, since
+  // every storey starts collapsed, and the structure follows at idle once the
+  // load has settled, or at once if search or reveal needs it first (NEW-4).
+  const treeInputs = useMemo((): Parameters<typeof buildTreeForGrouping> => [
+    groupingMode, models, ifcDataStore, EXPAND_ALL, isMultiModel, unifiedStoreys, sortMode,
+    geometricIds, classTreeIds, authoredProducts, groupFilter, geometryReadyModelIds,
+    georefMutations, mutationViews, materialSourceStores, presentationLayers.builder,
+    layerGrouping, t('hierarchy.layerGrouping.unclassified'), t('hierarchy.layerGrouping.unavailable'),
+    source => t('hierarchy.layerGrouping.noCode', { source: source || t('hierarchy.layerGrouping.classification') }),
+  ], [buildFor]);
+  const nativeSpatial = groupingMode === 'spatial' && [...models.values()].some(model => model.loadPath === 'native');
+  const nativeTree = useStructuralHierarchy(treeInputs, builderReady, true);
+  const structure = useMemo(() => lazyStructure(() => nativeSpatial ? nativeTree : buildFor(EXPAND_ALL)), [buildFor, nativeSpatial, nativeTree]);
+  // Once built (idle, search or reveal), expansion projects it: identical rows, no builder call.
+  // The idle build only bumps a counter to re-render: keeping the structure itself in
+  // state would keep the model it was built from (stores, geometry) alive through the
+  // whole next load, whose own idle build cannot run before it settles (#9629 review).
+  const [, structureBuilt] = useReducer((n: number) => n + 1, 0);
+  const projecting = structure.built;
+  useEffect(() => {
+    if (projecting || !builderReady || loading) return;
+    return scheduleIdle(() => { structure.get(); structureBuilt(); });
+  }, [structure, projecting, builderReady, loading]);
+  const treeIndex = useMemo(() => projecting ? indexHierarchyTree(structure.get()) : null, [projecting, structure]);
+  const getExpandedTreeForReveal = useCallback(() => structure.get(), [structure]);
+  const revealGlobalId = useRevealGlobalId(getExpandedTreeForReveal, expandedNodes, setExpandedNodes);
+  // Index the native tree once per tree, not on every expand/collapse.
+  const nativeIndex = useMemo(() => !treeIndex && nativeSpatial ? indexHierarchyTree(nativeTree) : null,
+    [treeIndex, nativeSpatial, nativeTree]);
+  const treeData = useMemo(
+    () => searchQuery.trim()
+      ? filterNodes(structure.get(), searchQuery)
+      : treeIndex ? flattenVisibleHierarchy(treeIndex, expandedNodes) : nativeIndex ? flattenVisibleHierarchy(nativeIndex, expandedNodes) : buildFor(expandedNodes),
+    [structure, treeIndex, buildFor, searchQuery, expandedNodes, nativeIndex],
+  );
+
+  const filteredNodes = treeData;
+
+  // Split filtered nodes into storeys and models sections (for multi-model mode)
+  const { storeysNodes, modelsNodes } = useMemo(
+    () => splitNodes(filteredNodes, isMultiModel),
+    [filteredNodes, isMultiModel]
+  );
+
+  const toggleExpand = useCallback((nodeId: string) => {
+    if (searchQuery.trim()) return;
+    // The first expansion builds the complete structure once, as search and
+    // reveal do, so this and every later toggle only project it (#5886);
+    // rebuilding the visible rows instead rescans membership per toggle.
+    structure.get();
+    setExpandedNodes(prev => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+      return next;
+    });
+  }, [searchQuery, structure]);
+
+  // Get all elements for a node (handles type groups, ifc-type, unified storeys, single storeys, model contributions, and elements)
+  const getNodeElements = useCallback((node: TreeNode): number[] => {
+    if (node.type === 'type-group' || node.type === 'ifc-type' || node.type === 'material-group' ||
+        node.type === 'group' || node.type === 'presentation-layer' || node.type === 'group-member') {
+      // GlobalIds are pre-stored on the node during tree construction — O(1).
+      // For 'group' rows these are the RESOLVED member geometry ids (#1622).
+      return node.globalIds;
+    }
+    if (node.type === 'unified-storey') {
+      // Get all elements from all models for this unified storey
+      const unified = unifiedStoreys.find(u => `unified-${u.key}` === node.id);
+      if (unified) {
+        return getUnifiedStoreyElements(unified);
+      }
+    } else if (node.type === 'model-header' && node.id.startsWith('contrib-')) {
+      // Model contribution header inside a unified storey - get elements for this model's storey
+      const storeyId = node.expressIds[0];
+      const modelId = node.modelIds[0];
+      const model = models.get(modelId);
+      if (model?.ifcDataStore?.spatialHierarchy) {
+        const localIds = effectiveSpatialMembers(model.ifcDataStore, mutationViews.get(modelId), storeyId);
+        return toGlobalIdsForModel(modelId, localIds);
+      }
+    } else if (node.type === 'IfcBuildingStorey') {
+      // Get storey elements
+      const storeyId = node.expressIds[0];
+      const modelId = node.modelIds[0];
+
+      if (modelId === 'legacy' && ifcDataStore?.spatialHierarchy) {
+        const elements = effectiveSpatialMembers(ifcDataStore, mutationViews.get('legacy'), storeyId);
+        if (elements.length) return elements;
+      }
+
+      const model = models.get(modelId);
+      if (model?.ifcDataStore?.spatialHierarchy) {
+        const localIds = effectiveSpatialMembers(model.ifcDataStore, mutationViews.get(modelId), storeyId);
+        return toGlobalIdsForModel(modelId, localIds);
+      }
+    } else if (node.type === 'IfcSpace' || node.type === 'IfcSpatialZone') {
+      const spaceId = node.expressIds[0];
+      const modelId = node.modelIds[0];
+
+      if (modelId === 'legacy' && ifcDataStore?.spatialHierarchy) {
+        const elements = effectiveSpatialMembers(ifcDataStore, mutationViews.get('legacy'), spaceId);
+        return [spaceId, ...elements];
+      }
+
+      const model = models.get(modelId);
+      if (model?.ifcDataStore?.spatialHierarchy) {
+        const localIds = effectiveSpatialMembers(model.ifcDataStore, mutationViews.get(modelId), spaceId);
+        return [...node.globalIds, ...toGlobalIdsForModel(modelId, localIds)];
+      }
+    } else if (node.type === 'element') {
+      // A decomposing assembly folds in its IfcRelAggregates parts so the eye
+      // toggle / isolate / basket act on the whole assembly at once (#1133).
+      return node.assemblyChildGlobalIds && node.assemblyChildGlobalIds.length > 0
+        ? [...node.globalIds, ...node.assemblyChildGlobalIds]
+        : node.globalIds;
+    }
+    // Spatial containers (Project, Site, Building) and top-level models don't have direct element visibility toggle
+    return [];
+  // Views mutate in place; mutationVersion refreshes this callback after edits.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [models, ifcDataStore, unifiedStoreys, getUnifiedStoreyElements, toGlobalIdsForModel, mutationViews, mutationVersion]);
+
+  // Persist storey sort-order preference (issue #1296)
+  const handleSetSortMode = useCallback((mode: HierarchySortMode) => {
+    setSortMode(mode);
+    persistSortMode(mode);
+  }, []);
+
+  return {
+    searchQuery,
+    setSearchQuery,
+    groupingMode,
+    setGroupingMode,
+    layerGrouping, setLayerGrouping,
+    sortMode,
+    setSortMode: handleSetSortMode,
+    groupFilter,
+    setGroupFilter,
+    unifiedStoreys,
+    groupingReady,
+    presentationLayerError: presentationLayers.error,
+    retryPresentationLayers: presentationLayers.retry,
+    treeData,
+    filteredNodes,
+    storeysNodes,
+    modelsNodes,
+    toggleExpand,
+    getNodeElements,
+    getUnifiedStoreyElements,
+    revealGlobalId,
+  };
+}

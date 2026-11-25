@@ -1,0 +1,400 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+use super::helpers::*;
+use super::AnalyticCurveSegment as Segment;
+use crate::trimmed_curve::{decode_trimmed_primitive, TrimRecovery, TrimmedPrimitive};
+use crate::{Error, Result};
+use ifc_lite_core::{AttributeValue, DecodedEntity, EntityDecoder, IfcType};
+use std::{collections::HashSet, f64::consts::TAU};
+
+const MAX_VISITS: usize = 100_000;
+const MAX_DEPTH: usize = 128;
+
+#[derive(Default)]
+pub(super) struct CurveWalk {
+    path: HashSet<u32>,
+    visits: usize,
+    pub(super) source: super::source::SourceCapture,
+}
+
+impl CurveWalk {
+    pub(super) fn with_source() -> Self {
+        Self {
+            source: super::source::SourceCapture::enabled(),
+            ..Self::default()
+        }
+    }
+
+    pub(super) fn extract(
+        &mut self,
+        curve: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Vec<Segment>>> {
+        #[cfg(feature = "retained-runtime")]
+        crate::resource::source_step()?;
+        self.visits += 1;
+        if self.visits > MAX_VISITS || self.path.len() >= MAX_DEPTH {
+            return Err(Error::geometry(
+                "analytic curve traversal exceeded work bound".to_string(),
+            ));
+        }
+        if !self.path.insert(curve.id) {
+            return Err(Error::geometry(
+                "analytic curve reference cycle".to_string(),
+            ));
+        }
+        let result = self.extract_inner(curve, decoder);
+        self.path.remove(&curve.id);
+        if let Ok(Some(ref pieces)) = result {
+            self.visits = self.visits.saturating_add(pieces.len());
+            if self.visits > MAX_VISITS {
+                return Err(Error::geometry(
+                    "analytic curve output exceeded work bound".to_string(),
+                ));
+            }
+        }
+        result
+    }
+
+    fn extract_inner(
+        &mut self,
+        curve: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Vec<Segment>>> {
+        self.source.record(curve, decoder)?;
+        #[cfg(feature = "retained-runtime")]
+        crate::resource::source_step()?;
+        match curve.ifc_type {
+            IfcType::IfcPolyline => self.polyline(curve, decoder).map(Some),
+            IfcType::IfcIndexedPolyCurve => self.indexed(curve, decoder),
+            IfcType::IfcCompositeCurve | IfcType::IfcCompositeCurveOnSurface => {
+                self.composite(curve, decoder)
+            }
+            IfcType::IfcTrimmedCurve => self.trimmed(curve, decoder),
+            IfcType::IfcLine => Ok(Some(vec![line(curve, decoder, 0.0, 1.0)?])),
+            IfcType::IfcCircle => {
+                let (center, normal, x_axis, _, radius) = circle_basis(curve, decoder)?;
+                Ok(Some(vec![Segment::Arc {
+                    center,
+                    normal,
+                    x_axis,
+                    radius,
+                    start_angle: 0.0,
+                    sweep_angle: TAU,
+                }]))
+            }
+            _ => Ok(None),
+        }
+    }
+
+    fn polyline(
+        &mut self,
+        curve: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Vec<Segment>> {
+        let refs = curve
+            .get_list(0)
+            .ok_or_else(|| invalid("Polyline missing Points"))?;
+        if refs.len() > MAX_VISITS {
+            return Err(invalid("Polyline exceeds work bound"));
+        }
+        let mut points = Vec::with_capacity(refs.len());
+        for reference in refs {
+            #[cfg(feature = "retained-runtime")]
+            crate::resource::source_step()?;
+            points.push(point_from_ref(reference, decoder)?);
+        }
+        Ok(points
+            .windows(2)
+            .map(|w| Segment::Line {
+                start: w[0],
+                end: w[1],
+            })
+            .collect())
+    }
+
+    fn indexed(
+        &mut self,
+        curve: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Vec<Segment>>> {
+        let points_entity = resolve(curve.get(0), decoder)?;
+        let coords = points_entity
+            .get_list(0)
+            .ok_or_else(|| invalid("IndexedPolyCurve missing CoordList"))?;
+        if coords.len() > MAX_VISITS {
+            return Err(invalid("IndexedPolyCurve exceeds work bound"));
+        }
+        let points: Vec<_> = coords
+            .iter()
+            .map(|coord| {
+                #[cfg(feature = "retained-runtime")]
+                crate::resource::source_step()?;
+                let values = coord
+                    .as_list()
+                    .ok_or_else(|| invalid("invalid point list coordinate"))?;
+                point_values(values)
+            })
+            .collect::<Result<_>>()?;
+        let mut out = Vec::new();
+        if curve.get(1).is_none_or(AttributeValue::is_null) {
+            for w in points.windows(2) {
+                #[cfg(feature = "retained-runtime")]
+                crate::resource::source_step()?;
+                out.push(Segment::Line {
+                    start: w[0],
+                    end: w[1],
+                });
+            }
+            return Ok(Some(out));
+        }
+        let items = curve
+            .get_list(1)
+            .ok_or_else(|| invalid("invalid IndexedPolyCurve Segments"))?;
+        for item in items {
+            #[cfg(feature = "retained-runtime")]
+            crate::resource::source_step()?;
+            self.visits += 1;
+            if self.visits > MAX_VISITS {
+                return Err(invalid("IndexedPolyCurve exceeds work bound"));
+            }
+            let (kind, segment) = item
+                .as_typed()
+                .ok_or_else(|| invalid("invalid indexed segment"))?;
+            let indices = segment
+                .as_list()
+                .ok_or_else(|| invalid("invalid indexed segment indices"))?;
+            let indexed: Vec<_> = indices
+                .iter()
+                .map(|value| {
+                    #[cfg(feature = "retained-runtime")]
+                    crate::resource::source_step()?;
+                    let i = value
+                        .as_float()
+                        .ok_or_else(|| invalid("invalid indexed vertex"))?;
+                    if !i.is_finite() || i < 1.0 || i.fract() != 0.0 || i > points.len() as f64 {
+                        return Err(invalid("indexed vertex out of range"));
+                    }
+                    Ok(points[i as usize - 1])
+                })
+                .collect::<Result<_>>()?;
+            match kind {
+                "IFCLINEINDEX" => {
+                    for w in indexed.windows(2) {
+                        #[cfg(feature = "retained-runtime")]
+                        crate::resource::source_step()?;
+                        out.push(Segment::Line {
+                            start: w[0],
+                            end: w[1],
+                        });
+                    }
+                }
+                "IFCARCINDEX" if indexed.len() == 3 => {
+                    let Some(arc) = arc_through(indexed[0], indexed[1], indexed[2]) else {
+                        return Ok(None);
+                    };
+                    out.push(arc);
+                }
+                _ => return Ok(None),
+            }
+        }
+        Ok(Some(out))
+    }
+
+    /// IFC composite parameters concatenate the parameter spans of each
+    /// `ParentCurve`. The span of a trimmed line is in its basis vector units;
+    /// the span of a trimmed circle is in the project's plane angle units.
+    pub(super) fn composite_trimmed(
+        &mut self,
+        curve: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+        start: Option<f64>,
+        end: Option<f64>,
+    ) -> Result<Option<Vec<Segment>>> {
+        // This walk does not enter `extract` for the composite itself.
+        self.source.record(curve, decoder)?;
+        #[cfg(feature = "retained-runtime")]
+        crate::resource::source_step()?;
+        let refs = curve
+            .get_list(0)
+            .ok_or_else(|| invalid("CompositeCurve missing Segments"))?;
+        if refs.len() > MAX_VISITS {
+            return Err(invalid("CompositeCurve exceeds work bound"));
+        }
+        let mut pieces_with_spans = Vec::new();
+        let mut total = 0.0;
+        for (index, reference) in refs.iter().enumerate() {
+            #[cfg(feature = "retained-runtime")]
+            crate::resource::source_step()?;
+            let segment = resolve(Some(reference), decoder)?;
+            if segment.ifc_type != IfcType::IfcCompositeCurveSegment {
+                self.source_rest(&refs[index..], decoder)?;
+                return Ok(None);
+            }
+            self.source.record(&segment, decoder)?;
+            let parent = resolve(segment.get(2), decoder)?;
+            let Some(pieces) = self.extract(&parent, decoder)? else {
+                self.source_rest(&refs[index + 1..], decoder)?;
+                return Ok(None);
+            };
+            let Some(mut spans) = parent_piece_spans(&parent, &pieces, decoder)? else {
+                self.source_rest(&refs[index + 1..], decoder)?;
+                return Ok(None);
+            };
+            let same_sense = segment.get_bool(1).unwrap_or(true);
+            let pieces: Vec<_> = if same_sense {
+                pieces
+            } else {
+                spans.reverse();
+                pieces.into_iter().rev().map(|p| p.reversed()).collect()
+            };
+            for (piece, span) in pieces.into_iter().zip(spans) {
+                #[cfg(feature = "retained-runtime")]
+                crate::resource::source_step()?;
+                if !span.is_finite() || span <= 0.0 {
+                    self.source_rest(&refs[index + 1..], decoder)?;
+                    return Ok(None);
+                }
+                total += span;
+                if !total.is_finite() {
+                    return Err(invalid("non-finite composite parameter domain"));
+                }
+                pieces_with_spans.push((piece, span));
+            }
+        }
+        let a = start.unwrap_or(0.0).max(0.0);
+        let b = end.unwrap_or(total).min(total);
+        if b <= a {
+            return Ok(Some(Vec::new()));
+        }
+        let mut out = Vec::new();
+        let mut cursor = 0.0;
+        for (piece, span) in pieces_with_spans {
+            #[cfg(feature = "retained-runtime")]
+            crate::resource::source_step()?;
+            let left = a.max(cursor);
+            let right = b.min(cursor + span);
+            if right > left {
+                out.push(piece.subsegment((left - cursor) / span, (right - cursor) / span));
+            }
+            cursor += span;
+        }
+        Ok(Some(out))
+    }
+
+    fn composite(
+        &mut self,
+        curve: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Vec<Segment>>> {
+        let refs = curve
+            .get_list(0)
+            .ok_or_else(|| invalid("CompositeCurve missing Segments"))?;
+        if refs.len() > MAX_VISITS {
+            return Err(invalid("CompositeCurve exceeds work bound"));
+        }
+        let mut out = Vec::new();
+        for (index, reference) in refs.iter().enumerate() {
+            #[cfg(feature = "retained-runtime")]
+            crate::resource::source_step()?;
+            let segment = resolve(Some(reference), decoder)?;
+            if segment.ifc_type != IfcType::IfcCompositeCurveSegment {
+                self.source_rest(&refs[index..], decoder)?;
+                return Ok(None);
+            }
+            self.source.record(&segment, decoder)?;
+            let same_sense = segment.get_bool(1).unwrap_or(true);
+            let parent = resolve(segment.get(2), decoder)?;
+            let Some(mut pieces) = self.extract(&parent, decoder)? else {
+                self.source_rest(&refs[index + 1..], decoder)?;
+                return Ok(None);
+            };
+            if !same_sense {
+                pieces = pieces.into_iter().rev().map(|p| p.reversed()).collect();
+            }
+            out.extend(pieces);
+        }
+        Ok(Some(out))
+    }
+
+    /// Once interpretation has already refused a composite, keep only the
+    /// authored source of its remaining segments, so captured provenance never
+    /// looks complete while missing them. Interpretation errors here refuse the
+    /// capture instead of changing the already-decided `None` result.
+    fn source_rest(&mut self, refs: &[AttributeValue], decoder: &mut EntityDecoder) -> Result<()> {
+        if !self.source.is_enabled() {
+            return Ok(());
+        }
+        for reference in refs {
+            #[cfg(feature = "retained-runtime")]
+            crate::resource::source_step()?;
+            let segment = match resolve(Some(reference), decoder) {
+                Ok(segment) if segment.ifc_type == IfcType::IfcCompositeCurveSegment => segment,
+                Ok(_) => {
+                    self.source.fail("unsupported composite member".to_owned());
+                    return Ok(());
+                }
+                Err(error) => return self.source.fail_error(error),
+            };
+            self.source.record(&segment, decoder)?;
+            let parent = ifc_lite_core::slot::IfcCompositeCurveSegment::PARENT_CURVE.index();
+            let walked = resolve(segment.get(parent), decoder)
+                .and_then(|parent| self.extract(&parent, decoder));
+            if let Err(error) = walked {
+                return self.source.fail_error(error);
+            }
+        }
+        Ok(())
+    }
+
+    fn trimmed(
+        &mut self,
+        curve: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Vec<Segment>>> {
+        let basis = resolve(curve.get(0), decoder)?;
+        if matches!(basis.ifc_type, IfcType::IfcLine | IfcType::IfcCircle) {
+            self.source.record(&basis, decoder)?;
+        } else if self.source.is_enabled() {
+            // Other leaf bases (e.g. a rational B-spline) are not line/arc
+            // geometry, but their original records are the authored source.
+            // Recording a nested composite basis would omit its segments, and
+            // walking it would spend the interpreter's own work bound.
+            if basis.ifc_type.is_subtype_of(IfcType::IfcCompositeCurve)
+                || basis.ifc_type == IfcType::IfcTrimmedCurve
+            {
+                self.source
+                    .fail("unsupported trimmed-curve basis source".to_owned());
+            } else {
+                self.source.record(&basis, decoder)?;
+            }
+        }
+        Ok(
+            decode_trimmed_primitive(curve, &basis, decoder, TrimRecovery::RequireBoth)?.map(
+                |primitive| {
+                    vec![match primitive {
+                        TrimmedPrimitive::Line { start, end } => Segment::Line { start, end },
+                        TrimmedPrimitive::Circle {
+                            center,
+                            normal,
+                            x_axis,
+                            radius,
+                            start_angle,
+                            sweep_angle,
+                            ..
+                        } => Segment::Arc {
+                            center,
+                            normal,
+                            x_axis,
+                            radius,
+                            start_angle,
+                            sweep_angle,
+                        },
+                    }]
+                },
+            ),
+        )
+    }
+}

@@ -1,0 +1,193 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import type { Renderer, RenderOptions } from '@ifc-lite/renderer';
+import { noteLiveFrame } from './live-frame-count';
+
+interface CaptureSession {
+  options: () => RenderOptions;
+  owned: boolean;
+  tail: Promise<void>;
+  controller: AbortController;
+  canvas: HTMLCanvasElement;
+}
+
+const sessions = new WeakMap<Renderer, CaptureSession>();
+
+/** The canonical animation loop supplies its normal render options once. */
+export function registerViewportCapture(renderer: Renderer, canvas: HTMLCanvasElement, options: () => RenderOptions): () => void {
+  sessions.get(renderer)?.controller.abort();
+  const session: CaptureSession = { options, owned: false, tail: Promise.resolve(), controller: new AbortController(), canvas };
+  sessions.set(renderer, session);
+  return () => {
+    if (sessions.get(renderer) === session) sessions.delete(renderer);
+    session.controller.abort();
+  };
+}
+
+export function viewportCaptureOwnsFrame(renderer: Renderer): boolean {
+  return sessions.get(renderer)?.owned ?? false;
+}
+
+/**
+ * Renderers a capture has drawn for since the live loop last submitted a
+ * frame (#9031), each with the capture that drew last: the loop's retries of
+ * that frame are per capture (#9153).
+ */
+const awaitingLiveFrame = new WeakMap<object, number>();
+let captures = 0;
+
+/**
+ * A pick now, or the Measure pass that compares what a pick reads (#8886),
+ * would read a capture's frame rather than the live view (#9031): the
+ * capture's camera while it owns the frame, then its clip, which the pickers
+ * mirror until the live loop draws again. A tick that renders nothing (no
+ * texture, a lost device, a GPU backlog, a replaced session) keeps it.
+ */
+export function viewportPicksAwaitLiveFrame(renderer: object): boolean {
+  return awaitingLiveFrame.has(renderer);
+}
+
+/** The capture the pickers wait on a live frame for, or 0 when they mirror the live view. */
+export function captureAwaitingLiveFrame(renderer: object): number {
+  return awaitingLiveFrame.get(renderer) ?? 0;
+}
+
+/**
+ * A click or tap that picks now would place a point, or select, on the
+ * capture's frame rather than the view the user clicked on (#9137). It is
+ * refused, not held for later: by then the camera, the mode or the gesture may
+ * have moved on, and the point it placed would be one the user never saw.
+ * True when refused; the live frame is asked for, so the next click picks.
+ */
+export function refuseCaptureHeldPick(renderer: Renderer): boolean {
+  if (!awaitingLiveFrame.has(renderer)) return false;
+  renderer.requestRender();
+  return true;
+}
+
+/** The live loop submitted a frame: the pickers mirror the live view again. */
+export function noteLiveFrameSubmitted(renderer: Renderer): void {
+  awaitingLiveFrame.delete(renderer);
+  noteLiveFrame(); // post-load work waits for such a frame (settled-frame.ts)
+}
+
+interface CaptureRequest<T> {
+  canvas?: HTMLCanvasElement;
+  options?: RenderOptions;
+  /** Synchronous camera preparation; the returned restoration runs inside the same lease. */
+  prepare?: () => void | (() => void);
+  /** Camera metadata belongs to the rendered frame, before asynchronous input can change it. */
+  afterRender?: () => void;
+  /** Copy/serialize pixels synchronously: WebGPU discards the canvas after presentation. */
+  read: (canvas: HTMLCanvasElement) => T;
+}
+
+type Thenable = { then: (...args: never[]) => unknown };
+type SynchronousRequest<T> = CaptureRequest<T> & (Extract<T, Thenable> extends never ? unknown : never);
+
+function isThenable(value: unknown): boolean {
+  return value !== null && (typeof value === 'object' || typeof value === 'function') &&
+    typeof (value as { then?: unknown }).then === 'function';
+}
+
+function presentation(signal: AbortSignal): Promise<boolean> {
+  // FRAME-WAIT-ALLOW(#2385): retain ownership through presentation of the captured frame.
+  return new Promise(resolve => {
+    const abort = () => { cancelAnimationFrame(frame); resolve(false); };
+    const frame = requestAnimationFrame(() => {
+      signal.removeEventListener('abort', abort);
+      resolve(!signal.aborted);
+    });
+    signal.addEventListener('abort', abort, { once: true });
+  });
+}
+
+async function completion(work: Promise<void>, signal: AbortSignal): Promise<boolean> {
+  if (signal.aborted) return false;
+  let abort = () => {};
+  const cancelled = new Promise<boolean>(resolve => {
+    abort = () => resolve(false);
+    signal.addEventListener('abort', abort, { once: true });
+  });
+  try { return await Promise.race([work.then(() => true), cancelled]); }
+  finally { signal.removeEventListener('abort', abort); }
+}
+
+/**
+ * Serialize prepare → canonical full render → synchronous pixel copy → GPU
+ * completion → presentation. The live loop parks before updating camera or uploading while this
+ * interval owns its frame. No persistent preferences are changed (#6709).
+ */
+export function captureViewportFrame<T>(renderer: Renderer, request: SynchronousRequest<T>): Promise<T | null> {
+  const session = sessions.get(renderer);
+  if (!session) {
+    console.warn('[capture] No active canonical viewport');
+    return Promise.resolve(null);
+  }
+  if (request.canvas && request.canvas !== session.canvas) {
+    console.warn('[capture] Canvas does not belong to the canonical viewport');
+    return Promise.resolve(null);
+  }
+  // Snapshot visibility when requested, including mutable Set consumers.
+  let source: RenderOptions;
+  try { source = { ...session.options(), ...request.options }; }
+  catch (error) {
+    console.error('[capture] Viewport options unavailable:', error);
+    return Promise.resolve(null);
+  }
+  const options: RenderOptions = {
+    ...source,
+    hiddenIds: source.hiddenIds ? new Set(source.hiddenIds) : undefined,
+    isolatedIds: source.isolatedIds ? new Set(source.isolatedIds) : source.isolatedIds,
+    ghostExceptIds: source.ghostExceptIds ? new Set(source.ghostExceptIds) : source.ghostExceptIds,
+    selectedIds: source.selectedIds ? new Set(source.selectedIds) : undefined,
+    isInteracting: false, maxPixelRatio: undefined, interactionFrameIntervalMs: undefined,
+    contributionCull: undefined, lod: undefined, restoreEvictedForCapture: true,
+  };
+  const execute = async (): Promise<T | null> => {
+    const signal = session.controller.signal;
+    if (signal.aborted || sessions.get(renderer) !== session) return null;
+    session.owned = true;
+    awaitingLiveFrame.set(renderer, ++captures);
+    let restore: void | (() => void) = undefined;
+    try {
+      restore = request.prepare?.();
+      if (!renderer.renderWithResult(options)) {
+        console.warn('[capture] Viewport render did not submit an owned frame');
+        return null;
+      }
+      request.afterRender?.();
+      // Canvas serialization synchronizes the submitted GPU work. Copy before
+      // yielding: even onSubmittedWorkDone can resolve after the compositor has
+      // presented and discarded the WebGPU drawing buffer (#6709).
+      const value = request.read(session.canvas);
+      if (isThenable(value)) {
+        console.warn('[capture] Pixel reader must copy synchronously; asynchronous result refused');
+        void Promise.resolve(value).catch(error => console.error('[capture] Refused asynchronous pixel reader rejected:', error));
+        return null;
+      }
+      const device = renderer.getGPUDevice();
+      if (device && !await completion(device.queue.onSubmittedWorkDone(), signal)) return null;
+      if (signal.aborted || !await presentation(signal)) return null;
+      return signal.aborted ? null : value;
+    } catch (error) {
+      console.error('[capture] Viewport capture failed:', error);
+      return null;
+    } finally {
+      try { if (!signal.aborted) restore?.(); }
+      finally {
+        session.owned = false;
+        // The live loop, this session's or the one that replaced it, draws the
+        // frame the pickers wait on; an idle loop would otherwise never ask (#9153).
+        if (sessions.has(renderer)) renderer.requestRender();
+      }
+    }
+  };
+  const result = session.tail.then(execute);
+  // A restoration failure is reported too, without poisoning the next capture.
+  const reported = result.catch(error => { console.error('[capture] Viewport restoration failed:', error); return null; });
+  session.tail = reported.then(() => {});
+  return reported;
+}

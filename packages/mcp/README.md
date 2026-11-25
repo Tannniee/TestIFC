@@ -1,0 +1,585 @@
+# `@ifc-lite/mcp`
+
+Model Context Protocol (MCP) server for **ifc-lite** — agent-native BIM via JSON-RPC.
+
+> Make ifc-lite the first BIM platform that any LLM agent (Claude Desktop,
+> Cursor, ChatGPT, Goose, Windsurf, Zed, custom) can drive directly against
+> real models.
+
+## Quick start
+
+```bash
+# Run against a local IFC file over stdio (the default for Claude Desktop / Cursor)
+npx @ifc-lite/mcp ./model.ifc
+
+# Federate multiple files
+npx @ifc-lite/mcp ./arch.ifc ./struct.ifc ./mep.ifc --federate
+
+# Read-only (no mutation tools advertised)
+npx @ifc-lite/mcp ./model.ifc --read-only
+
+# HTTP / Streamable HTTP for remote agents
+npx @ifc-lite/mcp ./model.ifc --transport http --port 8765 --token $API_TOKEN
+
+# Auto-open the WebGL viewer at startup. Add --open to also pop the URL in
+# the system browser.
+npx @ifc-lite/mcp ./model.ifc --viewer
+npx @ifc-lite/mcp ./model.ifc --open
+```
+
+## Embedded loaded-model authoring
+
+For embedded HTTP servers, `HttpTransport` accepts `maxSessions` (default
+1000, including pending factory builds) and `sessionIdleMs` (default 30
+minutes). At capacity it admits a new session only if a slot is free or an
+idle session can be reclaimed without unpublished drafts, active requests,
+or open event streams. Otherwise initialization returns `503
+session-capacity`; an unknown session returns `404 unknown-session` and must
+initialize again. See the [embedding guide](https://github.com/LTplus-AG/ifc-lite/blob/main/docs/guide/mcp.md#programmatic-embedding)
+for the idle-window and response contract.
+
+`loadIfcModel` returns a model whose `bim.store` supports the existing
+`addElementType`, `assignType`, `addMaterial`, `addMaterialLayerSet`,
+`addMaterialLayerSetUsage` and `assignMaterial` SDK methods. They delegate to
+shared schema-aware builders, convert metre dimensions to native units, and
+record each call as one complete public `mutation_undo` operation. Late schema
+refusals leave no partial helpers. These embedded methods are distinct from
+the JSON-RPC tool names; see the [programmatic embedding guide](https://github.com/LTplus-AG/ifc-lite/blob/main/docs/guide/mcp.md#programmatic-embedding).
+
+`addStair`, `addRailing` and `removeStair` use the same canonical SDK factory.
+`removeStair` removes a uniquely owned parent/flight pair atomically, retaining
+shared shape/style leaves and refusing ambiguous ownership or foreign product
+references. Public `run_flow` routes `element.stair` / `element.railing` through
+`model.addElement`; each successful graph creation has one `mutation_undo`.
+Tracking is fresh per RPC call, so cross-call update/remove needs a persistent
+caller-owned tracking store. No separate creation or Redo RPC is added.
+
+## 3D viewer integration
+
+The server bundles the same WebGL viewer used by `ifc-lite view`. Once it is
+open, every viewer-touching tool (`viewer_colorize`, `viewer_isolate`,
+`viewer_fly_to`, …) drives the live scene, and any element the user clicks
+in the browser flows back to MCP.
+
+### From a chat (the typical flow)
+
+The agent should follow this etiquette by default:
+
+1. Call `viewer_ask` with a `reason`. The tool returns suggested wording so
+   the agent can ask the user for permission.
+2. After the user agrees, call `viewer_open`. The result includes the URL
+   to share with the user.
+3. Drive the visualization (`viewer_colorize`, `viewer_color_by_property`,
+   `viewer_isolate`, `viewer_fly_to`, `viewer_set_section`).
+4. Subscribe to `ifc-lite://viewer/selection` (via `resources/subscribe`)
+   to be notified whenever the user picks an element. `viewer_get_selection`
+   reads the latest pick directly; `viewer_wait_for_selection` blocks until
+   the next click.
+5. `viewer_close` when done.
+
+### Pre-baked prompts
+
+- `visual_audit` — opens the viewer, runs `model_audit`, paints issues by
+  severity, frames the worst offender.
+- `interactive_property_inspect` — opens the viewer, waits for a click,
+  then explains everything we know about the picked entity.
+- `visualize_query` — runs a query, color-codes matches by property value,
+  flies the camera to the result.
+
+You can also reach it via the unified CLI:
+
+```bash
+ifc-lite mcp ./model.ifc
+ifc-lite mcp ./model.ifc --read-only
+```
+
+### Claude Desktop
+
+Drop this into `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "ifc-lite": {
+      "command": "npx",
+      "args": ["-y", "@ifc-lite/mcp", "/abs/path/to/model.ifc"]
+    }
+  }
+}
+```
+
+### Cursor / Windsurf / Goose
+
+The same `npx` command works as a stdio server in any MCP-aware client.
+
+## What the server exposes
+
+| Category | Examples |
+| --- | --- |
+| Discovery | `model_info`, `model_list`, `model_load`, `model_unload`, `schema_describe` |
+| Query | `query_entities`, `count_entities`, `get_entity`, `get_entities_bulk`, `spatial_hierarchy`, `containment_chain`, `relationships`, `properties_unique`, `materials_list`, `classifications_list`, `georeferencing`, `units`, `cost_data`, `cost_evaluate` |
+| Geometry | `geometry_bbox`, `geometry_volume`, `geometry_area`, `geometry_get`, `raycast`, `clash_check`, `clash_matrix` |
+| Validation | `ids_validate`, `ids_explain`, `model_audit`, `gherkin_check` |
+| IDS authoring | `ids_audit`, `ids_lint`, `ids_read`, `ids_apply_ops` (grounding-gated), `ids_write`, `ids_schema_search`, `ids_schema_entity`, `ids_schema_pset`, `ids_diff`, `ids_preview`, `ids_infer`, `ids_coverage`, `ids_test` |
+| Mutation | `entity_set_property`, `entity_delete_property`, `entity_set_attribute`, `entity_create`, `entity_delete`, `mutation_batch`, `mutation_undo`, `mutation_diff`, `model_save` |
+| Hosted modelling | `place_opening`, `place_door`, `place_window` |
+| Design modelling | `place_curtain_wall`, `place_grid`, `place_grid_column` |
+| Storeys | `storey_list`, `storey_add`, `storey_rename`, `storey_plan_edit`, `storey_edit`, `storey_delete`: add, re-level (elevation or floor-to-floor) and delete storeys with geometry following them. `storey_plan_edit` dry-runs the edit and reports refusals before anything is written |
+| Physical edits | `edit_hosted_element`, `edit_element_geometry`, `copy_elements`, `duplicate_element`, `array_elements` |
+| Native Room | `query_rooms`, `room_command` |
+| Wall joins | `join_walls` |
+| BCF | `bcf_topic_list`, `bcf_topic_create`, `bcf_topic_update`, `bcf_topic_close`, `bcf_viewpoint_create`, `bcf_export` |
+| bSDD | `bsdd_search`, `bsdd_class`, `bsdd_property_sets`, `bsdd_match` |
+| Diff | `model_diff` (`by_content` for content-keyed matching), `quantity_diff` |
+| Export | `export_ifc`, `export_csv`, `export_json`, `export_glb`, `export_obj`, `export_ifcx`, `export_3dm`, `export_pdf_report` |
+| Viewer | `viewer_ask`, `viewer_open`, `viewer_close`, `viewer_status`, `viewer_colorize`, `viewer_isolate`, `viewer_hide`, `viewer_show`, `viewer_reset`, `viewer_fly_to`, `viewer_set_section`, `viewer_clear_section`, `viewer_color_by_storey`, `viewer_color_by_property`, `viewer_get_selection`, `viewer_wait_for_selection`, `viewer_describe_selection` |
+
+`join_walls` joins two straight walls in the same placement frame through the
+viewer/SDK core. It writes `IfcRelConnectsPathElements` and rewrites bodies and
+axes atomically. Hosted openings must fit both joined end faces; unreadable cuts
+refuse the operation. One `mutation_undo` restores the complete earlier graph,
+including replaced profiles, axes and relationships.
+
+`place_opening`, `place_door` and `place_window` use the viewer/SDK's shared
+hosted creation core. Pass `host_express_id`, optional `model_id` (required
+with several loaded models), and PascalCase `params`: `Offset`, `Width`,
+`Height`, optional `Sill` (required for a window). Lengths are metres in the
+wall's frame. Cuts must fit and avoid existing source/overlay openings;
+unreadable geometry is refused. The void/fill graph is written atomically,
+and one `mutation_undo` removes it. These writes reach IFC export; geometry
+tools continue to read the parsed model.
+
+`entity_create` accepts an optional `global_id` for the new entity's GlobalId
+(IfcRoot subtypes only; written to attribute 0). It must be a valid 22-character
+IFC GUID not already carried by an entity in the model; an invalid or duplicate
+value is refused with `INVALID_INPUT` and nothing is queued.
+
+`model_diff` compares by GlobalId, which reads a from-scratch re-export as the
+whole model deleted and re-added. Pass `by_content: true` to run the
+`@ifc-lite/diff` engine's content-keyed matching instead; it is data-scope only
+(the server has no geometry pipeline) and reports unresolved `duplicated` /
+`deduplicated` / `ambiguous` matches as groups rather than guessing a pairing —
+capped by `max_matches` and `max_group_members`, both of which report the whole
+totals they cut. A `model_id` names a session rather than a file, so all three
+passes fold in mutations queued by `entity_create` / `entity_delete` /
+`entity_set_*` and report the count in `contentDiff.pendingMutations`.
+
+The rest of the read surface folds the same overlay: `get_entity`,
+`get_entities_bulk`, `query_entities` (property filters and `in_storey` alike),
+`count_entities`, `model_info`, `model_list`, `properties_unique`,
+`materials_list`, `classifications_list`, `spatial_hierarchy`,
+`containment_chain` and `model_audit`, plus the model manifest, entity and
+spatial-tree resources. Containment folds too: a wall you create and place with
+a queued `IfcRelContainedInSpatialStructure` is found by `in_storey`, and
+deleting a relationship record stops it relating anything. Those payloads carry
+`pendingMutations` whenever edits are queued and omit the field entirely when
+none are, which is the line between "in this session" and "on disk" — nothing is
+written until `export_ifc` or `model_save`.
+
+`relationships` (voids/fills/groups/connections), `units`, `georeferencing` and
+the geometry, clash and viewer tools answer from the parsed model and say so by
+never carrying `pendingMutations`.
+
+One GlobalId resolves to one entity everywhere: an entity the session created
+wins over a same-GlobalId entity in the file, and a deleted one never resolves.
+`get_entities_bulk` keys its map by that same rule and lists any key that named
+more than one live entity in `ambiguousGlobalIds`.
+
+Resources expose live model state under the `ifc-lite://` URI scheme:
+
+```
+ifc-lite://server/manifest
+ifc-lite://model/{model_id}/manifest
+ifc-lite://model/{model_id}/entity/{global_id}
+ifc-lite://model/{model_id}/spatial-tree
+ifc-lite://model/{model_id}/materials
+ifc-lite://model/{model_id}/property-sets
+ifc-lite://viewer/status         (open/closed, port, client count)
+ifc-lite://viewer/selection      (live; supports `resources/subscribe` for push updates)
+```
+
+Pre-baked prompts ship the BIM expertise:
+
+`audit_model`, `find_fire_rated_doors`, `generate_bcf_from_ids`,
+`compare_versions`, `space_program_check`, `clash_review`,
+`prop_quality_pass`, `migrate_to_ifcx`, `visual_audit`,
+`interactive_property_inspect`, `visualize_query`.
+
+## Programmatic embedding
+
+```ts
+import {
+  createMCPServer,
+  StdioTransport,
+  loadIfcModel,
+  InMemoryModelRegistry,
+} from '@ifc-lite/mcp';
+
+const registry = new InMemoryModelRegistry();
+registry.add(await loadIfcModel('./model.ifc'));
+
+const server = createMCPServer({ version: '0.1.0', registry });
+const transport = new StdioTransport();
+await transport.connect(server);
+```
+
+For Tauri/Electron hosts, use `InProcessTransport`:
+
+```ts
+import { InProcessTransport } from '@ifc-lite/mcp';
+
+const transport = new InProcessTransport();
+await transport.connect(server);
+const initResp = await transport.send({
+  jsonrpc: '2.0',
+  id: 1,
+  method: 'initialize',
+  params: { protocolVersion: '2025-11-05', capabilities: {}, clientInfo: { name: 'host', version: '1' } },
+});
+```
+
+## Errors
+
+Domain errors come back inside the tool result with `isError: true` and a
+stable `structuredContent.code`:
+
+```jsonc
+{
+  "isError": true,
+  "content": [{ "type": "text", "text": "Entity not found in model 'arch'" }],
+  "structuredContent": {
+    "code": "ENTITY_NOT_FOUND",
+    "details": { "model_id": "arch", "express_id": 42 },
+    "hint": "Use query_entities to discover valid IDs."
+  }
+}
+```
+
+That keeps the LLM in the loop instead of aborting the chain on a JSON-RPC
+error.
+
+## Bridge to a browser tab (`--bridge`)
+
+```bash
+npx @ifc-lite/mcp --bridge              # stdio MCP, forwarded to one paired tab
+npx @ifc-lite/mcp --bridge --read-only  # tools the tab marks as mutating stay off
+```
+
+`--bridge` lets a local agent (Claude Desktop, Claude Code, …) work on the
+model open in an ifc-lite browser tab: a model loaded from a cloud source, or
+one with unsaved edits. The bridge speaks MCP over stdio and forwards every tool
+call (other than `bridge_status`) over a WebSocket on `127.0.0.1` to the paired tab, which runs it against
+its model. The bridge loads no model of its own, so it takes no file arguments
+and refuses `--transport http`. It stops, freeing its port, when stdin ends,
+closes or errors, and on SIGINT or SIGTERM.
+
+**Status:** this package ships the local side. The viewer pairs from the
+pairing link, or from *Connect local agent* in its Sources panel and command
+palette, and serves its read tools only. Verified from a public `https` origin in Chromium 156 and Firefox 157: both block `ws://127.0.0.1` until the site may reach apps on this device (permission `loopback-network`). Chrome asks "Access other apps and services on this device" (site setting *Apps on device*); Firefox asks "<site> wants to access other apps and services on this device" (setting *Device apps and services*). Granting the older `local-network` / `local-network-access` permissions does not help. Safari is not verified.
+
+| Flag | Meaning |
+|------|---------|
+| `--bridge-port <n>` | Port on 127.0.0.1. Default `21517`; `0` picks a free one. The pairing link carries it. |
+| `--bridge-viewer-url <url>` | Base of the pairing link. Default `https://ifclite.com`. Its origin REPLACES the default in the allowlist; add `--allow-origin https://ifclite.com` to keep both. |
+| `--allow-origin <origin>` | Another browser origin that may connect (repeatable), e.g. a dev server. |
+| `--read-only` | A ceiling: tools the tab labels as mutating stay hidden and refused even if the tab allows changes. The tab must enforce the rest. |
+| `--insecure` | Accept a plain-`http` origin on a non-loopback host (refused otherwise); prints a warning. |
+
+### Security model
+
+- **Loopback only.** The server binds `127.0.0.1`, never another interface.
+- **Allowlist.** Exactly the `--bridge-viewer-url` origin (default
+  `https://ifclite.com`) plus each `--allow-origin`. A configured viewer URL
+  replaces the default: with `--bridge-viewer-url http://localhost:5173`,
+  `https://ifclite.com` is refused unless also passed as `--allow-origin`.
+  The effective list is printed once on stderr at startup and returned by
+  `bridge_status` (`allowedOrigins`).
+- **Upgrade guards.** Before the WebSocket opens, the request is refused (HTTP
+  403) unless its `Origin` is on the allowlist and its `Host` is `127.0.0.1`,
+  `localhost` or `[::1]` on the bridge's port. The Host check defeats DNS
+  rebinding. The Origin check only keeps other web pages out; a local process
+  can claim any origin, so the pairing code is the authentication. Plain
+  `http:` origins are accepted only on loopback hosts (`localhost`,
+  `127.0.0.0/8`, `[::1]`): an `http` page elsewhere could have its script
+  replaced on the network path and leak the code. `--insecure` overrides this
+  with a warning.
+- **One-time pairing code.** 20 characters of Crockford base32 (100 bits).
+  The tab's first frame (the `hello`) must arrive within 3 s of the socket
+  opening; otherwise the bridge sends `HANDSHAKE_TIMEOUT`, closes with 4408,
+  and terminates the socket 250 ms later if the peer has not closed it. A tab
+  sends its hello as soon as the socket opens (Chrome's Local Network Access
+  prompt comes before the socket exists), so 3 s is ample on loopback. The
+  code is compared in constant time and consumed on success; a used code never
+  works again. Wrong codes do not retire the code, so a guessing peer cannot
+  break the user's link. While a tab is paired no code is live, so no other
+  tab can connect unless the agent asks `bridge_status` for one with
+  `pair_new_tab: true`.
+- **Guess rate.** With no recent wrong code, a hello is compared at once.
+  After a wrong code, the comparison of EVERY hello, right or wrong, waits for
+  the current delay: 250 ms, doubling per wrong code up to 5 s, reset after
+  60 s without one or on a success. A waiting attempt keeps its unpaired slot
+  even if its socket closes, and a socket that closed before its comparison
+  counts as a wrong code. With 4 slots the worst case is 4 comparisons per
+  delay, so at most 0.8 guesses per second once the 5 s cap is reached,
+  against 100 bits: a local process without the code cannot pair.
+- **Dead sockets.** A socket that failed (bad frame, wrong code, timeout,
+  replaced) is ignored from then on, frees its unpaired slot at once, and is
+  terminated 250 ms after its close frame if the peer does not close.
+- **Pairing link.** `bridge_status` (always listed, because Claude Desktop
+  hides a server's stderr) and stderr both give the code and a link such as
+  `https://ifclite.com/#mcp-bridge=1&port=21517&code=ABCDE-FGHJK-MNPQR-STVWX`.
+  Port and code sit in the URL fragment, which the browser does not send to the
+  web server.
+- **One tab at a time.** A new successful pairing replaces the paired tab: the
+  old socket gets a `REPLACED` error and is closed, and its pending calls fail
+  at once with `VIEWER_NOT_CONNECTED` (`details.reason: "replaced"`).
+- **Permissions, and who enforces them.** The tab labels each tool `readOnly`
+  or not and sends the level the user granted (`read-only` by default, or
+  `read-write`). The bridge cannot see what a tool does: it trusts the tab's
+  labels. While the effective level is read-only (the tab's grant, or
+  `--read-only`), tools the tab labels mutating are neither listed nor
+  forwarded, and a direct call returns `READ_ONLY`. A tool the tab mislabels
+  `readOnly: true` would be forwarded, so the tab is the authority and must
+  refuse model-changing calls itself while read-only (the protocol requires
+  it). Over MCP, tools carry `annotations`: `readOnlyHint: true` for tools
+  labelled read-only, `readOnlyHint: false, destructiveHint: true` otherwise,
+  plus the tab's `title` when it gives one. There is no tool for writing back
+  to a cloud source; that stays a user action in the viewer.
+- **Tab-supplied data.** Tool names, titles, descriptions and results come from
+  the tab and from model data. The bridge's MCP `instructions` and
+  `bridge_status` say they are data, not instructions. Results may carry text
+  content and `structuredContent` only; images, resources (any URI) and other
+  content types fail the call.
+- **Bounds.** Before pairing, a connection may send at most 1.25 MiB in
+  total (a hello carries at most 1 MiB of tool descriptors); more, and it is
+  dropped before anything is parsed. A paired tab's frames over 16 MiB close
+  the socket with 1009, which fails the pending calls (`VIEWER_NOT_CONNECTED`,
+  reason `disconnected`). Every frame is checked as a whole first (at most 72
+  levels deep and 300,000 values) before any field is read, and `type` (16
+  characters), `id`, `sessionId` and `pairingCode` (64 characters each) must
+  be short strings. Within a frame: all tool descriptors together at most
+  1 MiB, each `inputSchema` at most 32 levels deep and 5,000 values, each
+  result at most 4 MiB, 64 levels and 250,000 values. Schemas must be
+  well-formed for the keywords the bridge validates (`properties` of schemas,
+  `required` as strings, numeric bounds as numbers, ...), `type` must name a
+  type the bridge enforces (`string`, `number`, `integer`, `boolean`, `array`,
+  `object`, `null`), and `additionalProperties` must be `true` or `false` (a
+  schema there would not be enforced). Other JSON Schema keywords (`pattern`,
+  `format`, `oneOf`, `const`, …) are published to the agent but not checked by
+  the bridge; the tab must validate them. Non-finite numbers (`1e999`) are
+  refused anywhere in a frame. An oversized or
+  malformed hello is refused; an update is rejected with a non-fatal `error`;
+  a result fails its call with a message naming the limit. The size and
+  depth walk is iterative and counts before it copies, and the schema-shape
+  check recurses only after the 32-level bound has passed, so a value nested
+  30,000 deep or an 8-million-element array is refused cheaply rather than
+  overflowing a stack.
+- **What is clipped, what is bounded, what passes through.** Diagnostic
+  strings derived from tab input are cut to a few hundred characters and
+  their control characters replaced, so a tab cannot inflate an error past the
+  result limit or forge a log line. That covers error messages, log lines,
+  frame and schema error paths, and the client name and version. Tool names,
+  titles, descriptions and schemas are not clipped; they are bounded by the
+  limits above (64, 256 and 8,192 characters, 1 MiB in total, schema depth and
+  value count). Tool result content is passed through to the agent as text,
+  unaltered, newlines included, bounded only by the result limits (4 MiB,
+  64 levels, 250,000 values). It is model data, and the bridge's MCP
+  `instructions` tell the agent to treat it as data, not instructions.
+- **Guarded handlers.** Handling a frame (before and after pairing), the
+  handshake and pairing timers, socket close, the upgrade handler and the
+  stdio line handler run under a guard. An unexpected exception there fails
+  that socket (or that line) and is logged once, and the process keeps
+  serving. A frame cannot crash the process that way.
+- **Outbound bounds.** A `call` frame is at most 4 MiB; a session has at most
+  64 calls waiting; a new call fails at once if, with it, more than 32 MiB
+  would be queued on the socket (a stalled tab). Arguments holding a
+  non-finite number (`1e999`, which would go out as `null`) are refused. Each
+  fails the call (`INVALID_INPUT` for size or arguments, `RATE_LIMITED` for
+  waiting calls or queued bytes) instead of growing memory until the call
+  timeout.
+- **Session-scoped replies.** Each pairing gets a session id, and each call an
+  id unique for the bridge's lifetime. A reply that names another session, an
+  unknown id or an already answered call is ignored. Calls time out after
+  120 s (`TIMEOUT`, and the tab gets a `cancel`); closing the socket fails all
+  pending calls.
+- **No tab.** Only `bridge_status` is listed, and any other call fails at once
+  with `VIEWER_NOT_CONNECTED`. `notifications/tools/list_changed` is sent when
+  the listed tools can change: on connect, disconnect, replacement, and an
+  `update` that actually changes the effective permission or the tool list. At
+  most one is sent per 200 ms; no-op updates send none.
+- **Quiet logs.** Repeated stderr lines of one kind (refused connections,
+  wrong codes, stray frames) are written once, then summarised as "N more ..."
+  every 10 s.
+- **Shutdown.** On stdin end, close or error and on SIGINT/SIGTERM the bridge
+  closes first, so pending calls are answered with `VIEWER_NOT_CONNECTED`
+  (reason `shutting-down`) before stdio closes and the port is freed.
+- **Residual: a local process can block pairing.** It cannot pair or guess
+  faster than 0.8 codes per second, but it CAN prevent pairing for as long as
+  it keeps attacking. It can repeat wrong, early-closing attempts, each of
+  which holds its slot for up to 5 s, or keep silent sockets open (each held
+  up to the 3 s first-frame timeout). Either way all 4 unpaired slots stay
+  busy, so the real tab gets HTTP 429, and if it does get a slot, its code is
+  compared up to 5 s late. A page on a disallowed origin cannot, because
+  the Origin check runs before a slot is allocated. A page on an ALLOWED
+  origin can: it can open four sockets without sending a hello and renew them
+  every 3 s, without knowing the code. So allow only origins whose content you
+  trust; an allowed origin that also serves untrusted content can block
+  pairing (never pair). A local process is already inside the trust boundary
+  for denial of service (it could also take the port first). The bridge makes it visible. Whenever a connection is refused
+  because every unpaired slot is busy (wrong codes, or sockets held open
+  without a hello), stderr says "pairing is being blocked: every unpaired slot
+  is busy …" (once per 10 s window), and `bridge_status` reports
+  `pairingPressure` (`failedAttempts`, `refusedBusy`) and tells the user to
+  stop that program or page, or restart the bridge on another `--bridge-port`.
+
+### Wire protocol
+
+Exported browser-safe (no Node imports) as `@ifc-lite/mcp/bridge-protocol`,
+with the types, validators (`parseTabMessage`, `parseServerMessage`,
+`validateToolDescriptors`), `BRIDGE_LIMITS`, `buildPairingUrl` and
+`parsePairingFragment`. The frames are transport-neutral JSON text objects,
+protocol version `1`; `--bridge` carries them over a loopback WebSocket at
+`ws://127.0.0.1:<port>/`, and another transport may carry the same frames later:
+
+| Direction | `type` | Fields |
+|-----------|--------|--------|
+| tab → bridge | `hello` (first frame) | `protocol`, `pairingCode`, `permission`, `tools[]` (`name`, `title?`, `description`, `inputSchema`, `readOnly`), `client?` |
+| bridge → tab | `welcome` | `protocol`, `sessionId`, `permission` (effective), `readOnlyCeiling`, `bridge` |
+| bridge → tab | `call` | `sessionId`, `id`, `name`, `arguments` |
+| tab → bridge | `result` | `sessionId`, `id`, `result` (an MCP `CallToolResult` with text content only, passed through) |
+| bridge → tab | `cancel` | `sessionId`, `id`, `reason` (`cancelled` or `timeout`) |
+| tab → bridge | `update` | `sessionId`, `permission?`, `tools?` |
+| bridge → tab | `error` | `code`, `message`; fatal codes end the channel; on the WebSocket transport, a close with code (4400 invalid, 4401 pairing failed, 4408 handshake timeout, 4409 replaced, 4426 protocol mismatch, 4503 shutting down) |
+
+**The tab's obligation:** while `welcome.readOnlyCeiling` is true or the
+effective `permission` is `read-only`, the tab must refuse every call that
+would change the model, whatever label it sent, and answer it with an
+`isError` result.
+
+**Timing and size the tab must tolerate:** send the `hello` within 3 s of
+the socket opening and keep it (with every frame before pairing) under
+1.25 MiB in total; keep `id`, `sessionId` and `pairingCode` at most 64
+characters and `type` at most 16; expect `welcome` (or `PAIRING_FAILED`) up
+to 5 s after the hello while someone is guessing codes, and HTTP 429 on
+connect for as long as a local program keeps every unpaired slot busy; a dropped
+over-limit unpaired connection closes without an error frame (1006).
+
+## Roadmap
+
+Shipped: stdio + Streamable HTTP transports; query, geometry (bbox, volume,
+area), clash, IDS validation, mutation, BCF, bSDD, diff, export (IFC, CSV, JSON,
+GLB, OBJ, IFCX), and live viewer control.
+
+Planned: mesh geometry (`geometry_get`) and `raycast` (both need the WASM
+geometry pipeline), Gherkin validation (`gherkin_check`), and PDF report export
+(`export_pdf_report`) — these tools are registered but currently return
+`UNSUPPORTED_OPERATION`. Also planned: OAuth 2.1 with PKCE and hosted
+multi-tenant deployment, sampling for natural-language descriptions, and public
+registry listing.
+
+## Docs
+
+See the [ifc-lite docs](https://ifclite.dev/docs/) for the full
+platform documentation.
+
+Licensed under MPL-2.0.
+
+Loaded-model physical edits use the same command cores as the viewer and typed
+SDK. `edit_element_geometry` handles Move/Rotate, Size, Wall Endpoints, Split and
+Trim/Extend. `copy_elements`, `duplicate_element` and `array_elements` carry
+hosted graph records and share the viewer placement and naming policies.
+References are model-local EXPRESS IDs; offsets use IFC storey-local metres
+and planar rotations use radians. Every write is one `mutation_undo` batch;
+unsupported sources and unsafe shared geometry refuse before committing.
+See the [MCP guide](https://github.com/LTplus-AG/ifc-lite/blob/main/docs/guide/mcp.md)
+for parameter contracts.
+
+`room_command` derives Room candidates from the current native geometry and
+runs Auto/Pick/Footprint/Update or layout Drag/Split/Remove/Prune through the
+shared Room core. It requires the WASM runtime. Query does not write; writes
+record one complete Undo batch. Model removal and session termination free
+retained native layout handles. Unsupported schema/storey planes return
+`INVALID_INPUT`; unavailable native initialization returns
+`UNSUPPORTED_OPERATION`. Unexpected export, parse, processing or runtime
+import failures return `INTERNAL_ERROR`; cancellation and state conflicts
+retain their distinct retryable codes.
+
+AI Flow nodes use explicit host environment configuration (`IFC_LITE_AI_MODEL`,
+`IFC_LITE_AI_API_KEY`, optional `IFC_LITE_AI_BASE_URL`). Review-capable runs require
+a new allowed `checkpoint_path` and return a pending artifact. A separate
+`resume_flow` with the exact `approved_digest` rechecks native source state and
+current scope, restores the original budget and consumes one durable disk claim.
+See the [MCP guide](../../docs/guide/mcp.md) for further pauses and refusals.
+
+`propose_flow` lets a read-only MCP caller run a native read/AI-only graph to
+a pending artifact. It rejects declared or node-defined effects and permits
+only `model.read` and `network.ai`. The current read scope and model allowlist
+still apply; the separate `resume_flow` requires current mutate authorization.
+MCP responses and checkpoint budgets include provider usage receipts without
+prompts, replies or credentials; receipt history survives subsequent pauses.
+
+`review_findings` reads actual retained IDS/information Review facts with `read`
+permission. Native producer capture binds full source SHA-256, definition/run
+provenance and exact model ownership; scope revocation suppresses the whole
+multi-model envelope. No editor, artifact or decision is created. Unsupported
+sources, incomplete overlays and bounded output stay explicit. See
+[the captured native Review contract](../../docs/guide/mcp.md#captured-native-review-reads).
+
+
+`review_findings` can read supplied `saved_analysis_runs` or
+`saved_validation_reports` using the canonical portable codecs and full-source,
+duplicate-preserving identity binding. This is a separate historical read mode;
+without either input the existing captured native read remains. Imported
+provenance never attests execution or complete native coverage. Read scope,
+current permissions/ownership and known-credential guards still apply. See
+[the supplied-input contract](../../docs/guide/mcp.md#supplied-historical-review-inputs).
+
+Native Flow `bcf.createTopic` and `bcf.addComment` writes use a durable,
+credential-free publication journal. Local MCP and CLI share
+`IFCLITE_BCF_OUTBOX_DIR` (default `~/.ifc-lite/bcf-outbox`); authenticated MCP
+principals get stable, separate hashed namespaces across sessions. Keep the
+journal when restarting: a committed write whose response was lost remains
+unresolved and blocks an identical send.
+
+Use `bcf_publications_list` to inspect intents and receipts. With mutate
+permission, `bcf_publication_check` reads the original target and stores actual
+matching candidates; supply current `capabilities`, including the target's
+`network.fetch:<host>` and exact `secret.read:<NAME>` when using `token_env`.
+A separate `bcf_publication_reconcile` binds `entry_id` to one checked
+`candidate_guid` without sending a write. Neither command retries an uncertain
+create, and reconciliation refuses arbitrary GUIDs or live send ownership.
+Checks and reconciliation are unavailable to read-only callers. These native
+recovery tools do not replace the viewer's BCF content library or qualify an
+external vendor's OAuth/API behavior.
+Remote sessions without a stable authenticated principal refuse BCF publication
+and recovery; ordinary model flows remain available. A transient session id
+never replaces the durable principal boundary.
+Checks keep trim-equivalent free text as manual candidates. Rewritten or
+omitted fields leave unmatched objects unavailable; they cannot prove absence.
+After a complete successful check finds an empty server collection and the caller
+explicitly supplies `confirm_full_read_access: true` for the original write’s
+full access scope,
+`bcf_publication_confirm_absent` explicitly releases that `entry_id` for a
+separately reviewed later run. This mutate-only decision never sends a write;
+a newer failed check or live sender blocks it. Checking alone never retries.
+Successful BCF outputs redact the actual resolved bearer, including literal
+and Player tokens, after the original durable receipt is saved.
+
+Native BCF listing is bounded: `bcf_publications_list` accepts `limit` (1–1000)
+and the preceding `cursor`, and returns `{entries,nextCursor?}`. Follow every
+`nextCursor`, including empty progress pages; the pages are not a snapshot
+across concurrent inserts. Recovery by known `entry_id` remains available when
+new-create capacity is exhausted; existing immutable receipts are retained.
+
+If a sending process cannot be identified on this machine, `bcf_publication_check`
+requires an operator to establish that the old process has stopped and explicitly
+pass `confirm_owner_stopped: true`. This assertion is persisted, never overrides
+an observed live sender, and does not send or retry a create. `token_env` requires
+its exact `secret.read:<NAME>` grant and may contain a short nonempty bearer.
+
+An empty read without this explicit full-scope confirmation is `unavailable`,
+even with a bearer token. Tokens never imply full visibility. Filtered, partial
+or incomparable reads cannot safely release a write; old persisted absence
+records without the confirmation marker remain readable but cannot authorize
+release. Only a caller who knows the original write’s complete access scope
+should make this assertion; live vendor authorization is not qualified.

@@ -1,0 +1,13 @@
+# Resolve the latest stable reference engine on every fresh CI run (#7732).
+# Canonical outputs and diagnostic receipts record the actual version used;
+# geometry and diagnostic admission remain checked independently of version.
+ifcopenshell
+numpy==2.0.2
+shapely==2.0.7
+
+# ifcopenshell.express.rule_executor (used by ifcopenshell.validate's
+# express_rules=True path, see validate_export.py / #4043) imports pytest's
+# assertion rewriter (`from _pytest import assertion`) at call time even
+# though nothing here uses pytest as a test runner. Without it,
+# express_rules=True raises ModuleNotFoundError instead of validating.
+pytest==9.1.1

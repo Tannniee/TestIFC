@@ -1,0 +1,123 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * The Info dialog's Shortcuts tab, generated from the keyboard command table
+ * (`lib/commands/keyboard-commands.ts`, #5836). Nothing here lists a key by
+ * hand: a row exists because a command declares the key, and its glyphs are
+ * formatted for the platform the viewer runs on.
+ */
+
+import { isFeatureEnabled } from '@/lib/features';
+import { useTranslation, type TranslationKey, type TranslationParameters } from '@/i18n';
+import { ALT_SHORTCUT_PANELS, altShortcutDigit } from '@/lib/panels/registry';
+import { isPanelAvailable } from '@/lib/panels/availability';
+import { isApplePlatform } from '@/lib/commands/chord';
+import {
+  KEY_COMMANDS,
+  KEY_COMMAND_CATEGORIES,
+  POINTER_GESTURES,
+  type KeyCommandCategory,
+} from '@/lib/commands/keyboard-commands';
+import { formatCommandKeys } from '@/lib/commands/shortcut-label';
+import { isKeyCommandAvailable } from '@/lib/commands/keyboard-command-features';
+
+interface ShortcutRow {
+  readonly id: string;
+  readonly keys: string;
+  readonly labelKey: TranslationKey;
+  readonly params?: TranslationParameters;
+}
+
+function rowsByCategory(apple: boolean, gestureKeys: (row: (typeof POINTER_GESTURES)[number]) => string,
+  panelTitles: { sidePanels: string; bottomPanels: string }) {
+  const rows = new Map<KeyCommandCategory, ShortcutRow[]>();
+  const push = (category: KeyCommandCategory, row: ShortcutRow) => {
+    const list = rows.get(category) ?? [];
+    list.push(row);
+    rows.set(category, list);
+  };
+  for (const command of KEY_COMMANDS) {
+    if (!isKeyCommandAvailable(command)) continue;
+    push(command.category, {
+      id: command.id,
+      keys: formatCommandKeys(command, apple),
+      // A host can switch off every bottom panel; the row then has no bottom clause.
+      labelKey: command.id === 'ui.openPanel' && !panelTitles.bottomPanels ? 'commands.ui.openPanelSideOnly' : command.labelKey,
+      params: command.id === 'ui.openPanel' ? panelTitles : undefined,
+    });
+  }
+  for (const gesture of POINTER_GESTURES) {
+    push(gesture.category, { id: gesture.id, keys: gestureKeys(gesture), labelKey: gesture.labelKey });
+  }
+  return KEY_COMMAND_CATEGORIES.flatMap((category) => {
+    const list = rows.get(category);
+    return list ? [{ category, rows: list }] : [];
+  });
+}
+
+export function ShortcutsTab() {
+  const { t } = useTranslation();
+  const apple = isApplePlatform();
+  // Each panel keeps its digit when one before it is switched off, so the list
+  // names the digit instead of relying on position.
+  const altPanelTitles = (bottom: boolean) => ALT_SHORTCUT_PANELS
+    .map((panel, position) => ({ panel, digit: altShortcutDigit(position) }))
+    .filter(({ panel }) => (panel.region === 'bottom') === bottom && isPanelAvailable(panel.id))
+    .map(({ panel, digit }) => t('commands.ui.openPanelEntry', { digit, panel: t(panel.titleKey) })).join(', ');
+  const groups = rowsByCategory(apple, (gesture) => t(gesture.gestureKey, { mod: apple ? '⌘' : 'Ctrl' }),
+    { sidePanels: altPanelTitles(false), bottomPanels: altPanelTitles(true) });
+
+  return (
+    <div className="space-y-4">
+      {/* Learn-more row: drives discovery to the marketing site and the github.io
+          docs. Sits above the shortcut groups so it's the first thing users hunting
+          for help see, without crowding the keyboard reference itself. */}
+      {isFeatureEnabled('help.product-links') && <div className="rounded border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">{t('keyboardShortcuts.shortcuts.learnMore')}</span>
+        <a
+          href="https://ifclite.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-2 underline-offset-2 hover:underline hover:text-primary transition-colors"
+        >
+          {t('keyboardShortcuts.shortcuts.homepageLink')}
+        </a>
+        <span className="mx-1.5 opacity-40">·</span>
+        <a
+          href="https://ifclite.dev/docs/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline-offset-2 hover:underline hover:text-primary transition-colors"
+        >
+          {t('keyboardShortcuts.shortcuts.docsLink')}
+        </a>
+      </div>}
+      {groups.map(({ category, rows }) => (
+        <div key={category}>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">
+            {t(`commands.category.${category}`)}
+          </h3>
+          <div className="space-y-1">
+            {rows.map((row) => (
+              <div
+                key={row.id}
+                data-shortcut-command={row.id}
+                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 py-1"
+              >
+                {/* The label wraps first (its 10rem basis); only a chord
+                    list too long for a phone row moves under it,
+                    right-aligned, and wraps there (#8802). */}
+                <span className="grow basis-40 text-sm">{t(row.labelKey, row.params)}</span>
+                <kbd className="ml-auto px-2 py-0.5 text-xs bg-muted rounded border font-mono">
+                  {row.keys}
+                </kbd>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

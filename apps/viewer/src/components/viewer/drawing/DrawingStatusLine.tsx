@@ -1,0 +1,109 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { Spinner } from '@/components/ui/spinner';
+
+/**
+ * The Drawing panel's status line (#5494): the active tool's hint on the
+ * left, regeneration progress and the markup facts on the right. It replaces
+ * the tips that floated at the canvas' bottom-right and the floating
+ * "Updating…" chip, so nothing but the text editor sits over the canvas.
+ * With the Select tool idle and nothing to count it is not drawn (#8802
+ * R3b): the pan/zoom hint is the Select tool's tooltip, and a permanent
+ * tutorial row cost the canvas its height.
+ */
+
+
+import type { Annotation2DTool, SelectedAnnotation2D } from '@/store/slices/drawing2DSlice';
+import { useTranslation } from '@/i18n';
+import { cn } from '@/lib/utils';
+import type { SnapMode } from '@/lib/drafting-core/types';
+import type { TranslationKey } from '@/i18n/en';
+
+const SNAP_LABELS: Partial<Record<SnapMode, TranslationKey>> = {
+  endpoint: 'section2d.snap.endpoint', midpoint: 'section2d.snap.midpoint', intersection: 'section2d.snap.intersection',
+  perpendicular: 'section2d.snap.perpendicular', nearest: 'section2d.snap.nearest',
+};
+
+export interface DrawingStatusLineProps {
+  activeTool: Annotation2DTool;
+  measureStarted: boolean;
+  shiftLocked: boolean;
+  snapped: boolean;
+  polygonPointCount: number;
+  cloudPointCount: number;
+  /** Dimension tool: measured points placed so far (0-2) and the snap under the cursor. */
+  dimensionStep?: number;
+  dimensionSnap?: SnapMode | null;
+  textEditing: boolean;
+  selection: SelectedAnnotation2D | null;
+  counts: { measurements: number; areas: number; texts: number; clouds: number; dimensions?: number };
+  underlayCount: number;
+  updating: boolean;
+}
+
+export function DrawingStatusLine(p: DrawingStatusLineProps) {
+  const { t } = useTranslation();
+
+  let hint: string;
+  switch (p.activeTool) {
+    case 'measure':
+      hint = p.measureStarted ? t('section2d.tip.measureSecond') : t('section2d.tip.measureFirst');
+      break;
+    case 'polygon-area':
+      hint = p.polygonPointCount === 0 ? t('section2d.tip.polygonFirst')
+        : p.polygonPointCount < 3 ? t('section2d.tip.polygonNeed', { count: p.polygonPointCount })
+          : t('section2d.tip.polygonClose');
+      break;
+    case 'cloud':
+      hint = p.cloudPointCount === 0 ? t('section2d.tip.cloudFirst') : t('section2d.tip.cloudSecond');
+      break;
+    case 'dimension':
+      hint = !p.dimensionStep ? t('section2d.tip.dimensionFirst')
+        : p.dimensionStep === 1 ? t('section2d.tip.dimensionSecond') : t('section2d.tip.dimensionPlace');
+      break;
+    case 'tag':
+      hint = t('section2d.tip.tag');
+      break;
+    case 'text':
+      hint = p.textEditing ? t('section2d.tip.textEditing') : t('section2d.tip.text');
+      break;
+    default:
+      hint = p.selection
+        ? (p.selection.type === 'text' ? t('section2d.tip.selectionText') : t('section2d.tip.selectionOther'))
+        : '';
+  }
+
+  const facts: string[] = [];
+  if (p.counts.measurements > 0) facts.push(t('section2d.status.measurements', { count: p.counts.measurements }));
+  if (p.counts.areas > 0) facts.push(t('section2d.status.areas', { count: p.counts.areas }));
+  if (p.counts.texts > 0) facts.push(t('section2d.status.texts', { count: p.counts.texts }));
+  if (p.counts.clouds > 0) facts.push(t('section2d.status.clouds', { count: p.counts.clouds }));
+  if (p.counts.dimensions) facts.push(t('section2d.status.dimensions', { count: p.counts.dimensions }));
+  if (p.underlayCount > 0) facts.push(t('section2d.status.underlays', { count: p.underlayCount }));
+  const markupTool = p.activeTool !== 'none';
+  const snapKey = p.activeTool === 'dimension' && p.dimensionSnap ? SNAP_LABELS[p.dimensionSnap] : undefined;
+  if (!hint && facts.length === 0 && !p.updating && !p.snapped) return null;
+  // A markup tool keeps saying there is nothing yet; idle Select says nothing.
+  if (facts.length === 0 && markupTool) facts.push(t('section2d.status.noMarkup'));
+
+  return (
+    <output className="flex h-6 shrink-0 items-center gap-3 border-t px-3 text-2xs text-muted-foreground tabular-nums">
+      <span className="min-w-0 flex-1 truncate">{hint}</span>
+      {p.activeTool === 'measure' && p.measureStarted && (
+        <span className={cn('shrink-0', p.shiftLocked && 'text-primary')}>{t('section2d.tip.shift')}</span>
+      )}
+      {snapKey ? <span className="shrink-0">{t(snapKey)}</span>
+        : p.snapped && <span className="shrink-0">{t('section2d.status.snapped')}</span>}
+      {p.updating && (
+        <span className="inline-flex shrink-0 items-center gap-1">
+          <Spinner size="xs" />
+          {t('section2d.updating')}
+        </span>
+      )}
+      {/* Narrow hosts hide the facts beside a hint; with no hint they are the line. */}
+      <span className={cn('shrink-0', hint && 'hidden sm:inline')}>{facts.join(' · ')}</span>
+    </output>
+  );
+}

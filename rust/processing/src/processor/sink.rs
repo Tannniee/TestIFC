@@ -1,0 +1,132 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! [`ProcessingSink`]: what a pass tells its caller while it runs.
+//!
+//! Every event has a no-op default, so a consumer implements the ones it
+//! reads. `()` is the sink that listens to nothing.
+//!
+//! Ordering contract (pinned by `tests/entry_point_trace.rs`):
+//! `on_omitted_type_records` fires at most once, before everything else, and
+//! only when the scan omitted a type record. Then
+//! `on_bootstrap` fires at most once, then `on_frame` exactly once, then any
+//! number of `on_batch` interleaved with `on_color_update`. `on_frame` fires
+//! before the first `on_batch`, also for a file with no jobs. A
+//! `on_color_update` replays deferred styles after the first batch, never
+//! before it. Events fire once per chunk, never per element. With
+//! `Features::finishes` on, `on_finishes` fires immediately before every
+//! `on_batch`, also for a batch whose meshes author no finish.
+
+use crate::mesh_frame::MeshFrame;
+use crate::style::SpecularMaterial;
+use crate::types::mesh::MeshData;
+use crate::types::response::QuickMetadataBootstrap;
+use std::sync::OnceLock;
+
+/// The frame a pass bakes its vertices in (#5407).
+///
+/// Delivered once, after frame selection and before the first batch, so a
+/// streaming consumer can collate each batch in the baked frame as it arrives.
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct FrameEvent {
+    /// The frame itself: its tag, the subtracted translation, the removed
+    /// site rotation. The returned result's `frame` is this value.
+    pub frame: MeshFrame,
+    /// [`native_to_baked`](super::native_to_baked) for `frame` and the site
+    /// transform: the column-major basis that maps native coordinates to the
+    /// baked frame.
+    pub baked_basis: [f64; 16],
+}
+
+/// Events of one [`process`](super::process) pass. See the module docs.
+pub trait ProcessingSink {
+    /// Opt in to per-job refusal receipts without changing the mesh pipeline.
+    /// The returned handle belongs to this request; ordinary sinks allocate none.
+    fn product_geometry_audit(&self) -> Option<crate::ProductGeometryAudit> { None }
+
+    /// F2 (#8341): distinct type records, ascending, whose planned type
+    /// geometry was omitted because the full decoder rejects the record. A
+    /// plain decode failure, never an input-admission refusal, so it is in
+    /// neither `ProcessingStats::refused_*` counter. Its length is the native
+    /// `PipelineDiagnosticsReport::omitted_type_records`.
+    fn on_omitted_type_records(&mut self, _records: &[u32]) {}
+    /// The lightweight spatial bootstrap, when `Features::quick_metadata_bootstrap` is on.
+    fn on_bootstrap(&mut self, _bootstrap: &QuickMetadataBootstrap) {}
+    /// The frame this pass bakes vertices in.
+    fn on_frame(&mut self, _frame: &FrameEvent) {}
+    /// A chunk of meshes, with the jobs done so far and the job total.
+    fn on_batch(&mut self, _meshes: &[MeshData], _processed: usize, _total: usize) {}
+    /// Colours resolved after the first batch, when styles were deferred.
+    fn on_color_update(&mut self, _updates: &[(u32, [f32; 4])]) {}
+    /// The IFC-authored finish of each mesh of the `on_batch` that follows,
+    /// when `Features::finishes` is on: `finishes[i]` belongs to its
+    /// `meshes[i]`, `None` where nothing authored one. The join is
+    /// [`ModelFinishes`](crate::style::ModelFinishes)'s, over the pass's own
+    /// scan and index.
+    fn on_finishes(&mut self, _finishes: &[Option<SpecularMaterial>]) {}
+}
+
+impl ProcessingSink for () {}
+
+/// A sink that listens to batches only: `OnBatch::new(|meshes, processed, total| ..)`.
+///
+/// The other events keep their no-op defaults. For a consumer that streams
+/// meshes out as they are emitted and reads everything else off the result.
+pub struct OnBatch<F>(F);
+
+impl<F> OnBatch<F>
+where
+    F: FnMut(&[MeshData], usize, usize),
+{
+    pub fn new(on_batch: F) -> Self {
+        Self(on_batch)
+    }
+}
+
+impl<F> ProcessingSink for OnBatch<F>
+where
+    F: FnMut(&[MeshData], usize, usize),
+{
+    fn on_batch(&mut self, meshes: &[MeshData], processed: usize, total: usize) {
+        (self.0)(meshes, processed, total);
+    }
+}
+
+/// The adapter the deprecated entry points use to turn their closure
+/// arguments into a sink. Deleted with them in C10.
+#[doc(hidden)]
+pub struct ClosureSink<'a, B, C, Q> {
+    pub on_batch: B,
+    pub on_color_update: C,
+    pub on_bootstrap: Q,
+    /// Receives [`FrameEvent::baked_basis`] when set.
+    pub baked_basis_out: Option<&'a OnceLock<[f64; 16]>>,
+}
+
+impl<B, C, Q> ProcessingSink for ClosureSink<'_, B, C, Q>
+where
+    B: FnMut(&[MeshData], usize, usize),
+    C: FnMut(&[(u32, [f32; 4])]),
+    Q: FnMut(&QuickMetadataBootstrap),
+{
+    fn on_bootstrap(&mut self, bootstrap: &QuickMetadataBootstrap) {
+        (self.on_bootstrap)(bootstrap);
+    }
+
+    fn on_frame(&mut self, frame: &FrameEvent) {
+        if let Some(out) = self.baked_basis_out {
+            // `set` fails only if already set: one pass publishes one frame.
+            let _ = out.set(frame.baked_basis);
+        }
+    }
+
+    fn on_batch(&mut self, meshes: &[MeshData], processed: usize, total: usize) {
+        (self.on_batch)(meshes, processed, total);
+    }
+
+    fn on_color_update(&mut self, updates: &[(u32, [f32; 4])]) {
+        (self.on_color_update)(updates);
+    }
+}

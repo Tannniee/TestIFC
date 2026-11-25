@@ -1,0 +1,53 @@
+[package]
+name = "ifc-lite-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "High-performance IFC/STEP parser for building data"
+keywords = ["ifc", "bim", "step", "parser", "aec"]
+categories = ["parsing", "data-structures"]
+readme = "../../README.md"
+exclude = ["examples/test_real_ifc.rs"]
+
+[features]
+default = []
+
+[dependencies]
+
+# The one float parser in core (every STEP real goes through read_step_number)
+# fast-float2 is the maintained fork of unmaintained fast-float (GHSA-x8jh-xj3x-gx3c, GHSA-8655-xgh5-5vvq)
+fast-float2 = "0.2"
+
+# Async streaming
+futures-core = "0.3"
+futures-util = "0.3"
+
+# Fast byte searching
+memchr.workspace = true
+# Parser
+nom = "7.1"
+
+# Fast hashing
+rustc-hash.workspace = true
+# `core::hash::ContentHash`: XXH3-128 dedup key. `twox-hash` rather than
+# `xxhash-rust`: same algorithm, but MIT where xxhash-rust is BSL-1.0 (a
+# downstream consumer ships under a licence allowlist that excludes BSL-1.0).
+# `default-features = false` avoids the `rand` default; `alloc` is what the
+# streaming hasher needs.
+# bytemuck: bulk little-endian reinterpret of f32/u32 runs for hashing.
+twox-hash = { version = "2.1", default-features = false, features = ["xxhash3_128", "alloc"] }
+bytemuck = "1.25"
+
+# Error handling
+thiserror.workspace = true
+
+[dev-dependencies]
+ifc-lite-geometry = { path = "../geometry" }
+tokio = { workspace = true, features = ["macros", "rt"] }
+# Test-only: parse the shared decode parity fixture.
+serde_json.workspace = true
+
+[lints]
+workspace = true

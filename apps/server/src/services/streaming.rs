@@ -1,0 +1,249 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! Streaming geometry processing with Server-Sent Events.
+//!
+//! Thin bridge over the canonical `ifc_lite_processing` pipeline: the
+//! blocking task runs `ifc_lite_processing::process` (the same code path as
+//! `POST /api/v1/parse` and the wasm `processGeometryBatch` boundary) and
+//! forwards the sink's `on_batch` events, with the frame it announces before
+//! the first batch (#5407), through a bounded channel as [`StreamEvent`]s
+//! (see [`EVENT_BUFFER_EVENTS`]).
+//!
+//! This file used to host a third, bespoke geometry pipeline with its own
+//! scan, style index (SurfaceColour-only, no material chain, no indexed
+//! colour maps), no aggregate void propagation, no submeshes and no type
+//! geometry — meshes streamed from `/parse/stream` could differ from every
+//! other surface (alignment audit). Supersede means delete: it is gone, and
+//! the streaming endpoints inherit every pipeline feature (and bug fix)
+//! automatically, including `opening_filter` support which the bespoke
+//! pipeline never had.
+
+use crate::admission::AdmissionGuard;
+use crate::types::{pair, with_finishes, StreamEvent};
+use ifc_lite_processing::style::SpecularMaterial;
+use async_stream::stream;
+use futures::Stream;
+use ifc_lite_processing::{
+    extract_symbolic_data_with_provenance_in_frame, process, Batching, FrameEvent, MeshData,
+    OpeningFilterMode, ProcessingRequest, ProcessingSink, TessellationQuality,
+};
+use std::pin::Pin;
+use tokio::sync::mpsc;
+
+/// How many events the blocking producer may run ahead of the response
+/// stream before it waits for the client.
+///
+/// The channel between the two is the only place the parse's emit rate meets
+/// the client's read rate. A client that stops reading keeps its connection
+/// until the write-idle timeout closes it (`IFC_STREAM_IDLE_TIMEOUT_SECS`,
+/// see `write_timeout.rs`); until then only this bound stops the producer
+/// from queuing every batch of the model on top of the parse's working set,
+/// which admission does not account for (it charges the UPLOAD size, not the
+/// tessellated output). A full queue parks the producer in `blocking_send`
+/// (legal there, it runs on a `spawn_blocking` thread), so a stalled reader
+/// stalls its own parse instead of growing the process.
+///
+/// Four events is two batches: the pipeline emits each batch as a `Batch`
+/// frame followed by its `Progress` frame, so the consumer always has one
+/// batch to serialise and one queued behind it while the producer meshes the
+/// next. Nothing is dropped: the producer waits for capacity. A receiver that
+/// goes away makes a parked send return at once, and the next callback sees
+/// `tx.is_closed()` and cancels.
+pub(crate) const EVENT_BUFFER_EVENTS: usize = 4;
+
+/// What the SSE bridge hears from the pipeline, forwarded as [`StreamEvent`]s.
+struct SseSink {
+    tx: mpsc::Sender<StreamEvent>,
+    /// Flipped when the client has gone, so the pipeline stops between chunks.
+    cancel: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    /// The finishes of the batch about to arrive (`on_finishes` fires just
+    /// before each `on_batch`).
+    finishes: Vec<Option<SpecularMaterial>>,
+    /// The basis the batches are baked in, delivered before the first batch (#5407).
+    baked_basis: Option<[f64; 16]>,
+    started: bool,
+    batch_number: usize,
+    last_type: String,
+}
+
+impl ProcessingSink for SseSink {
+    fn on_frame(&mut self, frame: &FrameEvent) {
+        self.baked_basis = Some(frame.baked_basis);
+    }
+
+    fn on_finishes(&mut self, finishes: &[Option<SpecularMaterial>]) {
+        self.finishes = finishes.to_vec();
+    }
+
+    fn on_batch(&mut self, meshes: &[MeshData], processed: usize, total: usize) {
+        if self.tx.is_closed() {
+            self.cancel.store(true, std::sync::atomic::Ordering::Relaxed);
+            return;
+        }
+        if !self.started {
+            self.started = true;
+            let _ = self.tx.blocking_send(StreamEvent::Start { total_estimate: total });
+            let _ = self.tx.blocking_send(StreamEvent::Progress {
+                processed: 0,
+                total,
+                current_type: "indexing".into(),
+            });
+        }
+        if let Some(mesh) = meshes.last() {
+            self.last_type = mesh.ifc_type.clone();
+        }
+        if !meshes.is_empty() {
+            self.batch_number += 1;
+            let _ = self.tx.blocking_send(StreamEvent::Batch {
+                meshes: pair(meshes.iter().cloned(), std::mem::take(&mut self.finishes)),
+                batch_number: self.batch_number,
+                baked_basis: self.baked_basis,
+            });
+        }
+        let _ = self.tx.blocking_send(StreamEvent::Progress {
+            processed,
+            total,
+            current_type: self.last_type.clone(),
+        });
+    }
+    // Styling is eager on this path (`fast_first` is off), so `on_color_update`
+    // never fires and keeps its default.
+}
+
+/// Generate streaming geometry events backed by the canonical pipeline.
+///
+/// Takes the raw IFC bytes (issue #1023): localized non-UTF-8 byte sequences
+/// in the HEADER must not block otherwise valid models, so no `String`
+/// conversion happens anywhere on this path.
+///
+/// `admission` is shared (#7676, SERVER-8): a caller that runs more work for
+/// the same request alongside the stream (the parquet route's data-model
+/// fill) keeps a clone, so that work is charged to the request's one slot
+/// instead of waiting for a second one its own stream holds.
+///
+/// No cache key is computed here (#7676, SERVER-22): the JSON stream writes
+/// no cache entry, so it has none to name, and the parquet stream names its
+/// own in `Start`. Hashing the whole upload again on the producer was a
+/// second SHA-256 per request that nothing could use.
+pub fn process_streaming(
+    content: bytes::Bytes,
+    initial_batch_size: usize,
+    max_batch_size: usize,
+    opening_filter: OpeningFilterMode,
+    tessellation_quality: TessellationQuality,
+    admission: Option<std::sync::Arc<AdmissionGuard>>,
+    layer_slicing: bool,
+) -> Pin<Box<dyn Stream<Item = StreamEvent> + Send>> {
+    // Zero is a caller bug, not a reason to stall the stream.
+    let initial_batch_size = initial_batch_size.max(1);
+    let max_batch_size = max_batch_size.max(1);
+
+    let (tx, mut rx) = mpsc::channel::<StreamEvent>(EVENT_BUFFER_EVENTS);
+
+    // Disconnect-aware cancellation: when the SSE client hangs up, the
+    // receiver drops, the batch callback notices via `tx.is_closed()`, and the
+    // streaming core stops between chunks instead of meshing the rest of the
+    // model for nobody (a full-size parse used to keep burning a core and its
+    // memory slot to completion).
+    let cancel = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let cancel_for_task = std::sync::Arc::clone(&cancel);
+
+    // The admission permit must be held until BOTH sides are done: the
+    // blocking producer (on disconnect the stream drops first, but the task
+    // keeps its memory/CPU until the cooperative cancel takes effect) AND the
+    // response stream (the channel can still hold `EVENT_BUFFER_EVENTS`
+    // emitted events after the producer exits, so dropping the permit at task
+    // exit would let a replacement parse be admitted on top of the undrained
+    // buffers). An Arc'd guard held by both releases on whichever finishes
+    // last.
+    let admission_for_task = admission.clone();
+
+    let handle = tokio::task::spawn_blocking(move || {
+        let _admission = admission_for_task;
+
+        let mut sink = SseSink {
+            tx: tx.clone(),
+            cancel: std::sync::Arc::clone(&cancel_for_task),
+            finishes: Vec::new(),
+            baked_basis: None,
+            started: false,
+            batch_number: 0,
+            last_type: String::new(),
+        };
+
+        // #5984: every batch's meshes carry their IFC-authored finish, which
+        // the pass joins from its own scan (`with_finishes`).
+        let request = with_finishes(ProcessingRequest::default()
+            .opening_filter(opening_filter)
+            .quality(tessellation_quality).layer_slicing(layer_slicing)
+            .batching(Batching::new(initial_batch_size, max_batch_size))
+            // Batches are forwarded as they are emitted - retaining them
+            // in the ProcessingResult would double peak memory.
+            .retain_meshes(false)
+            .cancel(std::sync::Arc::clone(&cancel_for_task)));
+        let result = process(&content, &request, &mut sink);
+        let started = sink.started;
+        drop(sink);
+
+        if cancel_for_task.load(std::sync::atomic::Ordering::Relaxed) || tx.is_closed() {
+            // Client gone: the partial result must not be presented as a
+            // completed parse - skip Complete AND the symbolic extraction
+            // (which re-scans the file). The is_closed check also covers a
+            // disconnect after the LAST batch, where the callback can no
+            // longer observe it.
+            tracing::info!("SSE client disconnected; streaming parse stopped early");
+            return;
+        }
+
+        if !started {
+            // Zero-geometry model: the batch callback never ran. Emit Start
+            // so consumers still observe the Start → Complete contract.
+            let _ = tx.blocking_send(StreamEvent::Start { total_estimate: 0 });
+        }
+
+        // 2D symbolic stream (IfcAnnotation + IfcGrid) on the same blocking
+        // thread — parity with the synchronous endpoints (issue #900).
+        // Georeferencing already rides in `result.metadata`.
+        //
+        // In the frame the batches above were meshed in: the `Complete` event
+        // carries the symbols and `mesh_coordinate_space` together, so they
+        // must agree (#4706).
+        let symbolic_data = match extract_symbolic_data_with_provenance_in_frame(&content, result.frame) {
+            Ok(data) => data,
+            Err(error) => {
+                let _ = tx.blocking_send(StreamEvent::Error { message: error.to_string() });
+                return;
+            }
+        };
+
+        let _ = tx.blocking_send(StreamEvent::Complete {
+            stats: result.stats,
+            metadata: result.metadata,
+            mesh_coordinate_space: Some(result.mesh_coordinate_space),
+            site_transform: result.site_transform,
+            building_transform: result.building_transform,
+            symbolic_data,
+        });
+        // `tx` drops here, closing the channel and ending the stream below.
+    });
+
+    Box::pin(stream! {
+        let _admission = admission;
+        while let Some(event) = rx.recv().await {
+            yield event;
+        }
+        // Surface a panicked/cancelled blocking task as a stream error
+        // instead of silently truncating the SSE stream.
+        if let Err(e) = handle.await {
+            yield StreamEvent::Error {
+                message: format!("Streaming geometry task failed: {e}"),
+            };
+        }
+    })
+}
+
+#[cfg(test)]
+#[path = "streaming_tests.rs"]
+mod streaming_tests;

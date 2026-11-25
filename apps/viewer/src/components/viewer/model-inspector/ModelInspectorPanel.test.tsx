@@ -1,0 +1,365 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * The Model inspector panel (charter #6232, M2.5) driven the way a user does:
+ * select a wall in the Model workspace, its sections show its name, type,
+ * size and layers; typing a new name or thickness and committing writes ONE
+ * undo step, and one undo shows the old value again.
+ */
+
+import '@/test/setup-dom.js';
+import { afterEach, beforeEach, describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { act } from 'react';
+import { useViewerStore } from '@/store';
+import { toGlobalIdFromModels } from '@/store/globalId';
+import { blur, cleanup, click, render, type, waitFor } from '@/test/render.js';
+import { MODEL_ID, STOREY, seedModelingSession } from '@/test/modeling-session-fixture';
+import '@/lib/commands/modeling/builtin';
+import { setRequestRemesh } from '@/lib/commands/modeling/transaction';
+import { applyMaterialLayers } from './inspector-edits.js';
+import { entityName, layerSetOf } from '@/lib/commands/modeling/authored-kinds';
+import { ModelInspectorPanel } from './ModelInspectorPanel.js';
+
+const s = () => useViewerStore.getState();
+const undoDepth = () => s().undoStacks.get(MODEL_ID)?.length ?? 0;
+const input = (root: HTMLElement, label: string) => {
+  const found = [...root.querySelectorAll('input')].find((el) => el.getAttribute('aria-label') === label || (el.id && root.querySelector(`label[for="${el.id}"]`)?.textContent === label));
+  assert.ok(found, `an input labelled "${label}"`);
+  return found as HTMLInputElement;
+};
+
+let wall = 0;
+let restoreRemesh: () => void;
+beforeEach(async () => {
+  await seedModelingSession();
+  restoreRemesh = setRequestRemesh(() => {});
+  const added = s().addWall(MODEL_ID, STOREY, { Start: [0, 0, 0], End: [4, 0, 0], Thickness: 0.2, Height: 3, Name: 'W1' });
+  assert.ok('expressId' in added);
+  wall = added.expressId;
+  assert.equal(s().enterModelWorkspace(), true);
+  s().setSelectedEntityId(toGlobalIdFromModels(s().models, MODEL_ID, wall));
+});
+afterEach(() => {
+  cleanup();
+  s().exitModelWorkspace();
+  restoreRemesh();
+});
+
+describe('the inspector while a tool that builds no kind runs (#9096)', () => {
+  const title = (ui: HTMLElement) => ui.querySelector('[data-inspector-title]')?.textContent;
+
+  for (const [command, label] of [['grid.place', 'Grid'], ['curtainwall.place', 'Curtain wall'], ['stair.place', 'Stair']] as const) {
+    it(`${command} started from the Wall tool does not keep showing wall defaults`, () => {
+      act(() => s().setSelectedEntityId(null));
+      const ui = render(<ModelInspectorPanel />);
+      act(() => s().startCommand('wall.place'));
+      assert.equal(title(ui), 'Defaults · Wall');
+      assert.ok(ui.querySelector('[data-inspector-mode="defaults"]'));
+
+      act(() => s().startCommand(command));
+      assert.equal(title(ui), label);
+      assert.equal(ui.querySelectorAll('[data-inspector-mode]').length, 0, 'no target to edit');
+      assert.equal(ui.querySelectorAll('input').length, 0, 'none of the wall fields');
+      assert.ok(ui.querySelector('[data-model-inspector-command]'));
+      assert.equal(ui.querySelectorAll('[data-model-inspector-idle]').length, 0, 'a tool is running: it does not ask to pick one');
+
+      act(() => s().endCommand('cancel'));
+      assert.equal(title(ui), 'Defaults · Wall', 'with nothing running, the kind built last is back');
+      assert.ok(ui.querySelector('[data-model-inspector-idle]'));
+    });
+  }
+
+  it('a wall height typed in the defaults makes the next wall fixed at that height (#9037 review)', () => {
+    act(() => s().setSelectedEntityId(null));
+    act(() => s().setAuthoringDefaults({ wallTop: 'storeyAbove' }));
+    const ui = render(<ModelInspectorPanel />);
+    act(() => s().startCommand('wall.place'));
+    const height = input(ui, 'Height in metres');
+    act(() => height.focus());
+    type(height, '2.4');
+    blur(height);
+    assert.equal(s().authoringDefaults.wallTop, 'fixed');
+    assert.equal(s().authoringDefaults.dims.wall.Height, 2.4);
+  });
+
+  it('the defaults show the height the Wall tool will place: the spacing to the storey above (#9037 review)', async () => {
+    const { commitStoreyOp } = await import('@/store/slices/mutation-storey');
+    assert.ok(commitStoreyOp(useViewerStore, MODEL_ID, { kind: 'level', edit: { kind: 'floorHeight', storeyId: STOREY, Height: 4 } }).ok);
+    act(() => s().setSelectedEntityId(null));
+    act(() => s().setAuthoringDefaults({ wallTop: 'storeyAbove' }));
+    const ui = render(<ModelInspectorPanel />);
+    act(() => s().startCommand('wall.place'));
+    act(() => s().setAuthoringDims('wall', { Height: 3 }));
+    assert.equal(input(ui, 'Height in metres').value, '4.00', 'not the stored 3.00 default');
+    act(() => s().setAuthoringDefaults({ wallTop: 'fixed' }));
+    assert.equal(input(ui, 'Height in metres').value, '3.00', 'a fixed wall uses the stored height');
+  });
+
+  it('leaving the Model workspace closes the storey manager: the next session opens on the inspector (#9037 review)', () => {
+    act(() => s().setStoreyManagerOpen(true));
+    act(() => s().exitModelWorkspace());
+    assert.equal(s().storeyManagerOpen, false);
+    act(() => { s().enterModelWorkspace(); });
+    const ui = render(<ModelInspectorPanel />);
+    assert.equal(ui.querySelector('[data-storey-manager]'), null, 'not the storey manager');
+    assert.ok(ui.querySelector('[data-model-inspector]'), 'the inspector');
+  });
+
+  it('a selection still shows while such a tool runs', () => {
+    const ui = render(<ModelInspectorPanel />);
+    act(() => s().startCommand('grid.place'));
+    assert.ok(s().selectedEntityId !== null, 'starting the tool kept the selection');
+    assert.match(title(ui) ?? '', /^IfcWall #/);
+    assert.equal(ui.querySelectorAll('[data-model-inspector-command]').length, 0);
+  });
+});
+
+describe('ModelInspectorPanel (#6232 M2.5)', () => {
+  it('#9296 keeps Defaults reachable while the storey manager stays open', async () => {
+    act(() => { s().setSelectedEntityId(null); s().startCommand('wall.place'); s().setStoreyManagerOpen(true); });
+    const ui = render(<ModelInspectorPanel />);
+    await act(async () => { await import('../model/storeys/StoreyManager'); });
+    const visible = (selector: string) => {
+      const pane = ui.querySelector(selector);
+      assert.ok(pane, `${selector} remains mounted`);
+      return pane.closest('[hidden]') === null;
+    };
+    assert.equal(visible('[data-storey-manager]'), true, 'Storeys starts visible');
+    assert.equal(visible('[data-model-inspector]'), false, 'Defaults starts hidden');
+    const defaults = ui.querySelector<HTMLInputElement>('input[value=defaults]');
+    assert.ok(defaults);
+    click(defaults);
+    assert.equal(visible('[data-model-inspector]'), true, 'Defaults is visible after its tab is picked');
+    assert.equal(visible('[data-storey-manager]'), false, 'Storeys is hidden while Defaults is picked');
+    assert.equal(input(ui, 'Thickness in metres').value, '0.20');
+    act(() => { s().endCommand('cancel'); s().setSelectedEntityId(toGlobalIdFromModels(s().models, MODEL_ID, wall)); });
+    assert.match(ui.querySelector('[data-inspector-title]')?.textContent ?? '', /^Defaults/);
+    assert.equal(s().storeyManagerOpen, true);
+    click(ui.querySelector<HTMLInputElement>('input[value=storeys]')!);
+    assert.equal(visible('[data-storey-manager]'), true, 'Storeys is visible after its tab is picked');
+    assert.equal(visible('[data-model-inspector]'), false, 'Defaults is hidden after returning to Storeys');
+  });
+
+  it('shows the selected wall: header, name, size and its sections', async () => {
+    const root = render(<ModelInspectorPanel />);
+    await waitFor(() => root.querySelector('[data-inspector-apply-layers]') !== null, 'the layer editor loads (its own chunk, #9296)');
+    assert.equal(root.querySelector('[data-inspector-title]')?.textContent, `IfcWall #${wall} · L0`);
+    assert.equal(input(root, 'Name').value, 'W1');
+    assert.equal(input(root, 'Thickness in metres').value, '0.20');
+    assert.equal(input(root, 'Height in metres').value, '3.00');
+    assert.equal(input(root, 'Length in metres').value, '4.00');
+    assert.equal(input(root, 'Length in metres').readOnly, false, 'a wall\'s length is typed here too (#9296)');
+    const headings = [...root.querySelectorAll('h3')].map((h) => h.textContent);
+    assert.deepEqual(headings, ['Type', 'Dimensions', 'Material layers']);
+  });
+
+  it('a new name is one undo step', () => {
+    const root = render(<ModelInspectorPanel />);
+    const depth = undoDepth();
+    const name = input(root, 'Name');
+    type(name, 'Party wall');
+    blur(name);
+    assert.equal(entityName({ dataStore: s().models.get(MODEL_ID)!.ifcDataStore!, view: s().mutationViews.get(MODEL_ID) }, wall), 'Party wall');
+    assert.equal(undoDepth(), depth + 1);
+    act(() => s().undo(MODEL_ID));
+    assert.equal(undoDepth(), depth);
+    assert.equal(input(root, 'Name').value, 'W1', 'the field shows the old name again');
+  });
+
+  it('a new thickness is one undo step', async () => {
+    const root = render(<ModelInspectorPanel />);
+    await waitFor(() => root.querySelector('[data-inspector-apply-layers]') !== null, 'the layer editor loads (its own chunk, #9296)');
+    const depth = undoDepth();
+    const field = input(root, 'Thickness in metres');
+    type(field, '0,3');
+    blur(field);
+    assert.equal(+s().readWallEndpoints(MODEL_ID, wall)!.thickness.toFixed(6), 0.3);
+    assert.equal(input(root, 'Thickness in metres').value, '0.30');
+    assert.equal(input(root, 'Layer 1 thickness in metres').value, '0.30', 'an unlayered wall\'s layer draft follows its thickness');
+    act(() => s().undo(MODEL_ID));
+    assert.equal(undoDepth(), depth, 'one undo');
+    assert.equal(+s().readWallEndpoints(MODEL_ID, wall)!.thickness.toFixed(6), 0.2);
+    assert.equal(input(root, 'Thickness in metres').value, '0.20');
+  });
+
+  it('refuses a non-positive thickness without writing', () => {
+    const root = render(<ModelInspectorPanel />);
+    const depth = undoDepth();
+    const field = input(root, 'Thickness in metres');
+    type(field, '0');
+    blur(field);
+    assert.equal(undoDepth(), depth);
+    assert.equal(input(root, 'Thickness in metres').value, '0.20', 'the field reverts');
+  });
+});
+
+describe('ModelInspectorPanel dimensions of slabs, columns and beams (#6232 C4)', () => {
+  const select = (expressId: number) => act(() => s().setSelectedEntityId(toGlobalIdFromModels(s().models, MODEL_ID, expressId)));
+  const commitField = (root: HTMLElement, label: string, text: string) => { const field = input(root, label); type(field, text); blur(field); };
+  const made = (m: { expressId: number } | { error: string }): number => { assert.ok('expressId' in m, 'error' in m ? m.error : ''); return m.expressId; };
+
+  it('a slab\'s thickness is editable, one undo step, and re-meshes the slab', () => {
+    const slab = made(s().addSlab(MODEL_ID, STOREY, { Position: [0, 0, 0], Width: 4, Depth: 3, Thickness: 0.2 }));
+    select(slab);
+    const root = render(<ModelInspectorPanel />);
+    const field = input(root, 'Thickness in metres');
+    assert.equal(field.readOnly, false, 'no longer read-only');
+    const depth = undoDepth();
+    commitField(root, 'Thickness in metres', '0.35');
+    assert.equal(undoDepth() - depth, 1);
+    assert.equal(input(root, 'Thickness in metres').value, '0.35');
+    act(() => s().undo(MODEL_ID));
+    assert.equal(input(root, 'Thickness in metres').value, '0.20', 'one undo');
+  });
+
+  it('a slab with layers keeps them consistent when its thickness is typed (#6232 C4)', () => {
+    const slab = made(s().addSlab(MODEL_ID, STOREY, { Position: [0, 0, 0], Width: 4, Depth: 3, Thickness: 0.2 }));
+    assert.notEqual(applyMaterialLayers(MODEL_ID, { kind: 'slab', target: 'element', elementId: slab, typeId: null, layers: [{ thickness: 0.1, material: { name: 'Screed' } }, { thickness: 0.1, material: { name: 'Concrete' } }] }), null);
+    select(slab);
+    const root = render(<ModelInspectorPanel />);
+    const depth = undoDepth();
+    commitField(root, 'Thickness in metres', '0.35');
+    assert.equal(undoDepth() - depth >= 1, true);
+    const live = { dataStore: s().models.get(MODEL_ID)!.ifcDataStore!, view: s().mutationViews.get(MODEL_ID) };
+    assert.deepEqual(layerSetOf(live, slab)!.layers.map((l) => +l.thickness.toFixed(6)), [0.1, 0.25], 'the last layer took the change: 0.10 + 0.25 = 0.35');
+    const tags = new Set(s().undoStacks.get(MODEL_ID)!.slice(depth).map((m) => s().mutationBatchTags.get(m.id)));
+    assert.equal(tags.size, 1, 'size and layers are one undo step');
+  });
+
+  it('a column edits Width, Depth and Height; a beam Length, Width and Height, each one undo step', () => {
+    const column = made(s().addColumn(MODEL_ID, STOREY, { Position: [2, 2, 0], Width: 0.3, Depth: 0.4, Height: 3 }));
+    select(column);
+    const root = render(<ModelInspectorPanel />);
+    assert.deepEqual(['Width', 'Depth', 'Height'].map((l) => input(root, `${l} in metres`).value), ['0.30', '0.40', '3.00']);
+    for (const [label, text, expected] of [['Width', '0.5', '0.50'], ['Depth', '0.6', '0.60'], ['Height', '4', '4.00']]) {
+      const depth = undoDepth();
+      commitField(root, `${label} in metres`, text);
+      assert.equal(undoDepth() - depth, 1, `${label}: one undo step`);
+      assert.equal(input(root, `${label} in metres`).value, expected);
+    }
+
+    const beam = made(s().addBeam(MODEL_ID, STOREY, { Start: [0, 0, 3], End: [4, 0, 3], Width: 0.2, Height: 0.3 }));
+    select(beam);
+    assert.deepEqual(['Length', 'Width', 'Height'].map((l) => input(root, `${l} in metres`).value), ['4.00', '0.20', '0.30']);
+    commitField(root, 'Length in metres', '5.5');
+    assert.equal(input(root, 'Length in metres').value, '5.50');
+    assert.equal(input(root, 'Length in metres').readOnly, false);
+  });
+
+  it('each column and beam field writes exactly its own dimension and leaves the others alone', () => {
+    const column = made(s().addColumn(MODEL_ID, STOREY, { Position: [2, 2, 0], Width: 0.3, Depth: 0.4, Height: 3 }));
+    select(column);
+    const root = render(<ModelInspectorPanel />);
+    const read = (labels: string[]) => labels.map((l) => input(root, `${l} in metres`).value);
+    // [Width, Depth, Height] before -> after committing one field: only that one moves.
+    for (const [label, text, expected] of [
+      ['Width', '0.55', ['0.55', '0.40', '3.00']],
+      ['Depth', '0.65', ['0.55', '0.65', '3.00']],
+      ['Height', '4.5', ['0.55', '0.65', '4.50']],
+    ] as const) {
+      commitField(root, `${label} in metres`, text);
+      assert.deepEqual(read(['Width', 'Depth', 'Height']), expected, `column ${label}`);
+    }
+    const beam = made(s().addBeam(MODEL_ID, STOREY, { Start: [0, 0, 3], End: [4, 0, 3], Width: 0.2, Height: 0.3 }));
+    select(beam);
+    for (const [label, text, expected] of [
+      ['Length', '5', ['5.00', '0.20', '0.30']],
+      ['Width', '0.25', ['5.00', '0.25', '0.30']],
+      ['Height', '0.45', ['5.00', '0.25', '0.45']],
+    ] as const) {
+      commitField(root, `${label} in metres`, text);
+      assert.deepEqual(read(['Length', 'Width', 'Height']), expected, `beam ${label}`);
+    }
+  });
+
+  it('a wall thickened from the inspector keeps its window cut through, in the same undo step', () => {
+    const placed = s().addHostedFill(MODEL_ID, wall, { kind: 'window', params: { Offset: 2, Sill: 0.9, Width: 1, Height: 1.2 } });
+    assert.ok('expressId' in placed);
+    const root = render(<ModelInspectorPanel />);
+    const depth = undoDepth();
+    commitField(root, 'Thickness in metres', '0.6');
+    assert.equal(input(root, 'Thickness in metres').value, '0.60');
+    const tags = new Set(s().undoStacks.get(MODEL_ID)!.slice(depth).map((m) => s().mutationBatchTags.get(m.id)));
+    assert.equal(tags.size, 1, 'the wall and its re-cut opening are one batch');
+    act(() => s().undo(MODEL_ID));
+    assert.equal(undoDepth(), depth, 'one undo');
+  });
+
+  it('a wall height below its window is refused and the field reverts', () => {
+    const placed = s().addHostedFill(MODEL_ID, wall, { kind: 'window', params: { Offset: 2, Sill: 0.9, Width: 1, Height: 1.2 } });
+    assert.ok('expressId' in placed);
+    const root = render(<ModelInspectorPanel />);
+    const depth = undoDepth();
+    commitField(root, 'Height in metres', '1.5');
+    assert.equal(undoDepth(), depth);
+    assert.equal(input(root, 'Height in metres').value, '3.00');
+  });
+});
+
+it('#9389 the multi-selection inspector names every element in one undo step', () => {
+  const second = s().addWall(MODEL_ID, STOREY, { Start: [0, 2, 0], End: [4, 2, 0], Thickness: 0.2, Height: 3, Name: 'W2' });
+  assert.ok('expressId' in second);
+  act(() => s().setSelectedEntityIds([wall, second.expressId].map(id => toGlobalIdFromModels(s().models, MODEL_ID, id))));
+  const ui = render(<ModelInspectorPanel />);
+  assert.match(ui.textContent ?? '', /2 selected elements/);
+  assert.match(ui.textContent ?? '', /W1/);
+  assert.match(ui.textContent ?? '', /W2/);
+  const name = input(ui, 'Name');
+  type(name, 'Shared');
+  blur(name);
+  const live = () => ({ dataStore: s().models.get(MODEL_ID)!.ifcDataStore!, view: s().mutationViews.get(MODEL_ID) });
+  assert.equal(entityName(live(), wall), 'Shared');
+  assert.equal(entityName(live(), second.expressId), 'Shared');
+  act(() => s().undo(MODEL_ID));
+  assert.equal(entityName(live(), wall), 'W1');
+  assert.equal(entityName(live(), second.expressId), 'W2');
+});
+
+it('#9389 a cross-model selection is inspectable but cannot make a shared edit across undo histories', () => {
+  const first = s().models.get(MODEL_ID)!;
+  const second = { ...first, id: 'second-model', idOffset: 1_000_000 };
+  act(() => useViewerStore.setState({ models: new Map([[MODEL_ID, first], [second.id, second]]) }));
+  act(() => s().setSelectedEntityIds([
+    toGlobalIdFromModels(s().models, MODEL_ID, wall),
+    toGlobalIdFromModels(s().models, second.id, 80),
+  ]));
+  const ui = render(<ModelInspectorPanel />);
+  assert.ok(ui.querySelector('[data-multi-selection-inspector]'));
+  assert.match(ui.textContent ?? '', /Select elements from one model/);
+  const name = input(ui, 'Name');
+  assert.equal(name.readOnly, true);
+  const depth = undoDepth();
+  type(name, 'Shared');
+  blur(name);
+  assert.equal(undoDepth(), depth);
+  assert.equal(entityName({ dataStore: first.ifcDataStore!, view: s().mutationViews.get(MODEL_ID) }, wall), 'W1');
+});
+
+it('#9389 an unreadable selected model cannot turn a cross-model Name edit into partial success', () => {
+  const first = s().models.get(MODEL_ID)!;
+  const second = { ...first, id: 'second-model', idOffset: 1_000_000 };
+  act(() => useViewerStore.setState({ models: new Map([[MODEL_ID, first], [second.id, second]]) }));
+  act(() => s().setSelectedEntityIds([
+    toGlobalIdFromModels(s().models, MODEL_ID, wall),
+    toGlobalIdFromModels(s().models, second.id, 80),
+  ]));
+  const ui = render(<ModelInspectorPanel />);
+  assert.equal(input(ui, 'Name').readOnly, true);
+  act(() => useViewerStore.setState({ models: new Map([[MODEL_ID, first], [second.id, { ...second, ifcDataStore: null }]]) }));
+  assert.match(ui.textContent ?? '', /2 selected elements/);
+  const rows = ui.querySelectorAll('[data-multi-selection-inspector] li');
+  assert.equal(rows.length, 2, '#9389 every selected element keeps a row when a model becomes unreadable');
+  assert.match(rows[0].textContent ?? '', /W1/);
+  assert.match(rows[1].textContent ?? '', /Unavailable element.*#80/);
+  assert.match(ui.textContent ?? '', /Select elements from one model/);
+  const name = input(ui, 'Name');
+  assert.equal(name.readOnly, true);
+  const depth = undoDepth();
+  type(name, 'Partial rename');
+  blur(name);
+  assert.equal(undoDepth(), depth);
+  assert.equal(entityName({ dataStore: first.ifcDataStore!, view: s().mutationViews.get(MODEL_ID) }, wall), 'W1');
+});

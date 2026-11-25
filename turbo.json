@@ -1,0 +1,174 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "agentGuidance": false,
+  "globalDependencies": [
+    "shared/ai/**/*.ts",
+    "rust/**/*.rs",
+    "rust/**/Cargo.toml",
+    "Cargo.toml",
+    "Cargo.lock",
+    "rust-toolchain.toml",
+    "scripts/build-wasm.sh",
+    "scripts/build-imported-geometry.mjs",
+    "scripts/lib/imported-artifacts.mjs",
+    "tsconfig.json",
+    "tsconfig.packages.json",
+    "tsconfig.tests.base.json",
+    "scripts/typecheck-tests.mjs",
+    "scripts/lib/is-main-entry.mjs",
+    "scripts/*worker-urls.*",
+    "scripts/lib/shipped-target.*",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "package.json",
+    ".npmrc",
+    "patches/**",
+    "tsconfig*.json",
+    ".env*",
+    "vite.config.*",
+    "vitest.config.*"
+  ],
+  "globalPassThroughEnv": [
+    "NODE_OPTIONS",
+    "RUSTUP_HOME",
+    "CARGO_HOME",
+    "RUSTUP_TOOLCHAIN",
+    "RUSTFLAGS",
+    "CARGO_TARGET_DIR",
+    "OPENROUTER_API_KEY",
+    "LLM_API_KEY",
+    "LLM_API_BASE",
+    "LLM_FREE_DAILY_LIMIT",
+    "APP_URL",
+    "POSTGRES_URL",
+    "DATABASE_URL",
+    "POSTGRES_DATABASE",
+    "NEON_PROJECT_ID",
+    "PGDATABASE",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_URL_NO_SSL",
+    "PGHOST",
+    "POSTGRES_PRISMA_URL",
+    "PGPASSWORD",
+    "POSTGRES_USER",
+    "POSTGRES_HOST",
+    "DATABASE_URL_UNPOOLED",
+    "PGUSER",
+    "POSTGRES_URL_NON_POOLING",
+    "PGHOST_UNPOOLED",
+    "LLM_FREE_MODELS",
+    "LLM_IMAGE_MODELS",
+    "LLM_FILE_ATTACHMENT_MODELS",
+    "BASH_PATH",
+    "npm_config_script_shell",
+    "PNPM_SCRIPT_SHELL",
+    "npm_execpath"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        "pkg/**",
+        "pkg-diff/**",
+        "pkg-rhino/**",
+        "pkg-core/**"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "src/**",
+        "scripts/**",
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.*.json",
+        "!tsconfig.tests.json",
+        "vite.config.ts",
+        "index.html"
+      ],
+      "env": [
+        "BUILD_CORE",
+        "VITE_RETAINED_GEOMETRY",
+        "IFCLITE_RETAINED_ENGINE",
+        "VERCEL",
+        "VITE_AUTODESK_CLIENT_ID",
+        "VITE_AUTODESK_HOSTED",
+        "VITE_CLOUD_HOSTED",
+        "VITE_SERVER_URL",
+        "VITE_IFC_SERVER_URL",
+        "VITE_USE_SERVER",
+        "VITE_LLM_FREE_MODELS",
+        "VITE_LLM_IMAGE_MODELS",
+        "VITE_LLM_FILE_ATTACHMENT_MODELS",
+        "VITE_POSTHOG_KEY",
+        "VITE_POSTHOG_HOST",
+        "VITE_SOURCEMAP",
+        "VITE_BUNDLE_ANALYSIS",
+        "VITE_GAUSSIAN_SPLATS",
+        "VITE_REGISTRY_ENABLED",
+        "IFC_REGISTRY_TARGET",
+        "VERCEL_GIT_COMMIT_SHA",
+        "VERCEL_DEPLOYMENT_ID",
+        "VERCEL_SKEW_PROTECTION_ENABLED",
+        "GITHUB_SHA"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": [
+        "build"
+      ],
+      "passThroughEnv": [
+        "IFCOPENSHELL_PYTHON",
+        "IFC_LITE_CURRENT_MAIN_DIFF_ORACLE",
+        "IFC_LITE_REQUIRE_FIXTURES",
+        "IFCLITE_TEST_CHROME_EXECUTABLE",
+        "GITHUB_*",
+        "RUNNER_*",
+        "MERGIFY_*",
+        "OCI_REGISTRY_BINARY",
+        "ORAS_BINARY"
+      ],
+      "cache": false,
+      "env": [
+        "TEST_PATTERN",
+        "TEST_SHARD",
+        "TEST_SHARDS"
+      ]
+    },
+    "@ifc-lite/export#test": {
+      "dependsOn": [
+        "build"
+      ],
+      "cache": false,
+      "env": [
+        "TEST_PATTERN",
+        "TEST_SHARD",
+        "TEST_SHARDS"
+      ],
+      "passThroughEnv": [
+        "IFC_LITE_SECTION_EVIDENCE_DIR",
+        "IFC_LITE_REQUIRE_FIXTURES",
+        "GITHUB_*",
+        "RUNNER_*",
+        "MERGIFY_*"
+      ]
+    },
+    "lint": {
+      "dependsOn": [
+        "build"
+      ],
+      "cache": false
+    }
+  }
+}

@@ -1,0 +1,30 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+export const testIfcEn = {
+  'testIfc.box.heading': 'Section Box · m',
+  'testIfc.box.min': 'Min',
+  'testIfc.box.max': 'Max',
+  'testIfc.box.draw': 'Draw again',
+  'testIfc.box.fit': 'Fit View',
+  'testIfc.box.reset': 'Reset Bounds',
+  'testIfc.box.showBox': 'Show Box',
+  'testIfc.box.showHandles': 'Show Handles',
+  'testIfc.box.cancel': 'Cancel drawing',
+  'testIfc.box.preparing': 'Moving to Top View… Esc to cancel.',
+  'testIfc.box.drawing': 'Drag a rectangle around the area to keep. Esc to cancel.',
+  'testIfc.box.drawError': 'Draw a larger rectangle that intersects the model.',
+  'testIfc.box.valueError': 'Enter finite limits with Max at least 0.05 m above Min.',
+  'testIfc.box.cameraError': 'Top View could not settle. Try drawing again.',
+  'testIfc.box.handle': 'Drag IFC {axis} {side} · Esc to undo',
+  'testIfc.tools': 'Quick tools',
+  'testIfc.pan': 'PAN — navigate model',
+  'testIfc.selectOrbit': 'Select an element as orbit center',
+  'testIfc.multi': 'Select multiple elements',
+  'testIfc.measure': 'Measure',
+  'testIfc.points': 'Point to point',
+  'testIfc.polyline': 'Polyline',
+  'testIfc.selectHint': 'Click an element to set the orbit center. Drag left to rotate; PAN returns to the model center.',
+  'testIfc.multiHint': 'Drag a rectangle to select elements. Drag the middle button to rotate.',
+  'testIfc.navigationHint': 'TestIFC navigation: cursor zoom, smooth rotation and pan, and a stable orbit center.',
+} as const;

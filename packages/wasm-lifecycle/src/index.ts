@@ -1,0 +1,36 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+export {
+  initWasmWithRetry,
+  isTransientWasmLoadError,
+  type InitWasmRetryOptions,
+} from './wasm-init-retry.js';
+
+export {
+  WASM_PANIC_STASH_KEY,
+  takeWasmPanicStash,
+  restashWasmPanicLocation,
+  type WasmPanicStash,
+} from './wasm-panic-forward.js';
+
+export {
+  createLifetime,
+  type Lifetime,
+  type LifetimeAttempt,
+  type LifetimeOptions,
+  type LifetimeState,
+} from './lifetime.js';
+
+export {
+  createWorkerRpc,
+  type PortRpcOptions,
+  type RpcReply,
+  type RpcRequestOptions,
+  type RpcStartOptions,
+  type RpcStartStep,
+  type RpcWorker,
+  type WorkerRpc,
+  type WorkerRpcOptions,
+} from './worker-rpc.js';

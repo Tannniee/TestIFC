@@ -1,0 +1,102 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Keeps one open issue while `Test` is red on main, naming the first bad commit,
+# and closes it when main is green again. PRs run a fast lane, so some failures
+# can first appear on main, and a red push run otherwise notifies nobody.
+# Runs from the default branch's copy of this file, and checks out no code.
+name: Test red on main
+
+on:
+  workflow_run:
+    workflows: [Test]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  issues: write
+
+# One writer at a time, so two finishing runs cannot open two issues.
+concurrency:
+  group: test-red-on-main
+
+jobs:
+  report:
+    if: github.event.workflow_run.event == 'push' && contains(fromJSON('["success","failure","timed_out"]'), github.event.workflow_run.conclusion)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Open, update or close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          # Runs can finish out of order: only the newest finished run speaks for
+          # main, so an older run cannot close or reopen a newer run's verdict.
+          newest=$(gh api "repos/$REPO/actions/workflows/test.yml/runs?branch=main&event=push&status=completed&per_page=30" \
+            --jq '[.workflow_runs[] | select(.conclusion == "success" or .conclusion == "failure" or .conclusion == "timed_out")][0].id')
+          if [ "$newest" != "$RUN_ID" ]; then
+            echo "run $RUN_ID is not the newest finished main run ($newest); leaving the issue alone"
+            exit 0
+          fi
+          title="ci: Test is red on main"
+          existing=$(gh issue list --repo "$REPO" --state open --search "\"$title\" in:title" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ "$CONCLUSION" = "success" ]; then
+            if [ -n "$existing" ]; then
+              gh issue close "$existing" --repo "$REPO" --comment "Green again at ${SHA}: ${RUN_URL}"
+            fi
+            exit 0
+          fi
+          failed=$(gh api --paginate "repos/$REPO/actions/runs/$RUN_ID/jobs?per_page=100" \
+            --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out") | "- " + .name')
+          body="\`Test\` ended \`${CONCLUSION}\` on main at ${SHA}: ${RUN_URL}
+
+          Failed jobs:
+          ${failed:-(none reported)}"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "Still red. ${body}"
+          else
+            gh issue create --repo "$REPO" --title "$title" --body "First bad commit seen: ${body}"
+          fi
+
+      # The scripts-tests shards are split by a pinned list
+      # (scripts/ci-scripts-test-shards.mjs) and every new test file lands on
+      # shard 2, so they drift apart. Warn when one shard's test step takes over
+      # MAX_RATIO times the other's (the step, not the job: setup is the same on
+      # both and would hide drift); never fail, and say so when the run cannot
+      # be read.
+      - name: Warn when the scripts-tests shards drift apart
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          MAX_RATIO: '1.5'
+        run: |
+          set -uo pipefail
+          if ! durations=$(gh api --paginate "repos/$REPO/actions/runs/$RUN_ID/jobs?per_page=100" \
+              --jq '.jobs[] | select((.name | startswith("Node scripts tests (shard ")) and .conclusion == "success") | [.name, ([.steps[] | select(.name == "Run every scripts/ test file (glob catch-all)" and .completed_at != null) | (.completed_at | fromdateiso8601) - (.started_at | fromdateiso8601)] | first // "missing")] | "\(.[0])\t\(.[1])"'); then
+            echo "::warning title=scripts-tests shard drift::could not read the jobs of run ${RUN_ID}"
+            exit 0
+          fi
+          printf '%s\n' "$durations" | awk -F'\t' -v max="$MAX_RATIO" -v url="$RUN_URL" '
+            NF == 2 && $2 == "missing" { printf "::warning title=scripts-tests shard drift::%s has no finished test step to time; the step name in this filter no longer matches test.yml\n", $1; miss = 1; next }
+            NF == 2 { n++; name[n] = $1; t[n] = $2 }
+            END {
+              if (miss) exit 0
+              if (n != 2) { printf "scripts-tests shard drift: %d successful shard job(s) in this run, nothing to compare\n", n; exit 0 }
+              hi = (t[1] >= t[2]) ? 1 : 2; lo = 3 - hi
+              if (t[hi] > max * t[lo])
+                printf "::warning title=scripts-tests shard drift::%s took %ds against %s (%ds), over the %sx limit. Re-pin PINNED in scripts/ci-scripts-test-shards.mjs from this run: %s\n", name[hi], t[hi], name[lo], t[lo], max, url
+              else
+                printf "scripts-tests shards within %sx: %s %ds, %s %ds\n", max, name[1], t[1], name[2], t[2]
+            }'

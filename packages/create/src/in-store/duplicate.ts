@@ -1,0 +1,349 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Duplicate an existing IfcRoot product in place via the StoreEditor
+ * overlay. Geometry is shared (the new entity points at the source's
+ * Representation by reference), and the new placement is offset from
+ * the source's so the duplicate is visible — the user can refine the
+ * position via Raw STEP editing or, in a future PR, a place-mode
+ * cursor flow.
+ *
+ * What lands in the overlay (4 new entities + 1 new spatial rel):
+ *   1. IfcCartesianPoint — the new world position
+ *   2. IfcAxis2Placement3D — wraps the new point, reuses source axes
+ *   3. IfcLocalPlacement — chains to the source's parent placement
+ *   4. {SourceType} — new GUID + new placement, same Representation ref
+ *   5. IfcRelContainedInSpatialStructure — anchors the new entity to
+ *      the same storey the source belongs to (or skipped if the
+ *      source isn't spatially contained)
+ *
+ * The function performs no I/O. It accepts extracted product attributes and
+ * verifies parsed type members against the immutable source before writing.
+ */
+
+import { generateIfcGuid, type RandomSource } from '@ifc-lite/encoding';
+import type { StoreEditor } from '@ifc-lite/mutations';
+import type { IfcAttributeValue } from '@ifc-lite/mutations';
+import { validateTypeMembers } from './duplicate-type-members.js';
+
+/** A 3D vector — STEP-local metres. */
+export type Vec3 = [number, number, number];
+
+/**
+ * One existing IfcRelDefines* / IfcRelAssociates* edge that
+ * references the source. The duplicate flow emits a fresh rel of the
+ * same type pointing at the duplicate so the exported STEP carries
+ * the same psets / qsets / material / classifications / documents /
+ * type associations the source had — without modifying the existing
+ * rels.
+ *
+ * The resolver populates these from the parsed store; the in-store
+ * builder verifies a parsed type relationship before extending it.
+ */
+export interface SourceAssociation {
+  /** Existing rel's IFC type (e.g. `'IfcRelDefinesByProperties'`). */
+  relType: string;
+  /**
+   * Existing rel's OwnerHistory expressId, or `null` when the source
+   * rel omits it (`$`). IFC4 makes `IfcRoot.OwnerHistory` optional.
+   */
+  ownerHistoryId: number | null;
+  /** Existing rel's Name attribute (parsed; null when `$`). */
+  name: string | null;
+  /** Existing rel's Description attribute (parsed; null when `$`). */
+  description: string | null;
+  /**
+   * The existing rel's `Relating*` reference (positional index 5):
+   * - `IfcRelDefinesByProperties.RelatingPropertyDefinition` → IfcPropertySet / IfcElementQuantity
+   * - `IfcRelDefinesByType.RelatingType` → Type entity
+   * - `IfcRelAssociatesMaterial.RelatingMaterial`
+   * - `IfcRelAssociatesClassification.RelatingClassification`
+   * - `IfcRelAssociatesDocument.RelatingDocument`
+   */
+  relatingExpressId: number;
+  /**
+   * Every definition when `RelatingPropertyDefinition` is an
+   * `IfcPropertySetDefinitionSet` (`(#a,#b)` or the typed
+   * `IFCPROPERTYSETDEFINITIONSET((#a,#b))`), first member first. Omitted for a
+   * single reference. The replayed rel writes `#N` for one member and
+   * `(#a,#b)` for several.
+   */
+  relatingExpressIds?: readonly number[];
+  /**
+   * The existing rel's own id and its RelatedObjects when collected. An
+   * `IfcRelDefinesByType` is extended with the duplicate rather than replayed:
+   * IFC gives a type at most one (`IfcTypeObject.Types SET [0:1]`), so a second
+   * rel to the same type makes the file schema-invalid.
+   */
+  relId?: number;
+  relatedIds?: readonly number[];
+}
+
+/** `#N` for one relating entity, `['#a','#b']` for an IfcPropertySetDefinitionSet. */
+function relatingReference(assoc: SourceAssociation): string | string[] {
+  const ids = assoc.relatingExpressIds && assoc.relatingExpressIds.length > 0
+    ? assoc.relatingExpressIds
+    : [assoc.relatingExpressId];
+  return ids.length === 1 ? `#${ids[0]}` : ids.map((id) => `#${id}`);
+}
+
+export interface SourceAttributes {
+  /** Source entity type (e.g. `'IfcWall'`, `'IfcColumn'`). */
+  type: string;
+  /** Source positional attributes as parsed by EntityExtractor. */
+  attributes: IfcAttributeValue[];
+  /** Express id of the source's IfcLocalPlacement (positional index 5 on IfcProduct). */
+  placementExpressId: number;
+  /** Express id of the IfcLocalPlacement that the source's placement is chained to (parent). May be null when the source sits at the spatial root. */
+  parentPlacementId: number | null;
+  /**
+   * The source's ObjectPlacement is an IfcGridPlacement (#9199), so it has no
+   * local point, parent or axes to read here: `sourceLocation` and the
+   * references are placeholders. `duplicateInStore` refuses such a source until
+   * the caller has placed it and cleared this.
+   */
+  onGridPlacement?: boolean;
+  /** The 3-component cartesian point referenced by the source's IfcAxis2Placement3D (Location, attribute index 0). */
+  sourceLocation: Vec3;
+  /** Express id of the source's Representation (positional index 6 on IfcProduct). May be null. */
+  representationId: number | null;
+  /**
+   * OwnerHistory expressId from the source (positional index 1 on
+   * IfcRoot), or `null` when the source omitted it. IFC4 made
+   * `IfcRoot.OwnerHistory` optional, so a duplicate has to be able
+   * to round-trip the missing case.
+   */
+  ownerHistoryId: number | null;
+  /** The IfcAxis2Placement3D's `Axis` ref (index 1), or `null` when omitted (`$` in STEP). Reused on the new placement so the duplicate keeps source rotation. */
+  axisRef: string | null;
+  /** The IfcAxis2Placement3D's `RefDirection` ref (index 2), or `null` when omitted. */
+  refDirectionRef: string | null;
+  /** Express id of the IfcBuildingStorey containing the source — emit a fresh IfcRelContainedInSpatialStructure pointing at it. Null skips the rel. */
+  storeyId: number | null;
+  /**
+   * Model length-unit scale (metres per native unit; 0.001 for mm).
+   * `sourceLocation` is in the file's native units while
+   * `options.offset` is metres, so the offset is converted before
+   * being applied. Defaults to 1 (metre file) when unset.
+   */
+  lengthUnitScale?: number;
+  /**
+   * Association rels containing the source. Each one is replayed
+   * against the duplicate so the export carries the same psets,
+   * qsets, material, classifications, documents, and type binding
+   * as the source. Empty array (or omitted) skips the cloning step.
+   */
+  associations?: SourceAssociation[];
+}
+
+export interface DuplicateInStoreOptions {
+  /** Translation applied to the source's location, in metres. Defaults to `[1, 0, 0]`. */
+  offset?: Vec3;
+  /** Optional override for the duplicate's Name attribute. Defaults to source.Name + ' (copy)'. */
+  name?: string;
+  /**
+   * Optional seeded randomness for the emitted GlobalIds (duplicate root +
+   * fresh rels) - the counterpart of `SpatialAnchor.guidRandom` for this
+   * anchor-less builder. Omit for the default platform CSPRNG.
+   */
+  guidRandom?: RandomSource;
+}
+
+export interface DuplicateBuildResult {
+  /** The new entity's expressId. */
+  newId: number;
+  newPlacementId: number;
+  newPointId: number;
+  newAxisPlacementId: number;
+  /** The IfcRelContainedInSpatialStructure linking the new entity to its storey. Null when the source had no spatial container. */
+  relContainedId: number | null;
+  /**
+   * The fresh `IfcRelDefines*` / `IfcRelAssociates*` rel ids
+   * emitted to mirror the source's associations. One entry per
+   * `SourceAssociation` provided. Empty when the resolver didn't
+   * collect any (or didn't run).
+   */
+  associationRelIds: number[];
+}
+
+/**
+ * Emit a duplicate of the source product into the editor overlay.
+ * Returns the new expressIds. Throws if the source attributes don't
+ * have at least 7 slots (the minimum IfcProduct surface).
+ */
+export function duplicateInStore(
+  editor: StoreEditor,
+  source: SourceAttributes,
+  options: DuplicateInStoreOptions = {},
+): DuplicateBuildResult {
+  if (source.onGridPlacement) {
+    throw new Error('duplicateInStore: the source sits straight on an IfcGridPlacement; place the duplicate (as the copy path does) before writing it');
+  }
+  if (source.attributes.length < 7) {
+    throw new Error(
+      `duplicateInStore: source has ${source.attributes.length} attributes, need ≥7 for an IfcProduct`,
+    );
+  }
+
+  for (const association of source.associations ?? []) validateTypeMembers(editor, association);
+
+  // Offset is metres; the source location is in the file's native
+  // length unit — convert before adding (a mm file would otherwise get
+  // a duplicate sitting ~1000× too close, visually on top of the source).
+  const scale = source.lengthUnitScale;
+  const toNative = scale && Number.isFinite(scale) && scale > 0 && scale !== 1
+    ? (m: number) => Math.round((m / scale) * 1e9) / 1e9
+    : (m: number) => m;
+  const offset: Vec3 = options.offset ?? [1, 0, 0];
+  const newLocation: Vec3 = [
+    source.sourceLocation[0] + toNative(offset[0]),
+    source.sourceLocation[1] + toNative(offset[1]),
+    source.sourceLocation[2] + toNative(offset[2]),
+  ];
+
+  // 1. New IfcCartesianPoint at the offset position.
+  const point = editor.addEntity('IfcCartesianPoint', [
+    [newLocation[0], newLocation[1], newLocation[2]],
+  ]);
+
+  // 2. New IfcAxis2Placement3D wrapping the new point. Reuse source
+  //    axis + ref-direction so the duplicate keeps the source's
+  //    rotation. The two ref args are passed through as the verbatim
+  //    STEP tokens captured at extraction time (`"#N"` or `"$"`).
+  const axisPlacement = editor.addEntity('IfcAxis2Placement3D', [
+    `#${point.expressId}`,
+    source.axisRef,
+    source.refDirectionRef,
+  ]);
+
+  // 3. New IfcLocalPlacement chained to the source's parent (or `$`
+  //    if the source sat at the spatial root).
+  const placement = editor.addEntity('IfcLocalPlacement', [
+    source.parentPlacementId !== null ? `#${source.parentPlacementId}` : null,
+    `#${axisPlacement.expressId}`,
+  ]);
+
+  // 4. The duplicate IfcRoot. New GUID; new ObjectPlacement; same
+  //    Representation reference (geometry shared); name suffix unless
+  //    the caller provided one.
+  const sourceName = source.attributes[2];
+  const duplicateName: IfcAttributeValue = options.name !== undefined
+    ? options.name
+    : (typeof sourceName === 'string' && sourceName.length > 0
+        ? `${sourceName} (copy)`
+        : sourceName);
+
+  const cloned = source.attributes.slice();
+  cloned[0] = generateIfcGuid(options.guidRandom);                                  // GlobalId
+  cloned[1] = source.ownerHistoryId !== null
+    ? `#${source.ownerHistoryId}`
+    : null;                                                       // OwnerHistory (preserved; null when source omitted it)
+  cloned[2] = duplicateName;                                      // Name
+  cloned[5] = `#${placement.expressId}`;         // ObjectPlacement
+  // cloned[6] (Representation) intentionally untouched — share geometry.
+  // cloned[7] (Tag) — leave the source tag; STEP allows duplicate tags.
+
+  const duplicate = editor.addEntity(source.type, cloned);
+
+  // 5. Optional: new IfcRelContainedInSpatialStructure anchoring the
+  //    new entity to the same storey. Skipped when the source had no
+  //    storey context.
+  let relContainedId: number | null = null;
+  if (source.storeyId !== null) {
+    const rel = editor.addEntity('IfcRelContainedInSpatialStructure', [
+      generateIfcGuid(options.guidRandom),                            // GlobalId
+      source.ownerHistoryId !== null ? `#${source.ownerHistoryId}` : null, // OwnerHistory
+      null,                                                         // Name
+      null,                                                         // Description
+      [`#${duplicate.expressId}`],                                  // RelatedElements
+      `#${source.storeyId}`,                                        // RelatingStructure
+    ]);
+    relContainedId = rel.expressId;
+  }
+
+  // 6. Replay every IfcRelDefines* / IfcRelAssociates* edge that
+  //    references the source. Emits one fresh rel per association so
+  //    the duplicate carries identical psets, qsets, material,
+  //    classifications, documents, and type binding in the exported
+  //    STEP. Modifies no existing rel — each new rel has just the
+  //    duplicate in its RelatedObjects list.
+  const associationRelIds: number[] = [];
+  if (source.associations && source.associations.length > 0) {
+    for (const assoc of source.associations) {
+      if (assoc.relId !== undefined && assoc.relType.toUpperCase() === 'IFCRELDEFINESBYTYPE') {
+        extendRelatedObjects(editor, assoc.relId, assoc.relatedIds ?? [], duplicate.expressId);
+        associationRelIds.push(assoc.relId);
+        continue;
+      }
+      const rel = editor.addEntity(assoc.relType, [
+        generateIfcGuid(options.guidRandom),                                // GlobalId
+        assoc.ownerHistoryId !== null ? `#${assoc.ownerHistoryId}` : null,  // OwnerHistory
+        assoc.name,                                                         // Name (parsed; may be null)
+        assoc.description,                                                  // Description
+        [`#${duplicate.expressId}`],                                        // RelatedObjects
+        relatingReference(assoc),                                           // Relating*
+      ]);
+      associationRelIds.push(rel.expressId);
+    }
+  }
+
+  return {
+    newId: duplicate.expressId,
+    newPlacementId: placement.expressId,
+    newPointId: point.expressId,
+    newAxisPlacementId: axisPlacement.expressId,
+    relContainedId,
+    associationRelIds,
+  };
+}
+
+/** RelatedObjects, IfcRelDefines* / IfcRelAssociates* slot 4. */
+const RELATED_OBJECTS = 4;
+
+/** Type relationships extended by the copies of one open batch, keyed by the batch's draft view. */
+const openBatches = new WeakMap<object, Map<number, { collected: readonly number[]; added: number[] }>>();
+
+/**
+ * Batch the type-relationship extensions of many duplicates written through
+ * `editor`'s view: each copy only records its id, and the returned flush writes
+ * every affected `IfcRelDefinesByType` once. Without it, copy N rewrites the
+ * whole RelatedObjects list again, so an array of N copies journals O(N²)
+ * references. Call the flush before the atomic edit that opened it returns.
+ */
+export function openTypeRelationBatch(editor: StoreEditor): () => void {
+  const view = editor.getMutationView();
+  const pending = new Map<number, { collected: readonly number[]; added: number[] }>();
+  openBatches.set(view, pending);
+  return () => {
+    if (openBatches.get(view) === pending) openBatches.delete(view);
+    for (const [relId, { collected, added }] of pending) writeRelatedObjects(editor, relId, collected, added);
+  };
+}
+
+/** Append `objectId` to a live rel's RelatedObjects: now, or at the flush of an open batch. */
+function extendRelatedObjects(editor: StoreEditor, relId: number, collected: readonly number[], objectId: number): void {
+  const pending = openBatches.get(editor.getMutationView());
+  if (!pending) return writeRelatedObjects(editor, relId, collected, [objectId]);
+  const entry = pending.get(relId) ?? { collected, added: [] };
+  entry.added.push(objectId);
+  pending.set(relId, entry);
+}
+
+/**
+ * Write a rel's RelatedObjects with `added` appended, reading the list as the
+ * session has it now (an earlier edit may already have extended it), so the
+ * collected list is only the fallback.
+ */
+function writeRelatedObjects(editor: StoreEditor, relId: number, collected: readonly number[], added: readonly number[]): void {
+  const view = editor.getMutationView();
+  const live = view.getPositionalMutationsForEntity(relId)?.get(RELATED_OBJECTS) ?? view.getNewEntity(relId)?.attributes[RELATED_OBJECTS];
+  const ids = Array.isArray(live)
+    ? live.map(ref => typeof ref === 'number' ? ref : typeof ref === 'string' && /^#\d+$/.test(ref.trim()) ? Number(ref.trim().slice(1)) : null)
+      .filter((id): id is number => id !== null)
+    : [...collected];
+  const present = new Set(ids);
+  for (const id of added) if (!present.has(id)) { present.add(id); ids.push(id); }
+  editor.setPositionalAttribute(relId, RELATED_OBJECTS, ids.map(id => `#${id}`));
+}

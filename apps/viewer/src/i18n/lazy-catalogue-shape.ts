@@ -1,0 +1,400 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+import { retainedCatalogueShape } from './retained-catalogue-shape';
+import { registryCatalogueShape } from './registry-catalogue-shape';
+import { structuralDeriveShape, type StructuralDeriveKey } from './structural-derive-catalogue-shape';
+import type { flowReviewEn } from './catalogues/flow-review.en';
+type ReviewKey = keyof typeof flowReviewEn extends `flowReview.${infer Key}` ? Key : never;
+/** Exact lazy keys and parameters validate contributed locales before feature code loads. */
+const flowReviewShape = {
+  "title": [],
+  "paused": ["nodes"],
+  "node": ["node", "type"],
+  "digest": ["digest"],
+  "created": ["time"],
+  "coverage.classify": ["classified", "failed", "model", "notSent", "requests", "rows", "unknown"],
+  "coverage.summarize": ["model", "requests", "rows", "sections", "sent", "uncited"],
+  "coverage.extract": ["model", "passages", "records", "requests", "sent", "unsupported"],
+  "approve": [],
+  "resume": [],
+  "reject": [],
+  "dismiss": [],
+  "state.prepared": [],
+  "state.reviewed": [],
+  "state.applying": [],
+  "state.completed": [],
+  "state.partial": ["reason"],
+  "state.rejected": [],
+  "refused.graph-changed": [],
+  "refused.sources-changed": [],
+  "refused.other": ["reason"],
+  "notSaved": ["reason"],
+  "needsModel": [],
+} satisfies Record<ReviewKey, readonly string[]>;
+import type { semanticAssistEn } from './catalogues/semantic-assist.en';
+
+type SemanticKey = keyof typeof semanticAssistEn extends `semanticAssist.${infer Key}` ? Key : never;
+/** Startup validation needs keys and parameters, while the panel's prose stays lazy. */
+const semanticMessageShape = {
+  "pickTexts": ["count"],
+  "suggestRequirements": [],
+  "suggestMapping": [],
+  "suggestQuery": [],
+  "suggestProjection": [],
+  "proposalTitle": [],
+  "summaryQuery": [],
+  "summaryMapping": ["count"],
+  "summaryProjection": ["count"],
+  "summaryRequirements": ["count"],
+  "queryTitle": [],
+  "queryExpectedSelect": ["columns"],
+  "queryExpectedConstruct": [],
+  "queryLintOk": ["form", "limit"],
+  "queryLintRefused": [],
+  "grantTitle": [],
+  "grantEndpoint": [],
+  "grantHost": [],
+  "grantLoopback": [],
+  "grantRelay": [],
+  "grantCredential": [],
+  "credentialHidden": [],
+  "credentialNone": [],
+  "yes": [],
+  "no": [],
+  "grantMissing": [],
+  "openLinkedRecords": [],
+  "queryRun": [],
+  "cancel": [],
+  "queryCancelled": [],
+  "queryRan": ["source", "time"],
+  "queryStatements": ["count"],
+  "queryGraph": [],
+  "queryHistorical": ["count", "time"],
+  "historical": [],
+  "current": [],
+  "mappingTitle": [],
+  "mappingRevision": ["revision"],
+  "mappingUnscoped": [],
+  "mappingConfidence": ["percent"],
+  "mappingElements": ["count"],
+  "mappingSave": ["count"],
+  "termProfile": ["key"],
+  "termExternal": [],
+  "termUnknown": [],
+  "issueUnknownTerm": [],
+  "issueSpanMismatch": [],
+  "issueSpanNotCaptured": [],
+  "issueExternalTerm": [],
+  "issueClassAbsent": [],
+  "issueUnsourced": [],
+  "unsupported": [],
+  "unsupportedReason": ["reason"],
+  "saved": [],
+  "projectionTitle": [],
+  "projectionValues": ["previous", "unit", "value"],
+  "projectionPolicy": ["policy"],
+  "projectionSkipped": [],
+  "projectionRefused": ["reason"],
+  "projectionApply": ["count"],
+  "projectionApplied": ["count"],
+  "requirementsTitle": [],
+  "requirementsVerified": ["count", "verified"],
+  "requirementsNoSources": [],
+  "requirementsSave": [],
+  "dispatchTitle": [],
+  "dispatchHint": [],
+  "targetIds": [],
+  "targetGeometry": [],
+  "targetManual": [],
+  "unresolvedSpan": [],
+  "unresolvedSourceMissing": [],
+  "unresolvedSourceChanged": [],
+  "unresolvedScope": [],
+  "unresolvedUnknown": [],
+  "schemaFailed": ["detail"],
+  "unresolvedVersion": [],
+  "unresolvedDimension": [],
+  "unresolvedMeasure": [],
+  "unresolvedProperty": [],
+  "unresolvedOperator": [],
+  "unresolvedValue": [],
+  "unresolvedUnit": [],
+  "unresolvedNative": ["detail"],
+  "unresolvedListed": [],
+  "include": ["id"],
+  "prepareDrafts": [],
+  "draftsPrepared": [],
+  "refusedIds": ["detail"],
+  "idsSkipsModels": ["count"],
+  "refusedGeometry": ["detail"],
+  "refusedManual": ["detail"],
+  "draftsWithdrawn": [],
+  "spanVerified": [],
+  "spanMismatch": [],
+  "spanNotCaptured": [],
+  "spanAt": ["end", "source", "start"],
+  "spanActual": ["actual"],
+  "spanFoundAt": ["offset"],
+  "controlsTitle": [],
+  "controlsHelp": [],
+  "sourceTitle": [],
+  "sourceText": [],
+  "pastedSpecification": [],
+  "recordsDocument": [],
+  "attachText": [],
+  "attachRecords": [],
+  "attached": ["characters", "id", "title"],
+  "detach": [],
+  "detachLabel": ["id"],
+  "savedTitle": [],
+  "savedUnreadable": ["count"],
+  "savedNone": [],
+  "savedMapping": ["count", "revision"],
+  "savedRequirements": ["count", "unsupported", "verified"],
+  "delete": [],
+  "deleteLabel": ["title"],
+} as const satisfies Record<SemanticKey, readonly string[]>;
+
+import type { reviewWorkspaceEn } from './catalogues/review-workspace.en';
+
+type WorkspaceReviewKey = keyof typeof reviewWorkspaceEn extends `reviewWorkspace.${infer Key}` ? Key : never;
+/** Startup validation needs keys and parameters, while the panel's prose stays lazy. */
+const reviewMessageShape = {
+  "title": [],
+  "refresh": [],
+  "source": [],
+  "population": ["count"],
+  "counts": ["cards", "current", "elements", "historical", "topics"],
+  "totalsNote": [],
+  "unverified": ["count"],
+  "sourceFailed": ["source"],
+  "runIncomplete": ["reasons", "run"],
+  "cards": [],
+  "showing": ["count"],
+  "empty.title": [],
+  "empty.noModels": [],
+  "empty.noResults": [],
+  "filtered.detail": [],
+  "clearFilters": [],
+  "facet.source": [],
+  "facet.run": [],
+  "facet.model": [],
+  "facet.state": [],
+  "facet.decision": [],
+  "facet.discipline": [],
+  "facet.storey": [],
+  "facetSelected": ["count", "facet"],
+  "facetOption": ["cards", "label"],
+  "filters": [],
+  "sourceKind.clash": [],
+  "sourceKind.validation": [],
+  "sourceKind.comparison": [],
+  "sourceKind.bcf": [],
+  "sourceKind.linked": [],
+  "state.current": [],
+  "state.not-evaluated": [],
+  "state.resolution-candidate": [],
+  "state.record": [],
+  "stateHelp.current": [],
+  "stateHelp.not-evaluated": [],
+  "stateHelp.resolution-candidate": [],
+  "stateHelp.record": [],
+  "unvalidatedCard": [],
+  "temporal.current": [],
+  "temporal.historical": [],
+  "lifecycle.observed": [],
+  "lifecycle.new": [],
+  "lifecycle.persistent": [],
+  "lifecycle.changed": [],
+  "lifecycle.persistent-historical": [],
+  "lifecycle.changed-historical": [],
+  "lifecycle.no-longer-observed": [],
+  "lifecycle.not-evaluated": [],
+  "lifecycle.record": [],
+  "gap.truncated": [],
+  "gap.stale": [],
+  "gap.check-error": [],
+  "gap.sets-truncated": [],
+  "gap.partial-source": [],
+  "gap.geometry-unavailable": [],
+  "gap.placement-only": [],
+  "gap.excluded-classes": [],
+  "reexamination.compatible": [],
+  "reexamination.compatiblePartial": ["count", "total"],
+  "reexamination.compatibleNone": ["count"],
+  "reexamination.countOnly": [],
+  "reexamination.historical": [],
+  "reexamination.persisting": [],
+  "reexamination.changed": [],
+  "reexamination.resolved": [],
+  "reexamination.definitionNotRecorded": [],
+  "reexamination.definitionUnknown": [],
+  "reexamination.definitionDiffers": [],
+  "reexamination.runFreshnessUnknown": [],
+  "reexamination.runStale": [],
+  "reexamination.scopeUnknown": [],
+  "reexamination.scopeDiffers": [],
+  "reexamination.identityUnavailable": [],
+  "reexamination.modelAmbiguous": [],
+  "reexamination.identityAmbiguous": [],
+  "reexamination.specificationError": [],
+  "reexamination.entityNotEvaluated": [],
+  "reexamination.runIncomplete": [],
+  "incompleteRun": ["reasons"],
+  "nativeStatus": ["status"],
+  "noStatus": [],
+  "card.expand": ["title"],
+  "card.collapse": ["title"],
+  "card.select": ["title"],
+  "card.findings": ["count"],
+  "card.elements": [],
+  "card.element": ["globalId", "model", "name", "type"],
+  "card.elementUnvalidated": ["globalId", "identity"],
+  "card.related": [],
+  "card.openRelated": ["title"],
+  "card.findingsHeading": [],
+  "originalUnavailable": [],
+  "open": [],
+  "openLabel": ["source", "title"],
+  "selectIn3d": [],
+  "selectIn3dNone": [],
+  "ask": [],
+  "draftOne": [],
+  "decision.heading": [],
+  "decision.note": [],
+  "decision.status": [],
+  "decision.none": [],
+  "decision.comment": [],
+  "decision.save": [],
+  "decision.clear": [],
+  "decision.saved": [],
+  "decision.cleared": [],
+  "decision.unsaved": [],
+  "decision.updated": ["time"],
+  "humanStatus.open": [],
+  "humanStatus.in-progress": [],
+  "humanStatus.resolved": [],
+  "humanStatus.accepted": [],
+  "humanStatus.dismissed": [],
+  "actions.draftTopics": ["count"],
+  "actions.addToReport": ["count"],
+  "actions.scopeSelected": [],
+  "actions.scopeShown": [],
+  "actions.selectAll": [],
+  "actions.clearSelection": [],
+  "actions.reportName": ["date"],
+  "actions.draftSaved": ["count"],
+  "actions.draftUnsaved": [],
+  "actions.draftTopicTooMany": ["count"],
+  "actions.draftTooMany": ["count"],
+  "actions.draftFieldLimit": ["count"],
+  "actions.draftNone": [],
+  "actions.draftFailed": [],
+  "actions.excludedHasTopic": ["count"],
+  "actions.excludedNotCurrent": ["count"],
+  "actions.reportSaved": ["count"],
+  "actions.reportUnsaved": [],
+  "actions.reportFailed": [],
+  "actions.openDocument": [],
+  "actions.openDrafts": [],
+} as const satisfies Record<WorkspaceReviewKey, readonly string[]>;
+
+import type { landXmlGeorefAssumptionsEn } from './catalogues/landxml-georef-assumptions.en';
+
+type GeorefAssumptionKey = keyof typeof landXmlGeorefAssumptionsEn extends `landXmlGeorefAssumptions.${infer Key}` ? Key : never;
+const georefAssumptionShape = {
+  "epsgFromName.label": [],
+  "epsgFromName.description": [],
+  "epsgFromName.applied": ["crs"],
+  "sharedVerticalDatum.label": [],
+  "sharedVerticalDatum.description": [],
+  "sharedVerticalDatum.applied": [],
+  "title": ["fileName"],
+  "offer": [],
+  "load": [],
+  "always": [],
+  "alwaysHint": [],
+  "cancel": [],
+  "settings": [],
+  "settingsHint": [],
+  "badge": [],
+  "assumed": [],
+} as const satisfies Record<GeorefAssumptionKey, readonly string[]>;
+
+import type { ifcFederationAssumptionsEn } from './catalogues/ifc-federation-assumptions.en';
+
+type IfcFederationKey = keyof typeof ifcFederationAssumptionsEn extends `settings.ifcFederation.${infer Key}` ? Key : never;
+const ifcFederationShape = {
+  "title": [],
+  "sharedVertical": [],
+  "hint": [],
+  "assumed": [],
+  "appliedUnresolved": [],
+  "applied": [],
+} as const satisfies Record<IfcFederationKey, readonly string[]>;
+
+/** The glyph overlay's tooltips (#9668); only the tooltip takes parameters. A regex, since this ships eagerly. */
+const STRUCTURAL_GLYPH_KEY = /^structuralGlyphs\.(support\.(fixed|pinned|roller|spring)|load\.(force|moment|temperature|displacement)|reaction)$/;
+
+/**
+ * The local agent bridge's keys (#9523), compact because this ships eagerly:
+ * every tail, and the parameters of the few that take any. Checked against
+ * `agent-bridge.en.ts` in `catalogue-problems.test.ts`.
+ */
+const AGENT_BRIDGE_TAILS = new Set(('row.title row.description row.connect dialog.title dialog.fromLink dialog.reads '
+  + 'dialog.readOnly dialog.localOnly dialog.browserPrompt dialog.start dialog.code dialog.codeHint dialog.port '
+  + 'dialog.codeRequired dialog.portInvalid dialog.connect dialog.tryAgain dialog.cancel dialog.connecting '
+  + 'chip.connected chip.connecting chip.ended chip.title panel.since panel.disconnect panel.pairAgain panel.dismiss '
+  + 'panel.activity panel.activityNote panel.noActivity panel.noModel panel.ok panel.error panel.cancelled panel.duration '
+  + 'failure.unreachable failure.origin failure.permissionDenied failure.pairingFailed failure.protocolMismatch '
+  + 'failure.handshakeTimeout failure.invalidMessage failure.busy failure.invalidLink ended.replaced '
+  + 'ended.bridgeShutdown ended.connectionLost ended.pageHidden dialog.unverified dialog.target dialog.replaces '
+  + 'failure.framed ended.flooded row.showActivity row.hideActivity failure.permissionPrompt dialog.permissionWait '
+  + 'chip.connectedEdits panel.sinceEdits panel.allowEdits panel.allowEditsHint panel.editsCeiling panel.edit panel.editChange '
+  + 'panel.editDeleted panel.editUnchanged').split(' '));
+const AGENT_BRIDGE_PARAMETERS: Record<string, readonly string[]> = {
+  'dialog.reads': ['port'], 'dialog.target': ['port'], 'dialog.replaces': ['port'], 'panel.since': ['port', 'time'], 'panel.error': ['code'], 'panel.duration': ['ms'],
+  'failure.unreachable': ['port'], 'failure.origin': ['origin'], 'panel.sinceEdits': ['port', 'time'], 'panel.editChange': ['after', 'before', 'entity', 'field'],
+  'panel.editDeleted': ['before', 'entity', 'field'], 'panel.editUnchanged': ['after', 'entity', 'field'],
+};
+
+export function lazyMessageParameters(key: string): readonly string[] | null {
+  if (key.startsWith('agentBridge.')) {
+    const tail = key.slice('agentBridge.'.length);
+    return AGENT_BRIDGE_TAILS.has(tail) ? AGENT_BRIDGE_PARAMETERS[tail] ?? [] : null;
+  }
+  if (key === 'structuralGlyphs.tooltip') return ['entity', 'kind'];
+  if (STRUCTURAL_GLYPH_KEY.test(key)) return [];
+  if (Object.hasOwn(retainedCatalogueShape, key)) {
+    return retainedCatalogueShape[key as keyof typeof retainedCatalogueShape];
+  }
+  if (Object.hasOwn(registryCatalogueShape, key)) {
+    return registryCatalogueShape[key as keyof typeof registryCatalogueShape];
+  }
+  if (key.startsWith('flowReview.')) {
+    const tail = key.slice('flowReview.'.length);
+    return Object.hasOwn(flowReviewShape, tail) ? flowReviewShape[tail as ReviewKey] : null;
+  }
+  if (key.startsWith('semanticAssist.')) {
+    const tail = key.slice('semanticAssist.'.length);
+    return Object.hasOwn(semanticMessageShape, tail) ? semanticMessageShape[tail as SemanticKey] : null;
+  }
+  if (key.startsWith('landXmlGeorefAssumptions.')) {
+    const tail = key.slice('landXmlGeorefAssumptions.'.length);
+    return Object.hasOwn(georefAssumptionShape, tail) ? georefAssumptionShape[tail as GeorefAssumptionKey] : null;
+  }
+  if (key.startsWith('settings.ifcFederation.')) {
+    const tail = key.slice('settings.ifcFederation.'.length);
+    return Object.hasOwn(ifcFederationShape, tail) ? ifcFederationShape[tail as IfcFederationKey] : null;
+  }
+  if (key.startsWith('structuralDerive.')) {
+    const tail = key.slice('structuralDerive.'.length);
+    return Object.hasOwn(structuralDeriveShape, tail) ? structuralDeriveShape[tail as StructuralDeriveKey] : null;
+  }
+  if (key.startsWith('reviewWorkspace.')) {
+    const tail = key.slice('reviewWorkspace.'.length);
+    return Object.hasOwn(reviewMessageShape, tail) ? reviewMessageShape[tail as WorkspaceReviewKey] : null;
+  }
+  return null;
+}

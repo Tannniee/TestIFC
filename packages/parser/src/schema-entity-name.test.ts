@@ -1,0 +1,140 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+import { describe, expect, it, vi } from 'vitest';
+import { getSchemaRegistryForVersion, type SchemaRegistry } from './generated/schema-registry-by-version.js';
+import * as parserApi from './index.js';
+import { getAttributeNamesForSchema, getAttributeTypeForSchema } from './ifc-schema.js';
+const getCanonicalEntityName = (registry: SchemaRegistry, type: string) => parserApi.getCanonicalEntityName?.(registry, type);
+
+describe('canonical registry lookup #7362', () => {
+  it('matches every real schema key and preserves unknown/schema boundaries', () => {
+    for (const version of ['IFC2X3', 'IFC4', 'IFC4X3'] as const) {
+      const registry = getSchemaRegistryForVersion(version);
+      for (const key of Object.keys(registry.entities)) {
+        expect(getCanonicalEntityName(registry, key.toUpperCase())).toBe(key);
+        expect(getCanonicalEntityName(registry, key.toLowerCase())).toBe(key);
+      }
+      for (const unknown of ['IfcUnknown7362', '__proto__', 'constructor', '']) expect(getCanonicalEntityName(registry, unknown)).toBeUndefined();
+    }
+    expect(getCanonicalEntityName(getSchemaRegistryForVersion('IFC4'), 'IFCRAILWAY')).toBeUndefined();
+    expect(getCanonicalEntityName(getSchemaRegistryForVersion('IFC4X3'), 'IFCRAILWAY')).toBe('IfcRailway');
+    expect(getAttributeNamesForSchema('IFCTASK', 'IFC4')).toContain('IsMilestone');
+    expect(getAttributeTypeForSchema('IFCTASK', 'IsMilestone', 'IFC4')).toBe('IfcBoolean');
+  });
+
+  it('retains ordered first-match behavior through public registry extension, deletion and reordering', () => {
+    const base = getSchemaRegistryForVersion('IFC4');
+    const registry: SchemaRegistry = { ...base, entities: { IfcWall: base.entities.IfcWall } };
+    expect(getCanonicalEntityName(registry, 'ifcwall')).toBe('IfcWall');
+    registry.entities.IFCWALL = base.entities.IfcWall;
+    expect(getCanonicalEntityName(registry, 'IFCWALL')).toBe('IfcWall');
+    delete registry.entities.IfcWall;
+    expect(getCanonicalEntityName(registry, 'IfcWall')).toBe('IFCWALL');
+    registry.entities.IfcWall = base.entities.IfcWall;
+    expect(getCanonicalEntityName(registry, 'IfcWall')).toBe('IFCWALL');
+    delete registry.entities.IFCWALL;
+    expect(getCanonicalEntityName(registry, 'IFCWALL')).toBe('IfcWall');
+    registry.entities = { IfcRailway: getSchemaRegistryForVersion('IFC4X3').entities.IfcRailway };
+    expect(getCanonicalEntityName(registry, 'IfcWall')).toBeUndefined();
+    expect(getCanonicalEntityName(registry, 'IFCRAILWAY')).toBe('IfcRailway');
+    expect(getCanonicalEntityName(base, 'IFCRAILWAY')).toBeUndefined();
+  });
+
+  it('indexes names without reading definitions or caching replaced metadata', () => {
+    const base = getSchemaRegistryForVersion('IFC4');
+    const entities = { IfcWall: base.entities.IfcWall };
+    let reads = 0;
+    Object.defineProperty(entities, 'IfcTask', { enumerable: true, configurable: true, get: () => { reads++; return base.entities.IfcTask; } });
+    const registry: SchemaRegistry = { ...base, entities };
+    expect(getCanonicalEntityName(registry, 'IFCTASK')).toBe('IfcTask');
+    expect(reads).toBe(0);
+    entities.IfcWall = base.entities.IfcTask;
+    const name = getCanonicalEntityName(registry, 'IFCWALL');
+    expect(name).toBe('IfcWall');
+    expect(registry.entities[name!]).toBe(base.entities.IfcTask);
+  });
+
+  it('reads replaced public schema attribute definitions immediately and restores the original definition', () => {
+    const registry = getSchemaRegistryForVersion('IFC4'), original = registry.entities.IfcTask;
+    const attributes = original.allAttributes;
+    if (!attributes) throw new Error('IFC4 IfcTask must declare inherited attributes');
+    expect(getAttributeTypeForSchema('IFCTASK', 'IsMilestone', 'IFC4')).toBe('IfcBoolean');
+    try {
+      registry.entities.IfcTask = { ...original, allAttributes: attributes.map(attribute =>
+        attribute.name === 'IsMilestone' ? { ...attribute, type: 'IfcLabel' } : attribute) };
+      expect(getAttributeTypeForSchema('ifctask', 'IsMilestone', 'IFC4')).toBe('IfcLabel');
+    } finally { registry.entities.IfcTask = original; }
+    expect(getAttributeTypeForSchema('IFCTASK', 'IsMilestone', 'IFC4')).toBe('IfcBoolean');
+  });
+
+  it('captures ordered keys for one operation while fresh snapshots and public calls observe extensions #7362', () => {
+    const base = getSchemaRegistryForVersion('IFC4');
+    const registry: SchemaRegistry = { ...base, entities: { IfcWall: base.entities.IfcWall } };
+    const first = parserApi.createSchemaEntityNameSnapshot?.(registry);
+    expect(first).toBeDefined();
+    registry.entities.IFCWALL = base.entities.IfcTask;
+    expect(first?.resolve('IFCWALL')).toBe('IfcWall');
+    delete registry.entities.IfcWall;
+    registry.entities.IfcWall = base.entities.IfcWall;
+    registry.entities.IfcTask = base.entities.IfcTask;
+    expect(first?.resolve('IFCTASK')).toBeUndefined();
+    expect(first?.resolve('IFCWALL')).toBe('IfcWall');
+    const next = parserApi.createSchemaEntityNameSnapshot?.(registry);
+    expect(next?.resolve('IFCTASK')).toBe('IfcTask');
+    expect(next?.resolve('IFCWALL')).toBe('IFCWALL');
+    expect(getCanonicalEntityName(registry, 'IFCWALL')).toBe('IFCWALL');
+  });
+
+  it('reads current definition values through captured names and ignores snapshots of another schema #7362', () => {
+    const registry = getSchemaRegistryForVersion('IFC4'), original = registry.entities.IfcWall;
+    const snapshot = parserApi.createSchemaEntityNameSnapshot?.(registry);
+    expect(snapshot).toBeDefined();
+    expect(getAttributeNamesForSchema('IFCWALL', 'IFC4', snapshot)).not.toContain('IsMilestone');
+    try {
+      registry.entities.IfcWall = registry.entities.IfcTask;
+      expect(getAttributeNamesForSchema('IFCWALL', 'IFC4', snapshot)).toContain('IsMilestone');
+    } finally { registry.entities.IfcWall = original; }
+    expect(getAttributeNamesForSchema('IFCWALL', 'IFC4', snapshot)).not.toContain('IsMilestone');
+    expect(parserApi.getCanonicalEntityName?.(getSchemaRegistryForVersion('IFC4X3'), 'IFCRAILWAY', snapshot)).toBe('IfcRailway');
+    expect(getAttributeNamesForSchema('IFCRAILWAY', 'IFC4X3', snapshot)).toContain('PredefinedType');
+  });
+});
+
+it('fresh snapshots reuse the name index while ordered keys are unchanged #8452', () => {
+  const registry = getSchemaRegistryForVersion('IFC4');
+  parserApi.createSchemaEntityNameSnapshot(registry);
+  const writes = vi.spyOn(Map.prototype, 'set');
+  try {
+    for (let i = 0; i < 20; i++) expect(parserApi.createSchemaEntityNameSnapshot(registry).resolve('IFCWALL')).toBe('IfcWall');
+    expect(writes.mock.calls.filter(([key, value]) => key === 'IFCWALL' && value === 'IfcWall')).toHaveLength(0);
+  } finally { writes.mockRestore(); }
+});
+
+// #9906: a reader without a snapshot checks the registry's ordered keys on
+// every lookup. That check serialised every entity name (about 18 microseconds
+// per lookup on IFC2X3) and was most of the time a metadata read took: 64% of
+// resolving presentation layers on a 326 MB model.
+it('checks the ordered keys on each lookup without serialising the registry #9906', () => {
+  const registry = getSchemaRegistryForVersion('IFC2X3');
+  const serialised = vi.spyOn(JSON, 'stringify');
+  let names: Array<string | undefined>, calls: number;
+  try {
+    names = Array.from({ length: 50 }, () => getCanonicalEntityName(registry, 'IFCSHAPEREPRESENTATION'));
+    for (let i = 0; i < 50; i++) names.push(getAttributeNamesForSchema('IFCSHAPEREPRESENTATION', 'IFC2X3').at(-1));
+    calls = serialised.mock.calls.length;
+  } finally { serialised.mockRestore(); }
+  expect(new Set(names)).toEqual(new Set(['IfcShapeRepresentation', 'Items']));
+  expect(calls).toBe(0);
+});
+
+it('snapshot reads retain the empty-registry diagnostic after their witness is hidden #8452', () => {
+  const registry = getSchemaRegistryForVersion('IFC4'), original = registry.entities;
+  try {
+    registry.entities = { IfcWall: original.IfcWall };
+    const snapshot = parserApi.createSchemaEntityNameSnapshot(registry);
+    expect(getAttributeNamesForSchema('IfcWall', 'IFC4', snapshot)).toContain('GlobalId');
+    Object.defineProperty(registry.entities, 'IfcWall', { enumerable: false });
+    expect(() => getAttributeNamesForSchema('IfcWall', 'IFC4', snapshot)).toThrow('zero entities');
+  } finally { registry.entities = original; }
+});

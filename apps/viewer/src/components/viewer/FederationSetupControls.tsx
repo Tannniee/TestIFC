@@ -1,0 +1,203 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Save/reopen a portable federation setup (#3930).
+ *
+ * Mounted once from `useFileCommands` (same pattern as `ShareDialog`), so it
+ * is reachable from the command palette regardless of which ribbon tab is
+ * active. Two hidden `<input type="file">`s drive the two-step "open" flow
+ * (pick the saved `.federation.json`, then pick the local model files to
+ * match against it); the review step never applies anything silently — every
+ * slot is shown as matched, mismatched (same name, different content/size),
+ * or missing before the user confirms.
+ *
+ * Also mounts `ModelTagsCommand` (#4215): the palette's "Model Tags" entry,
+ * the tag editor for a one-model session - the tags travel in this file.
+ */
+
+import { isFeatureEnabled } from '@/lib/features';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AlertTriangle, Anchor, Check, FileWarning } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/toast';
+import { useTranslation } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
+import { useFederationSetup } from '@/hooks/useFederationSetup';
+import {
+  parseFederationSetupFile,
+  type FederationSetupFile,
+  type FederationSetupSlotMatch,
+} from '@/lib/federation/federationSetupFile';
+import { ModelTagsCommand } from './ModelTagsCommand';
+
+const EVENT_SAVE = 'ifc-lite:save-federation-setup';
+const EVENT_OPEN = 'ifc-lite:open-federation-setup';
+
+function confidenceBadge(match: FederationSetupSlotMatch): { labelKey: TranslationKey; icon: typeof Check; tone: string } {
+  switch (match.confidence) {
+    case 'content':
+      return { labelKey: 'federationSetupControls.confidence.content', icon: Check, tone: 'text-ok' };
+    case 'name-size':
+      return { labelKey: 'federationSetupControls.confidence.nameSize', icon: Check, tone: 'text-ok' };
+    case 'name-only':
+      return { labelKey: 'federationSetupControls.confidence.nameOnly', icon: FileWarning, tone: 'text-warn' };
+    case 'none':
+      return { labelKey: 'federationSetupControls.confidence.none', icon: AlertTriangle, tone: 'text-danger' };
+  }
+}
+
+export function FederationSetupControls() {
+  const { t } = useTranslation();
+  const enabled = isFeatureEnabled('files.federation-setup');
+  const { exportFederationSetup, matchFederationSetup, applyFederationSetup } = useFederationSetup();
+
+  const setupFileInputRef = useRef<HTMLInputElement>(null);
+  const modelFilesInputRef = useRef<HTMLInputElement>(null);
+  const [pendingSetup, setPendingSetup] = useState<FederationSetupFile | null>(null);
+  const [matches, setMatches] = useState<FederationSetupSlotMatch[] | null>(null);
+  const [applying, setApplying] = useState(false);
+
+  const handleSave = useCallback(() => {
+    void exportFederationSetup().then((result) => {
+      if (!result.ok) toast.error(result.error);
+      else toast.success(t('federationSetupControls.saved'));
+    });
+  }, [exportFederationSetup, t]);
+
+  useEffect(() => {
+    // The palette and ribbon rows are gated; the events they dispatch are too.
+    if (!enabled) return;
+    const onSave = () => handleSave();
+    const onOpen = () => setupFileInputRef.current?.click();
+    window.addEventListener(EVENT_SAVE, onSave);
+    window.addEventListener(EVENT_OPEN, onOpen);
+    return () => {
+      window.removeEventListener(EVENT_SAVE, onSave);
+      window.removeEventListener(EVENT_OPEN, onOpen);
+    };
+  }, [enabled, handleSave]);
+
+  const handleSetupFileSelected = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    void file.text().then((text) => {
+      const result = parseFederationSetupFile(text);
+      if (!result.ok) {
+        toast.error(t('federationSetupControls.invalid', { reason: result.error }));
+        return;
+      }
+      setPendingSetup(result.setup);
+      toast.info(
+        t('federationSetupControls.pickSources', { count: result.setup.slots.length }),
+      );
+      modelFilesInputRef.current?.click();
+    });
+  }, [t]);
+
+  const handleModelFilesSelected = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = '';
+    if (!pendingSetup || files.length === 0) return;
+    void matchFederationSetup(pendingSetup, files).then(setMatches);
+  }, [pendingSetup, matchFederationSetup]);
+
+  const closeReview = useCallback(() => {
+    setMatches(null);
+    setPendingSetup(null);
+  }, []);
+
+  const handleApply = useCallback(() => {
+    if (!matches || !pendingSetup) return;
+    setApplying(true);
+    void applyFederationSetup(pendingSetup, matches).then((result) => {
+      setApplying(false);
+      closeReview();
+      // #8566: a found file can be refused by the canonical loader. Preserve
+      // its reason even when no slot succeeds; missing sources are separate.
+      const parts: string[] = [t('federationSetupControls.result.restored', {
+        restored: result.restoredCount, total: result.totalSlots,
+      })];
+      if (result.missingSlots.length > 0) parts.push(t('federationSetupControls.result.missing', { names: result.missingSlots.join(', ') }));
+      if (result.mismatchedSlots.length > 0) parts.push(t('federationSetupControls.result.mismatched', { names: result.mismatchedSlots.join(', ') }));
+      if (result.anchorMissing) parts.push(t('federationSetupControls.result.anchorMissing'));
+      if (result.taggedSlotsMissing.length > 0) parts.push(t('federationSetupControls.result.tagsMissing', { names: result.taggedSlotsMissing.join(', ') }));
+      if (result.failedSlots.length > 0) parts.push(t('federationSetupControls.result.failed', {
+        slots: result.failedSlots.map((f) => t('federationSetupControls.result.failedSlot', { name: f.name, reason: f.reason })).join(', '),
+      }));
+      const message = parts.join(' — ');
+      if (result.outcome === 'restored' && !result.anchorMissing) toast.success(message);
+      else toast.error(message);
+    });
+  }, [matches, pendingSetup, applyFederationSetup, closeReview, t]);
+
+  return (
+    <>
+      <ModelTagsCommand />
+      {enabled && <><input
+        ref={setupFileInputRef}
+        type="file"
+        accept=".json,application/json"
+        className="hidden"
+        onChange={handleSetupFileSelected}
+      />
+      <input
+        ref={modelFilesInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleModelFilesSelected}
+      /></>}
+      <Dialog open={matches !== null} onOpenChange={(open) => { if (!open) closeReview(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('federationSetupControls.reopenTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('federationSetupControls.reopenDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-80 overflow-y-auto space-y-1">
+            {matches?.map((match) => {
+              const badge = confidenceBadge(match);
+              const Icon = badge.icon;
+              return (
+                <div
+                  key={match.slotIndex}
+                  className="flex items-center gap-2 px-2 py-1.5 border border-border rounded text-sm"
+                >
+                  {match.slot.anchor && <Anchor className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />}
+                  <span className="truncate flex-1">{match.slot.name}</span>
+                  <span className={`inline-flex items-center gap-1 text-xs ${badge.tone}`}>
+                    <Icon className="h-3.5 w-3.5" />
+                    {t(badge.labelKey)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeReview} disabled={applying}>{t('federationSetupControls.cancel')}</Button>
+            <Button
+              onClick={handleApply}
+              disabled={applying || !matches?.some((m) => m.file !== null)}
+            >
+              {applying ? t('federationSetupControls.restoringButton') : t('federationSetupControls.restoreButton')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+export default FederationSetupControls;

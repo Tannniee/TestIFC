@@ -1,0 +1,60 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Learn hub: the tour catalog inside the Info dialog. One row per
+ * registered tour with duration, a completed check, and Start/Replay.
+ */
+
+import { CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/i18n';
+import { TOUR_REGISTRY } from '@/lib/tours/registry';
+import { isTourAvailable } from '@/lib/tours/tour-availability';
+import { isTourCompleted } from '@/lib/tours/storage';
+import { startTour } from '@/lib/tours/controller';
+import type { TourId } from '@/lib/tours/types';
+
+export function LearnTab({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
+  const begin = (id: TourId) => {
+    onClose();
+    // Let the dialog unmount before the tour resolves its first anchor.
+    requestAnimationFrame(() => startTour(id, 'learn'));
+  };
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">
+        {t('tours.learnTab.description')}
+      </p>
+      <div className="divide-y divide-border rounded-md border">
+        {TOUR_REGISTRY.filter(isTourAvailable).map((tour) => {
+          const done = isTourCompleted(tour.id, tour.version);
+          return (
+            <div key={tour.id} className="flex items-center gap-3 px-3 py-2.5">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 text-sm font-medium">
+                  {tour.title}
+                  {done && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-ok" aria-label={t('tours.learnTab.completedAriaLabel')} />}
+                </div>
+                <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{tour.description}</div>
+              </div>
+              {/* On a phone the duration sits under the button, leaving
+                  the title and description most of the row. */}
+              <div className="flex shrink-0 items-center gap-3 max-sm:flex-col-reverse max-sm:items-end max-sm:gap-0.5">
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  {t('tours.learnTab.minutes', { count: tour.minutes })}
+                </span>
+                <Button variant={done ? 'ghost' : 'outline'} size="sm" onClick={() => begin(tour.id)}>
+                  {done ? t('tours.learnTab.replay') : t('tours.learnTab.start')}
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

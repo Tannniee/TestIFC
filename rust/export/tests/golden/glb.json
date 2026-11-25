@@ -1,0 +1,38 @@
+{
+  "about": "FNV-1a 64 and byte length of each glb output, keyed by case. Written by ifc-lite-export, never by hand.",
+  "repin": "IFC_LITE_REPIN_GOLDEN=1 cargo test -p ifc-lite-export --features parquet-bos --test export_golden -- --exact glb",
+  "cases": {
+    "AC20-FZK-Haus": {
+      "fnv1a64": "3c722b159c09ec17",
+      "bytes": 1069020
+    },
+    "IfcOpenHouse_IFC4": {
+      "fnv1a64": "38984210813358ac",
+      "bytes": 76328
+    },
+    "bath_csg_solid": {
+      "fnv1a64": "c72d0220583ab9a4",
+      "bytes": 7844
+    },
+    "bonsai-terrain": {
+      "fnv1a64": "0171951032c8925a",
+      "bytes": 1156
+    },
+    "c6_data_model_synthetic": {
+      "fnv1a64": "5de525c36f19ae2d",
+      "bytes": 1960
+    },
+    "duplex": {
+      "fnv1a64": "d3c752f4131bd626",
+      "bytes": 998236
+    },
+    "mapped_instances_synthetic": {
+      "fnv1a64": "345534a6f582c3b8",
+      "bytes": 7564
+    },
+    "wall_two_openings": {
+      "fnv1a64": "f90fa636bcec8bbb",
+      "bytes": 7724
+    }
+  }
+}

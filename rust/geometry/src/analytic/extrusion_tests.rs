@@ -1,0 +1,144 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! #5784: authored extrusion parameters remain separate from occurrence placement.
+
+use super::extract_analytic_extrusion;
+use crate::analytic::AnalyticStatus;
+use ifc_lite_core::{build_entity_index, EntityDecoder};
+
+fn read(bytes: &[u8], id: u32) -> super::AnalyticExtrusion {
+    let mut decoder = EntityDecoder::with_index(bytes, build_entity_index(bytes));
+    let solid = decoder.decode_by_id(id).unwrap();
+    extract_analytic_extrusion(&solid, &mut decoder)
+}
+
+#[test]
+fn rectangle_extrusion_keeps_exact_profile_and_depth() {
+    let bytes = include_bytes!("../../tests/fixtures/mapped_instances_synthetic.ifc");
+    let extrusion = read(bytes, 12);
+    assert_eq!(extrusion.status, AnalyticStatus::Complete);
+    assert_eq!(extrusion.swept_area_id, Some(8));
+    assert_eq!(extrusion.depth, Some(1.0));
+    assert_eq!(extrusion.direction_ratios, Some([0.0, 0.0, 1.0]));
+    assert_eq!(extrusion.profile.unwrap().loops[0].segments.len(), 4);
+}
+
+#[test]
+fn issue_5784_serialized_source_references_keep_express_names() {
+    let bytes = include_bytes!("../../tests/fixtures/mapped_instances_synthetic.ifc");
+    let json = serde_json::to_value(read(bytes, 12)).unwrap();
+    assert_eq!(json["SweptArea"], 8);
+    assert_eq!(json["Position"], 11);
+    assert_eq!(json["ExtrudedDirection"], 9);
+    assert_eq!(json["Depth"], 1.0);
+    assert_eq!(json["profile"]["ProfileType"], "AREA");
+    assert_eq!(json["profile"]["Position"], 7);
+    for alias in ["swept_area_id", "position_id", "extruded_direction_id", "depth"] {
+        assert!(json.get(alias).is_none(), "unexpected extrusion alias {alias}");
+    }
+    assert!(json["profile"].get("position_id").is_none());
+}
+
+#[test]
+fn authored_direction_ratios_and_unit_vector_are_distinct() {
+    let source = String::from_utf8(include_bytes!("../../tests/fixtures/mapped_instances_synthetic.ifc").to_vec()).unwrap();
+    let source = source.replace("#9=IFCDIRECTION((0.,0.,1.));", "#9=IFCDIRECTION((0.,0.,2.));");
+    let extrusion = read(source.as_bytes(), 12);
+    assert_eq!(extrusion.status, AnalyticStatus::Complete);
+    assert_eq!(extrusion.direction_ratios, Some([0.0, 0.0, 2.0]));
+    assert_eq!(extrusion.axis_unit_vector, Some([0.0, 0.0, 1.0]));
+}
+
+#[test]
+fn invalid_depth_reports_unsupported_without_fabricating_depth() {
+    let source = String::from_utf8(include_bytes!("../../tests/fixtures/mapped_instances_synthetic.ifc").to_vec()).unwrap();
+    let source = source.replace("#12=IFCEXTRUDEDAREASOLID(#8,#11,#9,1.0);",
+        "#12=IFCEXTRUDEDAREASOLID(#8,#11,#9,-1.0);");
+    let extrusion = read(source.as_bytes(), 12);
+    assert!(matches!(extrusion.status, AnalyticStatus::Unsupported(ref reason) if reason.contains("Depth")));
+    assert_eq!(extrusion.depth, None);
+}
+
+#[test]
+fn curve_profile_cannot_be_reported_as_a_solid_area() {
+    let source = String::from_utf8(include_bytes!("../../tests/fixtures/mapped_instances_synthetic.ifc").to_vec()).unwrap();
+    let source = source.replace("#8=IFCRECTANGLEPROFILEDEF(.AREA.,", "#8=IFCRECTANGLEPROFILEDEF(.CURVE.,");
+    let extrusion = read(source.as_bytes(), 12);
+    assert!(matches!(extrusion.status, AnalyticStatus::Unsupported(ref reason)
+        if reason.contains("ProfileType CURVE")));
+    assert_eq!(extrusion.profile.unwrap().profile_type.as_deref(), Some("CURVE"));
+}
+
+#[test]
+fn pure_xy_extrusion_violates_valid_extrusion_direction() {
+    let source = String::from_utf8(include_bytes!("../../tests/fixtures/mapped_instances_synthetic.ifc").to_vec()).unwrap();
+    let source = source.replace("#9=IFCDIRECTION((0.,0.,1.));", "#9=IFCDIRECTION((1.,0.,0.));");
+    let extrusion = read(source.as_bytes(), 12);
+    assert!(matches!(extrusion.status, AnalyticStatus::Unsupported(ref reason)
+        if reason.contains("perpendicular to local Z")));
+    assert_eq!(extrusion.direction_ratios, Some([1.0, 0.0, 0.0]));
+    assert_eq!(extrusion.axis_unit_vector, None);
+}
+
+#[test]
+fn real_revit_extrusion_keeps_profile_hole_and_position() {
+    let bytes = include_bytes!("../../tests/fixtures/issue_098_wall_W.ifc");
+    let extrusion = read(bytes, 338107);
+    assert_eq!(extrusion.status, AnalyticStatus::Complete);
+    assert_eq!(extrusion.swept_area_id, Some(338102));
+    assert_eq!(extrusion.profile.as_ref().unwrap().loops.len(), 2);
+    assert!((extrusion.depth.unwrap() - 0.06).abs() < 1e-12);
+    assert!(extrusion.position_matrix.is_some());
+}
+
+
+#[test]
+fn original_solid_position_axis_and_ref_direction_survive_normalization() {
+    use crate::analytic::SourceValue;
+    let bytes = include_str!("../../tests/fixtures/mapped_instances_synthetic.ifc");
+    let bytes = bytes.replace("#11=IFCAXIS2PLACEMENT3D(#10,$,$);",
+        "#11=IFCAXIS2PLACEMENT3D(#10,#990,#991);\n#990=IFCDIRECTION((0.,0.,7.));\n#991=IFCDIRECTION((3.,0.,0.));");
+    assert!(bytes.contains("#990=IFCDIRECTION"), "fixture placement must be replaced");
+    assert!(read(bytes.as_bytes(), 12).source.is_none(), "capture is opt-in");
+    let source = crate::analytic::with_source_capture(|| read(bytes.as_bytes(), 12));
+    assert_eq!(source.status, AnalyticStatus::Complete);
+    let original = source.source.unwrap();
+    assert_eq!(original.capture_status, AnalyticStatus::Complete);
+    assert_eq!(original.records[&11].attributes["Axis"], SourceValue::EntityRef(990));
+    assert_eq!(original.records[&11].attributes["RefDirection"], SourceValue::EntityRef(991));
+    assert_eq!(original.records[&990].attributes["DirectionRatios"],
+        SourceValue::List(vec![SourceValue::Real(0.), SourceValue::Real(0.), SourceValue::Real(7.)]));
+    assert_eq!(original.records[&991].attributes["DirectionRatios"],
+        SourceValue::List(vec![SourceValue::Real(3.), SourceValue::Real(0.), SourceValue::Real(0.)]));
+    assert_eq!(source.position_matrix.unwrap()[0], 1.);
+}
+
+#[test]
+fn an_extruded_direction_whose_length_overflows_agrees_with_the_mesh_path() {
+    use crate::processors::extrusion_params::ExtrusionParams;
+    let fixture = include_str!("../../tests/fixtures/mapped_instances_synthetic.ifc");
+    for ratios in ["(1.7E308,0.,1.7E308)", "(0.,3.,4.)", "(1.E308,0.,1.E308)"] {
+        let source = fixture.replace("#9=IFCDIRECTION((0.,0.,1.));", &format!("#9=IFCDIRECTION({ratios});"));
+        assert!(source.contains(ratios), "fixture direction must be replaced");
+        let analytic = read(source.as_bytes(), 12);
+        assert_eq!(analytic.status, AnalyticStatus::Complete, "{ratios}");
+        let authored = analytic.direction_ratios.expect(ratios);
+        let unit = analytic.axis_unit_vector.expect(ratios);
+
+        let mut decoder = EntityDecoder::with_index(source.as_bytes(), build_entity_index(source.as_bytes()));
+        let solid = decoder.decode_by_id(12).unwrap();
+        let mesh = ExtrusionParams::decode(&solid, &mut decoder, "ExtrudedAreaSolid").expect(ratios);
+        assert_eq!(decoder.refused_records(), 0, "{ratios}");
+        let mesh_unit = mesh.direction.normalize();
+        for axis in 0..3 {
+            assert!((unit[axis] - mesh_unit[axis]).abs() <= f64::EPSILON, "{ratios}: {unit:?} vs {mesh_unit:?}");
+        }
+        // A finite length keeps the authored ratios over their own norm, bit for bit.
+        let norm = authored[0].hypot(authored[1]).hypot(authored[2]);
+        if norm.is_finite() {
+            assert_eq!(unit, authored.map(|value| value / norm), "{ratios}");
+        }
+    }
+}

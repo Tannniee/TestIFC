@@ -1,0 +1,705 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { LayerGroupingControl } from './hierarchy/LayerGroupingControl';
+
+import { useState, useCallback, useRef, useMemo } from 'react';
+import { useTranslation } from '@/i18n';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { Search, Building2, Layers, LayoutTemplate, FileBox, GripHorizontal, Palette, Network, Layers3, Shapes } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { useViewerStore, resolveEntityRef } from '@/store';
+import { useVisibilityIsolation } from '@/hooks/useVisibilityIsolation';
+import { useIfcLoader } from '@/hooks/useIfcLoader';
+import { useIfcFederation } from '@/hooks/useIfcFederation';
+import { useEntityListMultiSelect } from '@/hooks/useEntityListMultiSelect';
+import { Rule, activeGroupRules, type FilterRule } from '@ifc-lite/rules';
+import { toast } from '@/components/ui/toast';
+import { EmptyState } from '@/components/ui/empty-state';
+import { useSourceHost } from '@/services/sources/SourceHostProvider';
+import { syncSourceModel } from '@/lib/sources/syncSourceModel';
+
+import { HIERARCHY_ROW_HEIGHT, type TreeNode } from './hierarchy/types';
+import { useHierarchyTree } from './hierarchy/useHierarchyTree';
+import { useHierarchyMotion } from './hierarchy/useHierarchyMotion';
+import { useRevealSelection } from './hierarchy/useRevealSelection';
+import { useHierarchySplit } from './hierarchy/useHierarchySplit';
+import { revealMembershipSpatialTypes } from './hierarchy/nodeVisibility';
+import { computeTypeIsolationLabel } from './hierarchy/typeIsolationLabel';
+import { HierarchyNode } from './hierarchy/HierarchyNode';
+import { CaptureModelPanel } from './hierarchy/CaptureModelPanel';
+import { reloadGaussianCapture } from '@/hooks/ingest/gaussianReload';
+import type { AriaTreeAttrs } from './hierarchy/ariaTreeAttrs';
+import type { NodeActivationModifiers, UseTreeKeyboardResult } from './hierarchy/useTreeKeyboard';
+import { useHierarchyTreeKeyboard } from './hierarchy/useHierarchyTreeKeyboard';
+import { HierarchyFooterStatus } from './hierarchy/HierarchyFooterStatus';
+import { HierarchySearchEmptyState } from './hierarchy/HierarchySearchEmptyState';
+import { useStrippedHierarchyNodes } from './hierarchy/useStrippedHierarchyNodes';
+import { useConfirmRemoveModel } from './hierarchy/useConfirmRemoveModel';
+import { SectionHeader } from './hierarchy/SectionHeader';
+import { useModelRowSize } from './hierarchy/ModelRowTags';
+import { ModelsSectionHeader } from './hierarchy/ModelsSectionHeader';
+import { StoreyDisplayControls, StoreyFloorplanButton } from './hierarchy/StoreyDisplayControls';
+import { HierarchySortControl } from './hierarchy/HierarchySortControl';
+import { hierarchyRowSelection } from './hierarchy/rowSelection';
+import { createSpatialSubtreeResolver, hierarchyNodeAppearance, hierarchyNodeVisibility, hierarchyToggleTargets, recordHierarchyOwnState } from './hierarchy/nodeVisibility';
+import { hierarchyRowActions, type HierarchyRowAction } from './hierarchy/HierarchyRowActions';
+import { applyLevelDisplayMode } from '@/store/levelDisplay';
+import { createHierarchyModelsSelector, selectLegacyHierarchyGeometry } from './hierarchy/hierarchy-models-selector';
+import { TOUR_ANCHORS, tourAnchor } from '@/lib/tours/anchors';
+import { useStreamingThrottled } from '@/hooks/useStreamingThrottled';
+
+export function HierarchyPanel() {
+  const { t } = useTranslation();
+  // Narrow subscriptions (#6232 perf): `useIfc()` re-rendered the panel and
+  // every row on each geometry update, a re-meshed element included.
+  const [selectHierarchyModels] = useState(createHierarchyModelsSelector);
+  const models = useViewerStore(selectHierarchyModels);
+  const ifcDataStore = useViewerStore((s) => s.ifcDataStore);
+  // Legacy single-model geometry is held while streaming like the models above,
+  // but never across a data-store swap (a different model) (#6411).
+  const legacyGeometry = useViewerStore(selectLegacyHierarchyGeometry);
+  const geometryResult = useStreamingThrottled(
+    useMemo(() => ({ store: ifcDataStore, geometry: legacyGeometry }), [ifcDataStore, legacyGeometry]),
+    (held, next) => held.store === next.store,
+  ).geometry;
+  const setActiveModel = useViewerStore((s) => s.setActiveModel);
+  const setModelVisibility = useViewerStore((s) => s.setModelVisibility);
+  const { addModel, removeModel } = useIfcFederation(useIfcLoader().loadFile);
+  const sourceHost = useSourceHost();
+  const selectedEntityId = useViewerStore((s) => s.selectedEntityId);
+  const selectedEntityIds = useViewerStore((s) => s.selectedEntityIds);
+  const setSelectedEntities = useViewerStore((s) => s.setSelectedEntities);
+  const setSelectedModelId = useViewerStore((s) => s.setSelectedModelId);
+  const selectedStoreys = useViewerStore((s) => s.selectedStoreys);
+  const clearStoreySelection = useViewerStore((s) => s.clearStoreySelection);
+  const isolateEntities = useViewerStore((s) => s.isolateEntities);
+  const isolatedEntities = useViewerStore((s) => s.isolatedEntities);
+  // The set the viewport draws (storey Solo ∩ class filter ∩ isolation), so
+  // row dimming agrees with the renderer for every isolation channel (#8802).
+  const viewportIsolation = useVisibilityIsolation();
+  const clearIsolation = useViewerStore((s) => s.clearIsolation);
+  const classFilter = useViewerStore((s) => s.classFilter);
+  const setClassFilter = useViewerStore((s) => s.setClassFilter);
+  const addFilterRule = useViewerStore((s) => s.addFilterRule);
+  const updateFilterRule = useViewerStore((s) => s.updateFilterRule);
+  const removeFilterRule = useViewerStore((s) => s.removeFilterRule);
+  const setSearchFilterAutoRunPending = useViewerStore((s) => s.setSearchFilterAutoRunPending);
+  const clearClassFilter = useViewerStore((s) => s.clearClassFilter);
+  const clearAllFilters = useViewerStore((s) => s.clearAllFilters);
+  const setHierarchyBasketSelection = useViewerStore((s) => s.setHierarchyBasketSelection);
+  const sourceTags = useViewerStore((s) => s.sourceTags);
+
+  // Explicit group isolation reveals hidden-by-default spaces and zones.
+
+  const hiddenEntities = useViewerStore((s) => s.hiddenEntities);
+  const hideEntities = useViewerStore((s) => s.hideEntities);
+  const showEntities = useViewerStore((s) => s.showEntities);
+  const clearSelection = useViewerStore((s) => s.clearSelection);
+
+  // Derive label for type isolation (from the Type tab, or any other
+  // isolation source — e.g. the Filter tab's "Isolate in 3D", #2532) by
+  // resolving each isolated id's IFC type through the data-store index
+  // (O(1) per id via entities.getTypeName) rather than scanning
+  // geometryResult.meshes per id. Only label with a single type name when
+  // EVERY isolated id shares it — a heterogeneous isolation must not claim
+  // a class the user never isolated (#2532 review: the chip mislabelled a
+  // mixed-class Filter result by sampling only the first id). Extracted to
+  // `hierarchy/typeIsolationLabel.ts` (pure, unit-tested) — it also skips ids
+  // that don't resolve to any federated model rather than querying the
+  // fallback store with a raw, un-offset id (#2532 review: could hit an
+  // unrelated entity in a multi-model scene and mislabel the chip).
+  // Classes come through the session's mutation views (#6233); they mutate in
+  // place, so mutationVersion re-runs the label.
+  const mutationViews = useViewerStore((s) => s.mutationViews);
+  const mutationVersion = useViewerStore((s) => s.mutationVersion);
+  const typeIsolationLabel = useMemo(
+    () => computeTypeIsolationLabel(isolatedEntities, models, ifcDataStore, (modelId) => mutationViews.get(modelId)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isolatedEntities, models, ifcDataStore, mutationViews, mutationVersion],
+  );
+
+  const hasActiveFilters = selectedStoreys.size > 0 || isolatedEntities !== null || classFilter !== null;
+
+  const [syncingSourceModelIds, setSyncingSourceModelIds] = useState<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { splitRatio, isDragging, handleResizeStart, handleResizeKeyDown } = useHierarchySplit(containerRef);
+
+  // Check if we have multiple models loaded
+  const isMultiModel = models.size > 1;
+
+  // Use extracted hook for tree data management
+  const {
+    searchQuery,
+    setSearchQuery,
+    groupingMode,
+    setGroupingMode: setTreeGroupingMode,
+    layerGrouping, setLayerGrouping,
+    sortMode,
+    setSortMode,
+    groupFilter,
+    setGroupFilter,
+    groupingReady,
+    presentationLayerError,
+    retryPresentationLayers,
+    filteredNodes: rawFilteredNodes,
+    storeysNodes: rawStoreysNodes,
+    modelsNodes: rawModelsNodes,
+    toggleExpand: toggleTreeNode,
+    getNodeElements,
+    revealGlobalId,
+  } = useHierarchyTree({ models, ifcDataStore, isMultiModel, geometryResult });
+
+  const { filteredNodes, storeysNodes, modelsNodes } = useStrippedHierarchyNodes(rawFilteredNodes, rawStoreysNodes, rawModelsNodes);
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const searchEmptyState = groupingReady && normalizedSearch && !filteredNodes.some((node) =>
+    node.name.toLowerCase().includes(normalizedSearch) || node.secondaryName?.toLowerCase().includes(normalizedSearch))
+    ? <HierarchySearchEmptyState query={searchQuery.trim()} onClear={() => setSearchQuery('')} />
+    : null;
+
+  // Use the same Explorer selection contract for every hierarchy grouping.
+  // A group row contributes all of its actual members to one logical row.
+  const { selectGroups, setAnchor: setMultiSelectAnchor } = useEntityListMultiSelect();
+  const anchorSection = useRef('');
+  const selectionRows = useMemo(() => ({
+    filtered: filteredNodes.map((node) => hierarchyRowSelection(node, models, resolveEntityRef)),
+    storeys: storeysNodes.map((node) => hierarchyRowSelection(node, models, resolveEntityRef)),
+    models: modelsNodes.map((node) => hierarchyRowSelection(node, models, resolveEntityRef)),
+  }), [filteredNodes, storeysNodes, modelsNodes, models]);
+
+  // Refs for both scroll areas
+  const storeysRef = useRef<HTMLDivElement>(null);
+  const modelsRef = useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null); // Legacy single-model mode
+  const captureMotion = useHierarchyMotion([parentRef, storeysRef, modelsRef]);
+  const toggleExpand = useCallback((id: string) => {
+    captureMotion(); toggleTreeNode(id);
+  }, [captureMotion, toggleTreeNode]);
+  const setGroupingMode = useCallback((mode: typeof groupingMode) => {
+    captureMotion(); setTreeGroupingMode(mode);
+  }, [captureMotion, setTreeGroupingMode]);
+
+  // Virtualizers for both sections
+  const storeysVirtualizer = useVirtualizer({
+    count: storeysNodes.length,
+    getScrollElement: () => storeysRef.current,
+    estimateSize: () => HIERARCHY_ROW_HEIGHT,
+    overscan: 10,
+  });
+
+  const modelsVirtualizer = useVirtualizer({
+    count: modelsNodes.length,
+    getScrollElement: () => modelsRef.current,
+    estimateSize: useModelRowSize(modelsNodes, () => modelsVirtualizer.measure()), // #4215: a tagged model row carries a chips line
+    overscan: 10,
+  });
+
+  // Legacy virtualizer for single-model mode
+  const virtualizer = useVirtualizer({
+    count: filteredNodes.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => HIERARCHY_ROW_HEIGHT,
+    overscan: 10,
+  });
+
+  // Reveal an outside selection by expanding its ancestors and scrolling to it (#5881).
+  const { markFromTreeClick } = useRevealSelection({
+    selectedEntityId, groupingMode, revealGlobalId, storeysNodes, modelsNodes, filteredNodes,
+    isMultiModel: isMultiModel && groupingMode === 'spatial', storeysVirtualizer, modelsVirtualizer, virtualizer, container: parentRef, setSearchQuery, searchQuery, groupingReady,
+  });
+
+  // A source's container plan (a Rhino layer, #10214) is the layer tree's: only
+  // the spatial grouping's rows follow it, and only they record own states.
+  const planModels = groupingMode === 'spatial' ? models : undefined;
+
+  // Toggle visibility for a node
+  const handleVisibilityToggle = useCallback((node: TreeNode) => {
+    const elements = getNodeElements(node);
+    const { visibilityAction } = hierarchyNodeVisibility(node, elements, hiddenEntities, planModels);
+    const targets = planModels ? hierarchyToggleTargets(node, elements, visibilityAction, planModels) : [...elements];
+    if (targets.length === 0) return;
+
+    if (visibilityAction === 'hide') {
+      hideEntities(targets);
+      // Read at click time: a layer row's hide reaches sub-layers whose rows may not have re-rendered.
+      const selection = useViewerStore.getState();
+      if ((selection.selectedEntityId !== null && targets.includes(selection.selectedEntityId))
+        || targets.some((id) => selection.selectedEntityIds.has(id))) {
+        clearSelection();
+      }
+    } else {
+      showEntities(targets);
+    }
+    if (planModels) recordHierarchyOwnState(node, visibilityAction, planModels);
+  }, [getNodeElements, hiddenEntities, hideEntities, showEntities, clearSelection, planModels]);
+
+  // Handle model visibility toggle
+  const handleModelVisibilityToggle = useCallback((modelId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const model = models.get(modelId);
+    if (model) {
+      setModelVisibility(modelId, !model.visible);
+    }
+  }, [models, setModelVisibility]);
+
+  const { handleRemoveModel, removeModelDialog } = useConfirmRemoveModel(removeModel);
+
+  const handleSyncSourceModel = useCallback(async (modelId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const model = models.get(modelId);
+    const tag = sourceTags.get(modelId);
+    if (!model || !tag) return;
+
+    setSyncingSourceModelIds((previous) => new Set(previous).add(modelId));
+    try {
+      const { latestFile } = await syncSourceModel({
+        modelId,
+        tag,
+        sourceHost,
+        addModel,
+        removeModel,
+      });
+      const providerTitle = sourceHost.get(tag.provider)?.manifest.title ?? tag.provider;
+      toast.success(`Synced ${latestFile.name} from ${providerTitle}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to sync source model');
+    } finally {
+      setSyncingSourceModelIds((previous) => {
+        const next = new Set(previous);
+        next.delete(modelId);
+        return next;
+      });
+    }
+  }, [
+    addModel,
+    models,
+    removeModel,
+    sourceHost,
+    sourceTags,
+  ]);
+
+  // Handle model header click (select model + toggle expand)
+  const handleModelHeaderClick = useCallback((modelId: string, nodeId: string, hasChildren: boolean) => {
+    setSelectedModelId(modelId);
+    if (hasChildren) toggleExpand(nodeId);
+  }, [setSelectedModelId, toggleExpand]);
+
+  // The explicit Filter by this action upserts one rule per dimension (#1107).
+  const upsertSearchRule = useCallback(
+    (matches: (r: FilterRule) => boolean, rule: FilterRule | null) => {
+      const hs = useViewerStore.getState(); // targets the ACTIVE group only (#4904)
+      const idx = activeGroupRules(hs.searchFilter.groups, hs.searchFilterActiveGroup).findIndex(matches);
+      if (rule === null) {
+        if (idx < 0) return; // nothing to clear — don't arm an empty run
+        removeFilterRule(idx);
+      } else if (idx >= 0) {
+        updateFilterRule(idx, rule);
+      } else {
+        addFilterRule(rule);
+      }
+      // The Filter panel may mount later, so keep this explicit action pending.
+      setSearchFilterAutoRunPending(true);
+    },
+    [addFilterRule, updateFilterRule, removeFilterRule, setSearchFilterAutoRunPending],
+  );
+
+  type SelectionSection = keyof typeof selectionRows;
+
+  // #5885: activation only selects. Every visibility or filter transition has
+  // its own row action, so Enter, click and modifier selection agree.
+  const handleNodeClick = useCallback((
+    node: TreeNode,
+    event: NodeActivationModifiers,
+    section: SelectionSection,
+    index: number,
+  ) => {
+    const rows = selectionRows[section][index];
+    if (!rows?.length) return;
+    try {
+      const sectionKey = section === 'filtered' ? `filtered:${groupingMode}` : section;
+      if (anchorSection.current !== sectionKey) {
+        setMultiSelectAnchor(-1);
+        anchorSection.current = sectionKey;
+      }
+      selectGroups(selectionRows[section], index, event);
+      const refs = rows.map(({ modelId, expressId }) => ({ modelId, expressId }));
+      setHierarchyBasketSelection(refs);
+      if (node.type === 'unified-storey' && refs.length > 1 &&
+          !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+        // Preserve the combined properties view for a multi-model storey.
+        setSelectedEntities(refs);
+      }
+      const owners = new Set(rows.map((row) => row.modelId));
+      if (owners.size === 1) {
+        const modelId = rows[0].modelId;
+        if (modelId !== 'legacy') setActiveModel(modelId);
+      }
+    } finally {
+      markFromTreeClick();
+    }
+  }, [selectionRows, groupingMode, selectGroups, setMultiSelectAnchor, setHierarchyBasketSelection, setSelectedEntities, setActiveModel, markFromTreeClick]);
+
+  const handleRowAction = useCallback((node: TreeNode, action: HierarchyRowAction) => {
+    const isStorey = node.type === 'unified-storey' || node.type === 'IfcBuildingStorey';
+    const storeyRefs = isStorey
+      ? node.expressIds.map((expressId, index) => ({ modelId: node.modelIds[index] ?? 'legacy', expressId }))
+      : [];
+    if (action === 'solo') {
+      if (storeyRefs.length > 0) applyLevelDisplayMode('solo', storeyRefs);
+      return;
+    }
+    if (action === 'isolate') {
+      const elements = getNodeElements(node);
+      if (elements.length === 0) return;
+      revealMembershipSpatialTypes(node, elements, useViewerStore.getState(), resolveEntityRef);
+      isolateEntities(elements);
+      return;
+    }
+
+    if (action !== 'filter') return;
+    if (node.type === 'type-group') {
+      const className = node.ifcType ?? node.name;
+      setClassFilter(getNodeElements(node), className);
+      upsertSearchRule((rule) => rule.kind === 'ifcType' && rule.op === 'in', Rule.ifcType([className], 'in'));
+    } else if (node.type === 'ifc-type') {
+      upsertSearchRule((rule) => rule.kind === 'type', Rule.typeName('eq', node.name));
+    } else if (node.type === 'material-group') {
+      upsertSearchRule((rule) => rule.kind === 'material', Rule.material('eq', node.name));
+    } else if (node.type === 'group') {
+      upsertSearchRule((rule) => rule.kind === 'group', Rule.group('eq', node.name, node.ifcType));
+    } else if (isStorey) {
+      upsertSearchRule((rule) => rule.kind === 'storey', Rule.storey([node.name], 'in', storeyRefs));
+    }
+  }, [getNodeElements, isolateEntities, setClassFilter, upsertSearchRule]);
+
+  const rowActions = useCallback((node: TreeNode): HierarchyRowAction[] => {
+    return hierarchyRowActions(node, getNodeElements(node).length > 0);
+  }, [getNodeElements]);
+
+  // ARIA tree semantics + roving-tabIndex keyboard nav (#5883), see `useHierarchyTreeKeyboard.ts`.
+  const {
+    storeysAriaAttrs, modelsAriaAttrs, filteredAriaAttrs,
+    storeysTreeKeyboard, modelsTreeKeyboard, legacyTreeKeyboard, singleTreeSectionTitle,
+  } = useHierarchyTreeKeyboard({
+    storeysRef, modelsRef, parentRef,
+    storeysNodes, modelsNodes, filteredNodes, storeysVirtualizer, modelsVirtualizer, virtualizer,
+    toggleExpand, groupingMode, handleNodeClick, handleModelHeaderClick,
+  });
+
+  const spatialSubtreeOf = useMemo(() => createSpatialSubtreeResolver(models, ifcDataStore, (modelId) => useViewerStore.getState().mutationViews.get(modelId)), [models, ifcDataStore, mutationVersion]);
+  // Compute selection and visibility state for a node
+  const computeNodeState = useCallback((node: TreeNode, rows: ReadonlyArray<{ globalId: number }>) => {
+    const isSelected = rows.length > 0 && rows.every(({ globalId }) =>
+      selectedEntityId === globalId || selectedEntityIds.has(globalId));
+
+    const appearance = hierarchyNodeAppearance(node, getNodeElements(node), hiddenEntities, viewportIsolation, spatialSubtreeOf, planModels);
+
+    // Model visibility for model-header nodes
+    let modelVisible: boolean | undefined;
+    if (node.type === 'model-header' && node.id.startsWith('model-')) {
+      const model = models.get(node.modelIds[0]);
+      modelVisible = model?.visible;
+    }
+
+    return { isSelected, ...appearance, modelVisible };
+  }, [selectedEntityId, selectedEntityIds, hiddenEntities, viewportIsolation, getNodeElements, models, planModels, spatialSubtreeOf]);
+
+  // Every branch carries the tour anchor: the welcome tour's "Browse the
+  // structure" step must find the panel while a model is absent or loading.
+  if (!ifcDataStore && models.size === 0) {
+    return (
+      <div {...tourAnchor(TOUR_ANCHORS.hierarchyPanel)} className="h-full flex flex-col bg-background">
+        <div className="flex h-8 items-center px-3 border-b border-border">
+          <h2 className="text-xs font-semibold text-foreground">{t('hierarchy.panel.title')}</h2>
+        </div>
+        <EmptyState
+          className="flex-1 bg-background"
+          icon={<LayoutTemplate className="size-8" />}
+          title={t('hierarchy.panel.noModelTitle')}
+          description={t('hierarchy.panel.noModelHint')}
+        />
+      </div>
+    );
+  }
+
+  const singleModel = models.size === 1 ? Array.from(models.values())[0] : null;
+  if (singleModel?.gaussianSplat) { // #8566: a capture has no tree; its row carries the model controls
+    return <>{removeModelDialog}<CaptureModelPanel model={singleModel} title={t('hierarchy.panel.title')} rootProps={tourAnchor(TOUR_ANCHORS.hierarchyPanel)}
+      onRemove={handleRemoveModel} onReload={(id) => reloadGaussianCapture(id, { addModel, removeModel })} /></>;
+  }
+  if (!ifcDataStore && singleModel && !singleModel.ifcDataStore) {
+    const metadataState = singleModel.metadataLoadState;
+    const message = metadataState === 'error'
+      ? (singleModel.loadError || 'Model details failed to load.')
+      : singleModel.loadState === 'complete' ? 'No hierarchy available for this model.'
+      : 'Building the hierarchy. You can explore the geometry while model details load.';
+    return (
+      <div {...tourAnchor(TOUR_ANCHORS.hierarchyPanel)} className="h-full flex flex-col bg-background">
+        <div className="flex h-8 items-center px-3 border-b border-border">
+          <h2 className="text-xs font-semibold text-foreground">{t('hierarchy.panel.title')}</h2>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-6 text-center">
+          <div className="max-w-56 text-xs text-muted-foreground">
+            {message}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Each virtualized section has its own selection rows and ARIA keyboard state.
+  const renderNode = (node: TreeNode, virtualRow: { index: number; size: number; start: number }, section: SelectionSection, keyboard: UseTreeKeyboardResult, ariaAttrs: AriaTreeAttrs[]) => {
+    const { isSelected, nodeHidden, visibilityAction, modelVisible, outsideIsolation } = computeNodeState(node, selectionRows[section][virtualRow.index] ?? []);
+    const modelId = node.type === 'model-header' && node.id.startsWith('model-')
+      ? node.modelIds[0]
+      : undefined;
+    const attrs = ariaAttrs[virtualRow.index] ?? { level: node.depth + 1, posInSet: 1, setSize: 1 };
+
+    return (
+      <HierarchyNode
+        key={node.id}
+        node={node}
+        virtualRow={virtualRow}
+        isSelected={isSelected}
+        nodeHidden={nodeHidden}
+        outsideIsolation={outsideIsolation}
+        visibilityAction={visibilityAction}
+        isMultiModel={isMultiModel}
+        modelsCount={models.size}
+        searchActive={Boolean(searchQuery.trim())}
+        modelVisible={modelVisible}
+        onNodeClick={(_, event) => handleNodeClick(node, event, section, virtualRow.index)}
+        actions={rowActions(node)}
+        onAction={handleRowAction}
+        onToggleExpand={toggleExpand}
+        onVisibilityToggle={handleVisibilityToggle}
+        onModelVisibilityToggle={handleModelVisibilityToggle}
+        onRemoveModel={handleRemoveModel}
+        onSyncSourceModel={handleSyncSourceModel}
+        onModelHeaderClick={handleModelHeaderClick}
+        sourceBacked={modelId ? sourceTags.has(modelId) : false}
+        sourceSyncing={modelId ? syncingSourceModelIds.has(modelId) : false}
+        ariaLevel={attrs.level} ariaSetSize={attrs.setSize} ariaPosInSet={attrs.posInSet}
+        tabIndex={keyboard.getTabIndex(node.id)}
+        rowRef={(el) => keyboard.registerRow(node.id, el)}
+        onRowFocus={() => keyboard.onRowFocus(node.id)}
+      />
+    );
+  };
+
+  // Multi-model layout with resizable split
+  // Grouping mode toggle component (shared by both layouts)
+  const groupingToggle = (
+    // One neutral segmented switch with a distinct glyph per mode (Class used
+    // to share Layers' stacked-sheets glyph); the active mode reads as a
+    // raised tile and is named by the section header below (#8802).
+    <div className="hierarchy-grouping-tabs mt-1.5 flex gap-0.5 rounded-md bg-muted p-0.5">
+      {([
+        ['spatial', Building2, 'hierarchy.panel.grouping.spatial', 'hierarchy.panel.grouping.spatial'],
+        ['type', Shapes, 'hierarchy.panel.grouping.class', 'hierarchy.panel.grouping.class'],
+        ['ifc-type', FileBox, 'hierarchy.panel.grouping.type', 'hierarchy.panel.grouping.type'],
+        ['material', Palette, 'hierarchy.panel.grouping.material', 'hierarchy.panel.grouping.materialsTooltip'],
+        ['groups', Network, 'hierarchy.panel.grouping.groups', 'hierarchy.panel.grouping.groupsTooltip'],
+        ['presentation-layers', Layers3, 'hierarchy.panel.grouping.presentationLayers', 'hierarchy.panel.grouping.presentationLayersTooltip'],
+      ] as const).map(([mode, Icon, labelKey, titleKey]) => (
+        <Button
+          key={mode}
+          variant="toggle"
+          size="sm"
+          aria-pressed={groupingMode === mode}
+          aria-label={t(titleKey)}
+          className="h-6 min-w-0 flex-1 gap-1 rounded px-1 text-2xs font-medium"
+          onClick={() => setGroupingMode(mode)}
+          title={t(titleKey)}
+        >
+          <Icon className="h-3 w-3 shrink-0 panel-compact-icon" />
+          <span className="panel-compact-text">{t(labelKey)}</span>
+        </Button>
+      ))}
+    </div>
+  );
+
+  // Sub-filter chips for the Groups tab (#1622). Session-only; not persisted.
+  const groupFilterChips = groupingMode === 'groups' ? (
+    <div className="mt-1.5 flex gap-0.5 rounded-md bg-muted p-0.5 hierarchy-grouping-tabs">
+      {([
+        ['all', 'hierarchy.panel.groupFilter.all'], ['systems', 'hierarchy.panel.groupFilter.systems'],
+        ['zones', 'hierarchy.panel.groupFilter.zones'], ['other', 'hierarchy.panel.groupFilter.other'],
+      ] as const).map(([value, labelKey]) => (
+        <Button
+          key={value}
+          variant="toggle"
+          size="sm"
+          aria-pressed={groupFilter === value}
+          // Same switch as the grouping modes: the shared toggle state (#8802 R4).
+          className="h-5 min-w-0 flex-1 rounded px-1 text-2xs font-medium"
+          onClick={() => setGroupFilter(value)}
+        >
+          {t(labelKey)}
+        </Button>
+      ))}
+    </div>
+  ) : null;
+
+  // In type/ifc-type grouping mode, always use flat tree layout (even for multi-model)
+  if (isMultiModel && groupingMode === 'spatial') {
+    return (
+      <div ref={containerRef} {...tourAnchor(TOUR_ANCHORS.hierarchyPanel)} className="h-full flex flex-col bg-background">
+        {removeModelDialog}
+        {/* Search Header */}
+        <div className="px-2 pt-2 pb-2 border-b border-border">
+          <Input
+            placeholder={t('hierarchy.panel.searchPlaceholder')}
+            aria-label={t('hierarchy.panel.searchInputLabel')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            leftIcon={<Search className="h-4 w-4" />}
+            className="h-8 text-sm"
+          />
+          {groupingToggle}
+        </div>
+
+        {/* Resizable content area */}
+        {searchEmptyState ?? <div className="flex-1 flex flex-col min-h-0">
+          {/* Storeys Section */}
+          <div style={{ height: `${splitRatio * 100}%` }} className="flex flex-col min-h-0">
+            <SectionHeader icon={Layers} title={t('hierarchy.panel.buildingStoreysTitle')} count={storeysNodes.length}
+              actions={<><HierarchySortControl value={sortMode} onChange={setSortMode} /><StoreyFloorplanButton /></>} />
+            <StoreyDisplayControls />
+            <div ref={storeysRef} role="tree" tabIndex={storeysTreeKeyboard.containerTabIndex} aria-label={t('hierarchy.panel.buildingStoreysTitle')} onKeyDown={storeysTreeKeyboard.onKeyDown} className="flex-1 overflow-auto scrollbar-thin bg-background">
+              <div
+                style={{
+                  height: `${storeysVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {storeysVirtualizer.getVirtualItems().map((virtualRow) => {
+                  const node = storeysNodes[virtualRow.index];
+                  return renderNode(node, virtualRow, 'storeys', storeysTreeKeyboard, storeysAriaAttrs);
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Resizable Divider */}
+          {/* The focusable resize widget contains a grip icon; hr cannot contain children. */}
+          {/* eslint-disable-next-line jsx-a11y/prefer-tag-over-role */}
+          <div role="separator"
+            aria-orientation="horizontal"
+            aria-label={t('shellChrome.sidebarPanelHost.resizeSplitAriaLabel')}
+            aria-valuenow={Math.round(splitRatio * 100)}
+            aria-valuemin={15}
+            aria-valuemax={85}
+            tabIndex={0}
+            className={cn(
+              'flex items-center justify-center h-2 cursor-ns-resize border-y border-border bg-muted hover:bg-accent transition-colors',
+              isDragging && 'bg-primary/20'
+            )}
+            onMouseDown={handleResizeStart}
+            onKeyDown={handleResizeKeyDown}
+          >
+            <GripHorizontal className="h-3 w-3 text-muted-foreground" />
+          </div>
+
+          {/* Models Section */}
+          <div style={{ height: `${(1 - splitRatio) * 100}%` }} className="flex flex-col min-h-0">
+            <ModelsSectionHeader count={models.size} />
+            <div ref={modelsRef} role="tree" tabIndex={modelsTreeKeyboard.containerTabIndex} aria-label={t('hierarchy.modelsSection.title')} onKeyDown={modelsTreeKeyboard.onKeyDown} className="flex-1 overflow-auto scrollbar-thin bg-background">
+              <div
+                style={{
+                  height: `${modelsVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {modelsVirtualizer.getVirtualItems().map((virtualRow) => {
+                  const node = modelsNodes[virtualRow.index];
+                  return renderNode(node, virtualRow, 'models', modelsTreeKeyboard, modelsAriaAttrs);
+                })}
+              </div>
+            </div>
+          </div>
+        </div>}
+
+        {/* Footer status */}
+        <HierarchyFooterStatus
+          hasActiveFilters={hasActiveFilters} selectedStoreys={selectedStoreys} classFilter={classFilter}
+          isolatedEntities={isolatedEntities} typeIsolationLabel={typeIsolationLabel}
+          clearStoreySelection={clearStoreySelection} clearClassFilter={clearClassFilter}
+          clearIsolation={clearIsolation} clearAllFilters={clearAllFilters}
+        />
+      </div>
+    );
+  }
+
+  // Single model layout
+  return (
+    <div {...tourAnchor(TOUR_ANCHORS.hierarchyPanel)} className="h-full flex flex-col bg-background">
+      {removeModelDialog}
+      {/* Header */}
+      <div className="px-2 pt-2 pb-2 border-b border-border">
+        <Input
+          placeholder={t('hierarchy.panel.searchPlaceholder')}
+          aria-label={t('hierarchy.panel.searchInputLabel')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          leftIcon={<Search className="h-4 w-4" />}
+          className="h-8 text-sm"
+        />
+        {groupingToggle}
+        {groupFilterChips}
+      </div>
+
+      {/* Section Header */}
+      <SectionHeader
+        icon={groupingMode === 'spatial' ? Building2 : groupingMode === 'type' ? Shapes : groupingMode === 'material' ? Palette : groupingMode === 'groups' ? Network : groupingMode === 'presentation-layers' ? Layers3 : FileBox}
+        title={singleTreeSectionTitle}
+        count={filteredNodes.length}
+        actions={groupingMode === 'presentation-layers'
+          ? <LayerGroupingControl value={layerGrouping} onChange={setLayerGrouping} />
+          : groupingMode === 'spatial'
+          ? <><HierarchySortControl value={sortMode} onChange={setSortMode} /><StoreyFloorplanButton /></>
+          : undefined}
+      />
+
+      {/* Level display (Stacked / Exploded / Solo) + floorplan — only in the
+          spatial view where storeys are the organising concept. */}
+      {groupingMode === 'spatial' && <StoreyDisplayControls />}
+
+      {/* Tree */}
+      {presentationLayerError ? <EmptyState className="flex-1" icon={<Layers3 className="size-8" />}
+        title={t('hierarchy.panel.presentationLayersError')}
+        action={<Button variant="outline" onClick={retryPresentationLayers}>{t('hierarchy.panel.retryPresentationLayers')}</Button>} />
+        : searchEmptyState ?? (groupingReady && groupingMode === 'presentation-layers' && filteredNodes.length === 0
+        ? <EmptyState className="flex-1" icon={<Layers3 className="size-8" />} title={t('hierarchy.panel.noPresentationLayersTitle')} description={t('hierarchy.panel.noPresentationLayersHint')} />
+        : <div ref={parentRef} role="tree" aria-busy={!groupingReady} tabIndex={legacyTreeKeyboard.containerTabIndex} aria-label={singleTreeSectionTitle} onKeyDown={legacyTreeKeyboard.onKeyDown} className="flex-1 overflow-auto scrollbar-thin bg-background">
+        {!groupingReady && groupingMode === 'presentation-layers' && <output className="block p-4 text-sm text-muted-foreground">{t('hierarchy.panel.loadingPresentationLayers')}</output>}
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const node = filteredNodes[virtualRow.index];
+            return renderNode(node, virtualRow, 'filtered', legacyTreeKeyboard, filteredAriaAttrs);
+          })}
+        </div>
+      </div>)}
+
+      {/* Footer status */}
+      <HierarchyFooterStatus
+        hasActiveFilters={hasActiveFilters} selectedStoreys={selectedStoreys} classFilter={classFilter}
+        isolatedEntities={isolatedEntities} typeIsolationLabel={typeIsolationLabel}
+        clearStoreySelection={clearStoreySelection} clearClassFilter={clearClassFilter}
+        clearIsolation={clearIsolation} clearAllFilters={clearAllFilters}
+      />
+    </div>
+  );
+}

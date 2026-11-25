@@ -1,0 +1,61 @@
+{
+  "name": "@ifc-lite/cache",
+  "version": "3.8.0",
+  "description": "Binary cache format for IFC-Lite - fast model loading",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./chunk-inflate-pool": {
+      "types": "./dist/chunk-inflate-pool.d.ts",
+      "import": "./dist/chunk-inflate-pool.js",
+      "default": "./dist/chunk-inflate-pool.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm exec tsc",
+    "typecheck": "node ../../scripts/typecheck-tests.mjs",
+    "dev": "pnpm exec tsc --watch",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ifc-lite/data": "workspace:^",
+    "@ifc-lite/geometry": "workspace:^",
+    "@ifc-lite/load-trace": "workspace:^"
+  },
+  "devDependencies": {
+    "@ifc-lite/parser": "workspace:^",
+    "@mergifyio/vitest": "^2026.10.11",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  },
+  "license": "MPL-2.0",
+  "author": "Louis True",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LTplus-AG/ifc-lite.git",
+    "directory": "packages/cache"
+  },
+  "homepage": "https://ifclite.dev/docs/",
+  "bugs": "https://github.com/LTplus-AG/ifc-lite/issues",
+  "keywords": [
+    "ifc",
+    "bim",
+    "cache",
+    "binary",
+    "aec"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "SPEC.md"
+  ]
+}

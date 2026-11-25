@@ -1,0 +1,296 @@
+// SPDX-License-Identifier: MPL-2.0
+//! Named attribute edits on a source record: `applyAttributeMutations`
+//! (`step-attribute-mutations.ts`) and the serializers it calls
+//! (`serializeNamedAttribute`, `serializeAttributeValue`,
+//! `serializeEnumToken`, `serializeStringSlot`).
+//!
+//! Where an edit lands and how it is written are schema facts the TypeScript
+//! side reads off its registries; here they come from
+//! `generated::step_log_tables`, which those same functions produced.
+
+use crate::generated::step_log_tables::{SlotRow, NAME_LISTS, NONE, SLOT_ROWS};
+use super::lines::split_args;
+use crate::step_record_frame::{opens_record, record_frame, RecordFrame};
+use crate::step_text::quoted;
+
+use super::jsval::{format_step_real, integral_token, to_step_real};
+
+/// The source schema family (`dataStore.schemaVersion`): `IFC2X3`, `IFC4`,
+/// `IFC4X3` or `IFC5`, from the first `FILE_SCHEMA` identifier that names
+/// one, else a loose scan of the header, else `IFC4`.
+pub(crate) fn schema_family(content: &[u8]) -> &'static str {
+    ifc_lite_core::SchemaFamily::detect(content)
+        .unwrap_or(ifc_lite_core::SchemaFamily::Ifc4)
+        .as_str()
+}
+
+fn row(upper: &str) -> Option<&'static SlotRow> {
+    SLOT_ROWS.binary_search_by(|r| r.0.cmp(upper)).ok().map(|i| &SLOT_ROWS[i])
+}
+
+/// `attrIndex(type, name, stepSourceSchema(schema))`.
+pub(crate) fn attr_index(upper: &str, name: &str, schema: &str) -> Option<usize> {
+    let row = row(upper)?;
+    let column = match schema {
+        "IFC2X3" => 0,
+        "IFC4" => 1,
+        "IFC4X3" => 2,
+        _ => 3,
+    };
+    let list = match row.1[column] {
+        NONE => row.1[3],
+        i => i,
+    };
+    if list == NONE {
+        return None;
+    }
+    NAME_LISTS[usize::from(list)].iter().position(|n| *n == name)
+}
+
+/// The declared attribute names `attrIndex` resolves against, for readers
+/// that need a name by position.
+pub(crate) fn attr_names(upper: &str, schema: &str) -> &'static [&'static str] {
+    let Some(row) = row(upper) else { return &[] };
+    let column = match schema {
+        "IFC2X3" => 0,
+        "IFC4" => 1,
+        "IFC4X3" => 2,
+        _ => 3,
+    };
+    let list = match row.1[column] {
+        NONE => row.1[3],
+        i => i,
+    };
+    if list == NONE {
+        &[]
+    } else {
+        NAME_LISTS[usize::from(list)]
+    }
+}
+
+/// `getAttributeNamesForSchema(type, schema)`: the schema registry's list
+/// when it declares the type, else the cross-schema one.
+pub(crate) fn schema_names(upper: &str, schema: &str) -> &'static [&'static str] {
+    let Some(row) = row(upper) else { return &[] };
+    let column = match schema {
+        "IFC2X3" => 4,
+        "IFC4" => 5,
+        "IFC4X3" => 6,
+        _ => 3,
+    };
+    let list = match row.1[column] {
+        NONE => row.1[3],
+        i => i,
+    };
+    if list == NONE {
+        &[]
+    } else {
+        NAME_LISTS[usize::from(list)]
+    }
+}
+
+fn has(mask: u64, index: usize) -> bool {
+    index < 64 && mask & (1 << index) != 0
+}
+
+pub(crate) fn is_enum_slot(upper: &str, index: usize) -> bool {
+    row(upper).is_some_and(|r| has(r.2, index))
+}
+
+pub(crate) fn is_string_slot(upper: &str, index: usize) -> bool {
+    row(upper).is_some_and(|r| has(r.3, index))
+}
+
+/// `getRealTypedSlots(type, version).has(index)`; anything but IFC2X3 and
+/// IFC4X3 reads the IFC4 column, as `toDataSchemaVersion` does.
+pub(crate) fn is_real_slot(upper: &str, index: usize, schema: &str) -> bool {
+    let column = match schema {
+        "IFC2X3" => 0,
+        "IFC4X3" => 2,
+        _ => 1,
+    };
+    row(upper).is_some_and(|r| has(r.4[column], index))
+}
+
+/// `serializeStringSlot`.
+pub(crate) fn string_slot(value: &str) -> String {
+    if value == "$" || value == "*" {
+        value.to_string()
+    } else {
+        quoted(value)
+    }
+}
+
+/// `serializeEnumToken`. A value that is not an enumeration symbol is written
+/// as a quoted string, as the TypeScript side does (it also warns on the
+/// console, which has no counterpart in a file).
+pub(crate) fn enum_token(value: &str) -> String {
+    let trimmed = value.trim();
+    if trimmed == "*" {
+        return "*".to_string();
+    }
+    let symbol = trimmed.strip_prefix('.').unwrap_or(trimmed);
+    let symbol = symbol.strip_suffix('.').unwrap_or(symbol).trim().to_uppercase();
+    if symbol.is_empty() || symbol == "$" {
+        return "$".to_string();
+    }
+    let valid = symbol.chars().next().is_some_and(|c| c.is_ascii_uppercase())
+        && symbol.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_');
+    if !valid {
+        return string_slot(trimmed);
+    }
+    format!(".{symbol}.")
+}
+
+fn is_enum_like(s: &str) -> bool {
+    s.len() >= 3
+        && s.starts_with('.')
+        && s.ends_with('.')
+        && s[1..s.len() - 1].chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+}
+
+fn is_ref(s: &str) -> bool {
+    s.len() >= 2 && s.starts_with('#') && s[1..].chars().all(|c| c.is_ascii_digit())
+}
+
+/// `isCompleteStepNumericLiteral`: the whole of `s` is one STEP `REAL` or
+/// `INTEGER` literal, by core's one numeric grammar. This was a port of the
+/// regex `/^-?\d+(?:\.\d+)?(?:E[+-]?\d+)?$/i`, which refused `.5`, `+1`,
+/// `1.E5`, `+1.` and `-0.`, so a slot already written that way was rewritten
+/// quoted (F4 M-export-a, CORE-6).
+fn is_step_number(s: &str) -> bool {
+    ifc_lite_core::parser::step_numeric_literal_len(s.as_bytes()) == Some(s.len())
+}
+
+/// `serializeAttributeValue`: infer the token from the one it replaces.
+fn attribute_value(value: &str, current_token: &str) -> String {
+    let trimmed = value.trim();
+    let current = current_token.trim();
+    if current.len() >= 2 && current.starts_with('\'') && current.ends_with('\'') {
+        return if value.is_empty() { "$".to_string() } else { quoted(value) };
+    }
+    if value.is_empty() {
+        return "$".to_string();
+    }
+    if trimmed == "$" || trimmed == "*" || is_ref(trimmed) {
+        return trimmed.to_string();
+    }
+    if is_enum_like(current) || is_enum_like(trimmed) {
+        let inner = trimmed.strip_prefix('.').unwrap_or(trimmed);
+        let inner = inner.strip_suffix('.').unwrap_or(inner);
+        return format!(".{}.", inner.to_uppercase());
+    }
+    if matches!(current.to_ascii_uppercase().as_str(), ".T." | ".F." | ".U.") {
+        return match trimmed.to_lowercase().as_str() {
+            "true" | ".t." => ".T.".to_string(),
+            "false" | ".f." => ".F.".to_string(),
+            _ => ".U.".to_string(),
+        };
+    }
+    if is_step_number(trimmed) && is_step_number(current) {
+        // A literal `f64` cannot hold (`1.E400`) is no value: `$`.
+        let Some(n) = ifc_lite_core::parse_step_real(trimmed.as_bytes()) else { return "$".to_string() };
+        let real_slot = current.contains('.') || current.contains(['e', 'E']);
+        return if !real_slot && n.fract() == 0.0 { integral_token(n) } else { format_step_real(n) };
+    }
+    quoted(value)
+}
+
+/// `serializeNamedAttribute`. `None` is a refusal: a REAL slot handed text
+/// that is not a number.
+pub(crate) fn named_attribute(upper: &str, index: usize, value: &str, current: &str, schema: &str) -> Option<String> {
+    if is_enum_slot(upper, index) {
+        return Some(enum_token(value));
+    }
+    if is_string_slot(upper, index) {
+        return Some(string_slot(value));
+    }
+    if is_real_slot(upper, index, schema) {
+        let trimmed = value.trim();
+        if trimmed.is_empty() {
+            return Some("$".to_string());
+        }
+        let n = super::jsval::js_to_number(&serde_json::Value::String(trimmed.to_string()));
+        return to_step_real(n).ok();
+    }
+    Some(attribute_value(value, current))
+}
+
+/// The argument list of a record, split for by-index writes, with the frame
+/// that bounds it.
+pub(crate) fn split_record(text: &str) -> Option<(RecordFrame, Vec<String>)> {
+    let frame = record_frame(text)?;
+    let args = split_args(frame.args(text))?;
+    Some((frame, args))
+}
+
+/// `argumentListScans`: a line that declares no entity instance is not
+/// "unreadable"; one that does (`#N=`) and is not a whole record the frame
+/// reads (a complex instance, a non-ASCII byte in its head, no `;`), or whose
+/// list does not split, is (#7682).
+pub(crate) fn argument_list_scans(text: &str) -> bool {
+    match record_frame(text) {
+        Some(frame) => split_args(frame.args(text)).is_some(),
+        None => !opens_record(text),
+    }
+}
+
+/// `applyAttributeMutations`: `(text, rejected attribute names)`.
+pub(crate) fn apply_named(
+    text: &str,
+    upper: &str,
+    edits: &[(String, String)],
+    schema: &str,
+) -> (String, Vec<(String, String)>) {
+    let Some((frame, mut args)) = split_record(text) else { return (text.to_string(), Vec::new()) };
+    let lookup_schema = match schema {
+        "IFC2X3" | "IFC4" | "IFC4X3" => schema,
+        _ => "",
+    };
+    let mut changed = false;
+    let mut rejected = Vec::new();
+    for (name, value) in edits {
+        let Some(index) = attr_index(upper, name, lookup_schema) else { continue };
+        if index >= args.len() {
+            continue;
+        }
+        match named_attribute(upper, index, value, &args[index], schema) {
+            Some(serialized) => {
+                args[index] = serialized;
+                changed = true;
+            }
+            None => rejected.push((name.clone(), value.clone())),
+        }
+    }
+    if !changed {
+        return (text.to_string(), rejected);
+    }
+    (frame.with_args(text, &args.join(",")), rejected)
+}
+
+/// `applyPositionalMutations`: every in-range slot is rewritten, in the order
+/// the edits were queued.
+pub(crate) fn apply_positional(
+    text: &str,
+    upper: &str,
+    positionals: &[(usize, serde_json::Value)],
+    schema: &str,
+) -> Result<String, super::values::Unwritable> {
+    let Some((frame, mut args)) = split_record(text) else { return Ok(text.to_string()) };
+    let mut changed = false;
+    for (index, value) in positionals {
+        if *index >= args.len() {
+            continue;
+        }
+        args[*index] = super::values::positional_override(upper, *index, value, &args[*index], schema)?;
+        changed = true;
+    }
+    if !changed {
+        return Ok(text.to_string());
+    }
+    Ok(frame.with_args(text, &args.join(",")))
+}
+
+#[cfg(test)]
+#[path = "attrs_tests.rs"]
+mod tests;

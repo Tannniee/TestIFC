@@ -1,0 +1,143 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * The retained kernel's load policy (#7955 M2-C, spec §2.1–§2.3, §3.4):
+ *
+ * - scope: primary loads of IFC STEP below `RETAINED_MAX_SOURCE_BYTES`, the
+ *   largest source wasm32 can hold at all. A federated add, any other format or
+ *   a source past it stops before any work, with a message and a Retry that
+ *   switches the next load to exact;
+ * - memory: there is no tuned size cap. A run that runs out of memory ends as
+ *   an `out_of_memory` load error whose Retry also switches to exact;
+ * - while a retained model is open, nothing is federated onto it — exact
+ *   geometry never enters a retained view;
+ * - no exact geometry cache read or write, no geometry server;
+ * - the summary is written to the model as products arrive, and the status
+ *   bar shows the retained phases;
+ * - Cancel ends the run instead of discarding the load: what was published
+ *   stays, every product not reached is listed `cancelled`.
+ */
+
+import { useViewerStore } from '@/store';
+import { resolve as translate } from '@/i18n/registry';
+import { registerEnglish, type TranslationKey } from '@/i18n';
+import { retainedGeometryEn } from '@/i18n/catalogues/retained-geometry.en';
+import { chooseGeometryKernel, requestedGeometryKernel } from '@/store/geometryKernel';
+import { hasRetainedGeometryModel } from '@/store/retainedGeometry';
+import { memoryAccounting } from '@/lib/perf/memoryAccounting';
+import { settleUnownedLoadUi } from '@/hooks/modelLoadCanceller';
+import type { GeometryEventRequest, GeometryKernelLoad } from '@/hooks/ingest/geometryEventSource';
+import { RETAINED_MAX_SOURCE_BYTES, RetainedHostError } from './retained-protocol';
+import { retainedGeometryEvents, type RetainedPhase, type RetainedRunner } from './retainedGeometrySource';
+
+registerEnglish(retainedGeometryEn);
+
+const STEP_FILE_NAME = /\.(ifc|ifczip)$/i;
+const MIB = 1024 * 1024;
+
+function mib(bytes: number): string {
+  return `${Math.ceil(bytes / MIB)} MiB`;
+}
+
+/** Reported where every load error is: the viewport error card, with Retry. */
+function reportRefusal(message: string, retry: (() => void) | null): void {
+  const state = useViewerStore.getState();
+  state.setError(message);
+  state.setLastLoadRetry(retry);
+}
+
+/** Stops before any work and before a canceller exists, so it ends the load UI `addModel` raised. */
+function refusedLoad(message: string, retry: (() => void) | null): GeometryKernelLoad {
+  reportRefusal(message, retry);
+  settleUnownedLoadUi();
+  return { ...RETAINED_POLICY, refused: Promise.resolve(message) };
+}
+
+function phaseText(phase: RetainedPhase): { phase: string; percent: number } {
+  if (phase.phase === 'starting') return { phase: translate('retainedGeometry.progress.starting'), percent: 10 };
+  const { done, candidates, refused } = phase;
+  return {
+    phase: translate('retainedGeometry.progress.products', { done: String(done), candidates: String(candidates), refused: String(refused) }),
+    percent: 10 + Math.round(85 * (candidates > 0 ? done / candidates : 1)),
+  };
+}
+
+/** Shared by every retained answer: retained loads never touch exact geometry. */
+const RETAINED_POLICY: GeometryKernelLoad = {
+  kind: 'retained',
+  serverEnabled: false,
+  cachePlan: (plan) => ({ ...plan, tier: 'none', shouldCache: false }),
+  refuseSource: () => true,
+};
+
+/**
+ * The kernel for one load, or `null` for exact. `retry` re-runs the same load;
+ * a refusal's Retry first switches the next load to the exact kernel.
+ */
+export function beginRetainedLoad(
+  runner: RetainedRunner,
+  file: File,
+  target: { kind: 'primary' | 'federated' },
+  retry: () => void,
+): GeometryKernelLoad | null {
+  const name = { file: file.name };
+  if (target.kind === 'federated' && hasRetainedGeometryModel(useViewerStore.getState().models)) {
+    // The open model is retained; an exact add would mix kernels in one view.
+    return refusedLoad(translate('retainedGeometry.scope.federatedOnRetained', name), null);
+  }
+  if (requestedGeometryKernel() !== 'retained') return null;
+  const exactRetry = () => { chooseGeometryKernel('exact'); retry(); };
+  if (target.kind === 'federated') return refusedLoad(translate('retainedGeometry.scope.federated', name), exactRetry);
+  const outOfScope = (format: string, byteLength: number): TranslationKey | null =>
+    byteLength > RETAINED_MAX_SOURCE_BYTES ? 'retainedGeometry.scope.size'
+      : format !== 'ifc' ? 'retainedGeometry.scope.format' : null;
+  const early = outOfScope(STEP_FILE_NAME.test(file.name) ? 'ifc' : 'other', file.size);
+  const message = (key: TranslationKey, byteLength: number) =>
+    translate(key, { ...name, size: mib(byteLength), limit: mib(RETAINED_MAX_SOURCE_BYTES + 1) });
+  if (early) return refusedLoad(message(early, file.size), exactRetry);
+
+  return {
+    ...RETAINED_POLICY,
+    refuseSource(format, byteLength, { modelId, activity }) {
+      const key = outOfScope(format, byteLength);
+      if (!key) return false;
+      const text = activity.fail(message(key, byteLength));
+      const state = useViewerStore.getState();
+      state.updateModel(modelId, { loadState: 'error', loadError: text });
+      reportRefusal(text, exactRetry);
+      return true;
+    },
+    events: (request) => interruptible(runner, request),
+    loadFailure(error) {
+      if (!(error instanceof RetainedHostError)) return null;
+      if (error.code === 'out_of_memory') return { message: translate('retainedGeometry.memory', name), retry: exactRetry };
+      // The engine itself did not load (missing deployment files, network): running retained again
+      // cannot help, so Retry falls back to exact for this tab.
+      if (error.code === 'engine_missing') return { message: translate('retainedGeometry.engineMissing', { ...name, reason: error.reason }), retry: exactRetry };
+      // The host knows what failed; the exact path's wording would guess (it reads any trap as memory).
+      // Retry runs retained again (a crash can be transient); the exact reload is the panel's, never implied.
+      return { message: translate('retainedGeometry.hostFailure', { ...name, reason: error.reason }) };
+    },
+  };
+}
+
+async function* interruptible(runner: RetainedRunner, request: GeometryEventRequest) {
+  const state = useViewerStore.getState();
+  request.activity.interrupt = () => {
+    state.noteLoadCancelled();
+    runner.cancel();
+  };
+  try {
+    yield* retainedGeometryEvents(runner, request.view, {
+      signal: request.signal,
+      onSummary: (summary) => useViewerStore.getState().updateModel(request.modelId, { retainedGeometry: summary }),
+      onPhase: (phase) => useViewerStore.getState().setProgress(phaseText(phase)),
+      onWorkerMemory: (bytes) => memoryAccounting.recordWorkerMemory('retained', bytes),
+    });
+  } finally {
+    // After the run, Cancel is the loader's again (it may still be waiting on metadata).
+    request.activity.interrupt = undefined;
+  }
+}

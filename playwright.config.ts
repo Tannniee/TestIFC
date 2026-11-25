@@ -1,0 +1,274 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { defineConfig, devices } from '@playwright/test';
+import { withMergify } from '@mergifyio/playwright';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { BEGIN_FRAME_CHROME_ARGS } from './tests/benchmark/frames/begin-frame-driver';
+
+// One preview server per run. Every project shares it; `reuseExistingServer`
+// means a server another checkout already runs on the port would be tested
+// instead, so a host with several checkouts sets PLAYWRIGHT_PORT per run.
+const PORT = process.env.PLAYWRIGHT_PORT ?? '3000';
+const BASE_URL = `http://localhost:${PORT}`;
+const retainedProject = process.argv.some((arg, i) => arg === '--project=viewer-retained' ||
+  (arg === '--project' && process.argv[i + 1] === 'viewer-retained'));
+const retainedDefaultProject = process.argv.some((arg, i) => arg === '--project=viewer-retained-default' ||
+  (arg === '--project' && process.argv[i + 1] === 'viewer-retained-default'));
+const isolatedRetainedPreview = retainedProject || retainedDefaultProject;
+const retainedEngine = process.env.IFCLITE_RETAINED_ENGINE;
+const retainedAvailable = Boolean(retainedEngine && existsSync(join(retainedEngine, 'engine-manifest.json')));
+
+/**
+ * `playwright test --project=viewer-collab-e2e` (and nothing else): that
+ * project serves its own private preview, so the shared webServer below
+ * would only be started — or, with `reuseExistingServer`, silently borrowed
+ * from whichever checkout holds the port — to sit unused.
+ */
+function onlyCollabProject(): boolean {
+  const argv = process.argv;
+  const projects = argv.flatMap((arg, i) =>
+    arg.startsWith('--project=') ? [arg.slice('--project='.length)] : arg === '--project' && argv[i + 1] ? [argv[i + 1]] : [],
+  );
+  return projects.length > 0 && projects.every((p) => p === 'viewer-collab-e2e' ||
+    (p === 'viewer-retained' && !retainedAvailable));
+}
+
+export default withMergify(defineConfig({
+  // withMergify appends to `reporter`, so keep Playwright's own default explicit.
+  reporter: process.env.CI ? 'dot' : 'list',
+  // Covers tests/benchmark (perf) and tests/e2e (functional smoke);
+  // each project scopes its own files via testMatch.
+  testDir: './tests',
+  timeout: 180000, // 3 min for large files
+  workers: 1, // Single worker for accurate benchmarks (no resource contention)
+  fullyParallel: false, // Sequential execution for consistent timing
+  // NOTE: webServer is only honored at the TOP level — the per-project
+  // webServer blocks on the benchmark projects below are silently
+  // ignored by Playwright (latent: those projects are run manually
+  // against an already-running server). The e2e projects rely on this
+  // one; reuseExistingServer keeps local dev-server workflows working.
+  // Skipped when only viewer-collab-e2e runs (it brings its own preview).
+  webServer: onlyCollabProject()
+    ? undefined
+    : {
+        command: `pnpm --filter @ifc-lite/viewer exec vite preview --port ${PORT}${isolatedRetainedPreview ? ' --strictPort' : ''}`,
+        port: Number(PORT),
+        reuseExistingServer: !isolatedRetainedPreview,
+        timeout: 90000,
+        env: {
+          BROWSER: 'none',
+          // `lazy` runs the same spec against the production opt-in build (#7955).
+          ...(retainedProject ? { VITE_RETAINED_GEOMETRY: process.env.VITE_RETAINED_GEOMETRY === 'lazy' ? 'lazy' : 'on' } : {}),
+        },
+      },
+  projects: [
+    {
+      // Opt-in real-engine acceptance, run only by geometry-platform.
+      name: 'viewer-retained',
+      testMatch: /retained-(viewer|setting)\.e2e\.spec\.ts/,
+      timeout: 240000,
+      use: {
+        baseURL: BASE_URL,
+        headless: true,
+        channel: process.env.IFCLITE_BROWSER_CHANNEL || 'chrome',
+        trace: 'retain-on-failure',
+        screenshot: 'only-on-failure',
+        launchOptions: { args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan',
+          '--use-vulkan=swiftshader', '--use-angle=swiftshader', '--disable-vulkan-surface',
+          '--ignore-gpu-blocklist', '--enable-gpu'] },
+      },
+    },
+    {
+      // Run the same event-driven exact-load assertion against an unflagged dist.
+      name: 'viewer-retained-default',
+      testMatch: /retained-viewer\.e2e\.spec\.ts/,
+      grep: /build without a kernel choice/,
+      use: {
+        baseURL: BASE_URL,
+        headless: true,
+        channel: process.env.IFCLITE_BROWSER_CHANNEL || 'chrome',
+        launchOptions: { args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan',
+          '--use-vulkan=swiftshader', '--use-angle=swiftshader', '--disable-vulkan-surface',
+          '--ignore-gpu-blocklist', '--enable-gpu'] },
+      },
+    },
+    {
+      name: 'viewer-e2e',
+      testMatch: /(gaussian-browser-journey|reopen-held-pick|cold-load-scene-snapshot|assistant-context|assistant-report-claims|compare-impact-6921|assistant-check-authoring|assistant-artifacts|viewer-smoke|semantic-linked-records|mobile-page-zoom|mobile-form-factor|mobile-panels|mobile-long-press|mobile-journey|usd-export|laz-wasm|copc-lod|copc-deviation|deviation-attribution|model-reposition|document-text|document-block-jump-8227|content-storage|document-chart-source-6629|saved-clash-reports-6947|validation-colors|ids-bcf-export|rte-gpu-witness|federation-control-triplet|landxml-units-smoke|ribbon-labels|ribbon-classic-migration|panel-groups-5873|ribbon-reachability-5874|hierarchy-names|hierarchy-row-selection|bulk-target-sources|bulk-filter-groups|entity-context-menu|ribbon-entity-actions|viewport-hud|command-palette-entry|command-palette-ux|navigation-presets|wheel-zoom-easing|sticky-overrides|dialog-notices|orbit-pivot-marker|target-size-focus-5826|visibility-chips|visibility-empty-result|visibility-scenarios|section-measure-lasting-5893|lens-filter-groups|keyboard-dispatcher|lists-value-rules|swept-disk-centreline|swept-disk-inspection|swept-disk-source-snap|ortho-depth-nudge|ortho-axis-views-9501|selection-mask-depth|edge-line-continuity|projection-depth|perspective-distance-depth|projection-texture|reporter-6729|section-extra-planes|selective-clipping|symbolic-parse-outcomes|flow-ai-review|semantic-assist|review-workspace|retained-browser-never-fetch|omitted-type-records-8341|update-edited-quantities|rhino-export|command-palette-access|command-palette-access-extension|small-file-fast-path|rhino-import)\.e2e\.spec\.ts/,
+      timeout: 240000,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: BASE_URL,
+        actionTimeout: 60000,
+        headless: false,
+        channel: 'chrome',
+        launchOptions: {
+          args: [
+            '--enable-gpu',
+            '--enable-webgpu',
+            '--enable-unsafe-webgpu',
+            '--use-angle=default',
+            '--ignore-gpu-blocklist',
+          ],
+        },
+      },
+    },
+    {
+      name: 'viewer-e2e-ci',
+      testMatch: /(gaussian-browser-journey|reopen-held-pick|cold-load-scene-snapshot|assistant-context|assistant-report-claims|compare-impact-6921|assistant-check-authoring|assistant-artifacts|viewer-smoke|semantic-linked-records|mobile-page-zoom|mobile-form-factor|mobile-panels|mobile-long-press|mobile-journey|usd-export|laz-wasm|copc-lod|copc-deviation|deviation-attribution|model-reposition|document-text|document-block-jump-8227|content-storage|document-chart-source-6629|saved-clash-reports-6947|validation-colors|ids-bcf-export|rte-gpu-witness|federation-control-triplet|landxml-units-smoke|ribbon-labels|ribbon-classic-migration|panel-groups-5873|ribbon-reachability-5874|hierarchy-names|hierarchy-row-selection|bulk-target-sources|bulk-filter-groups|entity-context-menu|ribbon-entity-actions|viewport-hud|command-palette-entry|command-palette-ux|navigation-presets|wheel-zoom-easing|sticky-overrides|dialog-notices|orbit-pivot-marker|target-size-focus-5826|visibility-chips|visibility-empty-result|visibility-scenarios|section-measure-lasting-5893|lens-filter-groups|keyboard-dispatcher|lists-value-rules|swept-disk-centreline|swept-disk-inspection|swept-disk-source-snap|ortho-depth-nudge|ortho-axis-views-9501|selection-mask-depth|edge-line-continuity|projection-depth|perspective-distance-depth|projection-texture|reporter-6729|section-extra-planes|selective-clipping|symbolic-parse-outcomes|flow-ai-review|semantic-assist|review-workspace|retained-browser-never-fetch|omitted-type-records-8341|update-edited-quantities|rhino-export|command-palette-access|command-palette-access-extension|small-file-fast-path|rhino-import)\.e2e\.spec\.ts/,
+      timeout: 240000,
+      use: {
+        baseURL: BASE_URL,
+        actionTimeout: 60000,
+        headless: true,
+        // A failed test leaves a trace (DOM snapshots per action, console,
+        // network) and a screenshot under test-results/, which the workflow
+        // already uploads. The recurring model-reposition flake — `#file-
+        // input-add` absent for 60 s after a point-cloud-first load — had been
+        // diagnosed blind from the store snapshot alone, four reruns in a row
+        // on 2026-09-21; the trace is what shows what the page looked like.
+        // Retained only on failure, so a green run costs nothing extra.
+        trace: 'retain-on-failure',
+        screenshot: 'only-on-failure',
+        // Real Chrome, not Playwright's headless shell — the shell's
+        // WebGPU device is broken under software rendering (createBuffer
+        // fails for KB-sized buffers, popErrorScope instance drops).
+        // GitHub-hosted runners have Chrome preinstalled. WebGPU over
+        // SwiftShader needs the Vulkan flag set below.
+        channel: 'chrome',
+        launchOptions: {
+          args: [
+            '--enable-unsafe-webgpu',
+            '--enable-features=Vulkan',
+            '--use-vulkan=swiftshader', '--use-angle=swiftshader',
+            '--disable-vulkan-surface',
+            '--ignore-gpu-blocklist',
+            '--enable-gpu',
+          ],
+        },
+      },
+    },
+    {
+      // Opt-in browser acceptance for appearance authoring (#4404 face masks):
+      // real wasm planner + WebGPU renderer on a real GPU. Not in CI's default
+      // lane; the spec skips unless APPEARANCE_E2E=1. Real Chrome like the
+      // other viewer projects, so no Playwright browser download is needed.
+      name: 'viewer-appearance-e2e',
+      testMatch: /appearance-face-mask\.e2e\.spec\.ts/,
+      timeout: 600000,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: BASE_URL,
+        actionTimeout: 60000,
+        headless: true,
+        channel: 'chrome',
+        launchOptions: {
+          args: [
+            '--enable-gpu',
+            '--enable-webgpu',
+            '--enable-unsafe-webgpu',
+            '--use-angle=default',
+            '--ignore-gpu-blocklist',
+          ],
+        },
+      },
+    },
+    {
+      // Opt-in relay acceptance (#4446, #4444): needs the built viewer, a built
+      // @ifc-lite/collab-server and the AC20 fixture. Each spec spawns its own
+      // signed relay AND its own `vite preview` of this checkout's dist, both
+      // on ephemeral ports (the shared webServer above, PLAYWRIGHT_PORT / :3000,
+      // is reused from whatever process holds it — a sibling checkout's preview
+      // would test the wrong build — so this project sets no baseURL, and it is
+      // not started at all when this is the only project selected, see
+      // onlyCollabProject), and enables collab through the viewer's localStorage
+      // overrides. Real Google Chrome (`channel: 'chrome'`) is required for
+      // WebGPU. Not in CI's default lanes (no relay there) — `pnpm test:e2e:collab`, see
+      // docs/contributing/collaboration-testing.md.
+      name: 'viewer-collab-e2e',
+      testMatch: /collab-(share-seed|federation-scope|pdf-vector-room|georeference)\.e2e\.spec\.ts/,
+      timeout: 600000,
+      use: {
+        actionTimeout: 60000,
+        headless: true,
+        channel: 'chrome',
+        launchOptions: {
+          args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--enable-gpu'],
+        },
+      },
+    },
+    {
+      name: 'viewer-benchmark',
+      testMatch: /viewer-benchmark\.spec\.ts/,
+      timeout: 600000, // 10 min for very large files (327MB)
+      webServer: {
+        command: `pnpm --filter @ifc-lite/viewer exec vite preview --port ${PORT}`,
+        port: Number(PORT),
+        reuseExistingServer: true,
+        timeout: 60000,
+        env: {
+          BROWSER: 'none',
+        },
+      },
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: BASE_URL,
+        actionTimeout: 300000,
+        // Run headed for realistic GPU/WebGPU performance
+        headless: false,
+        // Use real Chrome channel for accurate benchmarks
+        channel: 'chrome',
+        // Enable GPU for WebGPU
+        launchOptions: {
+          args: [
+            '--enable-gpu',
+            '--enable-webgpu',
+            '--enable-unsafe-webgpu',
+            '--use-angle=default',
+            '--ignore-gpu-blocklist',
+          ],
+        },
+      },
+    },
+    {
+      name: 'viewer-benchmark-ci',
+      testMatch: /viewer-benchmark\.spec\.ts/,
+      timeout: 600000,
+      webServer: {
+        command: `pnpm --filter @ifc-lite/viewer exec vite preview --port ${PORT}`,
+        port: Number(PORT),
+        reuseExistingServer: true,
+        timeout: 60000,
+        env: {
+          BROWSER: 'none',
+        },
+      },
+      use: {
+        baseURL: BASE_URL,
+        actionTimeout: 300000,
+        // CI mode: headless but with GPU flags
+        headless: true,
+        // Real Chrome (preinstalled on the runner), not Playwright's bundled
+        // headless shell — the shell's WebGPU device is broken under software
+        // rendering (same reason the E2E CI project pins channel: 'chrome').
+        channel: 'chrome',
+        launchOptions: {
+          args: [
+            '--enable-gpu',
+            '--enable-webgpu',
+            '--enable-unsafe-webgpu',
+            // Match viewer-e2e-ci: ANGLE alone does not select Dawn's Vulkan backend.
+            '--enable-features=Vulkan',
+            '--use-vulkan=swiftshader',
+            '--use-angle=swiftshader',
+            '--disable-vulkan-surface',
+            '--ignore-gpu-blocklist',
+          ],
+        },
+      },
+    },
+  ],
+}));

@@ -1,0 +1,54 @@
+# @ifc-lite/semantic
+
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [[`449a837`](https://github.com/LTplus-AG/ifc-lite/commit/449a837b9846c5a978493d6f6297955f59607236), [`206e3f5`](https://github.com/LTplus-AG/ifc-lite/commit/206e3f5dcc2aac68e8a4641312bb6debcb2d294b), [`646946f`](https://github.com/LTplus-AG/ifc-lite/commit/646946f3c1594bf126c29ee2c59d24759304daf5), [`baf4bdd`](https://github.com/LTplus-AG/ifc-lite/commit/baf4bdd632727134c1b694bdee8f9e8d2e3b0d2f), [`d136dfb`](https://github.com/LTplus-AG/ifc-lite/commit/d136dfb006619f6c5ad0d0a04abef6bfba66e7ec)]:
+  - @ifc-lite/sandbox@3.0.0
+
+## 0.2.3
+
+### Patch Changes
+
+- [#8411](https://github.com/LTplus-AG/ifc-lite/pull/8411) [`58442c2`](https://github.com/LTplus-AG/ifc-lite/commit/58442c2da84df10227f79d7b2d2c08a7327bebd2) Thanks [@louistrue](https://github.com/louistrue)! - Update the n3 runtime dependency in @ifc-lite/semantic and the optional @tauri-apps/api dependency in @ifc-lite/geometry.
+
+- [#8560](https://github.com/LTplus-AG/ifc-lite/pull/8560) [`d35bc6b`](https://github.com/LTplus-AG/ifc-lite/commit/d35bc6b247f579d6077501625bad19e756c9d5a1) Thanks [@louistrue](https://github.com/louistrue)! - Allow identity resolvers to use a caller-owned GlobalId index for batch selection while retaining model/revision ambiguity and validation rules.
+
+## 0.2.2
+
+### Patch Changes
+
+- [#8239](https://github.com/LTplus-AG/ifc-lite/pull/8239) [`605f9da`](https://github.com/LTplus-AG/ifc-lite/commit/605f9da40f2d430ad48e9b2d990486232e7229fe) Thanks [@petruconduraru](https://github.com/petruconduraru)! - Resolve the N3 `Writer.end` callback with `value ?? ''` so the package still type-checks against `@types/n3` 1.26.5 and later, which type the callback result as possibly undefined.
+- Updated dependencies [[`af23dac`](https://github.com/LTplus-AG/ifc-lite/commit/af23dac7f84b3bdcc2a179359521600406e07c4e)]:
+  - @ifc-lite/extensions@0.12.0
+  - @ifc-lite/sandbox@2.12.1
+
+## 0.2.1
+
+### Patch Changes
+
+- [#7488](https://github.com/LTplus-AG/ifc-lite/pull/7488) [`7cb1fa4`](https://github.com/LTplus-AG/ifc-lite/commit/7cb1fa4ed4140e383de4626306cd8932bcff1711) Thanks [@dependabot](https://github.com/apps/dependabot)! - Update the n3 runtime dependency in @ifc-lite/semantic and the optional @tauri-apps/api dependency in @ifc-lite/geometry. Refresh happy-dom development dependencies in @ifc-lite/bcf, @ifc-lite/embed-sdk and @ifc-lite/ids, and the @anthropic-ai/sdk development dependency in @ifc-lite/ids-agent.
+- Updated dependencies [[`0eeb6cb`](https://github.com/LTplus-AG/ifc-lite/commit/0eeb6cb8e6c752ba33e249820fc1f776493fc515)]:
+  - @ifc-lite/sandbox@2.12.0
+
+## 0.2.0
+
+### Minor Changes
+
+- [#6785](https://github.com/LTplus-AG/ifc-lite/pull/6785) [`7dfc298`](https://github.com/LTplus-AG/ifc-lite/commit/7dfc29870b0aa6a593c163592fcb84a92e5dfa19) Thanks [@louistrue](https://github.com/louistrue)! - Add explicit resource URI identity resolution using a full `{GlobalId}` template or the last URI path segment. Reuse revision/model scoping and ambiguity handling, preserve RDF identifiers, and support portable viewer configuration and reverse queries without a GlobalId property.
+
+- [#7000](https://github.com/LTplus-AG/ifc-lite/pull/7000) [`3ae2e70`](https://github.com/LTplus-AG/ifc-lite/commit/3ae2e70f2fddd42aee87ac3402c740ccd2fa0ed9) Thanks [@louistrue](https://github.com/louistrue)! - Add `inspectReadOnlyQuery`, which applies the same read-only refusals as `assertReadOnlyQuery` and also returns the query form, the outer projected variables (or `'*'`) and the outer LIMIT, so a caller can check a drafted query against its declared shape before running it ([#6920](https://github.com/LTplus-AG/ifc-lite/issues/6920)).
+
+- [#6645](https://github.com/LTplus-AG/ifc-lite/pull/6645) [`09745f0`](https://github.com/LTplus-AG/ifc-lite/commit/09745f0f3bb99ac07802ae061f13df92e865683f) Thanks [@louistrue](https://github.com/louistrue)! - Add shared semantic datasets, profile validation, read-only SPARQL providers, portable workspaces and model revision identity strategies. Expose the canonical capability-gated network implementation through a lightweight sandbox/network entry point.
+
+- [#6786](https://github.com/LTplus-AG/ifc-lite/pull/6786) [`f04a972`](https://github.com/LTplus-AG/ifc-lite/commit/f04a97289d3130a1d7dc9df056c8b9c5b6d25791) Thanks [@louistrue](https://github.com/louistrue)! - Support explicit authorization for exact literal loopback HTTP origins in shared networking and semantic providers, CLI queries and fixed relay upstreams. Preserve HTTPS defaults, exact host grants, redirect denial and request limits. The viewer local grant is ephemeral and cancels pending retrievals when revoked; portable local endpoint settings never restore authority.
+
+### Patch Changes
+
+- [#6704](https://github.com/LTplus-AG/ifc-lite/pull/6704) [`9d07c95`](https://github.com/LTplus-AG/ifc-lite/commit/9d07c9521aa28827087d73959ba5087d974a6d19) Thanks [@BIMvoice](https://github.com/BIMvoice)! - Malformed percent-escapes and unparseable request targets no longer escape as a bare `URIError` or `TypeError`. The collab server answers a request target `new URL` rejects with 400 instead of 500, closes a websocket with a malformed room path with 4400 instead of 1011, and the blob-GC scan reads each room log by its file name instead of decoding the name into a room id (a log with a malformed name is read, or named in the abort message, instead of stopping the sweep with `URI malformed`). The MCP entity resource answers a malformed GlobalId as "no such entity", and the Speckle URL parser refuses it with its named "no usable id" error, and the semantic relay's HTTPS listener answers an unparseable request target with 400 instead of 500.
+  
+  Add `FilePersistence.loadLogFile(file, requireComplete?)` for reading an enumerated log by its actual path. Blob GC requires complete framing and refuses incomplete frame bodies or trailing partial headers, while ordinary room loads retain complete-prefix recovery.
+- Updated dependencies [[`b2a5fb2`](https://github.com/LTplus-AG/ifc-lite/commit/b2a5fb2b97290bb39d2d36be81dd416c15c6a849), [`0e2f612`](https://github.com/LTplus-AG/ifc-lite/commit/0e2f612fe205f08ab10314abd95f0319dba2cba5), [`b92dd05`](https://github.com/LTplus-AG/ifc-lite/commit/b92dd05495094a47c4a68eb1137a3a1906fc65cc), [`29e1088`](https://github.com/LTplus-AG/ifc-lite/commit/29e1088dda6777f7086bd122208ce7bda8db1d89), [`09745f0`](https://github.com/LTplus-AG/ifc-lite/commit/09745f0f3bb99ac07802ae061f13df92e865683f), [`f04a972`](https://github.com/LTplus-AG/ifc-lite/commit/f04a97289d3130a1d7dc9df056c8b9c5b6d25791), [`fe3070c`](https://github.com/LTplus-AG/ifc-lite/commit/fe3070cfb18853dd857554615160806a607dbae2), [`1bb0fe3`](https://github.com/LTplus-AG/ifc-lite/commit/1bb0fe34c8fc46acef6e51f3792f274e1e5be1b9)]:
+  - @ifc-lite/sandbox@2.11.0
+  - @ifc-lite/extensions@0.11.0

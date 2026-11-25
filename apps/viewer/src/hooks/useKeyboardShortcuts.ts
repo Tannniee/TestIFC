@@ -1,0 +1,181 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/** Live global and tool actions for the canonical keyboard table (#5841). */
+import { useEffect } from 'react';
+import { isPanelAvailable } from '@/lib/panels/availability';
+import { replayWorkspaceHistory } from '@/lib/model-placement/history';
+import { registerKeyboardCommand, type CommandRun } from '@/lib/commands/dispatcher';
+import type { KeyCommandId } from '@/lib/commands/keyboard-commands';
+import { useViewerStore } from '@/store';
+import { showAllFromStore } from '@/store/homeView';
+import { orderedSectionPlanes } from '@/lib/section/section-plane-set';
+import { hideSelectionFromStore } from '@/store/hideSelection';
+import { finishOpenMeasureSequence } from '@/store/finishMeasureSequence';
+import { isGeometryRestoreHeld } from '@/lib/pick-gating';
+import { workspacePanelForShortcutCode } from '@/lib/panels/registry';
+import { bottomPanelFlags } from '@/lib/panels/bottom-panels';
+import { closeAllPanelWindows } from '@/services/panel-windows';
+import { WALK_MOVEMENT_KEYS, eventKey, isTextEditingElement } from '@/lib/keyboard-event';
+import { bindModelWorkspaceKeys } from '@/lib/commands/modeling/keys-workspace';
+import {
+  executeBasketIsolate, executeBasketAdd,
+  executeBasketRemove, executeBasketSaveView,
+} from '@/store/basket/basketCommands';
+
+interface KeyboardShortcutsOptions { enabled?: boolean }
+
+function escapeGlobal(closeAll: boolean): void {
+  const state = useViewerStore.getState();
+  if (closeAll) {
+    state.showWorkspacePanel('properties');
+    state.resetDockLayout();
+    closeAllPanelWindows();
+    useViewerStore.setState(bottomPanelFlags(null));
+    state.setOverridesPanelVisible(false);
+    state.setChatPanelVisible(false);
+    state.setSheetPanelVisible(false);
+    state.setLeftPanelCollapsed(false);
+    state.setRightPanelCollapsed(false);
+  }
+  if (state.activeTool !== 'select') state.setActiveTool('select', 'esc');
+  else state.clearEntitySelection();
+}
+
+function rotateSelected(event: KeyboardEvent): boolean {
+  const state = useViewerStore.getState();
+  if (!state.editEnabled || !state.selectedEntity) return false;
+  const result = state.rotateEntity(
+    state.selectedEntity.modelId,
+    state.selectedEntity.expressId,
+    ((event.shiftKey ? -15 : 15) * Math.PI) / 180,
+  );
+  if (!result.ok) {
+    void import('@/components/ui/toast').then(({ toast }) => toast.error(`Couldn't rotate: ${result.reason}`));
+  }
+  return true;
+}
+
+function cancelMeasurement(): boolean {
+  const state = useViewerStore.getState();
+  const inProgress = !!(state.activeMeasurement || state.activePolyline || state.activeAngle || state.activeRadius);
+  // Esc is a gesture reset in every mode, even with nothing placed yet: it drops the
+  // lock, the snap glyph and a press still held (#8786). It holds Esc only if it cancelled something.
+  state.resetMeasureGesture();
+  if (inProgress) return true;
+  // The hover preview alone does not hold Esc: it is cursor feedback, like the snap glyph.
+  if (state.measurePointLast) { state.clearMeasurePoint(); return true; }
+  return false;
+}
+
+/** Make the previous or next cutting plane (in the order the chips show) the active one; wraps. */
+function stepSectionPlane(step: 1 | -1): boolean {
+  const state = useViewerStore.getState();
+  const planes = orderedSectionPlanes(state.sectionPlane, state.inactiveSectionPlanes);
+  if (planes.length < 2) return false;
+  const at = planes.findIndex((p) => p.id === state.sectionPlane.id);
+  state.activateSectionPlane(planes[(at + step + planes.length) % planes.length]!.id);
+  return true;
+}
+
+function splitSelected(): void {
+  const state = useViewerStore.getState();
+  if (state.session?.activeCommandId === 'element.split') {
+    state.endCommand('cancel');
+    return;
+  }
+  if (state.selectedEntityId === null) return;
+  state.startCommand('element.split');
+}
+
+// A focused button keeps Space: the dispatcher yields it before any command runs (#9233).
+function hideSelected(): boolean {
+  return hideSelectionFromStore();
+}
+
+/**
+ * The dispatcher yields Enter to a focused button (#9233), so Enter on Cancel
+ * in the Measurements list cancels rather than finishes (#9113); Enter from the
+ * canvas, the list or a row still finishes. A held Enter's repeats finish
+ * nothing: after the first press moves focus off a button (a delete hands it
+ * to the next row), a repeat must not finish the open sequence.
+ */
+function finishMeasurement(event: KeyboardEvent): boolean {
+  if (isGeometryRestoreHeld(useViewerStore.getState())) return true;
+  if (event.repeat) return false;
+  return finishOpenMeasureSequence();
+}
+
+function walkOwns(event: KeyboardEvent): boolean {
+  const key = eventKey(event);
+  return useViewerStore.getState().activeTool === 'walk' && key !== null && WALK_MOVEMENT_KEYS.has(key);
+}
+
+/** Each command id below gets its chord and context from KEY_COMMANDS. */
+const RUNNERS: readonly [KeyCommandId, CommandRun][] = [
+  ['edit.undo', () => { replayWorkspaceHistory(useViewerStore.getState(), 'undo'); }],
+  ['edit.redo', () => { replayWorkspaceHistory(useViewerStore.getState(), 'redo'); }],
+  ['tool.select', () => { useViewerStore.getState().setActiveTool('select'); }],
+  ['tool.walk', () => { useViewerStore.getState().setActiveTool('walk'); }],
+  ['tool.measure', () => { useViewerStore.getState().setActiveTool('measure'); }],
+  ['tool.section', () => { useViewerStore.getState().setActiveTool('section'); }],
+  ['tool.annotate', () => { useViewerStore.getState().setActiveTool('annotate'); }],
+  ['ui.openPanel', (event) => {
+    const panel = workspacePanelForShortcutCode(event.code);
+    // A panel the host switched off leaves its Alt+digit to the browser.
+    if (!panel || !isPanelAvailable(panel)) return false;
+    useViewerStore.getState().openPanelInHome(panel, 'shortcut');
+  }],
+  ['ui.toggleSidebar', () => { useViewerStore.getState().cycleSidebarMode(); }],
+  ['edit.toggleEditMode', () => { useViewerStore.getState().toggleEditEnabled(); }],
+  ['tool.split', () => { splitSelected(); }],
+  ['edit.rotate', rotateSelected],
+  ['basket.isolate', () => { executeBasketIsolate(); }],
+  ['basket.add', () => { executeBasketAdd(); }],
+  ['basket.remove', () => { executeBasketRemove(); }],
+  ['basket.toggleDock', (event) => {
+    if (walkOwns(event)) return false;
+    useViewerStore.getState().toggleBottomPanel('presentation', 'shortcut');
+  }],
+  ['basket.saveView', () => {
+    if (useViewerStore.getState().pinboardEntities.size === 0) return false;
+    void executeBasketSaveView().catch((error: unknown) => console.error('[keyboard] Could not save basket view:', error));
+  }],
+  ['visibility.hideSelection', hideSelected],
+  ['visibility.showAll', (event) => {
+    if (walkOwns(event)) return false;
+    showAllFromStore('a');
+  }],
+  ['measure.cancel', cancelMeasurement],
+  ['measure.finish', finishMeasurement],
+  ['measure.toggleSnap', () => { useViewerStore.getState().toggleSnap(); }],
+  ['section.previousPlane', () => stepSectionPlane(-1)],
+  ['section.nextPlane', () => stepSectionPlane(1)],
+  ['selection.escape', () => { escapeGlobal(false); }],
+  ['ui.closeAllPanels', () => { escapeGlobal(true); }],
+  ['ui.toggleTheme', () => { useViewerStore.getState().toggleTheme(); }],
+];
+
+const TOOL_CONTEXT: Partial<Record<KeyCommandId, string>> = {
+  'measure.cancel': 'measure',
+  'measure.finish': 'measure',
+  'measure.toggleSnap': 'measure',
+  'section.previousPlane': 'section',
+  'section.nextPlane': 'section',
+};
+
+/** Undo / redo also run from a focused combobox or menu button; only real text editing keeps its own. */
+const HISTORY_COMMANDS: ReadonlySet<KeyCommandId> = new Set(['edit.undo', 'edit.redo']);
+
+export function useKeyboardShortcuts({ enabled = true }: KeyboardShortcutsOptions = {}): void {
+  useEffect(() => {
+    if (!enabled) return;
+    const dispose = RUNNERS.map(([id, run]) => registerKeyboardCommand(id, run, {
+      active: TOOL_CONTEXT[id] ? () => useViewerStore.getState().activeTool === TOOL_CONTEXT[id] : undefined,
+      allowInTextEntry: HISTORY_COMMANDS.has(id) ? (event: KeyboardEvent) => !isTextEditingElement(event.target) : undefined,
+    }));
+    dispose.push(bindModelWorkspaceKeys());
+    return () => { for (const remove of dispose) remove(); };
+  }, [enabled]);
+}

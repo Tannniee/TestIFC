@@ -1,0 +1,35 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "ifclite-geom"
+description = "Native ifc-lite geometry-data export for Python (welded, IFC Z-up, world coords)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MPL-2.0" }
+authors = [{ name = "IFC-Lite Contributors" }]
+keywords = ["ifc", "bim", "geometry", "tessellation"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+3dm = ["rhino3dm==8.35.0"]
+
+[project.urls]
+Homepage = "https://github.com/LTplus-AG/ifc-lite"
+Repository = "https://github.com/LTplus-AG/ifc-lite"
+Documentation = "https://github.com/LTplus-AG/ifc-lite/tree/main/rust/python#readme"
+
+[tool.maturin]
+# Mixed package; the public API re-exports the abi3 extension from __init__.py.
+python-source = "python"
+module-name = "ifclite_geom._native"
+features = ["pyo3/extension-module"]
+# The type stub is python/ifclite_geom/__init__.pyi (with py.typed), shipped by
+# mixed-layout discovery. It is the only stub: a second top-level
+# ifclite_geom.pyi next to the package would give type checkers two candidates.

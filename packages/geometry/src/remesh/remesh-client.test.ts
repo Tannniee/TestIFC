@@ -1,0 +1,328 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * `RemeshClient` lifecycle (#6232 WP1). The worker is a scripted stand-in:
+ * these tests pin the client's own bookkeeping (routing, ordering, dispose).
+ * The wasm meshing itself is pinned by `scripts/lib/wasm-remesh-contracts.mjs`.
+ */
+
+import { describe, expect, it, vi } from 'vitest';
+import { RemeshClient } from './remesh-client.js';
+import type { RemeshConfig, RemeshRequest, RemeshResult } from './remesh-core.js';
+import type { RemeshWorkerInbound, RemeshWorkerOutbound } from './remesh-protocol.js';
+
+const CONFIG: RemeshConfig = { mergeLayers: false, tessellationQuality: null, skipSmallCuts: false, rectParamFastPath: true };
+
+class ScriptedWorker {
+  readonly posted: Array<{ message: RemeshWorkerInbound; transfer: Transferable[] }> = [];
+  terminated = false;
+  private readonly listeners = new Map<string, Set<(event: unknown) => void>>();
+
+  /** When set, the next postMessage throws it (e.g. a DataCloneError). */
+  refusePost: Error | null = null;
+
+  postMessage(message: RemeshWorkerInbound, transfer: Transferable[] = []): void {
+    if (this.refusePost) throw this.refusePost;
+    this.posted.push({ message, transfer });
+  }
+  terminateCalls = 0;
+  terminate(): void {
+    this.terminated = true;
+    this.terminateCalls += 1;
+  }
+  addEventListener(type: string, listener: (event: unknown) => void): void {
+    if (!this.listeners.has(type)) this.listeners.set(type, new Set());
+    this.listeners.get(type)?.add(listener);
+  }
+  removeEventListener(type: string, listener: (event: unknown) => void): void {
+    this.listeners.get(type)?.delete(listener);
+  }
+  private emit(type: string, event: unknown): void {
+    for (const listener of this.listeners.get(type) ?? []) listener(event);
+  }
+  reply(message: RemeshWorkerOutbound): void {
+    this.emit('message', { data: message });
+  }
+  crash(message: string): void {
+    this.emit('error', { message });
+  }
+  unreadable(): void {
+    this.emit('messageerror', {});
+  }
+  requestIds(): number[] {
+    return this.posted.flatMap(({ message }) => (message.type === 'remesh' ? [message.requestId] : []));
+  }
+}
+
+async function started(requestTimeoutMs?: number): Promise<{ client: RemeshClient; worker: ScriptedWorker }> {
+  const worker = new ScriptedWorker();
+  const pending = RemeshClient.create(CONFIG, { createWorker: () => worker as unknown as Worker, requestTimeoutMs });
+  worker.reply({ type: 'ready' });
+  return { client: await pending, worker };
+}
+
+function request(buffer = new Uint8Array(8)): RemeshRequest {
+  return {
+    buffer,
+    targets: Uint32Array.of(1),
+    frame: { x: 0, y: 0, z: 0, needsShift: false },
+    styleIds: new Uint32Array(),
+    styleColors: new Uint8Array(),
+  };
+}
+
+const result = (csgFailures: number): RemeshResult => ({ meshes: [], csgFailures, ms: { prepass: 0, produce: 0 } });
+
+describe('RemeshClient (#6232)', () => {
+  it('sends the config with init and resolves only once the engine is ready', async () => {
+    const worker = new ScriptedWorker();
+    let resolved = false;
+    const pending = RemeshClient.create(CONFIG, { createWorker: () => worker as unknown as Worker })
+      .then((client) => { resolved = true; return client; });
+    await Promise.resolve();
+    expect(resolved).toBe(false);
+    expect(worker.posted[0].message).toEqual({ type: 'init', config: CONFIG, wasmModule: undefined, wasmUrl: undefined });
+    worker.reply({ type: 'ready' });
+    await pending;
+    expect(resolved).toBe(true);
+  });
+
+  it('rejects and terminates the worker when the engine fails to start', async () => {
+    const worker = new ScriptedWorker();
+    const pending = RemeshClient.create(CONFIG, { createWorker: () => worker as unknown as Worker });
+    worker.reply({ type: 'init-error', message: 'no wasm' });
+    await expect(pending).rejects.toThrow(/no wasm/);
+    expect(worker.terminated).toBe(true);
+  });
+
+  it('routes each answer to its own request, whatever order they arrive in', async () => {
+    const { client, worker } = await started();
+    const first = client.remesh(request());
+    const second = client.remesh(request());
+    const [a, b] = worker.requestIds();
+    worker.reply({ type: 'error', requestId: b, message: 'kernel' });
+    worker.reply({ type: 'result', requestId: a, result: result(3) });
+    await expect(first).resolves.toMatchObject({ csgFailures: 3 });
+    await expect(second).rejects.toThrow(/kernel/);
+  });
+
+  it('keeps a config change between the requests it was sent between', async () => {
+    const { client, worker } = await started();
+    void client.remesh(request());
+    client.setConfig({ ...CONFIG, mergeLayers: true });
+    void client.remesh(request());
+    expect(worker.posted.slice(1).map(({ message }) => message.type)).toEqual(['remesh', 'config', 'remesh']);
+  });
+
+  it('transfers a whole-buffer request and copies a view into a larger buffer', async () => {
+    const { client, worker } = await started();
+    const whole = new Uint8Array(16);
+    void client.remesh(request(whole));
+    void client.remesh(request(new Uint8Array(32).subarray(4, 12)));
+    expect(worker.posted[1].transfer).toEqual([whole.buffer]);
+    expect(worker.posted[2].transfer).toEqual([]);
+  });
+
+  it('dispose terminates the worker and rejects what is in flight and what comes after', async () => {
+    const { client, worker } = await started();
+    const inFlight = client.remesh(request());
+    client.dispose();
+    client.dispose();
+    expect(worker.terminated).toBe(true);
+    await expect(inFlight).rejects.toThrow(/disposed/);
+    await expect(client.remesh(request())).rejects.toThrow(/disposed/);
+  });
+
+  it('a worker crash rejects every request in flight', async () => {
+    const { client, worker } = await started();
+    const one = client.remesh(request());
+    const two = client.remesh(request());
+    worker.crash('boom');
+    await expect(one).rejects.toThrow(/boom/);
+    await expect(two).rejects.toThrow(/boom/);
+  });
+
+  it('stays dead after a worker crash: later requests reject at once instead of hanging', async () => {
+    const { client, worker } = await started();
+    worker.crash('boom');
+    expect(client.alive).toBe(false);
+    expect(worker.terminated).toBe(true);
+    const posted = worker.posted.length;
+    await expect(client.remesh(request())).rejects.toThrow(/boom/);
+    await expect(client.styleWire(new Uint8Array(4))).rejects.toThrow(/boom/);
+    expect(worker.posted.length).toBe(posted);
+  });
+
+  it('a request past its deadline kills the worker and rejects everything in flight', async () => {
+    vi.useFakeTimers();
+    try {
+      const { client, worker } = await started(1_000);
+      const slow = client.remesh(request());
+      const queued = client.remesh(request());
+      const answered = expect(slow).rejects.toThrow(/did not answer within 1000 ms/);
+      const second = expect(queued).rejects.toThrow(/did not answer/);
+      vi.advanceTimersByTime(1_000);
+      await answered;
+      await second;
+      expect(worker.terminated).toBe(true);
+      expect(client.alive).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('answers a style-wire request with the wire the worker sends back', async () => {
+    const { client, worker } = await started();
+    const source = new Uint8Array(4);
+    const pending = client.styleWire(source);
+    const sent = worker.posted.at(-1)!;
+    expect(sent.message).toMatchObject({ type: 'style-wire', source });
+    // The model keeps its source, so it is copied, not transferred.
+    expect(sent.transfer).toEqual([]);
+    const wire = {
+      styleIds: Uint32Array.of(7), styleColors: Uint8Array.of(1, 2, 3, 4),
+      materialElementIds: new Uint32Array(), materialColorCounts: new Uint32Array(), materialColors: new Uint8Array(),
+    };
+    worker.reply({ type: 'style-wire', requestId: worker.requestIds().length + 1, wire });
+    await expect(pending).resolves.toBe(wire);
+  });
+
+  it('P5: an unreadable message during start rejects create() and terminates the worker', async () => {
+    const worker = new ScriptedWorker();
+    const pending = RemeshClient.create(CONFIG, { createWorker: () => worker as unknown as Worker });
+    worker.unreadable();
+    await expect(pending).rejects.toThrow(/could not be read/);
+    expect(worker.terminated).toBe(true);
+  });
+
+  it('P5: a worker that never answers init rejects create() at the deadline', async () => {
+    vi.useFakeTimers();
+    try {
+      const worker = new ScriptedWorker();
+      const pending = RemeshClient.create(CONFIG, { createWorker: () => worker as unknown as Worker, startTimeoutMs: 1_000 });
+      const failed = expect(pending).rejects.toThrow(/did not start within 1000 ms/);
+      vi.advanceTimersByTime(1_000);
+      await failed;
+      expect(worker.terminated).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('P5: a short request deadline does not cut off a slow engine start', async () => {
+    vi.useFakeTimers();
+    try {
+      const worker = new ScriptedWorker();
+      const pending = RemeshClient.create(CONFIG, { createWorker: () => worker as unknown as Worker, requestTimeoutMs: 1_000 });
+      vi.advanceTimersByTime(5_000);
+      worker.reply({ type: 'ready' });
+      const client = await pending;
+      expect(client.alive).toBe(true);
+      expect(worker.terminated).toBe(false);
+      // `ready` must disarm the start deadline: a healthy client is not
+      // killed once the default 120 s start window has passed.
+      vi.advanceTimersByTime(120_000);
+      expect(client.alive).toBe(true);
+      expect(worker.terminated).toBe(false);
+      const inFlight = client.remesh(request());
+      worker.reply({ type: 'result', requestId: worker.requestIds().at(-1)!, result: result(2) });
+      await expect(inFlight).resolves.toMatchObject({ csgFailures: 2 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('P5: a throwing init post rejects create() and terminates the worker', async () => {
+    const worker = new ScriptedWorker();
+    worker.refusePost = new Error('DataCloneError: init');
+    await expect(RemeshClient.create(CONFIG, { createWorker: () => worker as unknown as Worker }))
+      .rejects.toThrow(/DataCloneError: init/);
+    expect(worker.terminated).toBe(true);
+  });
+
+  it('P5: a request whose post throws rejects alone and leaves no timer to kill later requests', async () => {
+    vi.useFakeTimers();
+    try {
+      const { client, worker } = await started(1_000);
+      worker.refusePost = new Error('DataCloneError: remesh');
+      await expect(client.remesh(request())).rejects.toThrow(/DataCloneError: remesh/);
+      worker.refusePost = null;
+      vi.advanceTimersByTime(600);
+      const later = client.remesh(request());
+      // Past the refused request's would-be deadline (t=1000), before the later one's (t=1600).
+      vi.advanceTimersByTime(500);
+      const [id] = worker.requestIds();
+      expect(client.alive).toBe(true);
+      expect(worker.terminated).toBe(false);
+      worker.reply({ type: 'result', requestId: id, result: result(0) });
+      await expect(later).resolves.toMatchObject({ csgFailures: 0 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('P5: a late reply for a request whose post threw is ignored and does not disturb the client', async () => {
+    const { client, worker } = await started();
+    worker.refusePost = new Error('DataCloneError: remesh');
+    const refused = client.remesh(request());
+    await expect(refused).rejects.toThrow(/DataCloneError/);
+    worker.refusePost = null;
+    const refusedId = 1; // first request id; the refused post consumed it
+    // A reply for an id with no pending entry (the refused one, or any stray id) is dropped.
+    worker.reply({ type: 'result', requestId: refusedId, result: result(9) });
+    worker.reply({ type: 'error', requestId: 999, message: 'stray' });
+    expect(client.alive).toBe(true);
+    const next = client.remesh(request());
+    const [nextId] = worker.requestIds();
+    expect(nextId).not.toBe(refusedId);
+    worker.reply({ type: 'result', requestId: nextId, result: result(4) });
+    await expect(next).resolves.toMatchObject({ csgFailures: 4 });
+  });
+
+  it.each([
+    ['Infinity', Number.POSITIVE_INFINITY],
+    ['0', 0],
+  ])('P5: a %s timeout means no deadline, not an immediate one', async (_label, ms) => {
+    vi.useFakeTimers();
+    try {
+      const worker = new ScriptedWorker();
+      const pending = RemeshClient.create(CONFIG, {
+        createWorker: () => worker as unknown as Worker, startTimeoutMs: ms, requestTimeoutMs: ms,
+      });
+      vi.advanceTimersByTime(10 * 60_000);
+      worker.reply({ type: 'ready' });
+      const client = await pending;
+      const inFlight = client.remesh(request());
+      vi.advanceTimersByTime(10 * 60_000);
+      expect(client.alive).toBe(true);
+      worker.reply({ type: 'result', requestId: worker.requestIds()[0], result: result(1) });
+      await expect(inFlight).resolves.toMatchObject({ csgFailures: 1 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('P5: a worker error after the start deadline fired does not terminate or reject twice', async () => {
+    vi.useFakeTimers();
+    try {
+      const worker = new ScriptedWorker();
+      const settled = vi.fn();
+      const pending = RemeshClient.create(CONFIG, { createWorker: () => worker as unknown as Worker, startTimeoutMs: 1_000 });
+      const outcome = pending.then(() => settled('resolved'), (error: Error) => { settled(error.message); });
+      vi.advanceTimersByTime(1_000);
+      // The start handlers stay attached after the deadline: a late error,
+      // unreadable message or init-error must hit the dead latch, not re-run it.
+      worker.crash('late crash');
+      worker.unreadable();
+      worker.reply({ type: 'init-error', message: 'late init-error' });
+      await outcome;
+      expect(settled).toHaveBeenCalledTimes(1);
+      expect(settled).toHaveBeenCalledWith('Re-mesh worker did not start within 1000 ms');
+      expect(worker.terminateCalls).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

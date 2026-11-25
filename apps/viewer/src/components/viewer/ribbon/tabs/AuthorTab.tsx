@@ -1,0 +1,150 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+import { hasWorkspaceHistory } from '@/lib/model-placement/history';
+
+/**
+ * Ribbon · Author tab — the authoring surface: the global edit-mode
+ * switch, undo/redo, element creation tools, and bulk property flows.
+ * Everything here honors the same collab role gate as the classic
+ * toolbar (viewer/commenter roles cannot unlock authoring).
+ */
+
+import { Extension, EditProperty, ImportData, Undo, Redo, Appearance, Layer, Coloring } from '@/icons';
+import { useViewerStore } from '@/store';
+import { useTranslation } from '@/i18n';
+import { usePersistentToolHosts } from '../../PersistentToolHosts';
+import { useWorkspacePanelControls } from '../../toolbar/useWorkspacePanelControls';
+import {
+  RibbonGroup,
+  RibbonGroupDivider,
+  RibbonSmallStack,
+} from '../primitives';
+import { RibbonCommandLargeButton, RibbonCommandSmallButton } from '../command-button';
+import { anyRibbonCommandAvailable } from '../../surface-command-features';
+import { AUTHOR_GROUPS } from '../ribbon-tabs';
+
+const EDIT_ACTIVE_CLASS = 'bg-overlay-accent-soft text-foreground ring-1 ring-inset ring-overlay-accent/50';
+
+export function AuthorTab() {
+  const { t } = useTranslation();
+  const toolHosts = usePersistentToolHosts();
+  const hasData = useViewerStore(s => s.ifcDataStore !== null || [...s.models.values()].some(m => m.ifcDataStore != null));
+  // Edit mode is the Model workspace (#6232): this button enters and leaves it.
+  // Collab role: editing is reserved for editor/admin. Derive from the
+  // reactive role so the Edit switch enables/disables live when the role
+  // changes. null role = single-user, always editable.
+  const collabEditRole = useViewerStore((state) => state.collabRole);
+  const loading = useViewerStore(state => state.loading);
+  const canEditInSession =
+    collabEditRole === null || collabEditRole === 'editor' || collabEditRole === 'admin';
+
+  // Undo/redo replay authoring mutations, so they honour the same collab
+  // role gate as edit mode.
+  const hasUndo = useViewerStore(state => hasWorkspaceHistory(state, 'undo'));
+  const canUndo = canEditInSession && hasUndo;
+  const hasRedo = useViewerStore(state => hasWorkspaceHistory(state, 'redo'));
+  const canRedo = canEditInSession && hasRedo;
+
+  const { activeWorkspacePanels, handleToggleRightPanel } = useWorkspacePanelControls('ribbon');
+
+  // Decided at render time from the same tables as the buttons: a group whose
+  // commands a host switched off (`lib/features`) is left out with its divider.
+  // Unlike the other tabs even the leading group can go (edit.model off), so
+  // the divider is drawn before every shown group but the first.
+  const shown = {
+    edit: anyRibbonCommandAvailable(AUTHOR_GROUPS.edit),
+    create: anyRibbonCommandAvailable(AUTHOR_GROUPS.create),
+    properties: anyRibbonCommandAvailable(AUTHOR_GROUPS.properties),
+    customize: anyRibbonCommandAvailable(AUTHOR_GROUPS.customize),
+  };
+  const firstShown = (['edit', 'create', 'properties', 'customize'] as const).find((group) => shown[group]);
+  const divider = (group: keyof typeof shown) => (group === firstShown ? null : <RibbonGroupDivider />);
+
+  return (
+    <>
+      {shown.edit && (
+        <RibbonGroup label={t('ribbon.author.editGroup')}>
+          <RibbonSmallStack>
+            <RibbonCommandSmallButton
+              commandId="author:undo"
+              icon={Undo}
+              disabled={!canUndo}
+            />
+            <RibbonCommandSmallButton
+              commandId="author:redo"
+              icon={Redo}
+              disabled={!canRedo}
+            />
+            {/* Change sets (#6232 D4): which named set new edits land in. */}
+            <RibbonCommandSmallButton
+              commandId="panel:changeSets"
+              icon={Layer}
+              active={activeWorkspacePanels.has('changeSets')}
+              commandContext={{ activateRightPanel: () => useViewerStore.getState().toggleWorkspacePanel('changeSets', 'ribbon') }}
+            />
+          </RibbonSmallStack>
+        </RibbonGroup>
+      )}
+
+      {shown.create && (
+        <>
+          {divider('create')}
+
+          <RibbonGroup label={t('ribbon.author.createGroup')}>
+            <RibbonCommandLargeButton
+              commandId="panel:appearance"
+              icon={Appearance}
+              tooltip={t('ribbon.author.appearanceTooltip')}
+              active={activeWorkspacePanels.has('appearance')}
+              activeClassName={EDIT_ACTIVE_CLASS}
+              commandContext={{ activateRightPanel: () => handleToggleRightPanel('appearance') }}
+            />
+            <RibbonCommandLargeButton commandId="panel:colorizer" icon={Coloring}
+              active={activeWorkspacePanels.has('colorizer')} activeClassName={EDIT_ACTIVE_CLASS}
+              commandContext={{ activateRightPanel: () => handleToggleRightPanel('colorizer') }} />
+          </RibbonGroup>
+        </>
+      )}
+
+      {shown.properties && (
+        <>
+          {divider('properties')}
+
+          <RibbonGroup label={t('ribbon.author.propertiesGroup')}>
+            <RibbonSmallStack>
+              <RibbonCommandSmallButton commandId="author:bulk-properties" icon={EditProperty}
+                disabled={loading || !hasData || !canEditInSession || !toolHosts.openBulkProperties} commandContext={event => {
+                  const launcher = event.currentTarget;
+                  return { ...toolHosts, openBulkProperties: () => toolHosts.openBulkProperties?.(launcher) };
+                }} />
+              <RibbonCommandSmallButton commandId="author:import-data" icon={ImportData}
+                disabled={loading || !hasData || !canEditInSession || !toolHosts.openImportData} commandContext={event => {
+                  const launcher = event.currentTarget;
+                  return { ...toolHosts, openImportData: () => toolHosts.openImportData?.(launcher) };
+                }} />
+            </RibbonSmallStack>
+          </RibbonGroup>
+        </>
+      )}
+
+      {/* Extensions & flavors manage the workspace itself — installed
+          extensions, personal flavors, permissions. */}
+      {shown.customize && (
+        <>
+          {divider('customize')}
+
+          <RibbonGroup label={t('ribbon.author.customizeGroup')}>
+            <RibbonCommandLargeButton
+              commandId="panel:extensions"
+              icon={Extension}
+              tooltip={t('ribbon.author.extensionsTooltip')}
+              active={activeWorkspacePanels.has('extensions')}
+              commandContext={{ activateRightPanel: () => handleToggleRightPanel('extensions') }}
+            />
+          </RibbonGroup>
+        </>
+      )}
+    </>
+  );
+}

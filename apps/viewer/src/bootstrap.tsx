@@ -1,0 +1,161 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Viewer bootstrap: everything the app entry does, behind one call.
+ *
+ * `main.tsx` is `mountViewer(document.getElementById('root')!)`. A host
+ * application that builds this viewer from source and needs to compose in
+ * its own pieces at build time (today: extra file-source providers, #5228)
+ * writes its own entry that calls `mountViewer` with options, instead of
+ * patching viewer source. This is build-time composition only: nothing here
+ * loads code at runtime, and ordinary `.iflx` extensions gain no new reach.
+ *
+ * A host also chooses here which features its users see: `options.config`
+ * (a `ViewerRuntimeConfig`, see `lib/features`) is applied before anything
+ * renders. When the build sets `VITE_VIEWER_CONFIG_URL` the hosted entry
+ * (`main-hosted.tsx`) fetches it; a host with its own entry passes the object.
+ */
+
+// MUST be the first import: disables React 19.2's dev-mode component-render
+// Performance tracking before react-dom caches `supportsUserTiming`, so large-IFC
+// geometry/dataStore props don't blow its recursive prop-diff to a RangeError/OOM
+// (the load "stops halfway" stall). See disable-react-dev-perf-track.ts.
+import './disable-react-dev-perf-track';
+// Must run before react-dom: guards Node.removeChild/insertBefore so a browser
+// translation extension mutating the DOM can't crash the reconciler. See
+// harden-dom-mutations.ts (PostHog issues #1229/#1230/#1232).
+import './harden-dom-mutations';
+// Before anything that reads `location` (analytics, routing, share links):
+// takes a local-agent pairing link's one-time code out of the address bar
+// (#9523). Imports nothing; see lib/agent-bridge/pairing-fragment.ts.
+import './lib/agent-bridge/pairing-fragment.boot';
+// Before react-dom too: under ?perfTrace=1, switches the #6957 counters on
+// before the store and renderer exist, and counts React commits.
+import './lib/perf/reactCommits';
+import { PERF_TRACE_ENABLED } from './lib/perf/perfTraceFlag';
+import { loadTracerReady } from './lib/perf/loadTrace';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { App } from './App';
+import './index.css';
+import './components/viewer/ViewCube.css';
+import './components/ui/panel-motion.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
+// Wire the placement-edit helpers' parser-backed source reader. Pure
+// side-effect import; keeps `@ifc-lite/parser` out of placement-edit
+// itself so its overlay-path logic stays unit-testable.
+import './lib/placement-edit.boot';
+// Discover contributed `i18n/locales/<tag>.ts` catalogues; `startLocales` activates the
+// negotiated one at mount (Settings choice, host locale, browser languages; English default).
+import { startLocales } from './i18n/locales.boot';
+import { installWasmVersionSkewRecovery } from './lib/wasm-version-skew';
+import { installChunkVersionSkewRecovery } from './lib/chunk-version-skew';
+import { scheduleWasmPrewarm, scheduleFastPath } from './lib/wasm-prewarm';
+import { initializeUserContent } from './lib/storage/content-boot';
+import type { FileSourceProviderFactory } from './services/sources/source-host';
+// After the pairing-fragment strip, like every module that may report (pairing-fragment.boot.test.ts).
+import './lib/analytics';
+import { applyRuntimeConfig } from './lib/features/runtime-start';
+import { linkIconFont } from './lib/features/icon-font';
+import type { ViewerRuntimeConfig } from './lib/features/runtime-config';
+
+export type { FileSourceProviderFactory } from './services/sources/source-host';
+export type { ViewerRuntimeConfig } from './lib/features/runtime-config';
+
+export interface ViewerBootstrapOptions {
+  /**
+   * File-source providers (implementations of `FileSourceProvider` from
+   * `@ifc-lite/plugin-api`) to register after the built-in ones. Each factory
+   * is constructed and registered independently through
+   * `SourceHost.register()`, so it gets the same version, duplicate-name and
+   * relay checks, the same sandboxed `PluginContext` (https + allowed-domain
+   * fetch, no ambient credentials, no redirects, bounded retries, namespaced
+   * storage), and the same failure reporting as a built-in: one that throws
+   * or is refused appears in the Sources panel as "failed to register" and
+   * never stops any other provider from loading.
+   */
+  readonly sourceProviders?: readonly FileSourceProviderFactory[];
+  /**
+   * What this deployment shows its users: which catalogue features are on
+   * (`features.json` in the build lists them) and the preferred locale.
+   * Omitted, every feature is on. Fixed for the lifetime of the page.
+   *
+   * This is presentation, not protection: a feature that is off is not
+   * rendered, but its code still ships. Enforce on the server whatever must
+   * not happen.
+   */
+  readonly config?: ViewerRuntimeConfig;
+}
+
+let prepared = false;
+
+/**
+ * Everything the start needs that does not depend on the host's
+ * configuration. The hosted entry runs it while the configuration is still
+ * on its way; `mountViewer` runs it too, so a stock start is unchanged.
+ */
+export function prepareViewer(): void {
+  if (prepared) return;
+  prepared = true;
+  initializeUserContent();
+  // WASM engine-binary recovery — the sibling of the chunk recovery below for the
+  // `ifc-lite_bg.wasm` binary, which wasm-bindgen fetches inside a worker and so
+  // is invisible to Vite's `vite:preloadError`. When a deploy rotates the hashed
+  // wasm under an open tab the lazy fetch 404s (served as text/plain) and the
+  // engine throws an `application/wasm` MIME error (#1363); reload once, debounced,
+  // to pull the current deployment's assets.
+  installWasmVersionSkewRecovery();
+
+  // Post-mount chunk recovery — complements the inline boot self-heal in
+  // index.html. The boot watchdog handles the ENTRY failing to load; this handles
+  // a LAZY chunk (exporters / ids / bcf / sandbox …) 404ing after a newer deploy
+  // ships fresh hashes mid-session. Vite dispatches `vite:preloadError` for that;
+  // reload once (sessionStorage-bounded) to pull the matching new chunks. See
+  // chunk-version-skew.ts for why the reload must NOT suppress Vite's re-throw.
+  installChunkVersionSkewRecovery();
+
+  // Pull the geometry engine binary down while the user is still deciding which
+  // file to open, instead of on the click that opens it. See wasm-prewarm.ts.
+  scheduleWasmPrewarm();
+}
+
+/** Mounts the viewer into `container`. Call once, from the app entry. */
+export function mountViewer(container: HTMLElement, options: ViewerBootstrapOptions = {}): void {
+  prepareViewer();
+  // The feature set and analytics, then the locale, before anything renders.
+  const desktop = import.meta.env.VITE_IFCLITE_DESKTOP === '1';
+  const config = applyRuntimeConfig(desktop ? {
+    ...options.config, version: 1,
+    features: { ...options.config?.features, default: options.config?.features?.default ?? 'all',
+      enable: options.config?.features?.enable?.filter(id => !id.startsWith('privacy.')),
+      disable: [...(options.config?.features?.disable ?? []), 'privacy.analytics', 'privacy.vercel-analytics', 'privacy.notice'] },
+  } : options.config);
+  void startLocales(config?.locale);
+  // The model tree's icon font, a third-party request; viewer only (the embed has no tree).
+  if (!desktop) linkIconFont();
+
+  const render = () => ReactDOM.createRoot(container).render(
+    <React.StrictMode>
+      <App sourceProviders={options.sourceProviders} />
+    </React.StrictMode>
+  );
+  // Trace mode only: mount after the recording tracer exists, so a load can't
+  // start on the no-op tracer and lose its spans. A normal boot renders at once.
+  if (PERF_TRACE_ENABLED) void loadTracerReady.then(render);
+  else render();
+
+  // Spare parser + small-file geometry workers, prepared at idle (lib/fast-path).
+  // The runtime is its own chunk and applies its own gates (build env, URL kill
+  // switch, a host that leaves no way to open a model). It stays here, not in prepareViewer, so a hosted start whose
+  // configuration fails never spawns workers.
+  scheduleFastPath();
+
+  // Decode the schema tables a first interaction reads once a load has
+  // settled and the page is idle (lib/schema-tables/warm-schema-tables.ts).
+  // Loaded on demand so it adds nothing to the startup graph; it does nothing
+  // until a model has loaded.
+  void import('./lib/schema-tables/warm-schema-tables').then(({ startSchemaTableWarm }) => { startSchemaTableWarm(); })
+    .catch((err: unknown) => { console.warn('[schema-table warm] not started:', err); });
+}

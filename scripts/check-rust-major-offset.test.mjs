@@ -1,0 +1,433 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+/**
+ * Drives the UNMODIFIED gate (`--root <dir>`) over synthetic trees.
+ *
+ * Every case below is either the gate catching drift, or the gate refusing to
+ * report success over something it never examined. The second half is the
+ * point: a consistency gate whose scan finds no manifests, no dependency
+ * literals or no packages would print the same clean line as a real pass.
+ */
+
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const GATE = join(scriptDir, 'check-rust-major-offset.mjs');
+const REPO_ROOT = join(scriptDir, '..');
+
+const MEMBERS = ['core', 'geometry', 'processing', 'clash', 'export', 'ffi', 'wasm-bindings', 'landxml'];
+
+function run(root) {
+  try {
+    const stdout = execFileSync(process.execPath, [GATE, '--root', root], { encoding: 'utf8' });
+    return { code: 0, out: stdout };
+  } catch (err) {
+    return { code: err.status, out: `${err.stdout ?? ''}${err.stderr ?? ''}` };
+  }
+}
+
+function rootCargoToml(crateVersion, { depCount = 8 } = {}) {
+  const names = ['core', 'diff', 'geometry', 'processing', 'clash', 'export', 'wasm', 'landxml'].slice(0, depCount);
+  const deps = names.map((n) => `ifc-lite-${n} = { version = "${crateVersion}", path = "rust/${n}" }`).join('\n');
+  return `[workspace]\nmembers = ["rust/core"]\n\n[workspace.package]\nversion = "${crateVersion}"\nedition = "2021"\n\n[workspace.dependencies]\n${deps}\n`;
+}
+
+/**
+ * @param {object} opts
+ * @param {string} opts.npmVersion highest workspace package version
+ * @param {string} opts.crateVersion what the Rust manifests actually carry
+ * @param {boolean|'inherit'} opts.memberDeps `true`: each member carries an
+ *   explicit version literal; `'inherit'`: each member inherits from the root
+ *   table (`ifc-lite-core.workspace = true`, the layout since #7672); `false`:
+ *   no internal dependency at all
+ */
+function makeTree(t, { npmVersion = '6.0.1', crateVersion = '6.0.1', offsetFile, depCount = 8, memberDeps = true, packageCount = 22 } = {}) {
+  const root = mkdtempSync(join(tmpdir(), 'check-rust-major-offset-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+
+  writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'root', version: npmVersion }));
+  mkdirSync(join(root, 'packages'));
+  for (let i = 0; i < packageCount; i++) {
+    const dir = join(root, 'packages', `p${i}`);
+    mkdirSync(dir);
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: `p${i}`, version: i === 0 ? npmVersion : '0.1.0' }));
+  }
+
+  writeFileSync(join(root, 'Cargo.toml'), rootCargoToml(crateVersion, { depCount }));
+  mkdirSync(join(root, 'rust'));
+  for (const member of MEMBERS) {
+    mkdirSync(join(root, 'rust', member));
+    const dep =
+      memberDeps === 'inherit'
+        ? '\n[dependencies]\nifc-lite-core.workspace = true\n'
+        : memberDeps
+          ? `\n[dependencies]\nifc-lite-core = { version = "${crateVersion}", path = "../core" }\n`
+          : '\n[dependencies]\n';
+    writeFileSync(join(root, 'rust', member, 'Cargo.toml'), `[package]\nname = "ifc-lite-${member}"\nversion.workspace = true\n${dep}`);
+  }
+
+  if (offsetFile !== undefined) writeFileSync(join(root, 'rust-major-offset.json'), offsetFile);
+  return root;
+}
+
+const OFFSET_0 = JSON.stringify({ majorOffset: 0 });
+const OFFSET_1 = JSON.stringify({
+  majorOffset: 1,
+  reason: 'ifc-lite-geometry and ifc-lite-processing carry breaking Rust changes from #3210 under an npm minor bump.',
+  latestBreak: 'The newest break changes the public geometry and processing API contracts.',
+  refs: ['#3210', '#3216'],
+});
+
+test('RED: an offset that nothing has applied to the manifests fails, naming the remedy', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '6.1.0', offsetFile: OFFSET_1 });
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /DRIFT/);
+  assert.match(out, /7\.1\.0/);
+  assert.match(out, /sync-versions/);
+  // Drift's remedy is the sync, printed once however many literals drifted.
+  assert.equal(out.match(/Fix: run `node scripts\/sync-versions\.js`/g)?.length, 1, out);
+});
+
+test('GREEN: the same offset, applied — npm on 6.1.0, the crates on 7.1.0', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1 });
+  const { code, out } = run(root);
+  assert.equal(code, 0, out);
+  assert.match(out, /7\.1\.0/);
+});
+
+test('GREEN: offset 0 is today — one version across the monorepo', (t) => {
+  const { code, out } = run(makeTree(t, { offsetFile: OFFSET_0 }));
+  assert.equal(code, 0, out);
+});
+
+test('a member manifest left behind is caught and named', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1 });
+  writeFileSync(
+    join(root, 'rust', 'ffi', 'Cargo.toml'),
+    `[package]\nname = "ifc-lite-ffi"\nversion.workspace = true\n\n[dependencies]\nifc-lite-core = { version = "6.1.0", path = "../core" }\n`
+  );
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /rust\/ffi\/Cargo\.toml/);
+  assert.match(out, /6\.1\.0/);
+});
+
+test('an offset one major too low still fails as drift, not as a pass', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '8.1.0', offsetFile: OFFSET_1 });
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /DRIFT/);
+});
+
+// ---------------------------------------------------------------------------
+// Vacuity: every route to a success line over nothing must be a named failure.
+// ---------------------------------------------------------------------------
+
+test('vacuous: no offset file at all', (t) => {
+  const { code, out } = run(makeTree(t, {}));
+  assert.equal(code, 1);
+  assert.match(out, /NO_OFFSET_FILE/);
+  assert.match(out, /rust-major-offset\.json/);
+});
+
+test('vacuous: an empty offset file', (t) => {
+  const { code, out } = run(makeTree(t, { offsetFile: '' }));
+  assert.equal(code, 1);
+  assert.match(out, /BAD_JSON/);
+});
+
+test('vacuous: an offset that is not a non-negative integer', (t) => {
+  const { code, out } = run(makeTree(t, { offsetFile: JSON.stringify({ majorOffset: 'one' }) }));
+  assert.equal(code, 1);
+  assert.match(out, /BAD_OFFSET/);
+});
+
+test('vacuous: a major claimed with no reason and no refs', (t) => {
+  const { code, out } = run(makeTree(t, { offsetFile: JSON.stringify({ majorOffset: 1 }) }));
+  assert.equal(code, 1);
+  assert.match(out, /NO_REASON/);
+});
+
+test('vacuous: a package scan that found nothing to take a version from', (t) => {
+  const { code, out } = run(makeTree(t, { offsetFile: OFFSET_0, packageCount: 0 }));
+  assert.equal(code, 1);
+  assert.match(out, /PACKAGE_FLOOR/);
+});
+
+test('vacuous: a version that is not a semver triple', (t) => {
+  const { code, out } = run(makeTree(t, { npmVersion: '6.1', crateVersion: '6.1', offsetFile: OFFSET_0 }));
+  assert.equal(code, 1);
+  assert.match(out, /BAD_VERSION/);
+});
+
+test('vacuous: a Cargo.toml with no [workspace.package] version', (t) => {
+  const root = makeTree(t, { offsetFile: OFFSET_0 });
+  writeFileSync(join(root, 'Cargo.toml'), '[workspace]\nmembers = []\n');
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /NO_WORKSPACE_VERSION/);
+});
+
+test('vacuous: no Cargo.toml at all', (t) => {
+  const root = makeTree(t, { offsetFile: OFFSET_0 });
+  rmSync(join(root, 'Cargo.toml'));
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /NO_CARGO_TOML/);
+});
+
+test('vacuous: a workspace dependency table with too few internal literals to be the real one', (t) => {
+  const { code, out } = run(makeTree(t, { offsetFile: OFFSET_0, depCount: 2 }));
+  assert.equal(code, 1);
+  assert.match(out, /DEP_FLOOR/);
+  // A floor failure names its own remedy, not one that cannot repair it (#9783 review).
+  assert.match(out, /DEP_FLOOR fix: compare the manifests' internal dependency declarations with main/);
+  assert.doesNotMatch(out, /sync-versions\.js` and commit/);
+});
+
+test('vacuous: a root table one literal short, as when the scan skipped ifc-lite-diff (#8097)', (t) => {
+  const { code, out } = run(makeTree(t, { offsetFile: OFFSET_0, depCount: 7 }));
+  assert.equal(code, 1);
+  assert.match(out, /DEP_FLOOR/);
+});
+
+test('vacuous: member manifests that declare no internal dependency at all', (t) => {
+  // Neither an explicit literal nor an inheritance: the scan looked at nine
+  // manifests and found nothing of the kind it exists to check.
+  const { code, out } = run(makeTree(t, { offsetFile: OFFSET_0, memberDeps: false }));
+  assert.equal(code, 1);
+  assert.match(out, /DEP_FLOOR/);
+});
+
+test('GREEN: members that inherit from the root table are inspected and counted (#7672)', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1, memberDeps: 'inherit' });
+  const { code, out } = run(root);
+  assert.equal(code, 0, out);
+  // 8 literals in the root table + one inheritance per member (8).
+  assert.match(out, /16 internal dependency declaration\(s\) \(8 version literal\(s\), 8 inherited/);
+});
+
+test('an inheriting member agrees through the root literal, so a stale ROOT literal still fails', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '6.1.0', offsetFile: OFFSET_1, memberDeps: 'inherit' });
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /DRIFT/);
+  assert.match(out, /Cargo\.toml pins ifc-lite-core at 6\.1\.0/);
+});
+
+test('an explicit member literal next to inheriting members is still flagged as drift', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1, memberDeps: 'inherit' });
+  writeFileSync(
+    join(root, 'rust', 'ffi', 'Cargo.toml'),
+    `[package]\nname = "ifc-lite-ffi"\nversion.workspace = true\n\n[dependencies]\nifc-lite-core = { version = "6.1.0", path = "../core" }\n`
+  );
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /rust\/ffi\/Cargo\.toml pins ifc-lite-core at 6\.1\.0/);
+});
+
+test('vacuous: a workspace-inherited count below the floor is refused', (t) => {
+  // Inheriting is not a free pass: with only the root table and no member
+  // declaring anything, the total is below the floor.
+  const root = makeTree(t, { offsetFile: OFFSET_0, memberDeps: 'inherit' });
+  for (const member of MEMBERS.slice(2)) {
+    writeFileSync(join(root, 'rust', member, 'Cargo.toml'), `[package]\nname = "ifc-lite-${member}"\nversion.workspace = true\n`);
+  }
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /DEP_FLOOR/);
+});
+
+test('a reordered literal is still checked, not counted as absent', (t) => {
+  // TOML inline-table key order is free, so `{ path = "…", version = "…" }` is
+  // the same declaration as `{ version = "…", path = "…" }`. A pattern that
+  // demanded `version` first saw no declaration at all: the gate printed one
+  // fewer literal and called the rest agreement, and `sync-versions.js` never
+  // rewrote it either. Cargo catches the resulting mismatch, so nothing ships
+  // wrong — but a count over a region the scan never examined is the vacuity
+  // shape, not a report.
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1 });
+  writeFileSync(
+    join(root, 'rust', 'clash', 'Cargo.toml'),
+    `[package]\nname = "ifc-lite-clash"\nversion.workspace = true\n\n[dependencies]\nifc-lite-core = { path = "../core", version = "1.2.3" }\n`
+  );
+  const { code, out } = run(root);
+  assert.equal(code, 1, out);
+  assert.match(out, /DRIFT/);
+  assert.match(out, /rust\/clash\/Cargo\.toml/);
+  assert.match(out, /1\.2\.3/);
+});
+
+test('a reordered literal that AGREES is counted, so the total stays honest', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1 });
+  writeFileSync(
+    join(root, 'rust', 'clash', 'Cargo.toml'),
+    `[package]\nname = "ifc-lite-clash"\nversion.workspace = true\n\n[dependencies]\nifc-lite-core = { path = "../core", version = "7.1.0" }\n`
+  );
+  const { code, out } = run(root);
+  assert.equal(code, 0, out);
+  // 8 in the root table + one per member manifest, the reordered one included.
+  assert.match(out, /16 internal dependency declaration\(s\) \(16 version literal\(s\), 0 inherited/);
+});
+
+test('an inline `{ workspace = true }` is an inheritance, not a version literal', (t) => {
+  // `{ workspace = true }` pins nothing, so it must not inflate the LITERAL
+  // count; it is counted as an inherited declaration instead.
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1 });
+  writeFileSync(
+    join(root, 'rust', 'clash', 'Cargo.toml'),
+    `[package]\nname = "ifc-lite-clash"\nversion.workspace = true\n\n[dependencies]\nifc-lite-core = { workspace = true }\n`
+  );
+  const { code, out } = run(root);
+  assert.equal(code, 0, out);
+  assert.match(out, /16 internal dependency declaration\(s\) \(15 version literal\(s\), 1 inherited/);
+});
+
+test('vacuous: a declaration the scan cannot parse is named, not skipped', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1 });
+  writeFileSync(
+    join(root, 'rust', 'clash', 'Cargo.toml'),
+    `[package]\nname = "ifc-lite-clash"\nversion.workspace = true\n\n[dependencies]\nifc-lite-core = { version = "7.1.0", path = "../core", meta = { nested = true } }\n`
+  );
+  const { code, out } = run(root);
+  assert.equal(code, 1, out);
+  assert.match(out, /UNPARSED_DEP/);
+  // Its own line names the repair, since the footer adds none for it (#9783 review).
+  assert.match(out, /If so, remove the nested table and use .*, or extend scripts\/lib\/rust-internal-deps\.mjs/);
+  assert.doesNotMatch(out, /sync-versions\.js` and commit/);
+});
+
+test('vacuous: a [dependencies.ifc-lite-x] table header is named, not skipped', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1 });
+  writeFileSync(
+    join(root, 'rust', 'clash', 'Cargo.toml'),
+    `[package]\nname = "ifc-lite-clash"\nversion.workspace = true\n\n[dependencies.ifc-lite-core]\npath = "../core"\nversion = "1.2.3"\n`
+  );
+  const { code, out } = run(root);
+  assert.equal(code, 1, out);
+  assert.match(out, /UNPARSED_DEP/);
+});
+
+test('vacuous: a dotted ifc-lite-x.version key is named, not skipped', (t) => {
+  const root = makeTree(t, { npmVersion: '6.1.0', crateVersion: '7.1.0', offsetFile: OFFSET_1 });
+  writeFileSync(
+    join(root, 'rust', 'clash', 'Cargo.toml'),
+    `[package]\nname = "ifc-lite-clash"\nversion.workspace = true\n\n[dependencies]\nifc-lite-core.version = "1.2.3"\nifc-lite-core.path = "../core"\n`
+  );
+  const { code, out } = run(root);
+  assert.equal(code, 1, out);
+  assert.match(out, /UNPARSED_DEP/);
+});
+
+test('vacuous: the crate directory list points nowhere', (t) => {
+  const root = makeTree(t, { offsetFile: OFFSET_0 });
+  rmSync(join(root, 'rust'), { recursive: true });
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /MISSING_MANIFEST/);
+  // Only missing-manifest and floor failures, whose remedies are their own
+  // lines: sync-versions.js cannot repair them, so its footer is not printed (#9783 review).
+  const lines = out.split('\n').filter((l) => /^\s+- [A-Z_]+:/.test(l));
+  assert.ok(lines.length > 0 && lines.every((l) => /- (DEP_FLOOR|MISSING_MANIFEST):/.test(l)), out);
+  assert.doesNotMatch(out, /sync-versions\.js` and commit/);
+  // Nor the floor's: the missing manifest is why the count is low.
+  assert.doesNotMatch(out, /DEP_FLOOR fix:/);
+});
+
+test('remedies: a missing manifest does not hide the remedy of an unrelated root-table floor (#9783 review)', (t) => {
+  // The root [workspace.dependencies] count is not lowered by a missing member,
+  // so its floor still names its own fix, once, and the sync footer stays out.
+  const root = makeTree(t, { offsetFile: OFFSET_0, depCount: 2 });
+  rmSync(join(root, 'rust'), { recursive: true });
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /MISSING_MANIFEST/);
+  assert.equal(out.match(/DEP_FLOOR fix:/g)?.length, 1, out);
+  assert.doesNotMatch(out, /sync-versions\.js` and commit/);
+});
+
+test('remedies: an unparsable member declaration names how to respell it (#9783 review)', (t) => {
+  const root = makeTree(t, { offsetFile: OFFSET_0 });
+  const member = join(root, 'rust', 'ffi', 'Cargo.toml');
+  const toml = readFileSync(member, 'utf8');
+  const broken = toml.replace(/^(ifc-lite-core = \{ )/m, '$1meta = { nested = true }, ');
+  assert.notEqual(broken, toml, 'fixture edit applied');
+  writeFileSync(member, broken);
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /UNPARSED_DEP: rust\/ffi\/Cargo\.toml/);
+  assert.match(out, /rust\/ffi\/Cargo\.toml .*If so, remove the nested table and use .*`\{ workspace = true \}`/);
+});
+
+/** The gate's UNPARSED_DEP line for the root manifest; it must exist. */
+function unparsedRootLine(out) {
+  const line = out.split('\n').find((l) => /UNPARSED_DEP: Cargo\.toml/.test(l));
+  assert.ok(line, `no root UNPARSED_DEP line in:\n${out}`);
+  return line;
+}
+
+test('remedies: an unsupported spelling in the root is never told to inherit; a member may (#9783 review)', (t) => {
+  const root = makeTree(t, { offsetFile: OFFSET_0 });
+  const toml = readFileSync(join(root, 'Cargo.toml'), 'utf8');
+  writeFileSync(join(root, 'Cargo.toml'), `${toml}\n[workspace.dependencies.ifc-lite-landxml]\nversion = "6.0.1"\n`);
+  const rootOut = run(root).out;
+  const rootLine = unparsedRootLine(rootOut);
+  assert.match(rootLine, /in \[workspace\.dependencies\], which members inherit from/, rootOut);
+  assert.doesNotMatch(rootLine, /workspace = true/);
+  // A root with sub-tables and no flat [workspace.dependencies] header is still the root.
+  const subTables = makeTree(t, { offsetFile: OFFSET_0 });
+  const flat = readFileSync(join(subTables, 'Cargo.toml'), 'utf8');
+  const sub = flat.replace(/\[workspace\.dependencies\]\n[\s\S]*$/, '[workspace.dependencies.ifc-lite-core]\nversion = "6.0.1"\n');
+  assert.notEqual(sub, flat, 'fixture edit applied');
+  writeFileSync(join(subTables, 'Cargo.toml'), sub);
+  assert.doesNotMatch(unparsedRootLine(run(subTables).out), /workspace = true/);
+  // Nor does it need a bare [workspace] header: [workspace.package] alone makes it the root.
+  const implicit = makeTree(t, { offsetFile: OFFSET_0 });
+  const before = readFileSync(join(implicit, 'Cargo.toml'), 'utf8');
+  const toml2 = before.replace('[workspace]\nmembers = ["rust/core"]\n\n', '');
+  assert.notEqual(toml2, before, 'fixture edit applied');
+  assert.doesNotMatch(toml2, /^\[workspace\]$/m);
+  writeFileSync(join(implicit, 'Cargo.toml'), `${toml2}\n[workspace.dependencies.ifc-lite-landxml]\nversion = "6.0.1"\n`);
+  assert.doesNotMatch(unparsedRootLine(run(implicit).out), /workspace = true/);
+  const member = makeTree(t, { offsetFile: OFFSET_0 });
+  const ffi = join(member, 'rust', 'ffi', 'Cargo.toml');
+  writeFileSync(ffi, `${readFileSync(ffi, 'utf8')}\nifc-lite-clash.version = "6.0.1"\n`);
+  assert.match(run(member).out, /rust\/ffi\/Cargo\.toml declares .* or `ifc-lite-x\.workspace = true`/);
+});
+
+test('remedies: an unparsable root declaration names itself, not the floor (#9783 review)', (t) => {
+  const root = makeTree(t, { offsetFile: OFFSET_0 });
+  const toml = readFileSync(join(root, 'Cargo.toml'), 'utf8');
+  const broken = toml.replace(/^(ifc-lite-\S+ = \{ )/m, '$1meta = { nested = true }, ');
+  assert.notEqual(broken, toml, 'fixture edit applied');
+  writeFileSync(join(root, 'Cargo.toml'), broken);
+  const { code, out } = run(root);
+  assert.equal(code, 1);
+  assert.match(out, /UNPARSED_DEP/);
+  // Its line says how to respell it (CodeRabbit, #9783); the root defines what
+  // members inherit, so it is never told to inherit.
+  const rootLine = unparsedRootLine(out);
+  assert.match(rootLine, /If so, remove the nested table and use an inline table .* in \[workspace\.dependencies\]/, out);
+  assert.doesNotMatch(rootLine, /workspace = true/);
+  // No root-table floor line blaming a shrunk table or the pattern, and no floor remedy.
+  assert.doesNotMatch(out, /in Cargo\.toml's \[workspace\.dependencies\], below the floor/, out);
+  assert.doesNotMatch(out, /DEP_FLOOR fix:/, out);
+});
+
+// ---------------------------------------------------------------------------
+// The real tree. The gate is worthless if it cannot run on this repo.
+// ---------------------------------------------------------------------------
+
+test('the real repository passes its own gate', () => {
+  const { code, out } = run(REPO_ROOT);
+  assert.equal(code, 0, out);
+  assert.match(out, /\d+ internal dependency declaration/);
+});

@@ -1,0 +1,1947 @@
+# Rust API Reference
+
+API documentation for the Rust crates.
+
+> **Note**: For the crates published to crates.io, full generated rustdoc with source links lives on docs.rs (linked per crate below). Locally, `cargo doc --open` builds the same documentation for the whole workspace.
+
+## Workspace
+
+All crates live in one Cargo workspace (versioned together, MPL-2.0 licensed):
+
+| Crate | Path | Rustdoc | Description |
+|-------|------|---------|-------------|
+| `ifc-lite-core` | `rust/core` | [docs.rs](https://docs.rs/ifc-lite-core) | High-performance IFC/STEP parser for building data |
+| `ifc-lite-geometry` | `rust/geometry` | [docs.rs](https://docs.rs/ifc-lite-geometry) | Geometry processing and mesh generation for IFC models |
+| `ifc-lite-processing` | `rust/processing` | [docs.rs](https://docs.rs/ifc-lite-processing) | Shared IFC processing pipeline and types used by server and FFI |
+| `ifc-lite-export` | `rust/export` | local `cargo doc` | Domain-format exporters (HBJSON, OBJ, glTF/GLB, CSV, JSON, JSON-LD, STEP/IFC, IFC5/IFCX, Merged, Parquet/.bos) |
+| `ifc-lite-clash` | `rust/clash` | [docs.rs](https://docs.rs/ifc-lite-clash) | High-performance geometry kernel for IFC clash detection |
+| `ifc-lite-ffi` | `rust/ffi` | [docs.rs](https://docs.rs/ifc-lite-ffi) | C FFI bindings: native cdylib for in-process IFC parsing |
+| `ifc-lite-wasm` | `rust/wasm-bindings` | [docs.rs](https://docs.rs/ifc-lite-wasm) | WebAssembly bindings for IFC-Lite |
+
+The Python bindings (`rust/python`, PyPI package `ifclite-geom`) are excluded from the workspace and documented on the [Python API page](python.md).
+
+## Record discovery
+
+`ifc_lite_core::is_geometry_job` admits a scanned record using its raw STEP
+keyword and bytes. It preserves schema/legacy classification and the #1910
+spatial-container exception for a present `Representation`.
+`ifc_lite_processing::discovery::Discovery` collects shared prepass spans,
+first spatial records, and type-map inputs. Native `scan_entities` decorates
+jobs and retains native metadata, property and georeferencing handling.
+
+`scan_shard_result(content, start, end, classified)` returns a non-exhaustive
+`ShardScan`: records, optional class column, handoff, refusal offsets and
+malformed-record offsets. Diagnostics remain speculative until stitching.
+The five tuple APIs remain deprecated compatibility adapters until C10.
+Native and browser serial/once scans share `Discovery` and `scan::ScanClass`;
+streaming class columns use the accepted `gpu_meshes/prepass_discovery.rs`
+adapter. Metadata decoration and incremental emission stay scheduler-owned.
+
+`discovery::TypeGeometryPlan::{from_spans, from_file_missing}` in
+`rust/processing/src/discovery.rs` plans type geometry from collected spans or
+only the missing referenced-map/instantiated-type sets. Native uses
+`TypeGeometryMode::SuppressInstanced`; the browser uses `EmitTagged` for its
+Model/Types switch. `IfcTypeProduct.RepresentationMaps` accepts a bare `#n` or
+list of plain references; invalid list items are skipped, typed wrappers such
+as `IFCREPRESENTATIONMAP(#n)` are not unwrapped. Browser candidates must also
+pass full decoder admission (`decode_products`); syntax-invalid type records
+are omitted, not counted as semantic refusals.
+
+## Placement readers
+
+Use `ifc_lite_geometry::placement::Axis2Placement::{read_3d, read_2d, read_id}`
+and call `.matrix()` on the returned placement for a frame in file units.
+`EntityDecoder::{point3, direction3}` read point coordinates or raw direction
+ratios by id; `point3_at` and `direction3_at` read a referenced attribute.
+`point3_decoded` applies the same counted point rule to a record already
+decoded by that decoder from the same immutable source; propagate decode
+errors before calling it. It avoids parsing coordinates a second time.
+These leaf readers accept two or three finite numbers, promote two dimensions
+with `z = 0`, and count malformed-input refusals. For an already decoded
+direction when no decoder is available, `EntityDecoder::direction3_of` returns
+`Option<[f64; 3]>` and cannot count refusals.
+
+`placement::PlacementError::is_admission_refusal()` identifies malformed point,
+direction or real input and missing mandatory attributes. It returns false for
+dangling references, wrong record types, cycles and terminal execution stops;
+callers must propagate `PlacementError::ProgramStopped` separately. Symbolic
+extraction uses this distinction to drop refused input while retaining its
+established unresolved-placement behavior.
+
+The geometry crate's former `parse_axis2_placement_3d`,
+`parse_axis2_placement_3d_from_id`, `parse_cartesian_point`,
+`parse_cartesian_point_from_id`, `parse_direction`, and `parse_direction_from_id`
+exports are removed in the pending Rust major. `rotation_angle_about_z` remains
+available at the crate root and through `placement`.
+
+## ifc-lite-core
+
+Core parsing functionality.
+
+### Modules
+
+```rust
+pub mod parser;          // STEP tokenization and entity scanning
+pub mod decoder;         // Lazy entity decoding + entity index
+pub mod generated;       // Generated IFC type enumeration (IfcType)
+pub mod schema_gen;      // Decoded attribute values and entities
+pub mod streaming;       // Streaming parse events
+pub mod fast_parse;      // Fast single-purpose extraction helpers
+pub mod georef;          // Georeferencing extraction
+pub mod legacy_entities; // IFC2X3 legacy entity handling
+pub mod model_bounds;    // Model/placement bounds scanning
+pub mod project_units;   // Project unit resolution
+pub mod step_encoding;   // STEP string encode/decode
+pub mod units;           // Unit conversion helpers
+pub mod error;           // Error types
+```
+
+### Parser Module
+
+`ifc_lite_core::declared_schema_bounded(ifc_bytes)` reads the first actual
+`FILE_SCHEMA` identifier in the first 256 KiB of the STEP header. It skips
+comments and quoted decoys and stops at the header section boundary, returning
+`None` when no declaration is found in that window (`parser::header::MAX_HEADER_BYTES`,
+the same window the scanner searches for `DATA;`). Keywords are found by
+`parser::header::find_keyword_then`, a literal's text is
+`step_encoding::decode_step_literal`, and `parser::split_top_level_args` splits
+top-level arguments, all ignoring comments and quoted decoys.
+
+`ifc_lite_core::parser::StepRecord::parse(record)` is the zero-copy view of one
+`#id = KEYWORD ( ... )` record that every raw-byte reader goes through: it
+locates the attribute list (trivia and comments allowed wherever STEP allows
+them), and `attr`, `ref_at`, `ref_list_at`, `real_at`, `point_at`, `string_at`
+and `enum_at` read one attribute each, borrowing from the record. A list whose
+items are not all plain `#n` references is refused whole (`ref_list_at`), and
+`parse_ref` accepts `#` and digits only. `fast_parse::extract_entity_type_name`,
+`extract_first_entity_ref`, `extract_entity_refs_from_list` and
+`EntityDecoder::get_first_entity_ref_fast` are removed in favour of it.
+
+The native merged exporter also uses `StepRecord::attrs()` and `StepListItems`
+for relationship edits. A legal comment such as `#10=/* ( */IFCRELDEFINESBYPROPERTIES(...)`
+does not change the attribute boundaries: folding into the first relationship,
+removing duplicate members, and pruning empty containers edit only the selected
+values and separators. Unrelated comments and whitespace stay as authored.
+An unreadable argument list remains unedited and blocks unsafe pruning.
+List edits require the complete attribute to be one value under
+`parser::is_step_value`: a closed list followed by another value is not an
+editable list, and all its references conservatively block pruning. Legal
+trivia after a complete list remains allowed.
+
+`ifc_lite_core::parser::is_step_value(text)` and `parser::split_step_slots(inner)` are the
+strict reads for STEP WRITERS: whether text is exactly one well-formed value
+(the grammar the tokenizer reads: no bare keyword, no `1..2`, no empty list
+element, a binary is `[0-3]` plus hex, STEP whitespace only), and an argument
+list cut into untrimmed slots that rejoin byte for byte, or `None` when a
+by-index edit cannot trust it. The export crate's `step_slot` is a thin
+wrapper over them.
+
+`ifc_lite_core::optional_text(Option<&str>)` is the one "no value" rule for a decoded
+name or label: trimmed of STEP whitespace, and an empty result or a bare `$` is
+`None`. `get_string()` is already decoded, so never call `decode_ifc_string` on it.
+
+#### Token
+
+```rust
+/// STEP token types
+#[derive(Debug, Clone, PartialEq)]
+pub enum Token<'a> {
+    /// Entity reference: #123
+    EntityRef(u32),
+    /// String literal: 'text'
+    String(&'a [u8]),
+    /// Integer: 42
+    Integer(i64),
+    /// Float: 3.14
+    Float(f64),
+    /// Enum: .TRUE., .FALSE., .UNKNOWN.
+    Enum(&'a [u8]),
+    /// List: (1, 2, 3)
+    List(Vec<Token<'a>>),
+    /// Typed value: IFCPARAMETERVALUE(0.), IFCBOOLEAN(.T.)
+    TypedValue(&'a [u8], Vec<Token<'a>>),
+    /// Null value: $
+    Null,
+    /// Asterisk (derived value): *
+    Derived,
+}
+```
+
+#### EntityScanner
+
+```rust
+/// Scans IFC file for entity locations
+pub struct EntityScanner<'a> {
+    // ...
+}
+
+impl<'a> EntityScanner<'a> {
+    /// Create a scanner over the file bytes
+    pub fn new<T>(content: &'a T) -> Self;
+
+    /// Create a scanner starting at a byte position.
+    ///
+    /// Preconditions: `position` is a GLOBAL byte offset into `content` (the
+    /// returned entity spans are absolute, not shard-relative), and it must sit
+    /// at a known entity boundary — typically the byte right after a `;\n`
+    /// terminator, not inside the HEADER section or partway through an entity.
+    /// `new_at` does NOT auto-skip the STEP header; that is the caller's
+    /// responsibility (used by the sharded-scan pre-pass). Starting mid-header
+    /// or mid-entity yields incorrect spans. The offset is clamped to the buffer
+    /// length.
+    pub fn new_at<T>(content: &'a T, position: usize) -> Self;
+
+    /// Advance to the next entity: (express_id, type_name, start, end)
+    pub fn next_entity(&mut self) -> Option<(u32, &'a str, usize, usize)>;
+}
+```
+
+#### parse_entity / entity_count
+
+```rust
+/// Parse a single entity definition into (express_id, type, attribute tokens)
+pub fn parse_entity<'a, T>(input: &'a T) -> Result<(u32, IfcType, Vec<Token<'a>>)>;
+
+/// Cheap O(scan), O(1)-memory entity tally (no index allocation)
+pub fn entity_count<T>(content: &T) -> usize;
+```
+
+### Generated Schema Module
+
+#### IfcType
+
+```rust
+/// IFC entity types: all 876 entity types from the IFC4X3 schema,
+/// plus Unknown(u32) storing a CRC32 hash of unrecognized names.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum IfcType {
+    IfcBoxedHalfSpace,
+    IfcBridge,
+    IfcBuilding,
+    IfcBuildingStorey,
+    // ... 876 variants ...
+    /// Unknown/unrecognized IFC type (stores CRC32 hash)
+    Unknown(u32),
+}
+
+/// Every entity type the schema declares, in declaration order, re-exported
+/// from `ifc_lite_core` as `IFC_TYPES`.
+///
+/// The enum is exhaustive but not enumerable — `Unknown(u32)` makes it open and
+/// the ids are sparse — so anything reasoning about the WHOLE schema (mapping
+/// every class into another vocabulary, auditing coverage, generating a table)
+/// needs this rather than re-parsing the EXPRESS file.
+pub static ALL: &[IfcType];
+
+impl IfcType {
+    /// Parse from an (upper-case) type name
+    pub fn from_str(s: &str) -> Self;
+
+    /// Parse from the stable numeric type id
+    pub fn from_id(id: u32) -> Self;
+
+    /// Stable numeric type id
+    pub fn id(&self) -> u32;
+
+    /// Type name (SCREAMING case as written in STEP)
+    pub fn as_str(&self) -> &'static str;
+
+    /// Type name (CamelCase)
+    pub fn name(&self) -> &'static str;
+
+    /// This entity's attributes, in STEP declaration order — the order
+    /// `DecodedEntity::get` indexes. Supertype attributes come first, so
+    /// position 0 is `IfcRoot::GlobalId` on every rooted entity.
+    ///
+    /// These names are the GENERATED schema's (IFC4X3). An entity whose
+    /// attribute list grew between IFC releases has a different length, and
+    /// possibly different indices, in a file declaring an older `FILE_SCHEMA` —
+    /// so the positions match `DecodedEntity::get` for that file only when its
+    /// schema matches. Check `FILE_SCHEMA` before treating an index from here
+    /// as authoritative.
+    pub fn attribute_names(&self) -> &'static [&'static str];
+
+    /// One flag byte per attribute, parallel to `attribute_names()`. Decode
+    /// through `SchemaVersion::attribute`, not by hand.
+    pub fn attribute_flags(&self) -> &'static [u8];
+
+    /// Direct supertype in the schema hierarchy
+    pub fn parent(&self) -> Option<Self>;
+
+    /// Walk the hierarchy: is self a subtype of parent?
+    pub fn is_subtype_of(&self, parent: Self) -> bool;
+
+    /// Whether the entity is abstract in the schema
+    pub fn is_abstract(&self) -> bool;
+}
+```
+
+#### Schema-aware attribute names
+
+Use the file's declared schema when positional attribute names must match the
+source STEP record. The helper is re-exported from `ifc_lite_core`; entity names
+are case-insensitive, while returned EXPRESS attribute names retain their exact
+PascalCase spelling.
+
+```rust
+pub fn attribute_names_for_schema(
+    file_schema: &str,
+    entity_name: &str,
+) -> Option<&'static [&'static str]>;
+```
+
+`file_schema` accepts the bundled IFC2X3, IFC4, IFC4X1, IFC4X2, and IFC4X3 family labels,
+including standard `_ADDn`, `_TCn`, and `_RCn` revision suffixes. Revision
+suffixes are normalized to one fixed bundled registry per family (the IFC4
+registry is generated from `IFC4_ADD2_TC1`), so other accepted suffixes are
+family-level approximations and may not match the source file's positional
+attributes. It returns `None` for an unknown schema family or an entity that
+the selected registry does not declare; an entity declared with no attributes
+returns `Some(&[])`. Do not fall back to `IfcType::attribute_names()` after
+`None`, because that method describes the canonical generated IFC4X3 schema
+and could mislabel an older record's positional values.
+
+#### Attribute slot lookup by name
+
+`SchemaVersion` (re-exported from `ifc_lite_core`) names the five bundled EXPRESS
+registries. `SchemaVersion::attribute` answers where a named attribute lives in
+one schema and what shape it has, from the same generated tables as
+`attribute_names()`:
+
+```rust
+pub enum SchemaVersion { Ifc2x3, Ifc4, Ifc4x1, Ifc4x2, Ifc4x3 }
+
+pub struct AttrSlot {
+    /// Position in the STEP record, as `DecodedEntity::get` indexes it.
+    pub index: usize,
+    /// Ref, RefList, List, Real, Int, Text, Enum, Logical, Binary or Select.
+    pub kind: AttrKind,
+    /// The value may be written as a STEP list (LIST/SET/ARRAY, a defined type
+    /// that is one, or a select with such an alternative).
+    pub aggregate: bool,
+    /// The EXPRESS declaration says OPTIONAL.
+    pub optional: bool,
+}
+
+impl SchemaVersion {
+    pub fn from_file_schema(label: &str) -> Option<Self>;
+    pub fn attribute(self, entity: &str, name: &str) -> Option<AttrSlot>;
+    pub fn attributes(self, entity: &str) -> Option<impl ExactSizeIterator<Item = AttrSlot>>;
+}
+```
+
+Entity and attribute names compare ASCII-case-insensitively. `None` is explicit:
+an unknown schema label (`from_file_schema`), an entity the schema does not
+declare, or an attribute the entity does not have. `attribute` replaces the
+removed `IfcType::attribute_index`; `SchemaVersion::Ifc4x3.attribute(..)` is
+its canonical-IFC4X3 reading.
+
+#### Typed attribute slots
+
+A literal attribute index (`entity.get_ref(5)`) names nothing and cannot say which
+schema it assumes. `ifc_lite_core::slot` names the attribute instead, from the same
+registries as `attribute_names()`:
+
+```rust
+use ifc_lite_core::slot;
+
+let units = project.ref_at(slot::IfcProject::UNITS_IN_CONTEXT);   // Option<u32>
+let placement = wall.ref_at(slot::IfcWall::OBJECT_PLACEMENT);      // inherited attrs are flattened in
+```
+
+* One zero-sized struct per entity (all 1,021 the bundled schemas declare), one const per
+  attribute, named by its IFC4X3 spelling in SCREAMING_SNAKE. A same-position rename
+  between releases shares one const (`attribute-renames.json` in `@ifc-lite/codegen`);
+  a semantic replacement does not (`IfcSpace.PredefinedType` is absent in IFC2X3).
+* `Slot<K>` has the same position in every bundled schema that declares the entity, so it
+  folds to the same immediate as the literal. `SchemaSlot<K>` moves between schemas and
+  has no `index()`: resolve it with `SchemaSlot::at(SchemaVersion)` (an explicit pin) or
+  `EntityDecoder::slot(..)` (the source's `FILE_SCHEMA`, IFC4X3 when undeclared or
+  unknown), once, outside any per-entity loop.
+* `K` is the value kind: `Ref`, `RefList`, `List`, `Real`, `Int`, `Text`, `Enum`,
+  `Logical`, `Binary` or `Select` (a mixed select, or a kind that differs between
+  schemas; it fits every accessor).
+* `DecodedEntity::{attr, ref_at, ref_list_at, real_at, int_at, string_at, enum_at,
+  logical_at, binary_at, list_at}` take `impl Into<SlotIx<K>>`: a `Slot` of the matching
+  kind, or a computed `usize` for generic walkers. A bare integer literal also
+  compiles (it infers `usize`), so the positional-read ratchet
+  (`rust/processing/tests/positional_read_ratchet.rs`) counts `*_at(<literal>)` too.
+* Debug builds assert the entity is the slot's owner or a subtype of it.
+
+The old `get`, `get_ref`, `get_float`, `get_string`, `get_list` and `get_refs` keep working.
+
+#### has_geometry_by_name
+
+```rust
+/// Check if entity type typically has geometry (cached, name-based)
+pub fn has_geometry_by_name(type_name: &str) -> bool;
+```
+
+### Decoder Module
+
+#### EntityIndex / build_entity_index
+
+```rust
+/// Index of entity byte ranges in the file: express_id -> (start, end)
+pub type EntityIndex = FxHashMap<u32, (usize, usize)>;
+
+/// Build the index in one scan over the file bytes
+pub fn build_entity_index<T>(content: &T) -> EntityIndex;
+```
+
+#### ColumnarEntityIndex (wasm workers)
+
+Wasm geometry workers keep the shared entity index as sorted `u32` columns
+(`ids` / `starts` / `lengths`) and look up by `binary_search` instead of
+materializing a per-worker `FxHashMap` (#1682). Native / server paths still
+use `EntityIndex`.
+
+```rust
+pub struct ColumnarEntityIndex { /* ids, starts, lengths */ }
+
+impl ColumnarEntityIndex {
+    pub fn from_columns(ids: &[u32], starts: &[u32], lengths: &[u32]) -> Self;
+    // Each returns Err(SpanBeyondU32) when a record's start or length does not
+    // fit u32 (a source of 4 GiB or more keeps the usize-carrying EntityIndex).
+    pub fn from_scan<T>(content: &T) -> Result<Self, SpanBeyondU32>;
+    pub fn from_hashmap(map: &EntityIndex) -> Result<Self, SpanBeyondU32>;
+    pub fn from_hashmap_consuming(map: EntityIndex) -> Result<Self, SpanBeyondU32>;
+    pub fn lookup(&self, id: u32) -> Option<(usize, usize)>;
+}
+```
+
+#### EntityDecoder
+
+```rust
+/// Entity decoder for lazy parsing from raw IFC bytes,
+/// with per-decoder caches (decoded entities, points, placements, units).
+pub struct EntityDecoder<'a> {
+    // ...
+}
+
+impl<'a> EntityDecoder<'a> {
+    /// Create decoder over the file bytes (index built lazily)
+    pub fn new<T>(content: &'a T) -> Self;
+
+    /// Create decoder with a pre-built index
+    pub fn with_index<T>(content: &'a T, index: EntityIndex) -> Self;
+    pub fn with_arc_index<T>(content: &'a T, index: Arc<EntityIndex>) -> Self;
+    /// Wasm path: attach a shared columnar index (binary-search lookup)
+    pub fn with_arc_columnar_index<T>(content: &'a T, index: Arc<ColumnarEntityIndex>) -> Self;
+    /// Install a direct-address index for a source with u32 byte offsets
+    pub fn set_dense_index(&mut self, index: Arc<DenseEntityIndex>);
+
+    /// Decode an entity by express id (cached)
+    pub fn decode_by_id(&mut self, entity_id: u32) -> Result<DecodedEntity>;
+
+    /// Decode an entity by byte range
+    pub fn decode_at(&mut self, start: usize, end: usize) -> Result<DecodedEntity>;
+
+    /// Length-unit scale of the file (metres per file unit), cached
+    pub fn length_unit_scale(&mut self) -> f64;
+}
+```
+
+The decoder also exposes fast single-purpose accessors used by the geometry pipeline (`get_cartesian_point_fast`, `get_polyloop_coords_cached`, `get_entity_ref_list_fast`, ...); see `rust/core/src/decoder.rs`.
+
+`EntityDecoder::direction3_of(&entity)` reads an already decoded `IfcDirection`
+when no decoder is available. It accepts exactly one `DirectionRatios` attribute
+containing two or three finite plain numeric values and returns the raw
+`Option<[f64; 3]>`, promoting two ratios with `z = 0` without normalizing or
+rejecting a zero vector. A wrong record type, extra attributes, malformed list
+or non-finite ratio returns `None`. This read does not decode or count refusals.
+It is transitional (removed by C2): prefer `direction3_at`, which counts its
+refusals in `refused_records()`.
+
+`DenseEntityIndex::try_from_columns(ids, starts, lengths)` accepts sorted, unique
+IDs and `u32` span columns. It returns `None` if the columns disagree or direct
+addressing would allocate more than compact columns. `lookup(id)` preserves
+missing IDs and empty spans. Install an index only on a decoder for the same
+source. Native loading selects this representation when suitable, uses compact
+sorted columns for sparse IDs, and retains the hash-index path for sources whose
+offsets exceed `u32`. Caller-supplied `Arc<EntityIndex>` values remain supported.
+Compact staging has a source-based row budget; denser record streams switch to
+hash indexing during the scan, coalescing duplicate IDs as they arrive.
+
+### Streaming Module
+
+#### ParseEvent
+
+```rust
+/// Events emitted during streaming parse
+#[derive(Debug)]
+pub enum ParseEvent {
+    /// Parsing started
+    Started { file_size: usize, timestamp: f64 },
+    /// Entity discovered during scanning
+    EntityScanned { id: u32, ifc_type: IfcType, position: usize },
+    /// Geometry processing completed for an entity
+    GeometryReady { id: u32, vertex_count: usize, triangle_count: usize },
+    /// Progress update
+    Progress {
+        phase: String,
+        percent: f32,
+        entities_processed: usize,
+        total_entities: usize,
+    },
+    /// Parsing completed
+    Completed { duration_ms: f64, entity_count: usize, triangle_count: usize },
+    /// Error (non-fatal)
+    Error { message: String, position: Option<usize> },
+}
+```
+
+#### StreamConfig
+
+```rust
+/// Streaming parser configuration
+#[derive(Debug, Clone)]
+pub struct StreamConfig {
+    /// Yield progress events every N entities
+    pub progress_interval: usize,
+    /// Skip these entity types during scanning
+    pub skip_types: Vec<IfcType>,
+    /// Only process these entity types (if specified)
+    pub only_types: Option<Vec<IfcType>>,
+}
+// Default: progress_interval = 100; skip_types = owner history,
+// person, organization, application; only_types = None.
+```
+
+#### parse_stream
+
+```rust
+/// Stream IFC file parsing with events (async Stream)
+pub fn parse_stream<T>(
+    content: &T,
+    config: StreamConfig,
+) -> Pin<Box<dyn Stream<Item = ParseEvent> + '_>>;
+```
+
+### Schema Gen Module
+
+#### AttributeValue
+
+```rust
+/// Decoded attribute value
+#[derive(Debug, Clone)]
+pub enum AttributeValue {
+    EntityRef(u32),
+    String(String),
+    Integer(i64),
+    Float(f64),
+    Enum(String),
+    List(Vec<AttributeValue>),
+    Null,
+    Derived,
+}
+
+impl AttributeValue {
+    pub fn from_token(token: &Token) -> Self;
+    pub fn as_entity_ref(&self) -> Option<u32>;
+    pub fn as_string(&self) -> Option<&str>;
+    pub fn as_enum(&self) -> Option<&str>;
+    pub fn as_float(&self) -> Option<f64>;
+    pub fn as_int(&self) -> Option<i64>;
+    pub fn as_list(&self) -> Option<&[AttributeValue]>;
+}
+```
+
+#### DecodedEntity
+
+```rust
+/// Fully decoded entity
+#[derive(Debug)]
+pub struct DecodedEntity {
+    pub id: u32,
+    pub ifc_type: IfcType,
+    pub attributes: std::sync::Arc<Vec<AttributeValue>>,
+}
+```
+
+### Error Module
+
+```rust
+/// Parser error type
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("Parse error at position {position}: {message}")]
+    ParseError { position: usize, message: String },
+
+    #[error("Invalid entity reference: #{0}")]
+    InvalidEntityRef(u32),
+
+    #[error("Invalid IFC type: {0}")]
+    InvalidIfcType(String),
+
+    #[error("Unexpected token at position {position}: expected {expected}, got {got}")]
+    UnexpectedToken { position: usize, expected: String, got: String },
+
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("UTF-8 error: {0}")]
+    Utf8(#[from] std::str::Utf8Error),
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
+```
+
+---
+
+## ifc-lite-geometry
+
+Geometry processing and mesh generation. CSG (void cutting, boolean clipping) runs on the in-tree pure-Rust exact mesh-arrangement kernel (`src/kernel/`) on every target, native and wasm32 alike.
+
+`ifc_lite_geometry::extract_swept_disk(entity, decoder)` reads an authored
+`IfcSweptDiskSolid` into `AnalyticSweptDisk`, with an ordered `segments` list of
+`AnalyticCurveSegment::Line` and `Arc` values. The result is in representation-local
+IFC length units; `AnalyticStatus::Unsupported` carries a reason and no partial
+segments when the directrix cannot be described exactly. The processing API below
+places those segments in product world coordinates.
+
+`extract_analytic_extrusion(entity, decoder)` reads a source
+`IfcExtrudedAreaSolid` without tessellation. Its `AnalyticExtrusion` retains the
+authored `SweptArea` and `Position` STEP IDs, raw file-unit `Depth`, authored
+`IfcDirection.DirectionRatios`, a derived unit axis, and a separate matrix for
+the solid-local `Position`. `extract_analytic_profile` resolves exact closed
+line and arc loops for rectangles, circles, and supported arbitrary profiles,
+including holes, signed winding area, and exact perimeter in file units. The profile's own `Position` matrix
+remains separate. Arbitrary boundaries also require conservative
+[topology validation](#analytic-arbitrary-profile-topology), including contained,
+disjoint holes; unresolved topology produces `Unsupported`. Unsupported profile geometry or malformed extrusion
+parameters produce `AnalyticStatus::Unsupported` with a reason; no sampled
+outline is substituted. `ProfileType` must be `AREA`, and
+`ValidExtrusionDirection` rejects a direction perpendicular to the solid's
+local Z axis. These are **source-local, IFC Z-up file-unit** values:
+product placement, representation mapping, unit conversion to world metres,
+and later CSG remain distinct steps.
+
+### Features
+
+```toml
+default = []          # no optional features
+debug_geometry = []   # extra geometry debugging output
+csg_capture = []      # measurement-only CSG corpus capture for benches
+observability = []    # route diagnostics through `tracing` instead of eprintln
+```
+
+### Key Types (crate-root re-exports)
+
+Most modules are crate-private; consumers use the re-exports from `ifc_lite_geometry::*`.
+
+#### Mesh
+
+```rust
+/// Triangle mesh representation
+#[derive(Debug, Clone)]
+pub struct Mesh {
+    /// Vertex positions (x, y, z)
+    pub positions: Vec<f32>,
+    /// Vertex normals (nx, ny, nz)
+    pub normals: Vec<f32>,
+    /// Triangle indices (i0, i1, i2)
+    pub indices: Vec<u32>,
+    /// Whether the RTC offset has already been subtracted from positions
+    pub rtc_applied: bool,
+    /// Per-mesh local origin (f64) in the RTC/world frame; when non-zero,
+    /// positions are stored relative to it for f32 precision
+    pub origin: [f64; 3],
+    /// Instancing side-channel; None on the flat path
+    pub instance_meta: Option<InstanceMeta>,
+    // ...
+}
+
+impl Mesh {
+    pub fn vertex_count(&self) -> usize;
+    pub fn triangle_count(&self) -> usize;
+    /// Axis-aligned bounds of positions
+    pub fn bounds(&self) -> (Point3<f32>, Point3<f32>);
+}
+```
+
+Related mesh types: `SubMesh`, `SubMeshCollection`, `InstanceMeta`.
+
+#### representation
+
+`ifc_lite_geometry::representation` is the decoder-only home of a product's
+representation chain (`Representation(6)` to `IfcProductDefinitionShape.Representations(2)`
+to `Items(3)`, and `IfcMappedItem` to `MappingSource` to `MappedRepresentation`).
+It meshes nothing and owns no cache. `ProductShape::representations()` exposes
+the decoded list in file order; `select()` applies the caller's named policy.
+The crate-private `representation/structural.rs` serves consumers that need
+less: `product_shape_id` reads identity without decoding, `rep_item_ids` yields
+references for lazy RTC sampling, and `reference_only_opening` checks the
+bounded representation list without inspecting geometry. `representation/unwrap.rs`
+contains first-item mapped/boolean probe chains with explicit caller policies;
+it does not replace the branching visitor walk.
+
+```rust
+pub fn product_shape(element: &DecodedEntity, d: &mut EntityDecoder) -> Result<Option<ProductShape>, ShapeError>;
+pub fn rep_items(rep: &DecodedEntity, d: &mut EntityDecoder) -> Result<Vec<DecodedEntity>, ShapeError>;
+impl ProductShape { pub fn select(&self, element: &DecodedEntity, s: Select) -> impl Iterator<Item = &DecodedEntity>; }
+pub enum Select { Meshed, Body, RtcVotable, Any, Where(fn(..) -> bool) } // Meshed = what renders
+pub struct RepresentationWalk { pub select: Select, pub nested: NestedMaps }
+// product / map / mapped_item drive a WalkVisitor in DFS pre-order; nesting is
+// iterative, with caller-selected depth/cycle and expansion policies.
+// MappedLevel::local_transform returns MappingTarget · MappingOrigin in file units.
+pub fn meshed_representations(element, representations) -> impl Iterator; // = Select::Meshed
+```
+
+`NestedMaps::Expand { max_depth, max_levels }` bounds branching work in the
+walker. Use `MAX_WALK_LEVELS` (65,536) as the default allowance.
+Two independent counters share that limit: mapped-level attempts (after depth
+and cycle checks, before resolving the source) and `Items` members. Every
+attempt pays, distinct mapped item or not, because each one expands a shared
+source. A first read of a distinct `Items` list pays only for references that
+repeat an earlier one in the same list; its distinct items are bounded by the
+file itself and free, so one wide list of distinct items is never refused
+(#9102). A repeated read pays every member, including repeated valid DAG nodes
+and ignored non-reference members.
+Each charge is admitted before allocating or decoding the list's members.
+Product representations share the counters; each public walk call starts
+fresh. This bounds expansion work, not source parsing or visitor-owned
+computation.
+
+Exhaustion reports one `WalkRefusal::Budget { max_levels }` and stops the entire
+walk, unwinding every entered level. A root-list refusal identifies the
+representation ID and sets `WalkCtx::shape_rep`; nested refusals identify the
+mapped item and exclude it from the path. Product/map calls still return
+`Ok(())` on budget refusal: callers must handle the visitor's refusal channel to
+report truncation. Existing `ShapeError` results remain errors.
+
+Class X entry policy (#8007/#7781), an explicit exception to the former eager
+recursive behavior: a nested level resolves `MappingSource` and
+`MappedRepresentation` before `enter_map`, but reads, validates, charges and
+decodes its `Items` only after the callback returns `Continue`. List charging
+still precedes all member allocation/decoding, including ignored non-references.
+`SkipChildren` and `Stop` suppress child-list charges, decoding and errors, even
+for missing or malformed `Items`; both still pair entry with `leave_map`.
+A nested `MissingItems`, `Decode` or item-budget refusal now happens inside the
+entered scope, with a paired leave, while its refusal context excludes that
+level. Nonterminal malformed-list refusals allow later siblings; `Budget` stops
+globally. Depth/cycle checks still precede level admission; level admission
+still precedes source resolution and the callback, even for a skipped level.
+An over-budget list is refused before examining members, so it can supersede a
+decoder error. Root lists retain their existing precharge before member decode,
+without a mapped-level entry callback; their errors remain `ShapeError`.
+
+This laziness permits a visitor to reject/skip a source before paying for its
+children (for example, an already cached source or a failed transform). It is
+not sufficient for strict cache-independent admission. These generic meters
+bound actual expanded work; they do **not** charge cached logical occurrences
+that a visitor skips. The router's #7887 decoder-only product admission prepass
+now charges root members and repeated mapped occurrences across the selected
+meshed representations before rendering, independently of renderer cache hits.
+The existing `GeometryProgram` remains the renderer. A generic walk visitor's
+cache hit is still not proof that this lower walk validated all descendants.
+Continued expansion
+retains both work bounds and reports truncation. `FirstChain` remains unmetered
+by either work counter (no `u32::MAX` sentinel); its depth and cycle policy is
+unchanged. `Refuse` and `Leaf` also have no work meters.
+
+Level entities are pre-callback snapshots. The callback's mutable decoder can
+change which entity each child reference resolves to: child decoding now sees
+the post-callback decoder, while the already resolved mapped representation's
+`Items` attribute remains the snapshot. A fully decoded list is still a snapshot
+before its first item callback. No panic-unwind cleanup guarantee is added;
+normal stop/refusal cleanup pairs every entered scope. The Class X prerequisite
+introduced this policy with the recursive walker and its path-scoped set.
+
+The Class R implementation (#8007) uses an explicit DFS task stack (`List`,
+`Enter`, `Leave`) instead of native recursion, preserving that entry, refusal
+and callback policy. The active level path also supplies cycle checks; shared
+nodes on sibling paths remain separate occurrences. All five walk attribute
+reads use named slot indices without typed-owner assertions, preserving the
+malformed-target refusal and root `ShapeError` behavior (#8020).
+`MappedLevel::local_transform` delegates to the shared mapped-transform module
+and returns `MappingTarget · MappingOrigin` in file units, preserving
+target-before-origin error precedence. Router transform calls and the mapped
+RTC vote share that definition. The outer RTC traversal remains recursive.
+The task engine and transform consolidation introduce no additional work-policy
+exception. Source recovery retains the original policy and iterative regression
+tests; runtime validation and performance qualification of this head are pending.
+
+`WalkRefusal` now distinguishes `MissingSource`, `UnresolvedSource`,
+`MissingMappedRepresentation`, `UnresolvedMappedRepresentation`, `MissingItems`
+and `Decode(core::Error)` instead of `Dangling`/`Malformed`. A `#n` whose record
+cannot be decoded is `Decode`, whereas a present non-reference slot is
+`Unresolved*`. `TooDeep { max_depth }` carries the configured limit.
+`WalkRefusal::into_error(item_id)` preserves the historical strict refusal messages
+and wraps decoder failures in `Error::CoreError`. `WalkVisitor::refused` receives
+`&DecodedEntity` instead of a numeric id (read `.id` for the old identifier), so
+future strict visitors can inspect the refused mapped item. For a root budget
+refusal that entity is the holding representation, with `shape_rep` set.
+
+Source breaks, covered by the pending Rust major in `rust-major-offset.json`:
+`Expand` gains `max_levels`; `WalkRefusal` replaces/removes variants, changes
+`TooDeep` to a struct variant and adds `Budget`/`Decode`; it no longer implements
+`Clone`, `Copy`, `PartialEq` or `Eq` because the decoder error is owned; and
+`WalkVisitor::refused` is now required and implementations must change their argument type.
+`into_error` is additive. These breaks are recorded as Rust break #15 against
+the published Rust 25.0.0 baseline, with `majorOffset` 15. This is a source-level
+API assessment; no new cargo-semver-checks measurement is claimed.
+
+The ordinary renderer remains owned by GeometryProgram/MappingControl. Its
+separate internal Class X policy (#7873) gives each controller invocation two
+independent 65,536 allowances: reached mapped attempts and materialized Items
+members. Every mapped attempt pays, including cache hits and don't-bake skips,
+which avoid child-list charges but still pay their attempt. The four
+source-list boundaries charge a repeated list in full, including ignored
+non-reference members, before decoding it; a controller's first read of a
+distinct list pays only for its repeated references (#9102). Existing
+path/depth checks take precedence.
+
+A typed logical refusal is distinct from resource/cancellation `ProgramStop`.
+Root refusal returns an error. Nested refusal reports once under its parent's
+source policy, stops remaining siblings and closes entered sources innermost
+first, retaining the completed geometry prefix with its transforms. Partial
+sources and refused templates are not published. Actual resource stops remain
+sticky. Source-step debits become controller state only after reply acceptance.
+The don't-bake eligibility probe accepts exactly one raw reference and decodes
+at most that member after root mapped-attempt admission. Malformed multi-slot
+Items with ignored members fall through to guarded flat materialization.
+These controller meters bound expanded rendering work, not memory. Whole-product,
+cache-independent admission is implemented in `representation/product_budget.rs`
+and called by `program/product/admission.rs` before rendering. It charges root
+members and repeated mapped occurrences across `Select::Meshed` representations,
+retains completed roots, and withholds the current and later roots on budget
+exhaustion. `profile_extractor.rs` uses that same admission and walks the admitted
+roots for extrusion profiles, reporting refusals through its drawing diagnostics.
+The controllers remain responsible for rendering the admitted roots.
+
+#### mesh_check (test-support)
+
+`ifc_lite_geometry::mesh_check` is the one home for closure, edge-pairing and
+signed-volume checks over triangle soups. It is `pub` only under the
+`test-support` feature (the shared test oracles delegate to it) and
+`pub(crate)` otherwise.
+
+```rust
+pub enum VertexKey { Bits, BitsZeroFolded, GridDiv(f64), GridMul(f64), Index }
+pub enum Degenerate { SkipTriangle, SkipEdge, Reject }
+impl EdgeLedger {
+    pub fn build(mesh: &Mesh, key: VertexKey, degenerate: Degenerate) -> Self;
+    pub fn directed_closed(&self) -> bool;
+    pub fn strictly_paired(&self) -> bool;
+    pub fn undirected_defects(&self) -> usize;
+}
+/// The documented "watertight": 0.1 mm grid, collapsed triangles skipped,
+/// every edge used once each way, non-empty.
+pub fn is_watertight(mesh: &Mesh) -> bool;
+pub fn signed_volume(mesh: &Mesh) -> f64;
+```
+
+#### Profiles and extrusion
+
+```rust
+pub use profile::{Profile2D, Profile2DWithVoids, ProfileType, VoidInfo};
+pub use profile_extractor::{extract_profiles, ExtractedProfile};
+pub use extrusion::{extrude_profile, extrude_profile_lofted, extrude_profile_with_voids};
+```
+
+#### GeometryRouter and processors
+
+```rust
+/// Trait for geometry processors
+pub trait GeometryProcessor {
+    /// Process entity into mesh. `quality` selects tessellation detail.
+    fn process(
+        &self,
+        entity: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+        schema: &IfcSchema,
+        quality: TessellationQuality,
+    ) -> Result<Mesh>;
+
+    /// Get supported IFC types
+    fn supported_types(&self) -> Vec<IfcType>;
+}
+
+/// Routes an entity to the processor registered for its IfcType
+pub struct GeometryRouter {
+    // ...
+}
+```
+
+Built-in processors (all re-exported at the crate root): `ExtrudedAreaSolidProcessor`, `ExtrudedAreaSolidTaperedProcessor`, `FacetedBrepProcessor`, `AdvancedBrepProcessor`, `BooleanClippingProcessor`, `FaceBasedSurfaceModelProcessor`, `PolygonalFaceSetProcessor`, `RevolvedAreaSolidProcessor`, `SurfaceOfLinearExtrusionProcessor`, `SweptDiskSolidProcessor`, `TriangulatedFaceSetProcessor`.
+
+For routers processing batches from one immutable model,
+`GeometryRouter::new_brep_signature_cache()` creates a `SharedBrepSignatureCache`.
+Pass a clone to each router's `enable_shared_brep_signature_cache` to reuse
+completed faceted-BREP signatures when item deduplication is enabled. Create a
+new cache whenever the source model changes: signatures are keyed by express
+ID. Tessellation quality, unit scale and RTC remain router-local and are folded
+into the final deduplication key. The native processing pipeline manages this lifetime automatically.
+
+`GeometryRouter::with_scale_and_local_frame(unit_scale, enabled)` fixes the
+mesh-coordinate frame when the router is created. Use it when one operation
+must produce identical local-frame geometry across native and wasm targets;
+ordinary routers continue to use the target and environment default. The frame
+choice cannot be changed after construction because router caches depend on it.
+
+`RouterConfig` is the value type for the router's meshing choices: `unit_scale`, `rtc_offset`, `tessellation_quality`,
+`local_frame`, `skip_small_cuts` and `instancing_batch_local`.
+`GeometryRouter::from_config(config)` builds a router from one, arming no
+caches, and `GeometryRouter::config()` reads the effective values back (a
+refused length unit reads back as `unit_scale == 1.0`). This is **not a full
+router snapshot**: length-unit refusal is deliberately not serialized.
+Rebuilding from `router.config().clone()` loses refusal; pass the raw invalid
+scale or call `refuse_length_unit()` on every rebuilt router before meshing.
+The `with_*` constructors build through `from_config`, and the `set_*` methods remain.
+Configuration changes advance the router's execution generation, so a change
+while a product holds the execution lease refuses that product's publication.
+Equal-value quality/skip calls remain no-ops; the batch-local setter always
+advances the generation. Build the router, inject its shared caches, then lease
+it. Resource budgets, deadlines and cache accounts keep their execution owners;
+cloning a config does not copy or reset them.
+
+For repeated `IfcMappedItem` sources, `mapping_origin_transform(source, decoder)`
+parses the source map's origin once. `resolve_scaled_mapped_item_transform_with_origin_loader`
+accepts a loader for that matrix and still parses each item's `MappingTarget`
+before invoking it; both methods use the same target-times-origin composition
+as `resolve_scaled_mapped_item_transform`.
+
+Other notable re-exports: `orient_mesh_outward`, `calculate_normals`, `ClippingProcessor`, `Plane`, `Triangle` (CSG), `hash_mesh_world` / `GeometryHasher` (geometry-diff hashing), instancing encode/decode helpers, and the nalgebra types `Point2`, `Point3`, `Vector2`, `Vector3`.
+
+`embedded_raster_dimensions(step_binary)` returns optional PNG/JPEG dimensions
+from an IFC binary literal without decoding pixels. It supports allocation
+preflight; a readable header does not certify a complete or valid image stream.
+
+---
+
+## ifc-lite-processing
+
+The processing `style::resolve_element_color` adapter accepts a product, a flat
+`FxHashMap<u32, [f32; 4]>` prepass colour index, and a decoder. It uses the
+canonical style-source walk before the element-keyed material fallback.
+
+Shared processing pipeline used by the native server, the FFI DLL, the Python bindings, and the WASM bindings. Parallelised with rayon on native targets.
+
+Key re-exports:
+
+```rust
+// One-call pipeline: IFC bytes -> per-element meshes
+pub use processor::{
+    process, process_geometry,
+    Batching, Features, FrameEvent, OnBatch, OpeningFilterMode, ProcessingRequest,
+    ProcessingResult, ProcessingSink,
+    /* deprecated, deleted in the next major: process_geometry_filtered,
+       process_geometry_with_index, process_geometry_streaming and the other
+       `process_geometry_*` variants; StreamingOptions */
+};
+
+// Analysis-ready export document (welded, Z-up, world metres)
+pub use geometry_export::{build_geometry_data_export, ExportedElement, GeometryDataExport};
+
+// Optional authored swept-disk checks and reusable swept-disk/extrusion sources
+pub use analytic_export::{
+    check_swept_disk, extract_analytic_quantity_sources, AnalyticQuantitySources,
+    extract_swept_disk_descriptions, extract_swept_disk_definitions,
+    extract_extrusion_definitions, AnalyticSourceContext, AnalyticSourceKey,
+    extrusion_nominal_quantities, DirectrixMetrics, DirectrixSegmentMetrics,
+    ExtrusionDefinition, ExtrusionDefinitions, ExtrusionInstance,
+    ExtrusionNominalQuantities, SweptDiskDescriptions,
+    SweptDiskCheckError, SweptDiskCheckFinding, SweptDiskCheckOptions,
+    SweptDiskCheckReport, SweptDiskFindingCode, SweptDiskOccurrence,
+    SweptDiskDefinition, SweptDiskDefinitions,
+    SweptDiskInstance, SweptDiskSourceKey, SweptDiskSourceContext,
+    SweptDiskNominalQuantities,
+};
+
+pub use georeferencing::{
+    extract_georeferencing, extract_georeferencing_with_index, Georeferencing,
+};
+pub use ifc_lite_geometry::TessellationQuality;
+pub use style::{default_color_for_type, Rgba};
+pub use types::mesh::{InstanceRecord, MeshData, RawInstanceOccurrence};
+pub use types::response::{CoordinateInfo, ModelMetadata, ParseResponse, ProcessingStats};
+pub use parallel_scan::build_entity_index_parallel;
+```
+
+Material-layer slicing is opt-in: `ProcessingRequest::default().layer_slicing(true)`;
+the default is false and does not build the native material-layer index.
+The browser retains its separate merge-layers setting (`setMergeLayers`, see [WASM diagnostics and tuning](./wasm.md#diagnostics-and-tuning)).
+
+`process(content, &ProcessingRequest, &mut sink)` is the one native entry point.
+`ProcessingRequest` is a `#[non_exhaustive]` value type with a builder; the two
+named shapes are `ProcessingRequest::default()` (the streaming shape, 50-job
+chunks) and `ProcessingRequest::full_pass()` (one chunk, for the server routes,
+exporters and bindings). It carries the opening filter, tessellation quality,
+`Batching` (initial and throughput chunk sizes, `fast_first`), `Features`
+(properties, presentation layers, quick-metadata bootstrap, finishes), whether to retain
+the emitted meshes, instancing, an id allow-list (`None` is the unfiltered pass,
+`Some(empty)` meshes nothing), an injected entity index and a cancel flag.
+
+A `ProcessingSink` hears the pass while it runs; every event has a no-op default
+and `()` listens to nothing. Order: `on_bootstrap` at most once, then `on_frame`
+exactly once (the frame and the baked basis, before the first batch and also for
+a file with no geometry), then `on_batch` interleaved with `on_color_update`
+(deferred styles, replayed after the first batch). Events fire once per chunk.
+With `Features::finishes` on (off by default), `on_finishes` fires immediately
+before every `on_batch` with each mesh's IFC-authored finish (`finishes[i]` is
+`meshes[i]`'s, `None` where none is authored). It is the `style::ModelFinishes`
+join, computed from the pass's own scan, so a consumer does not read the file a
+second time for it.
+`OnBatch::new(|meshes, processed, total| ..)` is the sink for a caller that only
+streams meshes out.
+
+```rust
+use ifc_lite_processing::{process, Batching, ProcessingRequest, TessellationQuality};
+
+let request = ProcessingRequest::full_pass().quality(TessellationQuality::High);
+let result = process(&bytes, &request, &mut ());
+```
+
+`ifc_lite_processing::scan::ScanClass::classify(keyword)` is the one table of STEP
+keywords a scan loop reacts to (styled items, relationships, project / site /
+building, mapped items, property records, ...). The native scan, `PrepassSpans::stash`
+and the sharded scan's `classify_type_name` all match on it; `u8::from(class)`
+is the shard wire code.
+
+`ParseResponse::from_result(cache_key, result)` is the one mapping from a
+`ProcessingResult` to the serialised response. The FFI buffer is exactly that
+response: meshes in Z-up with metadata and stats, without symbolic data or IFC-authored finishes. The server's `POST /api/v1/parse`
+builds on it and adds Y-up meshes carrying their IFC-authored finish and
+symbolic data with provenance.
+
+`process_geometry(content)` stays as the convenience for the default full pass.
+The other ten `process_geometry_*` functions are `#[deprecated]` delegates onto
+`process` and are deleted in the next major release.
+
+`extract_swept_disk_descriptions(ifc_bytes, ids)` returns the outer `Radius`,
+optional `InnerRadius`, and ordered exact line/circular-arc `Directrix` for
+supported `IfcSweptDiskSolid` items. Call `disk.directrix_metrics()` on an
+occurrence to get `Option<DirectrixMetrics>`. A complete description returns
+`Some`, with `total_length` and indexed `segments` containing centreline
+`length` and optional `bend_angle`. Lengths, coordinates, and radii are
+absolute IFC world metres, Z-up. An arc's
+`bend_angle` is the positive sweep magnitude in radians; its signed
+`Directrix::Arc::sweep_angle` retains travel direction. Line segments have no
+bend angle. These geometric measurements do not include fabrication bend
+allowances or deductions. `ids` optionally filters product STEP IDs.
+
+`disk.nominal_quantities()` derives circular material cross-section area,
+cross-section area × centreline length (nominal volume), and outer/optional
+inner lateral areas. Areas are in m² and volume in m³. These are estimates of
+the uncut source sweep: self-overlap and mitred joins can change the physical
+body, so they are not IFC-authored `IfcElementQuantity` values or certified net
+quantities. The method returns `None` for an unsupported description, CSG
+operand, broken directrix join, degenerate segment, or arc whose radius does
+not exceed the disk radius. A sharp but joined mitre remains a nominal estimate.
+JSON and Python directrix exports include the same values under
+`nominal_quantities`.
+
+`extrusion_nominal_quantities(&source_extrusion)` derives exact net profile
+area (outer boundary less holes), perpendicular height, and nominal volume
+for a complete `AnalyticExtrusion`. For an oblique extrusion, perpendicular
+height is `Depth × |unit ExtrudedDirection.z|` in the solid's local frame.
+These values use **raw IFC file-length units** (squared and cubed as
+appropriate), because the source extrusion has no product occurrence
+transform. The function returns `None` for unsupported or invalid source
+profiles; it does not claim a product's post-boolean net quantity.
+
+Each record identifies its source solid and mapped-item path.
+`source_modified` identifies an authored CSG operand whose sweep may differ
+from the final body, so its metrics are source geometry measurements rather
+than final fabricated quantities. It does not indicate cuts from external
+`IfcRelVoidsElement` openings. Unsupported curves or transforms have an
+explicit status, no partial directrix, and the method returns `None`. For an
+unsupported transform, radii retain their authored values converted to metres;
+no world circular radius is implied. The existing mesh export remains a
+separate operation.
+
+`check_swept_disk(&occurrence, &options)` checks the extracted source geometry
+without decoding or tessellating it again. `SweptDiskCheckOptions::default()`
+uses 1e-9 m for a zero-length segment, 1e-6 m for a disconnected join, and
+1e-6 rad for a tangent discontinuity. The checker also flags a circular arc
+whose centreline radius does not exceed the swept disk radius. A report's
+findings identify the source segment, or both sides of a join, with a stable
+`SweptDiskFindingCode`, measured value, threshold and units. An unsupported
+analytic description produces a report with `skipped_reason` and no partial
+findings. `source_modified` is carried into the report so an authored CSG
+operand is not mistaken for the finished body. All tolerance values must be
+finite and nonnegative; `SweptDiskCheckOptions::validate()` and the checker
+return `SweptDiskCheckError` otherwise. These are geometric diagnostics, not
+fabrication-code checks or bend-allowance calculations. IFC allows non-tangent
+consecutive segments to form a miter, so a tangent discontinuity is an
+inspection cue rather than an automatic schema violation
+([IfcSweptDiskSolid](https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcSweptDiskSolid.htm)).
+
+`extract_analytic_quantity_sources(ifc_bytes, ids)` collects flattened
+swept-disk descriptions, reusable swept-disk definitions, and reusable
+extrusion definitions in one bounded canonical representation walk. Description
+indices match source-instance `ordinal` values; the individual entry points
+keep their existing output contracts.
+
+`extract_swept_disk_definitions(ifc_bytes, ids)` provides an opt-in
+source/instance form without changing the flattened result above. A source
+contains authored `Radius`, `InnerRadius`, and `Directrix` in raw IFC file
+length units. Its key includes the IFC-byte SHA-256, `FILE_SCHEMA`, exact f64
+length-unit-scale bits, solid STEP id, and either the top-level representation
+id or ordered `IfcRepresentationMap` ids. The bits are encoded as 16 hex
+digits so JSON consumers preserve exact identity. Repeated mapped items that use the
+same representation map share a source but remain separate instances with
+deterministic ordinals and mapped-item paths. `source_modified` still marks CSG
+operands.
+
+`extract_swept_disk_views` returns the world descriptions and reusable raw
+definitions together from one bounded walk and one decoded source cache. The
+rebar schedule uses this paired view to retain complete world-space sweeps even
+if the independent definition output budget omits a reusable source key.
+
+Each instance's column-major f64 `world_from_source` maps raw source
+coordinates directly into absolute IFC Z-up metres; it includes the file-unit
+scale, product placement and nested mapped transforms. A source radius is not
+a world radius until the uniform instance scale is applied. Nonuniform world
+disks carry an unsupported instance status; invalid matrices have `None` and
+an unsupported status. The source remains available for inspection. Work and
+output budgets are reported in `diagnostics` when reached.
+
+`extract_extrusion_definitions(ifc_bytes, ids)` uses the same bounded
+representation walk to return exact `IfcExtrudedAreaSolid` source profiles and
+placed product occurrences without tessellation. `AnalyticSourceKey` contains
+the model SHA-256, schema, exact unit-scale bits, solid ID, and either a direct
+representation ID or ordered representation-map IDs. Repeated mapping targets
+share one `ExtrusionDefinition` while preserving separate `ExtrusionInstance`
+ordinals, mapped-item paths, and f64 transforms.
+
+Source `ProfileType`, `DirectionRatios`, `Depth`, profile loops, area, perimeter,
+and profile/solid `Position` matrices remain in IFC file units. For a complete
+source with valid positive net profile area, `nominal_quantities` reuses
+`extrusion_nominal_quantities` to
+report net profile area, projected height, and nominal volume in squared,
+linear, and cubed IFC file-length units; unsupported or invalid sources yield `None`.
+For a boundary point from a complete source, apply the profile
+`profile_position`, then the extrusion `position_matrix`, then the instance
+`world_from_source`; the last matrix maps to absolute IFC Z-up metres and
+includes product placement, mapping, and file-unit scale. An absent optional
+`Position` leaves its matrix field as `None`, so use identity for that step
+when composing rather than expecting an identity array. Check source and
+instance statuses before using an absent matrix: unsupported or tapered source
+geometry and invalid or singular occurrence transforms have explicit statuses.
+`source_modified` marks CSG operands, not final post-boolean geometry. Source
+and instance output budgets are independent and report truncation in
+`diagnostics`.
+
+`ifc_lite_export::build_rebar_schedule(ifc_bytes, ids, &options)` returns one
+row per selected `IfcReinforcingBar` entity, including rows whose body has no
+supported swept-disk source. `rows` is keyed by occurrence STEP ID. Each row
+exposes and serializes its IFC identity as `GlobalId` and `Name`, matching `IfcRoot`.
+Every represented source sweep has its own ordinal, solid/directrix IDs, mapping path,
+outer/inner radii, directrix metrics, geometric check report and an optional
+reusable `SweptDiskSourceKey`. It keeps repeated mapped sources and CSG operands
+distinct; repeated uses of one map share the source key. A missing key is
+reported per row without dropping the world sweep. The `authored` map uses exact EXPRESS
+attribute names; each entry identifies the occurrence or type entity that
+supplied it. Numeric measures retain `value_file_units` and their `value_si`
+conversion, while centreline lengths are separately derived world metres.
+An authored `CrossSectionArea` of zero remains in the record with its provenance;
+the row diagnostic states that it does not establish a physical section area.
+Radii are effective world metres for complete paths; an unsupported transform
+retains source radii in metres without implying a world circular radius.
+Conflicting occurrence/type values are reported, with the occurrence taking
+precedence. `bar_entity_count` and `represented_sweep_count` count IFC records,
+not manufactured bars. The API provides no physical bar count, cutting length,
+or certified fabrication result. Authored attributes are read by the first
+`FILE_SCHEMA` entry with a bundled registry, the same rule as the attribute
+export; with none, they are omitted with a diagnostic rather than read in the
+IFC4 layout.
+
+`build_rebar_schedule_with_preflight(ifc_bytes, ids, &options, &limits)` adds
+caller-defined geometric comparisons to each represented sweep. Construct
+`RebarPreflightLimits::new(min_inside_bend_radius_m,
+min_straight_segment_length_m, max_developed_centreline_length_m)` with finite,
+nonnegative SI-metre limits. Each comparison retains its measured value, limit,
+segment index (when applicable), and pass/fail result; equality passes. The
+inside radius is the centreline arc radius minus the swept outer radius.
+Modified CSG sources, unsupported directrices, and paths with gaps or zero-length
+segments receive a skip reason and `comparisons: None`; assessed sweeps have
+`comparisons: Some(...)`. The underlying source findings remain in `checks`.
+Tangent discontinuities remain inspection cues and do not skip comparisons. Rows
+without a swept-disk source receive `preflight_skipped_reason`. Missing line or
+arc segments are listed as unassessed. These comparisons do not certify a
+cutting length or fabrication-code compliance.
+
+`build_rebar_schedule_with_fabrication_precheck(ifc_bytes, ids, &options,
+&policy)` adds an opt-in `RebarFabricationPolicy` without changing the legacy
+preflight API. Start with `RebarFabricationPolicy::default()` and set any subset
+of finite nonnegative SI limits: minimum inside bend radius or straight segment
+length, maximum developed centreline length, maximum absolute difference
+between authored `NominalDiameter` and the geometric outer diameter, and an
+inclusive finite, nonnegative bend-angle range `[minimum, maximum]` in radians.
+The policy is validated before IFC decoding. Each requested check reports
+`pass`, `fail`, or `uncheckable`, a source bar/solid/directrix ID, segment index
+when applicable, measurement, threshold, units, and reason. The reason is
+`None` for a passing check and explains a failure or unavailable measurement
+otherwise. An absent arc,
+straight segment, or positive authored `NominalDiameter` is uncheckable;
+conflicting type assignments and occurrence/type diameter conflicts also make
+the diameter comparison uncheckable. Authored diameter retains occurrence or
+type provenance. Geometry comparisons require a complete world-circular
+source; modified CSG, unsupported transforms and incomplete paths are
+uncheckable. Bend angle is the magnitude of each directrix arc sweep, not a
+join discontinuity. The result is always `precheck_only`: material, bending
+process, allowances, jurisdiction and physical bar count remain unchecked.
+Authored `BarLength` is not a verified cutting length. A reinforcing-bar entity
+may represent more than one manufactured bar.
+
+### Owned production contexts
+
+`ifc_lite_processing::element::ProductionModel` represents one model load.
+Call `snapshot(OwnedMeshProductionData)` once per effective batch to capture
+its opening, style, indexed-colour, material, texture and site-rotation maps.
+The maps are shared through `Arc`; products borrow them through the returned
+`OwnedMeshProductionContext` without copying them. Snapshots remain usable
+after the caller drops its map owners or creates a newer configuration revision.
+
+Pass the snapshot to `element::produce_element_meshes_owned` with the same
+job, options, decoder and router used by the canonical borrowed producer.
+It checks the model's source epoch before work and before returning a result.
+Call `ProductionModel::invalidate_source` when replacing or mutating the source:
+earlier snapshots then return `ProductionContextError::StaleSource`, including
+when invalidation occurs inside a geometry callback. Create a fresh snapshot
+before producing from the replacement source.
+
+The context identity distinguishes loads, source epochs and configuration
+revisions within the process. It does not authenticate IFC bytes or indexes;
+the caller must still pair the decoder, router and captured maps with the
+correct source. The appearance authoring pipeline uses these snapshots and
+refreshes its cached context after style edits or authored-entity injection.
+
+The native processor captures one snapshot per run and shares it across Rayon
+jobs. Deferred styled-item replay creates a fresh configuration revision before
+subsequent jobs execute. Browser `processGeometryBatch` captures one snapshot
+per batch, sharing cached style, indexed-colour and texture maps.
+`clearPrePassCache` and every `setEntityIndex` replacement retire earlier
+snapshots, including rejected or empty index replacements.
+
+### Production ownership and diagnostics
+
+Canonical borrowed and owned production reserve the supplied decoder and router
+for the whole synchronous product. A processor callback may produce a nested
+child using its active ancestor's owners; an unrelated live product cannot
+borrow that reservation. Owned production returns
+`ProductionContextError::OwnerUnavailable` if another product holds an owner
+or a callback replaces it. The borrowed entry keeps its infallible signature
+and returns empty output when ownership cannot be maintained.
+
+`ifc_lite_core::execution_owner::ExecutionIdentity::same_instance` compares
+owner instances independently of their configuration generations. Cache or
+configuration maintenance on one decoder preserves its instance; replacing the
+decoder changes it. Geometry execution acknowledges maintenance on the same
+instance and refuses a replacement before accepting its output.
+
+`GeometryRouter::take_csg_failures_checked` checks the current resource stop
+before running diagnostic hooks and again afterwards. A stop raised by a hook
+returns `Err(ProgramStop)` and retains drained records separately for explicit
+diagnostic retrieval through `take_csg_failures`. Later product publication and
+retry drains cannot adopt or discard those stopped reports. Canonical
+production discards that product's output when its final hook stops execution.
+
+### Appearance authoring
+
+`ifc_lite_processing::appearance::calibrate_appearance_plane` establishes one
+measured plane from two stable native-source landmarks and a known distance.
+`PlaneCalibrationRequest` supplies the raster-to-source affine, raster extent
+and an IFC Z-up world anchor/direction/normal. `CalibratedPlane` returns a
+world-space `Mapping::Planar`, raster corners and metres per source unit.
+Crop, page rotation and raster DPI only change the raster-to-source transform;
+they do not change the retained calibration landmarks or measured distance.
+This bounded calculation does not mutate IFC or composite pixels outside the
+page. Invalid, sheared or unrepresentable planes fail explicitly. Reconstructed
+world edges and anchor displacement must each preserve their intended vector
+within one part per million; large origins never enlarge that tolerance.
+
+`ifc_lite_processing::appearance::plan_appearance` prepares image and UV edits
+against an effective IFC STEP snapshot. It shares canonical geometry production
+with loading and returns both IFC edit operations and per-corner preview data.
+It does not mutate the input. `AppearanceRequest` supplies an IFC4/IFC4X3 schema,
+revision token, reserved allocator watermark, product IDs, relative image URI
+and an existing-UV, planar or box mapping. The initial scope is direct, unshared
+`IfcTriangulatedFaceSet` Body geometry with absent or complete `IfcLocalPlacement`
+chains. `IfcGridPlacement` and `IfcLinearPlacement`, including local placements
+parented to them, remain explicitly unsupported in every mapping mode; canonical
+load-time placement recovery is not sufficient validation for writing edits.
+Products with sliceable material-layer associations are also excluded, because
+reopening may replace their face set with layer slices. Canonical comparisons
+resolve the shared load-time RTC metadata before meshing georeferenced geometry.
+Plans report unsupported products;
+callers must explicitly accept a reduced scope, retain image resources and
+apply the complete IFC edit plan atomically after revalidating the revision and
+allocator. Preview consumers validate source topology and map triangle corners,
+rather than assuming vertex counts establish UV correspondence. `targetVertexCount`
+is the final canonical vertex-pool bound; removed triangles may leave unused
+vertices before or after the surviving indices. Do not substitute corner count
+or maximum-index-plus-one for this pool size.
+`targetCornerNormals` carries final shading normals in renderer Y-up triangle-corner
+order (`[nx, nz, -ny]` from IFC). Removing UV seams can merge near-coplanar weld
+representatives and change shading normals while every triangle position remains
+identical. Preview installs these canonical target normals so its shading matches
+reopening; it must not retain the previous normals or relax position checks.
+
+The exported `ifc_lite_geometry::MAX_TEXTURE_DIMENSION` is the shared raster edge
+limit; appearance preflight rejects invalid pixel dimensions. Embedded PNG/JPEG
+header inspection reads at most 1 MiB of encoded header bytes without copying the
+full STEP binary literal or decoding pixels.
+
+
+---
+
+## ifc-lite-export
+
+Domain-format exporters. Every exporter takes IFC bytes (or already-produced meshes) and returns the serialized output.
+
+```rust
+pub use csv::{export_csv, CsvMode, CsvOptions};
+pub use gltf::{export_gltf_streaming, try_export_glb, try_export_glb_from_meshes,
+               try_export_glb_with_stats, GltfOptions, GltfStats /* ... */};
+// Every GLB entry point is `try_`: an empty visible set is
+// `ExportError::NoRenderGeometry`, never a zero-mesh GLB (which is not valid glTF),
+// and from-meshes counts that run past their buffers are
+// `ExportError::MalformedMeshInput`, never a GLB missing the model's tail.
+// `GltfOptions::tessellation_quality` picks the curve tessellation density for
+// the glTF paths, re-exporting `TessellationQuality` so a caller does not need
+// a direct `ifc-lite-processing` dependency to name a level. The default is
+// `Medium`, which is the golden-output identity every byte-comparison test in
+// this crate rests on - coarser levels trade curve fidelity for vertex count
+// on tube-heavy models, and DO change the emitted bytes.
+// `GltfOptions::with_textures(true)` (default off) exports IFC surface textures:
+// `TEXCOORD_0` from the canonical UVs, a PNG bufferView in the binary chunk for
+// a decoded texture, the authored `URLReference` (relative only; an absolute
+// path, a scheme or a `..` above the export is `IncompleteAppearance`) for an
+// `IfcImageTexture`, and `MASK` materials matching the viewer's texel-alpha
+// discard and its hiding of a tint alpha <= 0.01. Only the in-memory GLB
+// assembler carries them; `quantize`, the bounded GLB and multi-buffer glTF
+// refuse with `ExportError::UnsupportedOption`, and a textured mesh whose
+// appearance is incomplete is `ExportError::IncompleteAppearance`, never solid colour.
+// `GltfOptions::with_name_by_global_id(true)` (default off, #9011) makes each IFC
+// element one node under the scene, named by its `GlobalId`, holding its part
+// nodes, with a copy of the root's translation and site rotation, so poses,
+// geometry and materials are unchanged. All three from-bytes assemblers apply it.
+pub use ifc_lite_processing::TessellationQuality;
+pub use hbjson::Model;
+pub use ifc5::{export_ifc5, Ifc5Options};
+pub use json::{export_json, JsonOptions};
+pub use jsonld::{export_jsonld, JsonLdOptions};
+pub use kmz::{ifc_angle_to_kml_heading, try_export_kmz_collada_from_meshes, KmzOptions};
+pub use merged::{export_merged, export_merged_with_stats, MergedOptions, MergedStats};
+pub use obj::{export_obj, export_obj_with_stats, ObjOptions, ObjStats};
+pub use step::{export_step, export_step_json, export_step_with_stats,
+               export_step_with_diagnostics, export_step_to_writer_with_diagnostics,
+               AttrMutation, PropMutation, StepOptions, StepStats};
+// A `MutablePropertyView.exportMutations()` log, applied with byte parity to
+// the TypeScript `StepExporter` (#5941). `MutationLog::from_json` reads the log.
+pub use step_log::{export_step_with_log, export_step_with_log_to_writer,
+                   export_merged_models_with_logs, MutationLog,
+                   LogMutation, LogNewEntity, MutationKind, GeorefMutations,
+                   LogExportStats, StepCounters};
+pub use model::{build_export_model, stream_export_model, ExportModel /* ... */};
+// Rows carry every set an `IfcRelDefinesByProperties` links: one definition, or an
+// `IfcPropertySetDefinitionSet` written bare `(#1,#2)` or typed
+// `IFCPROPERTYSETDEFINITIONSET((#1,#2))`. `PropValue::kind` (`ValueKind`) is the
+// primitive the STEP value was written as; JSON, JSON-LD and IFCX type values by it.
+pub use quantity_analysis::{analyze_authored_quantities, AuthoredQuantityAnalysis /* ... */};
+// Additional opt-in join: analyze_quantities(content, ids) -> QuantityAnalysis.
+// It combines authored observations with nominal source occurrences; product_total
+// is None with an aggregate diagnostic because overlap/voids/CSG are unknown.
+// `ExportModel` and both streaming entry points carry the model's UnitScales.
+// Attribute values are in the FILE's units, unlike the geometry exporters'
+// output, which is normalised to metres — so a consumer writing a quantity
+// beside exported geometry needs this to interpret it.
+pub use ifc_lite_processing::prepass::UnitScales;
+
+// Attribute access beyond the eight fields `EntityRow` carries. The callback
+// receives the `DecodedEntity` each row was built from, borrowed — read any
+// attribute from it without this crate guessing which ones matter.
+pub use model::{stream_export_model_with_options, build_export_model_with_options,
+                ModelOptions, Placement};
+pub use ifc_lite_core::{AttributeValue, DecodedEntity, IfcType};
+```
+
+`analyze_authored_quantities(ifc_bytes, ids)` is an opt-in, untessellated view
+keyed by actual product STEP ID. It reuses the export model's physical-quantity
+decoder and retains each `IfcElementQuantity`/leaf entity ID, exact EXPRESS
+names, numeric authored value, kind, and occurrence or inherited type origin.
+`kind` is the full IFC leaf type, such as `IfcQuantityLength`.
+`IfcRelDefinesByProperties.RelatingPropertyDefinition` may name one definition
+or an IFC4 `IfcPropertySetDefinitionSet`; every linked `IfcElementQuantity` is
+retained. Malformed definitions and exhausted relationship, set-visit, or
+authored-row, quantity-leaf-visit, aggregate quantity-set or leaf decode-byte, or
+type-relationship work budgets appear in
+`diagnostics`, with expansion stopped at the cap.
+Per-record diagnostics are capped at 1,024 plus one truncation notice; distinct
+work-budget refusal reasons remain visible after that cap.
+It reports both sides of a conflict instead of applying the flattened row's
+occurrence precedence. Explicit quantity units use the canonical bounded IFC
+unit resolver; an unresolved or dimensionally mismatched unit has a diagnostic
+instead of a guessed length-scale conversion. The IFC4X3 `IfcQuantityNumber`
+is preserved too; Number and Count use an explicit named unit when supplied
+and are otherwise dimensionless. `product_count` counts selected
+IFC product entities, not represented solids or physical bars. Derived source
+estimates remain separate from this authored view.
+For Count and Number, distinct explicit unit entities are conservatively
+reported as a conflict even when their display symbols match, since unit names
+do not certify dimensional equivalence.
+
+`analyze_quantities(content, ids)` joins those authored observations with the
+canonical swept-disk and extrusion source/instance APIs. It keeps one source
+record per geometric use, its source key and mapping path, plus formula, origin,
+unit, limitation and status for each nominal measurement. Swept-disk directrix estimates are
+in world metres; extrusion source estimates remain in raw IFC file units.
+`Depth` is labelled as an authored solid parameter, separate from an authored
+`IfcElementQuantity`. Product, source-use and unique-source counts are distinct.
+`product_total` remains absent with `aggregate_diagnostic`, since overlap,
+openings and CSG prevent a defensible final material total.
+
+`export_step_with_log` applies the mutation log a `MutablePropertyView`
+records (`exportMutations()`), replayed as `importMutations` replays it into a
+view wired like the viewer's, and writes the file the TypeScript `StepExporter`
+writes for it: byte-identical apart from the GlobalIds of generated records,
+which are derived from the host and the new express id. Records the log does
+not change stream from the source; memory beyond the record index grows with
+the edits. A log carrying a mutation kind the writer does not apply yet, an
+unrecognised mutation `type`, or an `UPDATE_ATTRIBUTE` with a `null` `newValue`
+is an `InvalidInput` error (the TypeScript replay skips the latter two; a native
+save refuses rather than drop an edit), as is combining a log with `StepOptions::included` or
+with the per-edit vectors. `LogExportStats` reports the new and modified entity
+counts the header states and the warnings the TypeScript exporter would give.
+`export_merged_models_with_logs(models, logs, opts)` is `export_merged_models`
+with a log per model: each edited model is first written through
+`export_step_with_log` in its own schema, as `MergedExporter.exportAsync` bakes
+edited models through `StepExporter`, and its georeferencing edits are not
+applied (reported in `MergedStats::warnings`), as the TypeScript bake passes
+none.
+
+`export_step_with_diagnostics` returns `(String, StepStats, Vec<String>)`;
+`export_step_to_writer_with_diagnostics` streams the output and returns
+`(StepStats, Vec<String>)`. The warning list exposes named conversion losses.
+For example, downgrading an IFC4 point connection with
+`ConditionCoordinateSystem` reports that its restraint directions are not
+preserved. Inspect these warnings alongside the counters.
+
+`export_step_with_stats` retains its `(String, StepStats)` return type and
+counter-only contract. `total` and `written` describe
+the selected entity set. The remaining counters are validity or refusal
+signals that callers should inspect: `copies_refused` counts copy-on-write
+edits that were not emitted, `refused_refs` counts out-of-range STEP
+references, and `attribute_edits_refused` counts root-attribute edits that
+could not be applied. `owner_history_unfilled` counts records in an IFC2X3
+downgrade that still have `$` in the schema-required `OwnerHistory` slot, and
+`required_slots_unfilled` counts the OTHER slots IFC2X3 requires a value in
+that stayed `$` because the schema offers no default that claims nothing (a
+measure, a label, an entity reference, or an enum with no `NOTDEFINED`
+member); slots whose declaration does offer one take `.NOTDEFINED.` or `.F.`
+and are not counted. When either is non-zero, the emitted file is not valid
+IFC2X3.
+
+`ModelOptions::default().with_placements(true)` resolves each product's
+`ObjectPlacement` into
+`EntityRow::placement`. Off by default: the memo is ~128 B per distinct
+placement, one per product in most files.
+
+`Placement` is a column-major 4x4 whose translation is in **metres**, with **no**
+RTC rebase and **no** Z-up to Y-up conversion — the IFC world frame, which is
+the file's own frame and not the frame the glTF or OBJ exporters emit.
+
+```rust
+
+// Behind the `parquet-bos` feature (native only; kept out of the wasm bundle):
+pub use parquet_bos::{export_bos, ParquetBosOptions};
+```
+
+### Features
+
+```toml
+default = ["gltf-textures"]
+gltf-textures = []    # opt-in textured glTF/GLB export (TEXCOORD_0 + PNG images); without it
+                      # (default-features = false, as the wasm engine does) requesting
+                      # textures returns ExportError::UnsupportedOption
+parquet-bos = []      # Parquet/.bos export (arrow + parquet + zip; not wasm32-safe)
+observability = []    # surface faceted-brep phase timing for profiling examples
+```
+
+---
+
+## ifc-lite-clash
+
+Native clash-detection kernel: a faithful port of the TypeScript reference engine in `packages/clash` (same AABB math, SAT triangle-triangle intersection, minimum-distance routines, per-element triangle BVHs, and narrow-phase classification). All computation in `f64` over `f32` input buffers.
+
+```rust
+pub use aabb::Aabb;
+pub use narrow::ClashStatus;
+pub use session::{ClashRecord, ClashSession, RuleResult};
+```
+
+```rust
+use ifc_lite_clash::ClashSession;
+
+let mut session = ClashSession::new();
+// positions: concatenated per-element vertex coords (x, y, z, ...)
+// pos_ranges: [float_offset, float_len] per element
+// indices: concatenated per-element LOCAL triangle indices
+// idx_ranges: [idx_offset, idx_len] per element
+// aabbs: [minx, miny, minz, maxx, maxy, maxz] per element
+session.ingest(&[], &[], &[], &[], &[]);
+let result = session.run_rule(&[], &[], 0, 0.0, 0.0, false);
+```
+
+---
+
+## ifc-lite-ffi
+
+C FFI bindings: a native cdylib for in-process IFC parsing (used by desktop-style hosts). By default it routes allocations through mimalloc (`default = ["mimalloc"]`; opt out with `--no-default-features`).
+
+```rust
+/// Parse an IFC file at `path` and write a serialized result buffer
+pub unsafe extern "C" fn ifc_lite_parse(
+    path_ptr: *const u8, path_len: usize,
+    out_ptr: *mut *mut u8, out_len: *mut usize,
+) -> i32;
+
+/// Same, with an explicit opening-filter mode
+/// (`opening_filter_mode`: 0 = Default, 1 = IgnoreAll, 2 = IgnoreOpaque)
+pub unsafe extern "C" fn ifc_lite_parse_ex(
+    path_ptr: *const u8, path_len: usize,
+    opening_filter_mode: i32,
+    out_ptr: *mut *mut u8, out_len: *mut usize,
+) -> i32;
+
+/// Same, with additive flags (bit 0 enables material-layer wall slicing).
+/// Unknown flag bits return 1; the existing parse functions stay unsliced.
+pub unsafe extern "C" fn ifc_lite_parse_with_flags(
+    path_ptr: *const u8, path_len: usize,
+    opening_filter_mode: u8, flags: u32,
+    out_ptr: *mut *mut u8, out_len: *mut usize,
+) -> i32;
+
+/// Free a buffer returned by the parse calls
+pub unsafe extern "C" fn ifc_lite_free(ptr: *mut u8, len: usize);
+```
+
+**FFI contract.** These entry points are `unsafe` and cross a C boundary, so the
+caller owns the following guarantees:
+
+- **Inputs.** `path_ptr` / `path_len` describe a UTF-8 file path (need not be
+  NUL-terminated). `out_ptr` and `out_len` must be non-null and valid for
+  writes. A null pointer or non-UTF-8 path returns `1` and writes nothing.
+- **Success (`0`).** `*out_ptr` receives a heap buffer of `*out_len` serialized
+  JSON bytes. The buffer is owned by the caller from that point on.
+- **Failure.** Non-zero return codes zero the out-parameters (no
+  buffer is allocated, so there is nothing to free): `1` null pointer, invalid
+  path, or unsupported flag bits; `2` file could not be read, `3` geometry processing panicked, `4` JSON
+  serialization failed.
+- **Freeing.** Pass the exact `ptr` and `len` you received from a successful
+  parse to `ifc_lite_free` **exactly once**. Do not free on a non-zero return,
+  do not free twice, and do not mix in a pointer/length from any other source.
+  `ifc_lite_free` is a no-op when `ptr` is null or `len` is `0`.
+
+---
+
+## ifc-lite-wasm
+
+WebAssembly bindings.
+
+### IfcAPI
+
+The WASM surface is split across `rust/wasm-bindings/src/api/*.rs`; every method
+is exported to JS under a camelCase `js_name` that mirrors `pkg/ifc-lite.d.ts`.
+The methods below are representative, not exhaustive; see the
+[WASM API page](wasm.md) for the full JS-side surface.
+
+```rust
+/// Main IFC-Lite API
+#[wasm_bindgen]
+pub struct IfcAPI {
+    // ...
+}
+
+#[wasm_bindgen]
+impl IfcAPI {
+    /// Create and initialize the IFC API
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self;
+
+    /// Fast SIMD entity scan; returns entity references for the data model
+    #[wasm_bindgen(js_name = scanEntitiesFast)]
+    pub fn scan_entities_fast(&self, content: &str) -> JsValue;
+
+    /// Streaming geometry pre-pass; emits progress via `on_event`
+    #[wasm_bindgen(js_name = buildPrePassStreaming)]
+    pub fn build_pre_pass_streaming(
+        &self,
+        data: &[u8],
+        on_event: &js_sys::Function,
+        chunk_size: u32,
+        disabled_type_names: Option<Vec<String>>,
+        skip_type_geometry: bool,
+    ) -> Result<JsValue, JsValue>;
+
+    /// Mesh one batch of geometry jobs into a MeshCollection
+    #[wasm_bindgen(js_name = processGeometryBatch)]
+    pub fn process_geometry_batch(
+        &self,
+        data: &[u8],
+        jobs_flat: &[u32],
+        unit_scale: f64,
+        // ... RTC offset, void keys, styles, material colours
+    ) -> MeshCollection;
+
+    /// Extract 2D profiles (outer boundary + holes) for parametric geometry
+    #[wasm_bindgen(js_name = extractProfiles)]
+    pub fn extract_profiles(&self, content: String, model_index: u32) -> ProfileCollection;
+
+    /// Export glTF binary (GLB) from the model
+    #[wasm_bindgen(js_name = exportGlb)]
+    pub fn export_glb(
+        &self,
+        content: &[u8],
+        include_metadata: bool,
+        hidden: &[u32],
+        isolated: &[u32],
+        hidden_types_csv: String,
+        lit: Option<bool>,
+        emissive: Option<bool>,
+    ) -> Result<Vec<u8>, JsValue>;
+
+    /// `export_glb` with each element one node named by its GlobalId (#9011)
+    #[wasm_bindgen(js_name = exportGlbNamedByGlobalId)]
+    pub fn export_glb_named_by_global_id(/* the same parameters */) -> Result<Vec<u8>, JsValue>;
+
+    /// Export CSV (entities / properties / quantities / spatial)
+    #[wasm_bindgen(js_name = exportCsv)]
+    pub fn export_csv(
+        &self,
+        content: &[u8],
+        mode: String,
+        delimiter: String,
+        include_properties: bool,
+    ) -> Vec<u8>;
+}
+```
+
+### Features
+
+```toml
+default = ["console_error_panic_hook"]
+threads = []          # threaded bundle via wasm-bindgen-rayon (built separately)
+console-tracing = []  # forward structured diagnostics to the DevTools console
+debug_geometry = []   # forwards to ifc-lite-geometry/debug_geometry
+```
+
+---
+
+## Building Documentation
+
+Generate full Rustdoc documentation:
+
+```bash
+cargo doc --no-deps --document-private-items --open
+```
+
+This will generate detailed documentation including:
+
+- All public and private items
+- Source code links
+- Examples from doc comments
+- Cross-references between items
+
+
+`ifc_lite_processing::appearance::catalog_appearance(bytes, &AppearanceCatalogRequest)`
+resolves rendered owner class and type selectors from an already-effective IFC4
+or IFC4X3 snapshot. It returns sorted `AppearanceCatalog` products/types and an
+explicit missing/ineligible ID list. IFC class strings use canonical PascalCase;
+`AppearanceCatalogType.name` serializes as the exact EXPRESS attribute `Name`.
+The function reuses appearance source decoding and its budgets, performs no meshing
+or texture-image decoding, and rejects malformed relevant type assignments or oversized
+catalog metadata without partial results. Hosts retain federation and selection
+orchestration and must fence stale snapshot responses before use.
+
+### Finite page appearance
+
+`ifc_lite_processing::appearance::plan_page_appearance(source, &request, rgba)`
+adds a calibrated planar page while sampling each object's original albedo
+outside the page. `PageAppearanceRequest.appearance` is the existing request with
+`Planar` mapping and both repeat flags false. `page` and `source_images[].raster`
+are `{width, height, byte_offset, byte_length}` ranges in a separate top-down,
+straight-alpha RGBA8 payload. External images are keyed by their exact effective
+`IfcImageTexture.URLReference` in `image_uri`; embedded textures are decoded by
+the canonical Rust resolver. Missing external pixels are an explicit refusal.
+
+The returned `PageAppearancePlan` contains the ordinary atomic `plan`, per-item
+`item_images`, deduplicated `assets` with encoded PNG bytes, and the requested
+`texels_per_metre`. Each generated URI is `textures/<SHA256 of PNG bytes>.png`.
+The host must adopt all returned image resources and IFC edits as one command;
+normal planning, undo and model export must retain those resources together.
+
+The topology-preserving triangle atlas resamples the original appearance at the
+requested physical density, raised per triangle to preserve at least the source
+texture pixel frequency in every direction (including skewed or repeated UVs).
+Budget refusal never silently lowers that source-fidelity floor. Finite page bounds and straight-alpha compositing
+prevent repeated/clamped page borders outside the page. Sampling guard pixels
+reduce chart seams; bilinear filtering still has finite resolution at page
+edges. This is visual preservation at an explicit sampling density, not pixel
+identity or exact vector clipping. It projects through the selected objects
+without visibility/occlusion testing. It does not silently reduce quality.
+
+Output is bounded to 4096 pixels per axis and 16,777,216 total atlas pixels,
+500,000 UV corners, and 96 MiB of PNG output. Inputs reuse the ordinary planner
+limits, plus a 128 MiB RGBA payload and bounded raster ranges. The current path
+explicitly refuses split per-face palettes, presentation-layer style overrides,
+and translucent untextured surfaces whose rendering path cannot be preserved.
+
+The page compositor clones directly attached `IfcSurfaceStyleRendering` metadata
+using canonical style precedence. Specular strength, typed roughness/exponent,
+reflectance method, transmission/reflection fields, surface name/side and other
+supported lighting/refraction leaves survive export. Albedo factors and opacity
+already baked into the atlas are neutralized to prevent double multiplication.
+Inherited material/representation metadata currently refuses page composition
+rather than silently discarding rendering properties. Original shared styles
+remain untouched.
+
+### Calibrated image annotations
+
+`appearance::plan_annotation_plane(source, &AnnotationPlaneRequest)` creates one
+textured `IfcAnnotation` in an explicitly selected effective `IfcSpatialElement`
+(`containerId`). It accepts IFC4/IFC4X3, an allocator watermark/revision, distinct
+host-generated `GlobalId`/`containmentGlobalId`, `Name`, a registered relative
+`imageUri`, and a generic frame `{origin, axisU, axisV, sizeMetres}`. The origin is
+the image's bottom-left in IFC world Z-up metres; U/V must be orthonormal. It works
+for any registered raster source, without decoding or resampling that image.
+
+The plan appends an `Annotation`/`Tessellation` representation, textured two-triangle
+face set, relative 3D placement and a fresh containment relation. Source entities
+and existing containment sets stay untouched. The `IfcLite:RegisteredImage`
+ObjectType identifies this annotation separately from drawing-markup sweep tags.
+Container rotation/native units are resolved canonically; ambiguous project/3D
+contexts, invalid/cyclic placements, stale/overlapping IDs, duplicate GlobalIds,
+nonrigid frames and geometry precision loss refuse the operation.
+
+`AnnotationPlanePlan` carries the ordinary typed mutation `plan`, `annotationId`,
+`geometryItemId`, original `frame`, `rtcOffset` and canonical native `mesh`.
+`coordinateSpace` is `ifc-z-up`; the mesh retains native snake-case metadata fields.
+Positions/normals require the ordinary host Z-up→Y-up conversion exactly once.
+Mesh UVs are already top-down for bitmap upload: do **not** flip them again.
+World reconstruction before axis conversion is position + mesh origin + rtcOffset.
+The mesh is produced by `produce_element_meshes`, and normal IFC reparse is the
+round-trip oracle. The host atomically registers the source asset, applies the
+entities and publishes this new owner through its existing model/history path;
+calling the replacement-only appearance preview API cannot create a missing owner.
+
+Source/entity bounds match the appearance planner. Creation reserves 32 IDs,
+produces fewer than 32 entities and exactly four vertices/two triangles. Names are
+limited to 1024 bytes, revisions to 4096 bytes, and URI validation is shared with
+image appearance planning. The method returns no live mutations or partial result
+on failure. Its fresh containment relation targets `IfcSpatialElement`, not only
+`IfcSpatialStructureElement`, matching IFC4/IFC4X3 EXPRESS.
+
+IFC4X3 creation also emits `IfcAnnotation.PredefinedType=USERDEFINED` and the
+optional `IfcCartesianPointList3D.TagList` slot; IFC4 omits these schema additions.
+
+### Scan correspondence registration
+
+`ifc_lite_processing::appearance::register_scan_correspondences` takes a
+`ScanRegistrationRequest` and returns a `ScanRegistrationReport`. It is the single
+native/WASM domain implementation for bounded manual point-pair rigid registration.
+Fitting uses only `fit`; `held_out` is evaluated afterward, with every residual
+retained. The request pins source/destination frame identities and exact asset
+hashes; the report binds the frozen request with SHA-256. A report is neither an
+alignment mutation nor an accuracy approval.
+
+The solver uses a proper Kabsch rotation with no scale estimation. Non-collinear
+planar points are valid; coincident/near-collinear point scatter and degenerate
+correspondence covariance refuse the operation. It reports scatter singular values
+separately from residuals. Do not confuse point-correspondence rank with rank of
+plane normals in a point-to-plane experiment. The anchored transform avoids a
+large standalone translation when evaluating georeferenced points.
+
+The [WASM contract](wasm.md#scan-correspondence-registration) documents bounds,
+coordinate conventions, disjoint observations, request digest and reporting.
+This opt-in computation never runs during parsing or geometry generation and
+never mutates source points, IFC placement or renderer alignment state.
+
+#### Source-bound annotation style references
+
+`EntityDecoder::styled_item_ids(item_id)` returns file-ordered `IfcStyledItem`
+ids attached through `Item`, or an explicit lookup error. It does not resolve
+colour. The lazy inverse index is owned by the shared `ColumnarEntityIndex`, so
+native element decoders and WASM batch decoders reuse the same result or cached
+refusal. Standalone decoders retain their own lookup. As with entity offsets,
+a shared index must belong to the decoder's exact immutable source bytes.
+
+The lookup refuses sources over 256 MiB, more than one million styled-item edges,
+records over 16 KiB, more than 64 styled items attached to one geometry item, or
+malformed source records. Failure never means that an item has no style.
+
+### PDF vector graphics-state preparation
+
+`ifc_lite_processing::pdf_vector::prepare_pdf_vector_page(&PdfVectorPage)` returns
+a `PreparedPdfVectorPage` containing the ordered convertible source paths with
+complete graphics state snapshots and a `FidelityReport` (`fidelity`) listing
+every omission kind with counts, page extents and visibility, plus the
+`exact`/`raster_only` verdict and its binding digest. Canonical Rust validates
+bounded decoded input and binds the immutable page/calibration/operations
+request. `prepare_pdf_vector_page_with_clip` accepts an optional rectangle
+inside the immutable CropBox; paths wholly outside it are excluded, while any
+supported painted envelope crossing it refuses. The original
+`prepare_pdf_vector_page` API remains the whole-page operation. It does not parse
+PDF bytes, flatten curves or create IFC entities;
+`fidelity.exact` is deliberately separate from geometric qualification or Apply
+readiness. `appearance::plan_pdf_fill_annotation_with_clip` applies the same
+selection when it creates IFC; `appearance::plan_pdf_fill_annotation` remains
+the whole-page API. Both recompute the report and plan a partial page only when
+the request's `accepted_fidelity_sha256` quotes
+it. See the [WASM contract](wasm.md#pdf-vector-graphics-state-preparation-and-fidelity-report)
+and [annotation implementation boundary](../architecture/pdf-vector-annotations.md#fidelity-report-and-partial-acceptance).
+
+### Sequential fixed-grid contour composition
+
+`ifc_lite_geometry::FixedGridComposition` qualifies source contour groups against
+one bounded lattice and keeps intermediate booleans in integer coordinates.
+`new(groups, grid)` assigns input IDs by index and an empty-set ID at
+`groups.len()`. `overlay(a, b, operation, fill_rule)` returns a new local group ID;
+`vertex_count(id)` lets the caller precharge work, and `contours(id)` exports only
+a classified result to model coordinates. IDs belong to their creating context.
+`boolean_2d_fixed_grid` uses this same implementation for a single operation.
+
+The PDF planner charges construction and each stage against its shared work
+budget. Independent native caps are 257 input groups, 1,024 original vertices,
+1,024 vertices per stage, 2,048 retained groups and 16,384 cumulative vertices.
+Coordinates must be finite within 1e12 model units; quantized coordinates must
+fit the exact diagnostic range of ±2^50. Original endpoint collapse/uncertain
+contacts and per-stage unresolved intersections refuse. Shared integer storage
+avoids introducing a new quantization phase between classification, clipping
+and paint-order composition.
+
+### Symbolic fill provenance
+
+`extract_symbolic_data_with_provenance(&source)?` returns an opaque
+`SymbolicDataWithProvenance`. Its `data()` accessor exposes the unchanged
+`SymbolicData`; `fill_items()` supplies one optional direct representation-item
+ID per fill ordinal. `into_parts()` consumes both together. Unknown, repeated,
+or mapped occurrences have no item identity. All three extraction entry points,
+including `extract_symbolic_data` and the explicit-frame variant, now return
+`Result<_, ifc_lite_core::resource_stop::ProgramStop>`: Rust callers must propagate
+or handle cancellation/resource refusal. This is a Rust API signature change;
+the publicly constructible primitive/aggregate structs and successful serialized
+shape remain unchanged. An empty `Ok` means no symbols, while ordinary geometric
+truncation remains an `Ok` with `truncated`. A stop returns `Err` and discards
+all staged symbols and provenance.
+
+`ifc_lite_geometry::resource::is_stopped()` polls live source, account and
+terminal stop state when a consumer needs a boolean. It reconciles detected stops
+through the same policy as `check_current()`; a healthy result must not be cached
+across later polls or used in place of handling the extraction API's typed error.
+
+Serializing the enriched result adds optional `geometry_item_id` to each known
+fill while retaining the existing symbol JSON shape. Deserialization accepts
+older symbol JSON and leaves missing provenance unknown. WASM and the server
+consume the enriched extraction; callers that only need 2D data can keep using
+`extract_symbolic_data(&source)?`.
+
+### Analytic arbitrary-profile topology
+
+`ifc_lite_geometry::analytic::extract_analytic_profile` preserves exact source
+line and circular-arc primitives. For `IfcArbitraryClosedProfileDef` and
+`IfcArbitraryProfileDefWithVoids`, `Complete` requires a simple outer boundary,
+simple inner boundaries inside it, mutually disjoint boundaries, and no nested
+inner boundaries. This implements the material-region conditions in
+[buildingSMART's profile definition](https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcArbitraryProfileDefWithVoids.htm).
+An invalid or unconfirmed topology returns `Unsupported` on the source profile,
+with no partial loops. `extract_analytic_extrusion` propagates that status.
+Consumers must require `Complete` before reporting nominal material quantities.
+
+Validation uses outward-rounded analytic curve enclosures and ray crossings;
+it does not substitute a drawing polygon or reuse the renderer's repair of
+malformed holes. Adjacent segments may meet at their designated endpoints.
+Their outgoing derivatives must establish separation, and all possible contacts
+must stay within the precision neighbourhood of that join. Sub-precision
+contacts there are treated as the same topological join, consistent with IFC's
+point-identity tolerance; strict simplicity below that resolution is not claimed. Other
+segment pairs and separate loops must have certified clearance. The authored
+segments, winding, area and perimeter are not changed by validation.
+
+The context-free extractor uses
+`EntityDecoder::geometric_context_precision_range()`: a lazy, cached scan of
+declared geometric-context `Precision` values in file-length units. The largest
+declaration sets boundary clearance; the smallest declaration limits adjacent
+endpoint equivalence. This conservatively covers profiles reused across representations.
+Subcontexts inherit from geometric contexts; scanning those base declarations
+also covers their precision. This may reject a close boundary valid in a
+tighter context when an unrelated context declares a larger precision.
+Malformed explicit declarations cause `Unsupported`. The IFC attribute is
+optional and has no specified default; the application uses a minimum clearance
+of `1e-9` file units when declarations are absent or smaller, while the join
+tolerance is capped at `1e-9` and respects any smaller declaration. This is an
+application policy, not an IFC default. Existing loop-closure checks remain
+separate; a loose model-wide declaration does not permit larger closure gaps.
+
+Line endpoints and partial-arc chords must be distinguishable at the clearance,
+and arc radii must exceed it. A conservative area/perimeter resolution screen
+also rejects thin loops composed entirely of adjacent primitives. These checks
+may refuse small features that cannot be established at the model's precision.
+They are not a complete certificate of local feature size: a narrow wedge near
+an otherwise valid acute corner is not itself classified as a self-intersection.
+
+The validator spends at most 1,000,000 work units per profile across pair
+checks, interval refinement and containment, with at most 48 refinement levels
+per pair or ray interval. Exhaustion is reported as `Unsupported`. Numerically
+unresolved contacts, overflow and evaluations requiring angles outside the
+certified trigonometric domain also return `Unsupported`. Thus valid but ill-conditioned or
+very large profiles may be unavailable for analytic quantities; they are never
+silently certified or substituted with an approximation. Rendering is
+unaffected. This change makes no performance claim; an end-to-end base/branch
+performance verdict is required before merge.
+
+Stopped product finalization isolates already-recorded router CSG failures through
+`GeometryRouter::quarantine_recorded_csg_failures` without invoking processor hooks.
+Explicit `take_csg_failures` retrieval includes these reports; later product drains do not.
+
+`GeometryRouter::with_product_csg_scope` bounds recorded diagnostics to a synchronous
+product owner epoch. Nested products preserve their parent’s records; error exits
+and unwind retain unconsumed reports for explicit retrieval without final hooks.
+
+Product diagnostic scopes also capture stored Boolean/CSG recorder reports before
+nested entry and on exit, without invoking `take_bool_failures` final callbacks.
+Registered wrappers exposing `boolean_recorder` use the same storage path.
+Custom processors with private logs behind `take_bool_failures` cannot have those
+logs partitioned without executing their callbacks. After interrupted or nested
+product work, their subsequent drained records are therefore retained only for
+explicit `take_csg_failures` retrieval, rather than assigned to a later product.
+This includes any new custom records mixed with the ambiguous log. An explicit
+drain outside product work restores the ordinary publication boundary. Cancellation
+and unwind still invoke no final hooks; callers using opaque custom diagnostics
+must retrieve them explicitly after interrupted or nested work.
+Exposing a Boolean recorder does not make a wrapper's additional private log
+scoped: known recorder storage is captured separately before callback drains.
+Each returned callback batch is retained before the next callback runs, so a
+later callback's unwind cannot discard already-drained reports.
+Canonical and resumable publication call `finish_product_csg_failures` only after
+all product work; intermediate retry drains use `take_csg_failures_checked` and
+cannot mark a still-running epoch complete.
+
+A completed final drain is provisional until source and execution-owner validation
+succeed. If either rejects publication, canonical and private resumable producers
+discard the geometry and pass the drained reports to
+`GeometryRouter::quarantine_unpublished_csg_failures`. This consumes the existing
+report map without invoking hooks, changing attribution, or adopting ambient
+reports. Explicit `take_csg_failures` returns it once; subsequent products cannot
+publish it. Callers of `finish_product_csg_failures` must likewise retain their
+returned reports until publication succeeds and quarantine them on rejection.
+
+### Scheduler execution boundaries
+
+`ifc_lite_processing::execution::build_router` applies `RouterConfig` and arms
+model caches (including brep signatures), optional material layers, instancing,
+and the indexed-colour exclusion together before production starts.
+`SchedulerPolicy::PerJob` keeps native model-wide template selection and uncached
+job decoding; `PerBatch` keeps the browser's warm decoder and batch-local
+instancing. `decode_job` and `job_type` preserve scanned native types and checked
+browser source-keyword recovery. `RouterDrain::take` drains router-wide counters
+at the corresponding job or batch boundary. Both schedulers still plan and
+produce through `produce_element_meshes_owned` and its immutable context/session.
+Native worker caches and browser wire/source ownership stay scheduler-owned.
+
+## Diff value projection
+
+`ifc_lite_diff::fingerprint::canonical_value_string` exposes the text portion of property-value normalization for adapters. Strings remain verbatim; non-finite scalar numbers use their ECMAScript tokens; arrays and objects use the diff engine’s sorted-key JSON form. Null, booleans and finite numbers return `None` because they retain their scalar type. This shares serialization with fingerprint generation instead of introducing an adapter-specific JSON encoding.

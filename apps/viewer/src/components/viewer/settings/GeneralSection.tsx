@@ -1,0 +1,77 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Settings → General (#5857): theme, UI language (#9061), hover tooltips,
+ * refreshing edited elements' quantities, and IFC/LandXML georeferencing
+ * assumptions (off by default).
+ */
+
+import { useTranslation } from '@/i18n';
+import { useViewerStore } from '@/store';
+import type { ThemeMode } from '@/store/slices/uiSlice';
+import { Switch } from '@/components/ui/switch';
+import { useEditedQuantityRefresh } from '@/hooks/useEditedQuantityRefresh';
+import { SettingsChoice, SettingsGroup, SettingsRow } from './SettingsGroup';
+import { LanguageSetting } from './LanguageSetting';
+import { IfcFederationSettingsSlot } from '../IfcFederationAssumptionsLazy';
+import { LandXmlGeorefSettingsSlot } from '../LandXmlGeorefAssumptionsLazy';
+
+export function GeneralSection() {
+  const { t } = useTranslation();
+  const theme = useViewerStore((s) => s.theme);
+  const setTheme = useViewerStore((s) => s.setTheme);
+  const hoverTooltipsEnabled = useViewerStore((s) => s.hoverTooltipsEnabled);
+  const toggleHoverTooltips = useViewerStore((s) => s.toggleHoverTooltips);
+  const [updateEditedQuantities, setUpdateEditedQuantities] = useEditedQuantityRefresh();
+
+  return (
+    <div className="space-y-4">
+      <SettingsGroup title={t('settings.general.appearanceTitle')}>
+        <SettingsRow label={t('settings.general.theme')}>
+          <SettingsChoice<ThemeMode>
+            id="settings-theme"
+            label={t('settings.general.theme')}
+            value={theme}
+            options={[
+              { value: 'light', label: t('settings.general.themeLight') },
+              { value: 'dark', label: t('settings.general.themeDark') },
+              { value: 'oled', label: t('settings.general.themeOled') },
+            ]}
+            onChange={setTheme}
+          />
+        </SettingsRow>
+        <LanguageSetting />
+      </SettingsGroup>
+      <SettingsGroup title={t('settings.general.helpersTitle')}>
+        <SettingsRow
+          label={t('settings.general.hoverTooltips')}
+          hint={t('settings.general.hoverTooltipsHint')}
+          htmlFor="settings-hover-tooltips"
+        >
+          <Switch
+            id="settings-hover-tooltips"
+            checked={hoverTooltipsEnabled}
+            onCheckedChange={() => toggleHoverTooltips()}
+          />
+        </SettingsRow>
+      </SettingsGroup>
+      <SettingsGroup title={t('settings.general.quantitiesTitle')}>
+        <SettingsRow
+          label={t('settings.general.updateEditedQuantities')}
+          hint={t('settings.general.updateEditedQuantitiesHint')}
+          htmlFor="settings-update-edited-quantities"
+        >
+          <Switch
+            id="settings-update-edited-quantities"
+            checked={updateEditedQuantities}
+            onCheckedChange={setUpdateEditedQuantities}
+          />
+        </SettingsRow>
+      </SettingsGroup>
+      <IfcFederationSettingsSlot />
+      <LandXmlGeorefSettingsSlot />
+    </div>
+  );
+}

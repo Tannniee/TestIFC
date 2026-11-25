@@ -1,0 +1,78 @@
+name: Autodesk cloud import
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'rust/cloud-import/**'
+      - 'packages/ifcx/**'
+      - 'apps/autodesk-service/**'
+      - 'apps/autodesk-exchange-worker/**'
+      - '.github/workflows/autodesk-cloud.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'rust/cloud-import/**'
+      - 'packages/ifcx/**'
+      - 'apps/autodesk-service/**'
+      - 'apps/autodesk-exchange-worker/**'
+      - '.github/workflows/autodesk-cloud.yml'
+  workflow_dispatch:
+# A new commit makes this PR's earlier run worthless; pushes, tags and manual runs are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+jobs:
+  forma-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HAS_MERGIFY_TOKEN: ${{ secrets.MERGIFY_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+      - run: rustup show
+      - run: cargo build --locked -p ifc-lite-cloud-import
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Native Forma to IFCX loader contract
+        id: forma_tests
+        run: pnpm test --env-mode=loose --filter=@ifc-lite/autodesk-service --filter=@ifc-lite/source-autodesk --filter=@ifc-lite/ifcx
+        env:
+          MERGIFY_TOKEN: ${{ secrets.MERGIFY_TOKEN }}
+          NODE_OPTIONS: --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=mergify-junit.xml
+          TEST_FORMA_CONVERTER: ${{ github.workspace }}/target/debug/ifc-lite-cloud-import
+      - name: Mergify CI Upload
+        if: (success() || failure()) && env.HAS_MERGIFY_TOKEN == 'true' && hashFiles('packages/ifcx/mergify-junit.xml') != ''
+        continue-on-error: true
+        uses: ./.github/actions/mergify-upload
+        with:
+          token: ${{ secrets.MERGIFY_TOKEN }}
+          report_path: packages/ifcx/mergify-junit.xml
+          test_step_outcome: ${{ steps.forma_tests.outcome }}
+  exchange-sdk:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Gateway and Windows HTTP worker contracts
+        env:
+          MERGIFY_TOKEN: ${{ secrets.MERGIFY_TOKEN }}
+        run: pnpm test --filter=@ifc-lite/autodesk-service --filter=@ifc-lite/source-autodesk
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet build apps/autodesk-exchange-worker/AutodeskExchangeWorker.csproj -p:RestoreLockedMode=true --configuration Release
+      - name: Offline export snapshot and workspace guards
+        run: dotnet run --no-build --project apps/autodesk-exchange-worker/AutodeskExchangeWorker.csproj --configuration Release -- --self-test

@@ -1,0 +1,54 @@
+# @ifc-lite/source-fixture
+
+## 0.4.0
+
+### Minor Changes
+
+- [#9526](https://github.com/LTplus-AG/ifc-lite/pull/9526) [`dbb660f`](https://github.com/LTplus-AG/ifc-lite/commit/dbb660fecb80156fa194656005d5c4cfb2eed3ae) Thanks [@bruadam](https://github.com/bruadam)! - The source provider contract can now describe writing back to a source. A provider may declare `capabilities.writeBack` with any of `new-version`, `new-file` and `new-location`, and implement the optional `uploadFile(ctx, target, bytes, options)`. It returns the created file and revision, or `{ ok: false, conflict }` with `stale-base` (the file changed since the edit's base revision) or `name-exists`. `uploadFile` never overwrites. Existing providers are unaffected: without `writeBack` a provider is read-only. `@ifc-lite/source-fixture` implements the contract (`capabilities.writeBack`, an `uploadFile` failure-injection key), and the conformance kit checks that `uploadFile` is present exactly when `writeBack` lists a mode. Part of [#9522](https://github.com/LTplus-AG/ifc-lite/issues/9522).
+
+### Patch Changes
+
+- Updated dependencies [[`dbb660f`](https://github.com/LTplus-AG/ifc-lite/commit/dbb660fecb80156fa194656005d5c4cfb2eed3ae)]:
+  - @ifc-lite/plugin-api@0.6.0
+
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [[`7c00fad`](https://github.com/LTplus-AG/ifc-lite/commit/7c00fadaf7bb702f8fe3d9a98541bd1d3db2d3b2)]:
+  - @ifc-lite/plugin-api@0.5.0
+
+## 0.3.0
+
+### Minor Changes
+
+- [#6460](https://github.com/LTplus-AG/ifc-lite/pull/6460) [`9bbe599`](https://github.com/LTplus-AG/ifc-lite/commit/9bbe599a1d256bff7648584517eb258bbe42cb65) Thanks [@louistrue](https://github.com/louistrue)! - Report download progress from the Dropbox, OneDrive/SharePoint and Dalux providers. `@ifc-lite/plugin-api` gains `readWithProgress(response, onProgress, fallbackTotal)`, which streams a response body and calls `DownloadOptions.onProgress` about ten times a second, starting at `(0, total)` and ending at `(byteLength, byteLength)`. When `Content-Length` is missing, the total falls back to the file's listed size. The `@ifc-lite/source-fixture` conformance suite now checks that a provider's download progress only increases and ends at the byte length.
+
+### Patch Changes
+
+- Updated dependencies [[`9bbe599`](https://github.com/LTplus-AG/ifc-lite/commit/9bbe599a1d256bff7648584517eb258bbe42cb65)]:
+  - @ifc-lite/plugin-api@0.4.0
+
+## 0.2.0
+
+### Minor Changes
+
+- [#2630](https://github.com/LTplus-AG/ifc-lite/pull/2630) [`9d6daac`](https://github.com/LTplus-AG/ifc-lite/commit/9d6daac8133a6f41e3d400aa597f73029fde4376) Thanks [@BIMvoice](https://github.com/BIMvoice)! - Gate the eager file-listing sweep on a new provider capability, `eagerFileSweep` ([#2613](https://github.com/LTplus-AG/ifc-lite/issues/2613)).
+
+  `fetchAllFilePages` in the viewer's source browser used to drain every page of a container's `listFiles` up front, unconditionally, for any `FileSourceProvider` — capped at 100,000 items / 5,000 pages, throwing above that. That was fine while Dalux was the only provider (its own UI has no per-folder "load more files" concept, so a full sweep matches its UX), but a provider with a real per-folder file endpoint would have blocked a folder's first render on a full drain, and risked hitting the cap outright on a large folder.
+
+  `ProviderCapabilities` gains `eagerFileSweep?: boolean`, defaulting to off. Off means the viewer pages a container's files incrementally — one page loads eagerly, further pages via a new `loadMoreFiles` (mirroring the existing `loadMoreFolders`) — the same way folder listings already work. `@ifc-lite/source-dalux` sets `eagerFileSweep: true` to keep its existing full-sweep behaviour unchanged. `@ifc-lite/source-fixture`'s `createFixtureSourceProvider` gains a matching `eagerFileSweep` option (default `false`) for testing either path.
+
+  No behaviour change for Dalux, the only provider in production. A future provider that leaves the capability off gets incremental file paging instead of an eager, possibly-failing sweep.
+
+### Patch Changes
+
+- Updated dependencies [[`9d6daac`](https://github.com/LTplus-AG/ifc-lite/commit/9d6daac8133a6f41e3d400aa597f73029fde4376)]:
+  - @ifc-lite/plugin-api@0.3.0
+
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [[`c8f771c`](https://github.com/LTplus-AG/ifc-lite/commit/c8f771ca15754cf314288f6797ac05a674a1e6b1), [`c8f771c`](https://github.com/LTplus-AG/ifc-lite/commit/c8f771ca15754cf314288f6797ac05a674a1e6b1)]:
+  - @ifc-lite/plugin-api@0.2.0

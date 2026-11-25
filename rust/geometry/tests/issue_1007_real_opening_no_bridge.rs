@@ -1,0 +1,459 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! Issue #1007 — STRICT no-bridge assertion on the REAL faceted-BREP roof
+//! opening, exercised through the SAME path the viewer renders
+//! (`process_element_with_voids`, called by `gpu_meshes.rs:process_element_with_voids`).
+//!
+//! The synthetic `issue_1007_opening_sliver` test passes a CLEAN tilted box host
+//! whose opening pokes THROUGH the top, and samples only 5 footprint points — it
+//! missed the real defect: on host #1112 the opening's UPPER cap is authored
+//! EXACTLY FLUSH with a faceted roof surface whose facets each sit ~0.1° off the
+//! cap plane (f32 import). The exact kernel then saw neither a clean transversal
+//! crossing nor an exactly-coplanar pair and left a well-proportioned (NOT a
+//! needle) flap covering ~¼ of the hole on the upper surface — invisible to an
+//! aspect-ratio / center-sample test but obvious in the viewer.
+//!
+//! This test DENSELY samples the WHOLE footprint on BOTH cut planes of each real
+//! opening and asserts NO output host triangle aligned with that plane covers an
+//! interior sample, plus no sliver, no tilted rim flap and a watertight rim. It MUST FAIL on
+//! the pre-fix tree and PASS after. Runs under `--no-default-features` (pure-Rust
+//! kernel, NO Manifold).
+
+use ifc_lite_core::{build_entity_index, EntityDecoder, EntityIndex, EntityScanner};
+use ifc_lite_geometry::{propagate_voids_to_parts, GeometryRouter, Mesh};
+use rustc_hash::FxHashMap;
+use std::collections::BTreeMap;
+
+/// Catalogued fixture, relative to `tests/models/`.
+const MODEL: &str = "issues/1007_roof_brep_opening_winding.ifc";
+
+// ───────────────────────── small vector helpers ─────────────────────────
+fn sub(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
+    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+}
+fn cross(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
+    [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+}
+fn dot(a: [f64; 3], b: [f64; 3]) -> f64 {
+    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+}
+fn norm(a: [f64; 3]) -> f64 {
+    dot(a, a).sqrt()
+}
+fn unit(a: [f64; 3]) -> [f64; 3] {
+    let l = norm(a);
+    if l == 0.0 {
+        a
+    } else {
+        [a[0] / l, a[1] / l, a[2] / l]
+    }
+}
+fn tri_normal(t: &[[f64; 3]; 3]) -> [f64; 3] {
+    unit(cross(sub(t[1], t[0]), sub(t[2], t[0])))
+}
+
+fn build_void_index(content: &str) -> FxHashMap<u32, Vec<u32>> {
+    let mut void_index: FxHashMap<u32, Vec<u32>> = FxHashMap::default();
+    let mut scanner = EntityScanner::new(content);
+    let mut decoder = EntityDecoder::new(content);
+    while let Some((id, type_name, start, end)) = scanner.next_entity() {
+        if type_name == "IFCRELVOIDSELEMENT" {
+            if let Ok(entity) = decoder.decode_at_with_id(id, start, end) {
+                if let (Some(host_id), Some(opening_id)) = (entity.get_ref(4), entity.get_ref(5)) {
+                    void_index.entry(host_id).or_default().push(opening_id);
+                }
+            }
+        }
+    }
+    let _ = propagate_voids_to_parts(&mut void_index, content, &mut decoder);
+    void_index
+}
+
+fn mesh_tris(m: &Mesh) -> Vec<[[f64; 3]; 3]> {
+    let v = |i: u32| {
+        let b = i as usize * 3;
+        [m.positions[b] as f64, m.positions[b + 1] as f64, m.positions[b + 2] as f64]
+    };
+    m.indices.chunks_exact(3).map(|c| [v(c[0]), v(c[1]), v(c[2])]).collect()
+}
+
+/// Is `p` strictly inside triangle `t`'s interior projected onto its plane AND
+/// within `band` of that plane? Detects a host triangle covering a hole sample.
+fn covers(p: [f64; 3], t: &[[f64; 3]; 3], band: f64) -> bool {
+    let n = tri_normal(t);
+    if norm(n) < 1e-9 {
+        return false;
+    }
+    if dot(sub(p, t[0]), n).abs() > band {
+        return false;
+    }
+    let (ax, ay) = {
+        let (nx, ny, nz) = (n[0].abs(), n[1].abs(), n[2].abs());
+        if nx >= ny && nx >= nz {
+            (1usize, 2usize)
+        } else if ny >= nz {
+            (0, 2)
+        } else {
+            (0, 1)
+        }
+    };
+    let pr = |q: [f64; 3]| [q[ax], q[ay]];
+    let (a, b, c, pp) = (pr(t[0]), pr(t[1]), pr(t[2]), pr(p));
+    let cr = |o: [f64; 2], u: [f64; 2], w: [f64; 2]| {
+        (u[0] - o[0]) * (w[1] - o[1]) - (u[1] - o[1]) * (w[0] - o[0])
+    };
+    let s0 = cr(a, b, pp);
+    let s1 = cr(b, c, pp);
+    let s2 = cr(c, a, pp);
+    let eps = 1e-7;
+    (s0 > eps && s1 > eps && s2 > eps) || (s0 < -eps && s1 < -eps && s2 < -eps)
+}
+
+/// Longest edge over the altitude onto it: the mesh census's aspect.
+fn census_aspect(t: &[[f64; 3]; 3]) -> f64 {
+    let longest = [sub(t[1], t[0]), sub(t[2], t[1]), sub(t[0], t[2])].iter().map(|e| dot(*e, *e)).fold(0.0, f64::max);
+    longest / norm(cross(sub(t[1], t[0]), sub(t[2], t[0])))
+}
+
+/// Normals closer than this are one plane to the flap oracle: a split leaves
+/// its pieces this close, well under the 0.0002 degrees #1112's roof facets
+/// now lie apart.
+const COPLANAR_DEG: f64 = 1.0e-5;
+
+/// The #1007 rim-corner CHAMFER, measured as what made it show: a thin flap
+/// fanned from a far roof corner to two rim points, lying in a plane of its
+/// own. It sat alone in its plane bucket, a fraction of a degree off the roof
+/// slope around it, and shaded as a facet. The footprint-bridge sampling cannot
+/// see it (it lies outside the cap footprint), but it touches a rim vertex.
+///
+/// Returns the largest tilt, in degrees, of a thin triangle touching `rim`
+/// against the neighbour it lies flattest with, outside the triangles in its
+/// own plane (within [`COPLANAR_DEG`]). A thin triangle that is part of a flat
+/// face reads 0 whatever its shape, and so does a split one. Thin is past 8:1
+/// by the census aspect. A plane with nothing outside it reads 0, a triangle
+/// with no neighbour at all 180.
+fn worst_rim_flap_tilt_deg(tris: &[[[f64; 3]; 3]], rim: &[[f64; 3]]) -> f64 {
+    let near = |p: [f64; 3]| rim.iter().any(|r| norm(sub(p, *r)) < 5e-3);
+    let key = |p: [f64; 3]| [0, 1, 2].map(|k| (p[k] * 1.0e4).round() as i64);
+    let edges = |t: &[[f64; 3]; 3]| {
+        [0, 1, 2].map(|i| {
+            let (u, v) = (key(t[i]), key(t[(i + 1) % 3]));
+            if u < v { (u, v) } else { (v, u) }
+        })
+    };
+    let mut by_edge: BTreeMap<_, Vec<usize>> = BTreeMap::new();
+    for (i, t) in tris.iter().enumerate() {
+        for e in edges(t) {
+            by_edge.entry(e).or_default().push(i);
+        }
+    }
+    let mut worst = 0.0_f64;
+    for (i, t) in tris.iter().enumerate() {
+        if !t.iter().any(|p| near(*p)) || !(census_aspect(t) > 8.0) {
+            continue;
+        }
+        let n = tri_normal(t);
+        let angle = |j: usize| dot(n, tri_normal(&tris[j])).clamp(-1.0, 1.0).acos().to_degrees();
+        // The triangles in its own plane, as a split leaves its pieces: a
+        // piece is measured against what lies around the group, not against
+        // a sibling.
+        let mut group = vec![i];
+        let mut k = 0;
+        while k < group.len() {
+            for &j in edges(&tris[group[k]]).iter().flat_map(|e| by_edge[e].iter()) {
+                if !group.contains(&j) && angle(j) < COPLANAR_DEG {
+                    group.push(j);
+                }
+            }
+            k += 1;
+        }
+        let flattest = group
+            .iter()
+            .flat_map(|&g| edges(&tris[g]).into_iter())
+            .flat_map(|e| by_edge[&e].iter())
+            .filter(|j| !group.contains(j))
+            .map(|&j| angle(j))
+            .reduce(f64::min)
+            // Nothing outside its plane: a flat surface, unless it is alone.
+            .unwrap_or(if group.len() > 1 { 0.0 } else { 180.0 });
+        worst = worst.max(flattest);
+    }
+    worst
+}
+
+/// Count undirected edges used exactly once (open boundary) on the cut mesh.
+///
+/// NOTE: this real faceted roof BREP is NOT a single closed 2-manifold shell —
+/// cutting it leaves some open boundary edges at the host's own facet seams (44 on
+/// the pre-fix tree, 41 after this fix) regardless of the opening cut. So this is a
+/// NON-REGRESSION bound (a gross tear from a broken cut runs into the hundreds),
+/// not a `== 0` watertight assertion; the load-bearing assertion is the no-bridge
+/// footprint coverage.
+fn open_boundary_edges(tris: &[[[f64; 3]; 3]]) -> usize {
+    let key = |p: [f64; 3]| {
+        (
+            (p[0] * 4096.0).round() as i64,
+            (p[1] * 4096.0).round() as i64,
+            (p[2] * 4096.0).round() as i64,
+        )
+    };
+    let mut edges: BTreeMap<((i64, i64, i64), (i64, i64, i64)), u32> = BTreeMap::new();
+    for t in tris {
+        let k = [key(t[0]), key(t[1]), key(t[2])];
+        for (u, v) in [(k[0], k[1]), (k[1], k[2]), (k[2], k[0])] {
+            *edges.entry(if u < v { (u, v) } else { (v, u) }).or_insert(0) += 1;
+        }
+    }
+    edges.values().filter(|&&c| c == 1).count()
+}
+
+/// Process the host with voids through the VIEWER path and probe every opening's
+/// footprint on each cut plane. Returns the worst per-cap bridged-sample count.
+///
+/// `None` here is overloaded: it also means "host has no voids", checked
+/// below. An absent fixture also reads as `None` locally; under
+/// `IFC_LITE_REQUIRE_FIXTURES=1` the testkit panics instead (`path` is relative
+/// to `tests/models/`).
+fn worst_bridged_samples(path: &str, host_id: u32) -> Option<usize> {
+    let content = ifc_lite_testkit::fixture_text(path)?;
+    let index: EntityIndex = build_entity_index(&content);
+    let voids = build_void_index(&content);
+    let opening_ids = voids.get(&host_id).cloned().unwrap_or_default();
+    if opening_ids.is_empty() {
+        return None;
+    }
+
+    let mut decoder = EntityDecoder::with_index(&content, index.clone());
+    let host = decoder.decode_by_id(host_id).ok()?;
+    let router = GeometryRouter::with_scale(1.0);
+
+    // The exact mesh the viewer renders (gpu_meshes.rs calls this same fn).
+    let out = router.process_element_with_voids(&host, &mut decoder, &voids).ok()?;
+    let out_tris = mesh_tris(&out);
+    assert!(!out_tris.is_empty(), "cut host #{host_id} produced an empty mesh");
+
+    // No sliver anywhere in the cut, by the mesh census's measure (longest edge
+    // over altitude past 50:1). The cut reads 41:1 at worst.
+    let shape = ifc_lite_testkit::mesh::triangle_shape(&out.positions, &out.indices);
+    assert_eq!(
+        shape.slivers, 0,
+        "host #{host_id}: the cut left {} sliver(s), worst {:.0}:1",
+        shape.slivers, shape.max_aspect,
+    );
+    // Non-regression on torn rim: this BREP host leaves ~41–44 open facet-seam
+    // edges either way; a broken cut that tears the opening rim open balloons this
+    // into the hundreds. Bound it generously so a real tear is still caught.
+    let ob = open_boundary_edges(&out_tris);
+    assert!(
+        ob <= 80,
+        "host #{host_id}: cut left {ob} open boundary edges — the opening rim is torn open",
+    );
+
+    // Collect every opening-cut vertex (the rim) so we can bound the worst aspect
+    // of the host triangles that touch it — the rim-corner CHAMFER guard (below).
+    let mut rim: Vec<[f64; 3]> = Vec::new();
+    for &oid in &opening_ids {
+        if let Ok(oe) = decoder.decode_by_id(oid) {
+            if let Ok(om) = router.process_element(&oe, &mut decoder) {
+                if !om.is_empty() {
+                    for t in mesh_tris(&om) {
+                        rim.extend_from_slice(&t);
+                    }
+                }
+            }
+        }
+    }
+    // RIM-CORNER CHAMFER guard (#1007): see `worst_rim_flap_tilt_deg`. The roof
+    // slope came back from the f32 import with facets about 0.09 degrees apart,
+    // and the far-corner fan was emitted alone in its plane
+    // (`strategy/inner.rs`). Today the fan lies in the slope's plane, 0.0002
+    // degrees off its neighbours; the bound sits between the two.
+    //
+    // This used to bound the longest-over-shortest edge ratio of rim triangles
+    // at 10:1, which the post-cut bisection met by splitting the fan. Splitting
+    // a triangle at a point on its own edge leaves the surface where it was, so
+    // that bound measured the bisection and not the flap.
+    let tilt = worst_rim_flap_tilt_deg(&out_tris, &rim);
+    eprintln!(
+        "[1007-metrics] host #{host_id}: rim_flap_tilt_deg={tilt:.5} worst_aspect={:.2} \
+         open_boundary_edges={ob} out_tris={}",
+        shape.max_aspect,
+        out_tris.len()
+    );
+    assert!(
+        tilt < 0.02,
+        "host #{host_id}: a thin triangle at the opening rim is tilted {tilt:.3} degrees out of \
+         the face around it: the rim-corner flap is back",
+    );
+
+    let mut worst = 0usize;
+    for &oid in &opening_ids {
+        let oe = match decoder.decode_by_id(oid) {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+        let om = match router.process_element(&oe, &mut decoder) {
+            Ok(m) if !m.is_empty() => m,
+            _ => continue,
+        };
+        let ot = mesh_tris(&om);
+        // Cluster opening triangle normals into plane buckets; the two
+        // highest-area opposite-facing buckets are the caps flush with the host.
+        let mut bucket: Vec<([f64; 3], f64, f64)> = Vec::new(); // (normal, offset, area)
+        for t in &ot {
+            let n = tri_normal(t);
+            if norm(n) < 1e-9 {
+                continue;
+            }
+            let off = dot(t[0], n);
+            let area = 0.5 * norm(cross(sub(t[1], t[0]), sub(t[2], t[0])));
+            let mut found = false;
+            for b in bucket.iter_mut() {
+                if dot(b.0, n) > 0.999 && (b.1 - off).abs() < 1e-3 {
+                    b.2 += area;
+                    found = true;
+                    break;
+                }
+            }
+            if !found {
+                bucket.push((n, off, area));
+            }
+        }
+        bucket.sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap());
+        let caps: Vec<([f64; 3], f64)> = bucket.iter().take(2).map(|b| (b.0, b.1)).collect();
+
+        for (cn, coff) in &caps {
+            let cn = *cn;
+            // in-plane sampling basis
+            let seed = if cn[2].abs() < 0.9 { [0.0, 0.0, 1.0] } else { [0.0, 1.0, 0.0] };
+            let u = unit(cross(seed, cn));
+            let v = unit(cross(cn, u));
+            // collect opening verts ON this cap plane, derive the footprint bounds
+            let cverts: Vec<[f64; 3]> =
+                ot.iter().flatten().copied().filter(|p| (dot(*p, cn) - coff).abs() < 1e-3).collect();
+            if cverts.len() < 3 {
+                continue;
+            }
+            let c0 = {
+                let mut s = [0.0; 3];
+                for p in &cverts {
+                    s = [s[0] + p[0], s[1] + p[1], s[2] + p[2]];
+                }
+                let k = cverts.len() as f64;
+                [s[0] / k, s[1] / k, s[2] / k]
+            };
+            let (mut umin, mut umax, mut vmin, mut vmax) =
+                (f64::MAX, f64::MIN, f64::MAX, f64::MIN);
+            for p in &cverts {
+                let w = sub(*p, c0);
+                let (uu, vv) = (dot(w, u), dot(w, v));
+                umin = umin.min(uu);
+                umax = umax.max(uu);
+                vmin = vmin.min(vv);
+                vmax = vmax.max(vv);
+            }
+            // dense interior grid (inset, never touching the rim)
+            let n = 24usize;
+            let mut covered = 0usize;
+            for i in 1..n {
+                for j in 1..n {
+                    let su = umin + (umax - umin) * (i as f64) / (n as f64);
+                    let sv = vmin + (vmax - vmin) * (j as f64) / (n as f64);
+                    let p = [
+                        c0[0] + u[0] * su + v[0] * sv,
+                        c0[1] + u[1] * su + v[1] * sv,
+                        c0[2] + u[2] * su + v[2] * sv,
+                    ];
+                    if out_tris
+                        .iter()
+                        .any(|t| dot(tri_normal(t), cn).abs() > 0.99 && covers(p, t, 1e-3))
+                    {
+                        covered += 1;
+                    }
+                }
+            }
+            worst = worst.max(covered);
+        }
+    }
+    Some(worst)
+}
+
+/// STRICT: the real #1112 roof openings (#2150 / #2154) must be cut with NO host
+/// triangle bridging the footprint on EITHER cut plane, via the viewer path.
+#[test]
+fn real_1112_roof_openings_have_no_bridging_triangle() {
+    let Some(worst) = worst_bridged_samples(MODEL, 1112) else {
+        // Fixture absent in this checkout — nothing to assert.
+        eprintln!("skip: {MODEL} (host #1112 voids) not available or has no voids");
+        return;
+    };
+    // A dense 23×23 interior grid per cap plane. Pre-fix this was 142/529 (#2150
+    // upper) and 48/529 (#2154 upper); a clean cut leaves ZERO. Allow a tiny slack
+    // for f32 edge effects on the densest grid — the defect was ¼ of the hole.
+    assert_eq!(
+        worst, 0,
+        "a host triangle bridges a real #1112 opening footprint ({worst} interior samples covered) \
+         — the exact-kernel opening cut still leaves a flap over the hole",
+    );
+}
+
+/// The flap oracle reads what it is meant to: a thin triangle fanned from a far
+/// corner to two rim points reads 0 while it lies in the face around it, and
+/// its tilt once one rim point leaves that plane far enough to turn it by the
+/// 0.09 degrees the #1112 facets were apart.
+#[test]
+fn rim_flap_oracle_reads_a_tilted_fan_and_not_a_flat_one() {
+    let far = [0.0, 5.0, 0.0];
+    let fan = |lift: f64| {
+        let rim = [[0.0, 0.0, 0.0], [0.2, 0.0, lift]];
+        // The thin fan, and the slope either side of it.
+        (vec![[rim[0], rim[1], far], [rim[1], [4.0, 0.0, 0.0], far], [[-4.0, 0.0, 0.0], rim[0], far]], rim)
+    };
+    let (flat, rim) = fan(0.0);
+    assert!(census_aspect(&flat[0]) > 8.0, "the fixture's fan must be thin");
+    assert!(worst_rim_flap_tilt_deg(&flat, &rim) < 1e-9);
+    let (tilted, rim) = fan(0.2 * 0.09_f64.to_radians().tan());
+    let read = worst_rim_flap_tilt_deg(&tilted, &rim);
+    assert!(read > 0.08 && read < 0.1, "tilt read {read}");
+    // Split at the middle of its edge to the far corner, with the slope
+    // triangle across that edge, the tilted fan reads the same.
+    let (t, right) = (tilted[0], tilted[1]);
+    let mid = [0, 1, 2].map(|k| 0.5 * (t[1][k] + t[2][k]));
+    let split = vec![[t[0], t[1], mid], [t[0], mid, t[2]], [right[0], right[1], mid], [mid, right[1], right[2]], tilted[2]];
+    let read_split = worst_rim_flap_tilt_deg(&split, &rim);
+    assert!((read_split - read).abs() < 1e-6, "split tilt read {read_split}, unsplit {read}");
+}
+
+/// Schependomlaan window opening — same strict assertion, SKIP-IF-ABSENT. Models a
+/// real-world axis-aligned flush window; if the corpus model is present in this
+/// checkout it must also cut clean via the exact path. (Host id is read from the
+/// env so the corpus model can be wired without hardcoding an entity id.)
+///
+/// NOTE: `SCHEP_HOST` is never set in CI, so this test could only ever skip; it
+/// is `#[ignore]` to make that explicit (same convention as `dedup_validate.rs`).
+/// Verified locally against the manifest fixture with a partition wall that has
+/// two openings:
+/// `SCHEP_HOST=534371 cargo test -p ifc-lite-geometry --test issue_1007_real_opening_no_bridge -- --ignored`
+#[test]
+#[ignore = "manual; needs SCHEP_HOST=<wall entity id> (e.g. 534371)"]
+fn real_schependomlaan_window_has_no_bridging_triangle() {
+    // The manifest ships the fixture (`pnpm fixtures`); the gate lives in the testkit.
+    let path = "ara3d/schependomlaan.ifc";
+    let host_id: u32 = match std::env::var("SCHEP_HOST").ok().and_then(|s| s.parse().ok()) {
+        Some(id) => id,
+        None => {
+            eprintln!("skip: set SCHEP_HOST=<wall entity id> to probe {path}");
+            return;
+        }
+    };
+    let Some(worst) = worst_bridged_samples(path, host_id) else {
+        eprintln!("skip: {path} host #{host_id} has no voids");
+        return;
+    };
+    assert_eq!(
+        worst, 0,
+        "a host triangle bridges a schependomlaan window footprint ({worst} samples) via the exact path",
+    );
+}

@@ -1,0 +1,68 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/// <reference types="vite/client" />
+/// <reference types="unplugin-icons/types/react" />
+
+interface ImportMetaEnv {
+  /**
+   * Same-origin URL of this deployment's `ViewerRuntimeConfig`. Set = the
+   * build loads `main-hosted.tsx`, which fetches it before mounting and
+   * refuses to start without it.
+   */
+  readonly VITE_VIEWER_CONFIG_URL?: string;
+  /** Local OCI registry demo, using the development server's same-origin proxy. */
+  readonly VITE_REGISTRY_ENABLED?: string;
+  readonly VITE_REGISTRY_ADDRESS?: string;
+  /** Enable reviewed model reports only after the report service is deployed and qualified. */
+  readonly VITE_MODEL_REPORTS_ENABLED?: string;
+  /** Gaussian capture admission (#8568): unset = committed default, 'disabled' = kill switch, 'internal-unqualified' = presenter build. */
+  readonly VITE_GAUSSIAN_SPLATS?: string;
+  /** Same-origin cookie-backed Dropbox and Microsoft cloud sign-in. */
+  readonly VITE_CLOUD_HOSTED?: string;
+  /** 'false' removes the BIMcollab Documents source (it needs the /api/bimcollab relay). */
+  readonly VITE_SOURCE_BIMCOLLAB?: string;
+  /**
+   * buildagil OAuth client id. Set = the buildagil source is offered; the
+   * /api/buildagil relay needs the same id as server-only BUILDAGIL_CLIENT_ID.
+   */
+  readonly VITE_BUILDAGIL_CLIENT_ID?: string;
+  readonly VITE_AUTODESK_CLIENT_ID?: string;
+  readonly VITE_AUTODESK_HOSTED?: string;
+  /** Server URL for IFC processing (also used by superset integration) */
+  readonly VITE_IFC_SERVER_URL?: string;
+  /** Alternative server URL env var */
+  readonly VITE_SERVER_URL?: string;
+  /** Set to 'true' to route IFC loading through server instead of client-side WASM */
+  readonly VITE_USE_SERVER?: string;
+  /** Comma-separated free-tier model IDs */
+  readonly VITE_LLM_FREE_MODELS?: string;
+  /** Comma-separated model IDs that support image inputs */
+  readonly VITE_LLM_IMAGE_MODELS?: string;
+  /** Comma-separated model IDs that support file attachment context */
+  readonly VITE_LLM_FILE_ATTACHMENT_MODELS?: string;
+  /** Build-time default Cesium ion access token */
+  readonly VITE_CESIUM_ION_TOKEN?: string;
+  /** PostHog project API key — analytics are disabled when unset */
+  readonly VITE_POSTHOG_KEY?: string;
+  /** PostHog ingestion host — analytics are disabled when unset */
+  readonly VITE_POSTHOG_HOST?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
+// Build-time constants injected by Vite define
+declare const __APP_VERSION__: string;
+declare const __BUILD_SHA__: string;
+declare const __BUILD_DATE__: string;
+declare const __RELEASE_HISTORY__: Array<{
+  name: string;
+  releases: Array<{
+    version: string;
+    highlights: Array<{ type: 'feature' | 'fix' | 'perf'; text: string }>;
+  }>;
+}>;
+declare const __PACKAGE_VERSIONS__: Array<{ name: string; version: string }>;

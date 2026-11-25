@@ -1,0 +1,185 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Cache service — IndexedDB-backed cache (ifc-cache.ts) for the web build.
+ *
+ * Extracted from useIfc.ts for reusability and testability
+ */
+
+// ============================================================================
+// Types
+// ============================================================================
+
+/**
+ * Extra validation metadata persisted with a cache entry (mesh-only tier):
+ * the source File's `lastModified` and a TRUE full-file content hash, used to
+ * validate a source-decoupled hit against the fresh buffer. See `ifc-cache.ts`.
+ */
+export interface CacheEntryMeta {
+  lastModified?: number;
+  fullSourceHash?: string;
+  /** The source's `IfcSourceBytes.contentKey` at write, so a hit need not re-hash the source on the main thread. */
+  sourceContentKey?: string;
+}
+
+/**
+ * Result from cache lookup
+ */
+export interface CacheResult {
+  /** Serialized cache buffer containing data store and geometry. A Blob for
+   *  entries written since the v13 cold tier (disk-backed → `slice()` gives
+   *  partial chunk reads); an ArrayBuffer for older entries. */
+  buffer: Blob | ArrayBuffer;
+  /** Original IFC source file for on-demand property extraction */
+  sourceBuffer?: ArrayBuffer;
+  /** Source File `lastModified` (ms) stored at write; mesh-only mtime guard. */
+  lastModified?: number;
+  /** True full-file content hash (SHA-256 hex) stored at write; mesh-only revalidation. */
+  fullSourceHash?: string;
+  /** The source's `IfcSourceBytes.contentKey` at write, so a hit need not re-hash the source on the main thread. */
+  sourceContentKey?: string;
+  /** When this entry was written; a scene snapshot only attaches to the same write. */
+  createdAt?: number;
+  /** The finished scene (`encodeSceneSnapshot`), with the renderer policy it was built under. */
+  sceneSnapshot?: Blob;
+  sceneSnapshotKey?: string;
+}
+
+/**
+ * Function signature for getting cached data
+ */
+export type GetCachedFn = (key: string) => Promise<CacheResult | null>;
+
+/**
+ * Function signature for setting cached data
+ */
+export type SetCachedFn = (
+  key: string,
+  data: ArrayBuffer,
+  fileName: string,
+  fileSize: number,
+  sourceBuffer?: ArrayBuffer,
+  meta?: CacheEntryMeta,
+) => Promise<SceneSnapshotWrite | null>;
+
+/**
+ * Function signature for deleting cached data
+ */
+export type DeleteCachedFn = (key: string) => Promise<void>;
+
+/** Identifies one write of a cache entry. */
+export interface SceneSnapshotWrite {
+  createdAt: number;
+  fullSourceHash?: string;
+}
+
+/**
+ * Attach a finished scene to the entry from this write; a purged or replaced
+ * entry stays as it is. Resolves whether it was stored.
+ */
+export type PutSceneSnapshotFn = (key: string, write: SceneSnapshotWrite, snapshot: Blob, snapshotKey: string) => Promise<boolean>;
+
+/** Remove a scene snapshot from the entry from this write. Resolves whether one was removed. */
+export type ClearSceneSnapshotFn = (key: string, write: SceneSnapshotWrite) => Promise<boolean>;
+
+/**
+ * Cache service interface
+ */
+export interface ICacheService {
+  getCached: GetCachedFn;
+  setCached: SetCachedFn;
+  deleteCached: DeleteCachedFn;
+  putSceneSnapshot: PutSceneSnapshotFn;
+  clearSceneSnapshot: ClearSceneSnapshotFn;
+}
+
+// ============================================================================
+// Service Singleton
+// ============================================================================
+
+/** Cached service instance - loaded once per session */
+let cacheService: ICacheService | null = null;
+
+/**
+ * Get the cache service.
+ * Lazily loads the IndexedDB implementation.
+ */
+export async function getCacheService(): Promise<ICacheService> {
+  if (cacheService) return cacheService;
+
+  const mod = await import('./ifc-cache.js');
+  cacheService = {
+    getCached: mod.getCached,
+    setCached: mod.setCached,
+    deleteCached: mod.deleteCached,
+    putSceneSnapshot: mod.putSceneSnapshot,
+    clearSceneSnapshot: mod.clearSceneSnapshot,
+  };
+
+  return cacheService;
+}
+
+// ============================================================================
+// Convenience Functions
+// ============================================================================
+
+/**
+ * Get cached data by key
+ * @param key - Cache key (typically xxhash64 of source file)
+ * @returns Cache result with buffer and optional source, or null if not found
+ */
+export async function getCached(key: string): Promise<CacheResult | null> {
+  const service = await getCacheService();
+  return service.getCached(key);
+}
+
+/**
+ * Store data in cache
+ * @param key - Cache key (typically xxhash64 of source file)
+ * @param data - Serialized cache buffer
+ * @param fileName - Original file name for logging
+ * @param fileSize - Original file size for logging
+ * @param sourceBuffer - Optional source file for on-demand extraction
+ * @returns The stored write's identity, or null when the write was skipped
+ */
+export async function setCached(
+  key: string,
+  data: ArrayBuffer,
+  fileName: string,
+  fileSize: number,
+  sourceBuffer?: ArrayBuffer,
+  meta?: CacheEntryMeta,
+): Promise<SceneSnapshotWrite | null> {
+  const service = await getCacheService();
+  return service.setCached(key, data, fileName, fileSize, sourceBuffer, meta);
+}
+
+/**
+ * Delete a cache entry by key
+ * @param key - Cache key to delete
+ */
+export async function deleteCached(key: string): Promise<void> {
+  const service = await getCacheService();
+  return service.deleteCached(key);
+}
+
+/** See {@link PutSceneSnapshotFn}. */
+export async function putSceneSnapshot(key: string, write: SceneSnapshotWrite, snapshot: Blob, snapshotKey: string): Promise<boolean> {
+  const service = await getCacheService();
+  return service.putSceneSnapshot(key, write, snapshot, snapshotKey);
+}
+
+/** See {@link ClearSceneSnapshotFn}. */
+export async function clearSceneSnapshot(key: string, write: SceneSnapshotWrite): Promise<boolean> {
+  const service = await getCacheService();
+  return service.clearSceneSnapshot(key, write);
+}
+
+/**
+ * Reset the cache service singleton (useful for testing)
+ */
+export function resetCacheService(): void {
+  cacheService = null;
+}

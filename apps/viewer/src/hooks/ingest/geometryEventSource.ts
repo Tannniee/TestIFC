@@ -1,0 +1,128 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Where a load's geometry comes from (#7955 M2-C): the exact kernel's
+ * `processAdaptive` stream, or — only in a `VITE_RETAINED_GEOMETRY=on` build,
+ * and only when the user asked for it — the retained kernel's.
+ *
+ * `useIfcLoader` decides the kernel ONCE per load (`beginGeometryKernel`) and
+ * asks it three things: may this source be loaded at all, may the exact cache
+ * and server serve it, and where do its geometry events come from. The default
+ * build resolves `@ifc-lite/viewer-retained` to a `null` stub, so every answer
+ * is the exact one and the exact options below are exactly what the loader
+ * passed inline before.
+ */
+
+import { fastGeometryEvents, type FastGeometryRun } from './fastPath.js';
+// The loader's other pre-geometry seams, re-exported so it imports one module for all of them.
+export { claimFastGeometry } from './fastPath.js';
+export { runPickStart } from './pickStart.js';
+export { ADAPTIVE_SYNC_THRESHOLD_BYTES } from './adaptiveGeometryOptions.js';
+import { type GeometryProcessor, type StallPhaseHandle, type StreamingGeometryEvent } from '@ifc-lite/geometry';
+import { retainedKernel } from '@ifc-lite/viewer-retained';
+import { getGeomWorkerOverride } from '../../store/constants.js';
+import { adaptiveGeometryOptions } from './adaptiveGeometryOptions.js';
+import type { CachePlan } from '../cacheTier.js';
+
+type AdaptiveOptions = NonNullable<Parameters<GeometryProcessor['processAdaptive']>[1]>;
+
+/** Everything a geometry stream needs from the load that opens it. */
+export interface GeometryEventRequest {
+  processor: GeometryProcessor;
+  /** The source bytes; a view of the parser's SharedArrayBuffer when one is shared. */
+  view: Uint8Array;
+  fileSizeMB: number;
+  signal: AbortSignal;
+  stallPhaseHandle: StallPhaseHandle;
+  existingSab?: SharedArrayBuffer;
+  sharedRtcOffset?: AdaptiveOptions['sharedRtcOffset'];
+  onEntityIndex: NonNullable<AdaptiveOptions['onEntityIndex']>;
+  sourceFingerprint?: SharedArrayBuffer;
+  trace: AdaptiveOptions['trace'];
+  modelId: string;
+  /** The load's activity; a retained run installs `interrupt` so Cancel keeps what it published. */
+  activity: { interrupt?: () => void; fail(message: string): string };
+  /** A small-file fast-path run started at the pick (fastPath.ts); its events replace the pool's. */
+  fastRun?: FastGeometryRun | null;
+}
+
+/** The kernel one load runs on, decided before any work. */
+export interface GeometryKernelLoad {
+  readonly kind: 'exact' | 'retained';
+  /** Set when the request is out of the kernel's scope; resolves to the refusal message it reported, `null` for a quiet stop. */
+  readonly refused?: Promise<string | null>;
+  /** Whether the exact geometry server may serve this load. */
+  readonly serverEnabled: boolean;
+  /** The cache plan this load may use: retained loads never read or write exact geometry. */
+  cachePlan(plan: CachePlan): CachePlan;
+  /**
+   * Once the format and unwrapped size are known: true when this load must stop
+   * here. The refusal is reported and the model record marked; the caller ends
+   * its load UI and returns.
+   */
+  refuseSource(format: string, byteLength: number, request: Pick<GeometryEventRequest, 'modelId' | 'activity'>): boolean;
+  /** The kernel's own event stream; absent for exact, which streams through `processAdaptive`. */
+  events?(request: GeometryEventRequest): AsyncIterable<StreamingGeometryEvent>;
+  /** A geometry failure this kernel words itself; `retry` replaces the load's own (a retained run out of memory retries exact). */
+  loadFailure?(error: unknown): { message: string; retry?: () => void } | null;
+}
+
+const EXACT_GEOMETRY_KERNEL: GeometryKernelLoad = {
+  kind: 'exact',
+  serverEnabled: true,
+  cachePlan: (plan) => plan,
+  refuseSource: () => false,
+};
+
+/**
+ * Decide the kernel for this load. A retained request outside retained scope
+ * (federated add, non-STEP file, oversize source) comes back already refused,
+ * before a byte is read or any Worker spawns. `retry` re-runs this same load;
+ * a refusal offers it after switching the next load to the exact kernel.
+ */
+export function beginGeometryKernel(
+  file: File,
+  target: { kind: 'primary' | 'federated' },
+  retry: () => void,
+  /**
+   * Required, so no caller hands the retained engine an empty file by default. `hasSourceBytes`
+   * is false for a processed model: the server's exact geometry is all there is. Such a load is
+   * exact whatever the setting, and never waits for, fetches or arms the retained engine.
+   */
+  source: { hasSourceBytes: boolean },
+): GeometryKernelLoad {
+  if (!source.hasSourceBytes) return EXACT_GEOMETRY_KERNEL;
+  // `retainedKernel` is `null` in the default viewer (the alias maps to off.ts).
+  return retainedKernel?.begin(file, target, retry) ?? EXACT_GEOMETRY_KERNEL;
+}
+
+export function openGeometryEvents(kernel: GeometryKernelLoad, request: GeometryEventRequest): AsyncIterable<StreamingGeometryEvent> {
+  if (kernel.events) return kernel.events(request);
+  if (request.fastRun) return fastGeometryEvents(request.fastRun, () => adaptiveEvents(request), request.signal);
+  return adaptiveEvents(request);
+}
+
+function adaptiveEvents(request: GeometryEventRequest): AsyncIterable<StreamingGeometryEvent> {
+  return request.processor.processAdaptive(request.view, adaptiveGeometryOptions({
+    fileSizeMB: request.fileSizeMB,
+    signal: request.signal,
+    stallPhaseHandle: request.stallPhaseHandle,
+    existingSab: request.existingSab,
+    // Federated adds share the anchor's RTC origin so all models sit in
+    // one coordinate space (pixel-perfect alignment, no post-shift).
+    sharedRtcOffset: request.sharedRtcOffset,
+    // Let a geometry worker finish before materializing large parser
+    // reference arrays. Small loads still receive immediately.
+    // Refusal counts and malformed-stop diagnostics remain attached.
+    onEntityIndex: request.onEntityIndex,
+    sourceFingerprint: request.sourceFingerprint,
+    // `?geomWorkers=N` A/B knob — overrides the cores/memory worker-
+    // count heuristic so the host's thermal sweet spot can be measured.
+    // Still clamped to the memory budget by the engine. Geometry output
+    // is unaffected by the count (disjoint deterministic element slices).
+    workerCountOverride: getGeomWorkerOverride(),
+    trace: request.trace,
+  }));
+}

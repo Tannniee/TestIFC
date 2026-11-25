@@ -1,0 +1,219 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { beforeEach, describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { federationRegistry } from '@ifc-lite/renderer';
+import { MutablePropertyView, StoreEditor } from '@ifc-lite/mutations';
+import { PropertyValueType } from '@ifc-lite/data';
+import { IfcParser } from '@ifc-lite/parser';
+import { fixtureModel, fixtureModels } from '@/test/store-fixture';
+import { getOrCreateMutationView } from '@/sdk/adapters/mutation-view';
+import { useViewerStore } from './index.js';
+import { canMutate, dataMutationPermission, mutationPermission } from './mutation-permission.js';
+import { startWorkflowRun } from '@/lib/flow/run-session';
+
+const first = fixtureModel('first', { entities: [{ expressId: 11, type: 'IfcWall', name: 'A' }] });
+const second = fixtureModel('second', { idOffset: 1000, entities: [{ expressId: 22, type: 'IfcWall', name: 'B' }] });
+const authoredIfc = new URL('../../public/samples/hello-wall.ifc', import.meta.url);
+
+function seed(twoModels: boolean): void {
+  const models = twoModels ? [first, second] : [first];
+  useViewerStore.setState({
+    ...fixtureModels(...models),
+    editEnabled: false,
+    collabRole: null,
+    mutationViews: new Map(models.map((model) => [model.id, new MutablePropertyView(null, model.id)])),
+    undoStacks: new Map(),
+    redoStacks: new Map(),
+    dirtyModels: new Set(),
+    mutationVersion: 0,
+  });
+}
+
+describe('canonical viewer mutation permission (#5901)', () => {
+  beforeEach(() => seed(false));
+
+  for (const twoModels of [false, true]) {
+    it(`keeps ${twoModels ? 'federated' : 'single-model'} data edits work in View while geometry stays gated (#9296)`, () => {
+      seed(twoModels);
+      const modelId = twoModels ? second.id : first.id;
+      const expressId = twoModels ? 22 : 11;
+      const state = useViewerStore.getState();
+      assert.deepEqual(mutationPermission(state, modelId), { allowed: false, reason: 'edit-mode' });
+      assert.ok(state.setAttribute(modelId, expressId, 'Name', 'Edited'));
+      assert.equal(useViewerStore.getState().undoStacks.get(modelId)?.length, 1);
+      assert.equal(useViewerStore.getState().dirtyModels.has(modelId), true);
+      assert.equal(canMutate(useViewerStore.getState(), modelId), false, 'geometry still needs Model');
+      if (twoModels) assert.equal(useViewerStore.getState().undoStacks.get(first.id), undefined);
+    });
+  }
+
+  it('names a running workflow before Edit mode, since Edit mode would not unblock it (#9296)', () => {
+    const run = startWorkflowRun();
+    run.modelReaders = 1;
+    try {
+      assert.deepEqual(mutationPermission(useViewerStore.getState(), first.id), { allowed: false, reason: 'workflow-running' });
+    } finally {
+      run.release();
+    }
+  });
+
+  it('edits a pset in View without entering Model, with one undo step (#9296)', () => {
+    assert.equal(useViewerStore.getState().workspaceMode, 'view');
+    const mutation = useViewerStore.getState().setProperty(first.id, 11, 'Pset_Test', 'FireRating', 'EI60');
+    assert.ok(mutation);
+    assert.equal(useViewerStore.getState().workspaceMode, 'view');
+    assert.equal(useViewerStore.getState().undoStacks.get(first.id)?.length, 1);
+    assert.equal(useViewerStore.getState().mutationViews.get(first.id)?.getPropertyValue(11, 'Pset_Test', 'FireRating'), 'EI60');
+    useViewerStore.getState().undo(first.id);
+    assert.equal(useViewerStore.getState().mutationViews.get(first.id)?.getPropertyValue(11, 'Pset_Test', 'FireRating'), null);
+  });
+
+  it('rejects a non-IFC model and a collaboration viewer before creating an undo entry', () => {
+    const unavailable = { ...second, ifcDataStore: null };
+    useViewerStore.setState({
+      ...fixtureModels(first, unavailable),
+      editEnabled: true,
+      mutationViews: new Map([[unavailable.id, new MutablePropertyView(null, unavailable.id)]]),
+      undoStacks: new Map(),
+    });
+    assert.deepEqual(mutationPermission(useViewerStore.getState(), unavailable.id),
+      { allowed: false, reason: 'model-unavailable' });
+    assert.equal(useViewerStore.getState().setAttribute(unavailable.id, 22, 'Name', 'Edited'), null);
+    useViewerStore.setState({ collabRole: 'viewer' });
+    assert.deepEqual(mutationPermission(useViewerStore.getState(), first.id),
+      { allowed: false, reason: 'collab-role' });
+    assert.equal(useViewerStore.getState().setAttribute(first.id, 11, 'Name', 'Edited'), null);
+    assert.equal(useViewerStore.getState().undoStacks.size, 0);
+  });
+
+  for (const twoModels of [false, true]) {
+    it(`blocks column authoring before overlay creation and authors a column in ${twoModels ? 'federated' : 'single-model'} Edit mode (#5901)`, async () => {
+      const bytes = await readFile(authoredIfc);
+      const dataStore = await new IfcParser().parseColumnar(
+        bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
+        { disableWorkerScan: true },
+      );
+      const target = {
+        ...fixtureModel('authored', { idOffset: twoModels ? 1000 : 0 }),
+        ifcDataStore: dataStore,
+        geometryResult: null,
+      };
+      useViewerStore.setState({
+        ...fixtureModels(...(twoModels ? [first, target] : [target])),
+        editEnabled: false,
+        collabRole: null,
+        mutationViews: new Map(),
+        undoStacks: new Map(),
+        dirtyModels: new Set(),
+      });
+      const params = { Position: [0, 0, 0] as [number, number, number], Width: 0.3, Depth: 0.3, Height: 3 };
+      const denied = useViewerStore.getState().addColumn(target.id, 42, params);
+      assert.ok('error' in denied && denied.error.includes('Edit mode'));
+      assert.equal(useViewerStore.getState().mutationViews.size, 0);
+      assert.equal(useViewerStore.getState().dirtyModels.size, 0);
+
+      useViewerStore.setState({ editEnabled: true });
+      assert.ok(getOrCreateMutationView(useViewerStore, target.id));
+      const created = useViewerStore.getState().addColumn(target.id, 42, params);
+      assert.ok('expressId' in created, 'the authored IFC storey accepts a real column');
+      assert.equal(useViewerStore.getState().dirtyModels.has(target.id), true);
+      assert.ok((useViewerStore.getState().undoStacks.get(target.id)?.length ?? 0) > 0);
+      if (twoModels) assert.equal(useViewerStore.getState().dirtyModels.has(first.id), false);
+    });
+  }
+});
+
+describe('explicit property declarations reject before local history (#6643, Q9X8)', () => {
+  beforeEach(() => { seed(false); useViewerStore.setState({ editEnabled: true }); });
+  it('invalid declared REAL leaves effective properties, undo, dirty state and mirror untouched', context => {
+    const state = useViewerStore.getState(); const view = state.mutationViews.get(first.id); assert.ok(view);
+    const mirror = context.mock.method(state, 'mirrorPropertyEdit', () => {});
+    assert.throws(() => state.setProperty(first.id, 11, 'Pset_Test', 'Value', 'invalid', PropertyValueType.String, 'IfcReal'), /does not fit/);
+    assert.equal(view.getMutations().length, 0); assert.equal(view.getPropertyValue(11, 'Pset_Test', 'Value'), null);
+    assert.equal(useViewerStore.getState().undoStacks.size, 0); assert.equal(useViewerStore.getState().dirtyModels.size, 0);
+    assert.equal(mirror.mock.callCount(), 0);
+  });
+  it('canonicalizes an explicit valid REAL declaration before local write and mirrors the same type', context => {
+    const state = useViewerStore.getState(); const mirror = context.mock.method(state, 'mirrorPropertyEdit', () => {});
+    assert.ok(state.setProperty(first.id, 11, 'Pset_Test', 'Value', 1.25, PropertyValueType.String, 'IfcReal'));
+    const property = state.mutationViews.get(first.id)?.getForEntity(11).find(pset => pset.name === 'Pset_Test')?.properties[0];
+    assert.equal(property?.value, 1.25); assert.equal(property?.type, PropertyValueType.Real); assert.equal(property?.dataType, 'IfcReal');
+    assert.equal(mirror.mock.callCount(), 1); assert.equal(mirror.mock.calls[0]?.arguments[5], PropertyValueType.Real);
+    assert.equal(useViewerStore.getState().undoStacks.get(first.id)?.length, 1);
+  });
+});
+
+it('refuses live when authored overlay ids consume the remaining headroom', () => {
+  const model = fixtureModel('headroom', { entities: [{ expressId: 11, type: 'IfcWall' }] });
+  model.ifcDataStore!.entityIndex.byId = new Map(); // The fixture's entity table supplies the source watermark.
+  const view = new MutablePropertyView(null, model.id);
+  federationRegistry.clear();
+  try {
+    federationRegistry.registerModel(model.id, 11);
+    federationRegistry.registerModel('later', 10);
+    useViewerStore.setState({ ...fixtureModels(model), mutationViews: new Map([[model.id, view]]), collabRole: null });
+    assert.deepEqual(dataMutationPermission(useViewerStore.getState(), model.id), { allowed: true });
+    view.setExpressIdWatermark(1_000_010);
+    federationRegistry.publishOverlayRange(model.id, 12, 1_000_010);
+    assert.deepEqual(dataMutationPermission(useViewerStore.getState(), model.id), { allowed: true }, 'last id remains publishable');
+    const observed: boolean[] = [];
+    const stop = useViewerStore.subscribe(state => { observed.push(dataMutationPermission(state, model.id).allowed); });
+    try {
+      assert.equal(view.createEntity('IfcWall', []).expressId, 1_000_011);
+      assert.deepEqual(dataMutationPermission(useViewerStore.getState(), model.id), { allowed: false, reason: 'id-space-exhausted' });
+      view.clear();
+      assert.equal(view.peekNextExpressId(), 1_000_011);
+      assert.deepEqual(dataMutationPermission(useViewerStore.getState(), model.id), { allowed: true });
+      assert.deepEqual(observed, [false, true], 'allocator transitions notify permission subscribers');
+      view.createEntity('IfcWall', []);
+      federationRegistry.publishOverlayRange(model.id, 1_000_011, 1_000_011);
+      view.clear();
+    } finally { stop(); }
+    assert.deepEqual(dataMutationPermission(useViewerStore.getState(), model.id), { allowed: false, reason: 'id-space-exhausted' });
+  } finally { federationRegistry.clear(); }
+});
+
+for (const registeredMax of [5, 11, 30]) {
+  it(`unpublished creation keeps property editing allowed (registry bound ${registeredMax})`, () => {
+    federationRegistry.clear();
+    try {
+      const model = fixtureModel('allocator', { entities: [{ expressId: 11, type: 'IfcWall' }] });
+      model.ifcDataStore!.entityIndex.byId = new Map();
+      federationRegistry.registerModel(model.id, registeredMax);
+      useViewerStore.setState({ ...fixtureModels(model), collabRole: null, mutationViews: new Map(), storeEditors: new Map() });
+      const view = getOrCreateMutationView(useViewerStore, model.id)!;
+      const editor = new StoreEditor(model.ifcDataStore!, view);
+      const created = editor.addEntity('IfcMaterial', ['Material']);
+      assert.equal(created.expressId, Math.max(11, registeredMax) + 1);
+      assert.deepEqual(dataMutationPermission(useViewerStore.getState(), model.id), { allowed: true });
+      assert.ok(useViewerStore.getState().setProperty(model.id, 11, 'Pset_Test', 'Value', 'edited'));
+    } finally { federationRegistry.clear(); }
+  });
+}
+for (const reset of ['clearMutations', 'view.clear'] as const) {
+  it(`${reset} allocates above permanently published overlays`, () => {
+    federationRegistry.clear();
+    try {
+      const model = fixtureModel('allocator', { entities: [{ expressId: 11, type: 'IfcWall' }] });
+      model.ifcDataStore!.entityIndex.byId = new Map();
+      model.maxExpressId = 11;
+      federationRegistry.registerModel(model.id, 11);
+      useViewerStore.setState({ ...fixtureModels(model), collabRole: null, mutationViews: new Map(), storeEditors: new Map() });
+      const view = getOrCreateMutationView(useViewerStore, model.id)!;
+      const editor = new StoreEditor(model.ifcDataStore!, view);
+      const first = editor.addEntity('IfcMaterial', ['First']);
+      useViewerStore.getState().toGlobalId(model.id, first.expressId);
+      if (reset === 'clearMutations') useViewerStore.getState().clearMutations(model.id);
+      else view.clear();
+      assert.deepEqual(dataMutationPermission(useViewerStore.getState(), model.id), { allowed: true });
+      assert.equal(view.peekNextExpressId(), first.expressId + 1);
+      const next = editor.addEntity('IfcMaterial', ['Second']);
+      assert.equal(next.expressId, first.expressId + 1);
+      assert.equal(useViewerStore.getState().toGlobalId(model.id, next.expressId), next.expressId);
+    } finally { federationRegistry.clear(); }
+  });
+}

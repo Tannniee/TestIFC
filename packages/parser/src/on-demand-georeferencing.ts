@@ -1,0 +1,256 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * The georeferencing member of the `extract*OnDemand` family. Split out of
+ * on-demand-extractors.ts to keep that module under its size ratchet; the
+ * behaviour is unchanged and on-demand-extractors.ts re-exports the entry
+ * point, so every existing import keeps resolving.
+ */
+
+import { EntityExtractor } from './entity-extractor.js';
+import type { IfcDataStore } from './columnar-parser.js';
+import {
+    extractIfc4Georeferencing,
+    withGeoreferenceFallbacks,
+    type GeoreferenceInfo,
+} from './georef-extractor.js';
+import { extractGeoreferenceCandidates, type GeoreferenceCandidates } from './georef-candidates.js';
+import { oncePerStore } from './on-demand-cache.js';
+
+/**
+ * Extract georeferencing info from on-demand store (source buffer + entityIndex).
+ * Bridges to the entity-based georef extractor by resolving entities lazily.
+ *
+ * Memoized per store. When IfcMapConversion/IfcProjectedCRS claim no georeference
+ * (e.g. IFC2x3 files that carry CRS in ePSet_MapConversion) the underlying
+ * scan considers every IfcPropertySet to match by name. A conservative resident
+ * byte filter skips ordinary names without decoding their property lists.
+ * The viewer calls this on the load/render path (ViewportContainer's Cesium-availability check), which
+ * re-runs on every streamed geometry batch, so without caching the cost is
+ * O(batches x propertySets) and can turn a multi-second load into minutes.
+ * Caching collapses it to a single scan per store. Safe because the result is a
+ * pure function of the immutable source + entityIndex; georef *edits* are layered
+ * on top later in getEffectiveGeoreference(), not here.
+ */
+export function extractGeoreferencingOnDemand(store: IfcDataStore): GeoreferenceInfo | null {
+    if (store.georeferencing !== undefined) return store.georeferencing;
+    // Don't cache a not-yet-loaded store — it may gain source/entityIndex later.
+    if (!store.source?.length || !store.entityIndex) return null;
+    return oncePerStore(store, 'georef', () => computeGeoreferencingOnDemand(store));
+}
+
+/**
+ * Every georeferencing source the store's file carries, losers included (see
+ * {@link extractGeoreferenceCandidates}). Unlike
+ * {@link extractGeoreferencingOnDemand} this always scans the property sets
+ * for the IFC2x3 ePSets, because a diagnosis wants them even when the IFC4
+ * entities win; so it is not memoized and does not belong on a render path.
+ * Null when the store has no STEP source to read.
+ */
+export function extractGeoreferenceCandidatesOnDemand(store: IfcDataStore): GeoreferenceCandidates | null {
+    const loaded = loadGeorefEntities(store);
+    if (!loaded) return null;
+    loadGeorefPropertySets(store, loaded);
+    return extractGeoreferenceCandidates(loaded.entities, loaded.typeMap);
+}
+
+function computeGeoreferencingOnDemand(store: IfcDataStore): GeoreferenceInfo | null {
+    const loaded = loadGeorefEntities(store);
+    if (!loaded) return null;
+
+    // IFC2x3 fallback: models without IfcMapConversion store georeferencing in
+    // ePSet_MapConversion / ePSet_ProjectedCRS property sets. Those aren't
+    // loaded by loadGeorefEntities, so the ePSet fallback had nothing to read and the model fell
+    // back to the legacy IfcSite EPSG:4326 (wrong CRS). Only scan property sets
+    // when the IFC4 result claims nothing, the extractor's own fallback rule: a
+    // refused IfcMapConversion beside a nameless CRS takes the fallbacks too, and
+    // gating on the conversion's presence reported the site there instead of the
+    // ePSet (#4695). Only the georef ePSets + their values are pulled in.
+    const ifc4 = extractIfc4Georeferencing(loaded.entities, loaded.typeMap);
+    if (!ifc4.hasGeoreference) loadGeorefPropertySets(store, loaded);
+
+    if (loaded.entities.size === 0) return null;
+
+    return withGeoreferenceFallbacks(ifc4, loaded.entities, loaded.typeMap);
+}
+
+interface LoadedGeorefEntities {
+    extractor: EntityExtractor;
+    entities: Parameters<typeof extractIfc4Georeferencing>[0];
+    typeMap: Map<string, number[]>;
+}
+
+/** The georef entity types and what they reference, keyed the way the georef extractor reads them. */
+function loadGeorefEntities(store: IfcDataStore): LoadedGeorefEntities | null {
+    if (!store.source?.length || !store.entityIndex) return null;
+
+    const source = store.source;
+    const extractor = new EntityExtractor(source);
+    const { byId, byType } = store.entityIndex;
+
+    // Build a lightweight entity map for just the georef-related types
+    const entityMap = new Map<number, { expressId: number; attributes: unknown[] }>();
+    const typeMap = new Map<string, number[]>();
+
+    // `byType` is keyed by the RAW STEP type name, so asking for a supertype
+    // alone misses every file written with a concrete subtype spelling.
+    // IFC4X3's IfcMapConversionScaled is such a subtype: without it a file
+    // georeferenced that way produced no mapConversion at all — and therefore
+    // no transformMatrix — and was placed at its local origin. Both spellings
+    // fold onto the same mixed-case key the georef extractor reads.
+    const GEOREF_TYPES: ReadonlyArray<readonly [string, string]> = [
+        ['IFCMAPCONVERSION', 'IfcMapConversion'],
+        ['IFCMAPCONVERSIONSCALED', 'IfcMapConversion'],
+        ['IFCPROJECTEDCRS', 'IfcProjectedCRS'],
+        ['IFCRIGIDOPERATION', 'IfcRigidOperation'],
+        ['IFCGEOGRAPHICCRS', 'IfcGeographicCRS'],
+        ['IFCWELLKNOWNTEXT', 'IfcWellKnownText'],
+        ['IFCSITE', 'IfcSite'],
+    ];
+    /** Pull an entity and what it references (to `depth` hops) into the map. */
+    const include = (id: number | null, depth: number): void => {
+        if (id === null || depth < 0) return;
+        let entity = entityMap.get(id);
+        if (!entity) {
+            const ref = byId.get(id);
+            const extracted = ref ? extractor.extractEntity(ref) : null;
+            if (!extracted) return;
+            entity = extracted;
+            entityMap.set(id, entity);
+        }
+        const visit = (value: unknown): void => {
+            if (typeof value === 'number' && Number.isInteger(value)) include(value, depth - 1);
+            else if (Array.isArray(value)) value.forEach(visit);
+        };
+        if (depth > 0) entity.attributes?.forEach(visit);
+    };
+    for (const [typeName, displayName] of GEOREF_TYPES) {
+        const ids = byType.get(typeName);
+        if (!ids?.length) continue;
+
+        const existing = typeMap.get(displayName);
+        typeMap.set(displayName, existing ? [...existing, ...ids] : ids);
+
+        for (const id of ids) {
+            const ref = byId.get(id);
+            if (!ref) continue;
+            const entity = extractor.extractEntity(ref);
+            if (entity) {
+                entityMap.set(id, entity);
+
+                // A geographic CRS's AngleUnit/HeightUnit chain (unit →
+                // IfcMeasureWithUnit → its SI unit) reads a plane-angle
+                // IfcRigidOperation; a rigid operation's TargetCRS may be either CRS.
+                if (typeName === 'IFCGEOGRAPHICCRS' && entity.attributes) {
+                    for (const slot of [4, 5]) {
+                        const unitAttr = entity.attributes[slot];
+                        include(typeof unitAttr === 'number' ? unitAttr : null, 3);
+                    }
+                }
+                if (typeName === 'IFCRIGIDOPERATION' && entity.attributes) {
+                    const targetAttr = entity.attributes[1];
+                    include(typeof targetAttr === 'number' ? targetAttr : null, 0);
+                }
+
+                // For IfcProjectedCRS, also resolve the MapUnit reference (attribute [6])
+                // so the georef extractor can determine the actual unit scale
+                if (typeName === 'IFCPROJECTEDCRS' && entity.attributes) {
+                    const mapUnitAttr = entity.attributes[6];
+                    const mapUnitRefId = typeof mapUnitAttr === 'number' ? mapUnitAttr : null;
+                    if (mapUnitRefId && !entityMap.has(mapUnitRefId)) {
+                        const unitRef = byId.get(mapUnitRefId);
+                        if (unitRef) {
+                            const unitEntity = extractor.extractEntity(unitRef);
+                            if (unitEntity) entityMap.set(mapUnitRefId, unitEntity);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // A plane-angle IfcRigidOperation against a geographic CRS without its own
+    // AngleUnit is in the project's plane-angle unit: IfcProject →
+    // IfcUnitAssignment → unit → IfcMeasureWithUnit → SI unit.
+    if (typeMap.has('IfcRigidOperation') && typeMap.has('IfcGeographicCRS')) {
+        const projectIds = byType.get('IFCPROJECT') ?? [];
+        if (projectIds.length) {
+            typeMap.set('IfcProject', projectIds);
+            const project = (include(projectIds[0], 0), entityMap.get(projectIds[0]));
+            const unitsAttr = project?.attributes?.[8];
+            include(typeof unitsAttr === 'number' ? unitsAttr : null, 4);
+        }
+    }
+
+    return {
+        extractor,
+        entities: entityMap as LoadedGeorefEntities['entities'], // same shape as IfcEntity
+        typeMap,
+    };
+}
+
+/** Pull the `ePSet_MapConversion` / `ePSet_ProjectedCRS` sets and their values into `loaded`. */
+function loadGeorefPropertySets(store: IfcDataStore, loaded: LoadedGeorefEntities): void {
+    const source = store.source;
+    if (!source?.length || !store.entityIndex) return;
+    const { byId, byType } = store.entityIndex;
+    const { extractor, entities: entityMap, typeMap } = loaded;
+    const psetIds = byType.get('IFCPROPERTYSET');
+    if (!psetIds?.length) return;
+    const georefPsetIds: number[] = [];
+    const childIds = new Set<number>();
+    for (const id of psetIds) {
+        const ref = byId.get(id);
+        if (!ref) continue;
+        if (source.isResident && !mayContainGeorefName(source.slice(ref.byteOffset, ref.byteOffset + ref.byteLength))) continue;
+        const entity = extractor.extractEntity(ref);
+        if (!entity?.attributes) continue;
+        // IfcPropertySet: Name (2), HasProperties (4)
+        const name = typeof entity.attributes[2] === 'string'
+            ? (entity.attributes[2] as string).toLowerCase()
+            : '';
+        if (name !== 'epset_mapconversion' && name !== 'epset_projectedcrs') continue;
+        entityMap.set(id, entity);
+        georefPsetIds.push(id);
+        const props = entity.attributes[4];
+        if (Array.isArray(props)) {
+            for (const propRef of props) {
+                const propId = typeof propRef === 'number' ? propRef : null;
+                if (propId === null || childIds.has(propId)) continue;
+                // Property atoms may be deferred on huge files (not in
+                // the primary byId index) — fall back like refFromStore.
+                const childRef = byId.get(propId) ?? store.deferredEntityIndex?.get(propId);
+                if (!childRef) continue;
+                const child = extractor.extractEntity(childRef);
+                if (child) {
+                    entityMap.set(propId, child);
+                    childIds.add(propId);
+                }
+            }
+        }
+    }
+    if (georefPsetIds.length) {
+        typeMap.set('IfcPropertySet', georefPsetIds);
+    }
+}
+
+/**
+ * Negative filter only: both supported names contain ASCII `ePSet_`. Any STEP
+ * escape may encode part of that prefix, so a backslash always keeps the full
+ * decoder. Matches anywhere (including comments/other attributes) also keep it;
+ * only the canonical decoder decides whether Name actually identifies an ePSet.
+ * Compressed sources bypass this filter to avoid an extra inflation/read.
+ */
+function mayContainGeorefName(bytes: Uint8Array): boolean {
+    for (let i = 0; i < bytes.length; i++) {
+        const byte = bytes[i];
+        if (byte === 0x5c) return true;
+        if ((byte | 0x20) === 0x65 && i + 5 < bytes.length
+            && (bytes[i + 1] | 0x20) === 0x70 && (bytes[i + 2] | 0x20) === 0x73
+            && (bytes[i + 3] | 0x20) === 0x65 && (bytes[i + 4] | 0x20) === 0x74
+            && bytes[i + 5] === 0x5f) return true;
+    }
+    return false;
+}

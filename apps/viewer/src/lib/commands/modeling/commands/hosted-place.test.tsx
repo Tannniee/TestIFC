@@ -1,0 +1,374 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * `opening.place` / `door.place` / `window.place` (#6232 A1): point at a wall
+ * and click. The element lands in the wall under the cursor, its centre on
+ * the cursor's spot along the wall; a click away from any wall places nothing
+ * (D3, hosted only). Each placement is ONE undo step for the whole graph, it
+ * exports with IfcRelVoidsElement and IfcRelFillsElement, and it survives a
+ * split and a resize of its host.
+ */
+
+import '@/test/setup-dom.js';
+import { afterEach, beforeEach, describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { act } from 'react';
+import { IfcParser } from '@ifc-lite/parser';
+import { placedBodyExtent, resolveHostAnchor, readHostedFill } from '@ifc-lite/create';
+import { useViewerStore } from '@/store';
+import { cleanup, press, render, type } from '@/test/render.js';
+import { MODEL_ID, STOREY, TILTED_SLAB, seedModelingSession } from '@/test/modeling-session-fixture';
+import { CommandFieldsBar } from '@/components/viewer/tools/command/CommandFieldsBar';
+import { editedModelBytes } from '@/lib/export/edited-model-bytes';
+import type { SnapResult } from '@/lib/snap/types';
+import '../builtin.js';
+import { commandPointerDown, commandPointerMove, getCommandRuntime, writeCommandField } from '../runtime.js';
+import { setRequestRemesh, type RemeshRequest } from '../transaction.js';
+import type { CommandContext } from '../types.js';
+import { OPENING_PLACE, WINDOW_PLACE, type HostedPlaceGesture } from './hosted-place.js';
+import { setElementSize } from '@/store/slices/mutation-element-size';
+import { readHostedSlide } from './hosted-slide.js';
+import { readHost } from './hosted-host.js';
+import { typeOf } from '../authored-kinds.js';
+import { CommandScene } from '@/components/viewer/tools/command/CommandHud';
+import { renderScene } from '@/components/viewport-ui/scene/test/scene-test-support';
+import { createElementType } from '@/components/viewer/model-inspector/inspector-edits';
+
+const at = (x: number, y: number): SnapResult => ({ local: [x, y], winner: null, guides: [], locked: false });
+const click = (x: number, y: number) => act(() => { commandPointerMove(at(x, y)); commandPointerDown(at(x, y)); });
+const gesture = () => getCommandRuntime().gesture as HostedPlaceGesture;
+const undoDepth = () => useViewerStore.getState().undoStacks.get(MODEL_ID)?.length ?? 0;
+const live = () => {
+  const s = useViewerStore.getState();
+  return { dataStore: s.models.get(MODEL_ID)!.ifcDataStore!, view: s.mutationViews.get(MODEL_ID)! };
+};
+/** Live overlay records of an IFC class. */
+function created(ifcClass: string): number[] {
+  const { view } = live();
+  return view.getNewEntities().filter((e) => e.type.toUpperCase() === ifcClass && !view.isDeleted(e.expressId)).map((e) => e.expressId);
+}
+const round = (v: number) => +v.toFixed(6);
+
+let remeshed: RemeshRequest[] = [];
+let restoreRemesh: () => void = () => {};
+let wall = 0;
+
+/** A 6 m × 0.2 m × 3 m wall along storey +x from the origin. */
+function addWall(): number {
+  const added = useViewerStore.getState().addWall(MODEL_ID, STOREY, { Start: [0, 0, 0], End: [6, 0, 0], Thickness: 0.2, Height: 3 });
+  assert.ok('expressId' in added);
+  return added.expressId;
+}
+
+beforeEach(async () => {
+  await seedModelingSession();
+  remeshed = [];
+  // Defaults outlive a seed: start every test from the builder's window and door.
+  useViewerStore.getState().setAuthoringDims('window', { Width: 1.2, Height: 1.5, SillHeight: 0.9 });
+  useViewerStore.getState().setAuthoringDefaults({ typeIds: {} });
+  restoreRemesh = setRequestRemesh((_get, request) => { remeshed.push(request); });
+  wall = addWall();
+});
+afterEach(() => {
+  restoreRemesh();
+  useViewerStore.getState().exitModelWorkspace();
+  cleanup();
+});
+
+describe('window.place (#6232 A1)', () => {
+  it('a click on a wall places a window there: opening, voids, fills and window in ONE undo step', () => {
+    useViewerStore.getState().startCommand('window.place');
+    const before = undoDepth();
+    click(2, 0.08);
+    const [window] = created('IFCWINDOW');
+    assert.ok(window, 'a window was placed');
+    const read = readHostedFill(live().dataStore, window, live().view)!;
+    assert.deepEqual([read.hostId, round(read.offset), round(read.sill)], [wall, 2, 0.9], 'at the cursor along the wall, on the window sill default');
+    for (const cls of ['IFCOPENINGELEMENT', 'IFCRELVOIDSELEMENT', 'IFCRELFILLSELEMENT']) assert.equal(created(cls).length, 1, cls);
+    const s = useViewerStore.getState();
+    assert.equal(s.selectedEntityId !== null && s.resolveGlobalIdFromModels(s.selectedEntityId)?.expressId, window, 'the window is selected');
+    assert.deepEqual(remeshed.map((r) => [r.cause, [...r.expressIds].sort()]), [['created', [window, wall].sort()]],
+      'the window and its host are re-meshed, so the host comes back with its void');
+
+    useViewerStore.getState().undo(MODEL_ID);
+    for (const cls of ['IFCWINDOW', 'IFCOPENINGELEMENT', 'IFCRELVOIDSELEMENT', 'IFCRELFILLSELEMENT']) assert.deepEqual(created(cls), [], `${cls} undone`);
+    assert.equal(undoDepth(), before, 'one Ctrl+Z took the whole placement');
+    useViewerStore.getState().redo(MODEL_ID);
+    assert.equal(created('IFCWINDOW').length, 1, 'redo puts it back');
+  });
+
+  it('with no wall under the cursor nothing is placed (D3: hosted only)', () => {
+    useViewerStore.getState().startCommand('window.place');
+    const before = undoDepth();
+    act(() => { commandPointerMove(at(3, 2)); });
+    assert.equal(gesture().host, null);
+    const verdict = WINDOW_PLACE.validate!(gesture(), getCommandRuntime().ctx as CommandContext);
+    assert.deepEqual(verdict, { ok: false, reasonKey: 'hostedPlace.noHost' });
+    click(3, 2);
+    assert.deepEqual(created('IFCWINDOW'), []);
+    assert.deepEqual(created('IFCOPENINGELEMENT'), []);
+    assert.equal(undoDepth(), before);
+  });
+
+  it('near the wall end the window stays inside the wall; a typed Offset pins it', () => {
+    useViewerStore.getState().startCommand('window.place');
+    act(() => { commandPointerMove(at(0.1, 0)); });
+    assert.equal(round(gesture().offset!), 0.6, 'clamped to half the 1.2 m default width');
+    const ui = render(<CommandFieldsBar />);
+    press(document.body, '4'); // opens Offset with a typed digit
+    const input = ui.querySelector('input') as HTMLInputElement;
+    assert.equal(input.getAttribute('aria-label'), 'Offset');
+    type(input, '4.5');
+    press(input, 'Enter');
+    const [window] = created('IFCWINDOW');
+    assert.equal(round(readHostedFill(live().dataStore, window, live().view)!.offset), 4.5);
+  });
+
+  it('refuses a window that does not fit in the wall', () => {
+    useViewerStore.getState().setAuthoringDims('window', { Height: 2.5, SillHeight: 0.9 });
+    useViewerStore.getState().startCommand('window.place');
+    act(() => { commandPointerMove(at(3, 0)); });
+    const verdict = WINDOW_PLACE.validate!(gesture(), getCommandRuntime().ctx as CommandContext);
+    assert.deepEqual(verdict, { ok: false, reasonKey: 'hostedPlace.outsideHost' }, '0.9 m + 2.5 m pokes out of a 3 m wall');
+    click(3, 0);
+    assert.deepEqual(created('IFCWINDOW'), []);
+  });
+
+  it('#6232 D5 refuses an overlapping click through the shared core and allows an edge-touching window', () => {
+    useViewerStore.getState().startCommand('window.place');
+    click(3, 0);
+    assert.equal(created('IFCWINDOW').length, 1);
+    const history = undoDepth();
+    click(3, 0);
+    assert.equal(created('IFCWINDOW').length, 1, 'the second cut must not stack on the first');
+    assert.equal(undoDepth(), history, 'refusal leaves the first placement undo step intact');
+    click(4.2, 0);
+    assert.equal(created('IFCWINDOW').length, 2, 'exact shared edge has no positive overlap');
+    useViewerStore.getState().undo(MODEL_ID);
+    assert.equal(created('IFCWINDOW').length, 1, 'one undo removes the complete second window graph');
+  });
+
+  it('exports with the true void: IfcRelVoidsElement and IfcRelFillsElement survive a re-parse', async () => {
+    useViewerStore.getState().startCommand('window.place');
+    click(3, 0);
+    const [window] = created('IFCWINDOW');
+    const { dataStore, view } = live();
+    const bytes = editedModelBytes(dataStore, view);
+    const reparsed = await new IfcParser().parseColumnar(bytes.slice().buffer as ArrayBuffer, { disableWorkerScan: true });
+    const guidOf = (id: number) => String(view.getNewEntity(id)!.attributes[0]);
+    const byGuid = (guid: string) => [...reparsed.entityIndex.byId.keys()].find((id) => reparsed.entities.getGlobalId(id) === guid);
+    const reWall = byGuid(guidOf(wall));
+    const reWindow = byGuid(guidOf(window));
+    assert.ok(reWall && reWindow, 'wall and window are in the file');
+    const read = readHostedFill(reparsed, reWindow);
+    assert.ok(read, 'the re-parsed window fills an opening that voids a wall');
+    assert.equal(read.hostId, reWall, 'IfcRelFillsElement → opening → IfcRelVoidsElement → the wall');
+    assert.equal(round(read.offset), 3);
+    assert.equal((reparsed.entityIndex.byType.get('IFCRELVOIDSELEMENT') ?? []).length, 1);
+    assert.equal((reparsed.entityIndex.byType.get('IFCRELFILLSELEMENT') ?? []).length, 1);
+  });
+});
+
+describe('door.place and opening.place (#6232 A1)', () => {
+  it('a door stands on the floor and takes the door type default in the same undo step', () => {
+    const typeId = createElementType(MODEL_ID, 'door', 'D-900');
+    assert.ok(typeId !== null, 'IFC4 has IfcDoorType');
+    useViewerStore.getState().setAuthoringDefaults({ typeIds: { door: { modelId: MODEL_ID, expressId: typeId } } });
+    useViewerStore.getState().startCommand('door.place');
+    const before = undoDepth();
+    click(1.5, -0.05);
+    const [door] = created('IFCDOOR');
+    assert.ok(door);
+    const read = readHostedFill(live().dataStore, door, live().view)!;
+    assert.deepEqual([read.hostId, round(read.offset), round(read.sill)], [wall, 1.5, 0]);
+    assert.equal(typeOf(live(), door), typeId, 'typed by the door default');
+    useViewerStore.getState().undo(MODEL_ID);
+    assert.deepEqual(created('IFCDOOR'), []);
+    assert.equal(undoDepth(), before);
+  });
+
+  it('an opening keeps its own typed size for the next one', () => {
+    useViewerStore.getState().startCommand('opening.place');
+    const width = OPENING_PLACE.fields!.findIndex((f) => f.id === 'width');
+    act(() => { writeCommandField(width, 2); });
+    click(3, 0);
+    click(5, 0);
+    const openings = created('IFCOPENINGELEMENT');
+    assert.equal(openings.length, 2);
+    assert.deepEqual(created('IFCDOOR'), []);
+    assert.deepEqual(created('IFCRELFILLSELEMENT'), [], 'a bare opening fills nothing');
+    assert.equal(round(readHostedFill(live().dataStore, openings[1], live().view)!.offset), 5, 'the second 2 m opening ends at the wall end');
+    const { view } = live();
+    const profileWidths = openings.map((id) => {
+      // IfcOpeningElement.Representation → shape → body → solid → profile XDim.
+      const deref = (v: unknown) => view.getNewEntity(Number(String(v).slice(1)))!;
+      const shape = deref(view.getNewEntity(id)!.attributes[6]);
+      const rep = deref((shape.attributes[2] as unknown[])[0]);
+      const solid = deref((rep.attributes[3] as unknown[])[0]);
+      return deref(solid.attributes[0]).attributes[3];
+    });
+    assert.deepEqual(profileWidths, [2, 2], 'both openings are 2 m wide');
+  });
+});
+
+describe('the host keeps its fill (#6232 A1)', () => {
+  function placeWindowAt(x: number): number {
+    useViewerStore.getState().startCommand('window.place');
+    click(x, 0);
+    useViewerStore.getState().exitModelWorkspace();
+    useViewerStore.setState({ editEnabled: true });
+    const [window] = created('IFCWINDOW');
+    return window;
+  }
+
+  it('a split moves the window with its half of the wall', () => {
+    const window = placeWindowAt(1);
+    const split = useViewerStore.getState().splitWallAtDistance(MODEL_ID, wall, 2);
+    assert.ok(split.ok, split.ok ? '' : split.reason);
+    // The 4 m right piece is larger and keeps the source's identity; the left 2 m piece is new.
+    assert.equal(split.right.expressId, wall);
+    const read = readHostedFill(live().dataStore, window, live().view)!;
+    assert.deepEqual([read.hostId, round(read.offset)], [split.left.expressId, 1], 'the window went to the new piece it stands in');
+    assert.equal(created('IFCRELFILLSELEMENT').length, 1, 'still filling its opening');
+  });
+
+  it('one undo of a split puts the window back in the whole wall (#6232 C5)', () => {
+    const window = placeWindowAt(1);
+    const split = useViewerStore.getState().splitWallAtDistance(MODEL_ID, wall, 2);
+    assert.ok(split.ok, split.ok ? '' : split.reason);
+    assert.equal(readHostedFill(live().dataStore, window, live().view)!.hostId, split.left.expressId, 'the split moved it to the new piece');
+    useViewerStore.getState().undo(MODEL_ID);
+    const back = readHostedFill(live().dataStore, window, live().view);
+    // Re-hosting the opening was not undoable: the window stayed on the deleted piece.
+    assert.deepEqual([back?.hostId, back && round(back.offset)], [wall, 1], 'back in the wall it was placed in');
+  });
+
+  it('a split behind the window keeps it on the source, shifted to the new start', () => {
+    const window = placeWindowAt(4.5);
+    const split = useViewerStore.getState().splitWallAtDistance(MODEL_ID, wall, 2);
+    assert.ok(split.ok, split.ok ? '' : split.reason);
+    const read = readHostedFill(live().dataStore, window, live().view)!;
+    assert.deepEqual([read.hostId, round(read.offset)], [wall, 2.5]);
+  });
+
+  it('a resize keeps the window in its wall', () => {
+    const window = placeWindowAt(3);
+    const resized = useViewerStore.getState().resizeWall(MODEL_ID, wall, [0, 0, 0], [8, 0, 0]);
+    assert.ok(resized.ok, resized.ok ? '' : resized.reason);
+    const read = readHostedFill(live().dataStore, window, live().view)!;
+    assert.deepEqual([read.hostId, round(read.offset)], [wall, 3]);
+    assert.equal(created('IFCRELVOIDSELEMENT').length, 1);
+  });
+});
+
+// Review of #6476: the host reads were cached by model id and edit count only, so a new model under the same id read the old one's walls.
+describe('host reads follow the loaded model (#6232 A1)', () => {
+  it('a model reloaded under the same id, at the same edit count, reads its own wall', async () => {
+    const version = useViewerStore.getState().mutationVersion;
+    assert.deepEqual(readHost(useViewerStore.getState(), MODEL_ID, wall)?.origin.map(round), [0, 0, 0]);
+    await seedModelingSession();
+    const added = useViewerStore.getState().addWall(MODEL_ID, STOREY, { Start: [0, 2, 0], End: [6, 2, 0], Thickness: 0.2, Height: 3 });
+    assert.ok('expressId' in added);
+    assert.equal(added.expressId, wall, 'the same express id');
+    assert.equal(useViewerStore.getState().mutationVersion, version, 'at the same edit count');
+    assert.deepEqual(readHost(useViewerStore.getState(), MODEL_ID, wall)?.origin.map(round), [0, 2, 0]);
+  });
+});
+
+// #9296 round 5 H: the UI uses the existing slab opening builder and history.
+describe('opening.place slab shaft (#9296)', () => {
+  function slab() {
+    const result = useViewerStore.getState().addSlab(MODEL_ID, STOREY, {
+      Profile: 'polygon', OuterCurve: [[0,0],[5,0],[5,2],[3,2],[3,4],[0,4]], Thickness: .2,
+      ExtrudedDirection: [0,0,-1],
+    });
+    assert.ok('expressId' in result);
+    return result.expressId;
+  }
+  it('hovers, previews and commits a through shaft in one undo step, surviving thickening', () => {
+    const id = slab();
+    useViewerStore.getState().startCommand('opening.place');
+    act(() => commandPointerMove(at(1,1)));
+    assert.equal(gesture().host?.expressId, id);
+    assert.equal(gesture().host?.hostKind, 'slab');
+    assert.deepEqual(gesture().shaft, { Width: 1.5, Depth: 2 });
+    act(() => { writeCommandField(0, 1.2); writeCommandField(1, 1.6); });
+    assert.deepEqual(gesture().shaft, { Width: 1.2, Depth: 1.6 });
+    assert.ok(OPENING_PLACE.ghost!(gesture(), getCommandRuntime().ctx as CommandContext).length);
+    const before = undoDepth();
+    click(1,1);
+    const [opening] = created('IFCOPENINGELEMENT');
+    assert.ok(opening);
+    assert.equal(readHostedSlide(useViewerStore.getState(), MODEL_ID, opening), null, 'wall slide handles are not offered for slab shafts');
+    assert.equal(readHostedFill(live().dataStore, opening, live().view)?.hostId, id);
+    const rel = live().view.getNewEntities().find(e => e.type.toUpperCase() === 'IFCRELVOIDSELEMENT')!;
+    assert.equal(rel.attributes[4], `#${id}`);
+    assert.ok(remeshed.some(r => r.expressIds.includes(id)));
+    useViewerStore.getState().undo(MODEL_ID);
+    assert.deepEqual(created('IFCOPENINGELEMENT'), []);
+    assert.equal(undoDepth(), before);
+    useViewerStore.getState().redo(MODEL_ID);
+    assert.equal(readHostedFill(live().dataStore, opening, live().view)?.hostId, id);
+    assert.equal(setElementSize(useViewerStore, MODEL_ID, id, { kind: 'slab', thickness: .6 }).ok, true);
+    const body = resolveHostAnchor(live().dataStore, id, live().view).hostBounds!;
+    const cut = placedBodyExtent(live().dataStore, opening, live().view)!;
+    assert.ok(cut.min[2] < body.min[2] && cut.max[2] > body.max[2], 'still through the thickened slab');
+    assert.equal(readHostedFill(live().dataStore, opening, live().view)?.hostId, id);
+  });
+  it('draws a readable shaft outline through the command scene and follows typed dimensions (#9296)', () => {
+    const id = slab();
+    const s = useViewerStore.getState();
+    // An orthographic top camera: 100 px per metre in the render X/-Z plane.
+    useViewerStore.setState({ cameraCallbacks: { ...s.cameraCallbacks,
+      projectToScreen: p => ({ x: p.x * 100, y: -p.z * 100 }) }, selectedEntityId: id });
+    s.startCommand('opening.place');
+    act(() => commandPointerMove(at(1,1)));
+    const { container, flush } = renderScene(<CommandScene />);
+    flush();
+    const dimensions = () => {
+      const preview = container.querySelector('[data-slab-shaft-preview] polygon');
+      assert.ok(preview, 'a rectangle remains visible over the selected host');
+      const points = preview.getAttribute('points')!.split(' ').map(p => p.split(',').map(Number));
+      assert.equal(points.length, 4);
+      const xs = points.map(p => p[0]), ys = points.map(p => p[1]);
+      return [Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys)];
+    };
+    assert.deepEqual(dimensions(), [150,200]);
+    act(() => { writeCommandField(0, 1.2); writeCommandField(1, 1.6); });
+    flush();
+    assert.deepEqual(dimensions(), [120,160]);
+  });
+  it('honors a snapped slab at a wall crossing and leaves the wall uncut (#9296)', () => {
+    const id = slab();
+    const crossing = useViewerStore.getState().addWall(MODEL_ID, STOREY,
+      { Start: [0,1,0], End: [5,1,0], Thickness: .2, Height: 2.5 });
+    assert.ok('expressId' in crossing);
+    const snap: SnapResult = { ...at(1,1), winner: { kind: 'edge', source: 'mesh', local: [1,1], entity: { modelId: MODEL_ID, expressId: id } } };
+    useViewerStore.getState().startCommand('opening.place');
+    act(() => { commandPointerMove(snap); commandPointerDown(snap); });
+    const [opening] = created('IFCOPENINGELEMENT');
+    assert.ok(opening);
+    assert.equal(readHostedFill(live().dataStore, opening, live().view)?.hostId, id);
+    const voids = live().view.getNewEntities().filter(e => e.type.toUpperCase() === 'IFCRELVOIDSELEMENT');
+    assert.equal(voids.length, 1);
+    assert.equal(voids[0].attributes[4], `#${id}`);
+  });
+  it('refuses a rectangle across the L notch and keeps door/window tools wall-only', () => {
+    slab();
+    useViewerStore.getState().startCommand('opening.place');
+    act(() => commandPointerMove(at(2.8,2)));
+    assert.ok(gesture().host);
+    assert.equal(readHost(useViewerStore.getState(), MODEL_ID, TILTED_SLAB), null, 'sloped slabs are refused');
+    assert.equal(OPENING_PLACE.validate!(gesture(), getCommandRuntime().ctx as CommandContext).ok, false);
+    click(2.8,2);
+    assert.deepEqual(created('IFCOPENINGELEMENT'), []);
+    for (const tool of ['door.place','window.place']) {
+      useViewerStore.getState().startCommand(tool);
+      click(1,1);
+      assert.equal(gesture().host, null);
+      assert.deepEqual(created('IFCOPENINGELEMENT'), []);
+    }
+  });
+});

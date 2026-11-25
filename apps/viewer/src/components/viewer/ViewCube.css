@@ -1,0 +1,118 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+/* Beveled cube styling adapted from TestIFC, scoped to this control. */
+.testifc-viewcube {
+  --view-cube-border: color-mix(in oklch, var(--color-foreground) 24%, transparent);
+  --view-cube-surface-high: var(--color-muted);
+  --view-cube-surface-low: var(--color-card);
+  --view-cube-panel: color-mix(in oklch, var(--color-card) 90%, transparent);
+  fieldset { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
+  .view-nav-cluster {
+    width: 204px; height: 234px; position: relative;
+    display: flex; align-items: flex-start; gap: 4px;
+    color: var(--color-foreground); user-select: none; opacity: .82;
+    filter: drop-shadow(0 7px 12px rgba(0, 0, 0, .3));
+    transition: opacity 140ms ease;
+  }
+  .view-nav-cluster:hover, .view-nav-cluster:focus-within { opacity: 1; }
+  .view-cube__panel {
+    width: 170px; height: 170px; padding: 3px;
+    border: 0; background: transparent;
+  }
+  .view-cube { width: 164px; height: 164px; position: relative; display: grid; place-items: start center; }
+  .view-cube__stage {
+    width: 158px; height: 158px; position: relative; display: grid; place-items: center;
+    perspective: 560px; touch-action: none; cursor: grab;
+  }
+  .view-cube__stage.is-dragging { cursor: grabbing; }
+  .view-cube__body { width: 96px; height: 96px; position: relative; transform-style: preserve-3d; will-change: transform; }
+  .view-cube__surface {
+    padding: 0; position: absolute; top: 50%; left: 50%; box-sizing: border-box;
+    border: 1px solid var(--view-cube-border);
+    display: grid; place-items: center; color: var(--color-foreground); font: 750 var(--text-2xs)/1 var(--font-sans);
+    backface-visibility: hidden; transform-style: preserve-3d; cursor: pointer; outline: none;
+    transition: background 100ms ease, border-color 100ms ease, filter 100ms ease, box-shadow 100ms ease, opacity 100ms ease;
+  }
+  .view-cube__surface--face { border-radius: 2px; box-shadow: inset 0 0 18px rgba(255, 255, 255, .04); }
+  .view-cube__surface--face[data-axis="x"] { background: linear-gradient(145deg, color-mix(in oklch, #d84a4a 32%, var(--view-cube-surface-high)), color-mix(in oklch, #d84a4a 48%, var(--view-cube-surface-low))); }
+  .view-cube__surface--face[data-axis="y"] { background: linear-gradient(145deg, color-mix(in oklch, #45a66b 27%, var(--view-cube-surface-high)), color-mix(in oklch, #45a66b 43%, var(--view-cube-surface-low))); }
+  .view-cube__surface--face[data-axis="z"] { background: linear-gradient(145deg, color-mix(in oklch, #3478db 30%, var(--view-cube-surface-high)), color-mix(in oklch, #3478db 48%, var(--view-cube-surface-low))); }
+  .view-cube__surface--edge {
+    border-color: var(--view-cube-border);
+    background: linear-gradient(180deg, var(--view-cube-surface-high), var(--view-cube-surface-low));
+    box-shadow: inset 0 0 8px rgba(255, 255, 255, .06);
+  }
+  .view-cube__surface--corner {
+    border: 0; background: linear-gradient(160deg, var(--view-cube-surface-high), var(--view-cube-surface-low));
+    box-shadow: inset 0 0 0 1px var(--view-cube-border);
+  }
+  .view-cube__body.has-active .view-cube__surface:not(.is-active):not(.is-hovered):not(:hover):not(:focus-visible) { opacity: .72; filter: saturate(.82) brightness(.92); }
+  .view-cube__surface:not(:disabled):hover, .view-cube__surface.is-hovered, .view-cube__surface:focus-visible {
+    z-index: 10; opacity: 1; border-color: color-mix(in oklch, var(--color-primary) 88%, white);
+    filter: brightness(1.3) saturate(1.16);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-primary) 78%, white), inset 0 0 22px color-mix(in oklch, var(--color-primary) 28%, transparent), 0 0 12px color-mix(in oklch, var(--color-primary) 25%, transparent);
+  }
+  .view-cube__surface--face:not(:disabled):hover, .view-cube__surface--face.is-hovered, .view-cube__surface--face:focus-visible {
+    background: linear-gradient(145deg, color-mix(in oklch, var(--color-primary) 38%, var(--color-card)), color-mix(in oklch, var(--color-primary) 52%, var(--color-background)));
+  }
+  .view-cube__surface.is-active {
+    z-index: 8; opacity: 1; border-color: color-mix(in oklch, var(--color-primary) 82%, white); filter: brightness(1.16) saturate(1.12);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-primary) 66%, transparent), inset 0 0 20px color-mix(in oklch, var(--color-primary) 24%, transparent), 0 0 9px color-mix(in oklch, var(--color-primary) 16%, transparent);
+  }
+  .view-cube__surface--face.is-active { background: linear-gradient(145deg, color-mix(in oklch, var(--color-primary) 30%, var(--color-card)), color-mix(in oklch, var(--color-primary) 43%, var(--color-background))); }
+  .view-cube__surface--edge:not(:disabled):hover, .view-cube__surface--edge.is-hovered,
+  .view-cube__surface--corner:not(:disabled):hover, .view-cube__surface--corner.is-hovered,
+  .view-cube__surface--edge.is-active, .view-cube__surface--corner.is-active { background: color-mix(in oklch, var(--color-primary) 38%, var(--color-card)); }
+  .view-cube__label {
+    pointer-events: none; display: inline-block; transform-origin: 50% 50%; white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .42); will-change: transform;
+  }
+  .view-controls {
+    width: 30px; height: 234px; margin-top: 2px; display: grid;
+    grid-template-columns: 30px; grid-template-rows: repeat(7, 30px);
+    gap: 4px; align-items: center; pointer-events: none;
+  }
+  .view-control-button {
+    width: 30px; height: 30px; padding: 0; position: relative;
+    border: 1px solid var(--view-cube-border); border-radius: 7px;
+    color: var(--color-foreground); background: var(--view-cube-panel);
+    backdrop-filter: blur(12px); display: grid; place-items: center; cursor: pointer; pointer-events: auto;
+    transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+  }
+  .view-control-button:not(:disabled):hover, .view-control-button:focus-visible {
+    z-index: 30; border-color: color-mix(in oklch, var(--color-primary) 82%, white);
+    background: color-mix(in oklch, var(--color-card) 84%, var(--color-primary));
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-primary) 12%, transparent), 0 4px 14px rgba(0, 0, 0, .26); outline: none;
+  }
+  .view-control-button.is-active {
+    border-color: color-mix(in oklch, var(--color-primary) 88%, white);
+    background: color-mix(in oklch, var(--color-card) 72%, var(--color-primary));
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-primary) 28%, transparent), 0 0 10px color-mix(in oklch, var(--color-primary) 18%, transparent);
+  }
+  .view-control-button:not(:disabled):active { transform: translateY(1px); }
+  .view-control-button::after {
+    content: attr(data-tooltip); position: absolute; top: 50%; right: calc(100% + 8px); transform: translate(3px, -50%);
+    padding: 5px 7px; border: 1px solid rgba(255, 255, 255, .12); border-radius: 6px;
+    color: #eef4fb; background: rgba(12, 16, 21, .96); box-shadow: 0 6px 18px rgba(0, 0, 0, .32);
+    font: 600 11px/1 var(--font-sans); white-space: nowrap; pointer-events: none;
+    opacity: 0; visibility: hidden; transition: opacity 100ms ease, transform 100ms ease, visibility 100ms ease;
+  }
+  .view-control-button:not(:disabled):hover::after, .view-control-button:focus-visible::after { opacity: 1; visibility: visible; transform: translate(0, -50%); }
+  .home-view { grid-column: 1; grid-row: 1; }
+  .left-view { grid-column: 1; grid-row: 2; }
+  .right-view { grid-column: 1; grid-row: 3; }
+  .top-view { grid-column: 1; grid-row: 4; }
+  .bottom-view { grid-column: 1; grid-row: 5; }
+  .front-view { grid-column: 1; grid-row: 6; }
+  .back-view { grid-column: 1; grid-row: 7; }
+  .view-control-button svg { width: 22px; height: 22px; pointer-events: none; overflow: visible; }
+  .mini-cube { filter: drop-shadow(0 0 .55px rgba(255, 255, 255, .28)); }
+  .mini-cube .face-highlight { fill: color-mix(in oklch, var(--color-primary) 84%, #49b5f4); stroke: none; }
+  .mini-cube .cube-edge { fill: none; stroke: currentColor; stroke-width: 1.45; stroke-linecap: round; stroke-linejoin: round; }
+  .mini-cube .cube-hidden { fill: none; stroke: var(--color-muted-foreground); stroke-width: 1.05; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1.55 1.35; }
+  .view-control-button .home-icon { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  button:disabled { cursor: default; }
+  .disabled { opacity: .34; filter: grayscale(.48) drop-shadow(0 7px 12px rgba(0, 0, 0, .3)); }
+
+}

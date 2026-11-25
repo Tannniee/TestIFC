@@ -1,0 +1,400 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Touch controls hook for the 3D viewport
+ * Handles multi-touch gesture handling (orbit, pinch-zoom, pan, tap-to-select)
+ */
+
+import { useEffect, type MutableRefObject, type RefObject } from 'react';
+import type { Renderer, PickResult } from '@ifc-lite/renderer';
+import type { MeshData } from '@ifc-lite/geometry';
+import type { SectionPlane } from '@/store';
+import { invalidateSelectionPick, markTouchSelection, selectViewportTarget } from './referenceSelection.js';
+import { focusedClashOrbitPivot, sceneAnchorOrbitPivot } from './orbitPivot.js';
+import { cameraPoseKey, createZoomSurfacePicker, type SurfacePoint } from './zoomSurface.js';
+import { useViewerStore } from '@/store';
+import { toast } from '@/components/ui/toast';
+import { pickViewportAppearanceFace, viewportFacePickError } from './appearance/face-mask/viewport-face-picker.js';
+import { resolve as translate } from '@/i18n/registry';
+import { beginMeasurePress, canvasTouches, notePenTouches, routeMeasureTap, viewportHandlerContext } from './touchRouting.js';
+import { placesOnTap, routeToolTap } from './toolTap.js';
+import { createCommandTouchPress } from './commandTouchPress.js';
+import { applyDragNavigation, dragNavigationFor, type DragNavigation } from './dragNavigation.js';
+import { openContextMenuAt } from './contextMenuSelection.js';
+import { createTouchLongPress, HOLD_MS } from './touchLongPress.js';
+import { withinTapSlop } from './tapSlop.js';
+import { refuseCaptureHeldPick } from '@/lib/viewport-capture';
+import { isGeometryRestoreHeld } from '@/lib/pick-gating';
+/** Locked gesture mode for 2-finger interactions */
+type TwoFingerGesture = 'none' | 'pinch' | 'pan';
+
+export interface TouchState {
+  /** The fingers on the canvas (`canvasTouches`), not every finger on the screen (#9122). */
+  touches: Touch[];
+  lastDistance: number;
+  lastCenter: { x: number; y: number };
+  tapStartTime: number;
+  tapStartPos: { x: number; y: number }; tapStartedHeld?: boolean; // began during a reopen restore hold: the tap does nothing (#10218)
+  didMove: boolean;
+  multiTouch: boolean;
+  /** Locked 2-finger gesture mode (reset on finger lift) */
+  twoFingerGesture: TwoFingerGesture;
+  /** Accumulated distance change since 2-finger gesture start */
+  gestureDistanceAccum: number;
+  /** Accumulated center movement since 2-finger gesture start */
+  gesturePanAccum: number;
+}
+
+export interface UseTouchControlsParams {
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+  rendererRef: MutableRefObject<Renderer | null>;
+  isInitialized: boolean;
+  touchStateRef: MutableRefObject<TouchState>;
+  activeToolRef: MutableRefObject<string>;
+  hiddenEntitiesRef: MutableRefObject<Set<number>>;
+  isolatedEntitiesRef: MutableRefObject<Set<number> | null>;
+  selectedEntityIdRef: MutableRefObject<number | null>;
+  selectedModelIndexRef: MutableRefObject<number | undefined>;
+  clearColorRef: MutableRefObject<[number, number, number, number]>;
+  sectionPlaneRef: MutableRefObject<SectionPlane>;
+  sectionRangeRef: MutableRefObject<{ min: number; max: number } | null>;
+  geometryRef: MutableRefObject<MeshData[] | null>;
+  isInteractingRef: MutableRefObject<boolean>;
+  handlePickForSelection: (pickResult: PickResult | null) => void;
+  openContextMenu: (entityId: number | null, screenX: number, screenY: number) => void;
+  getPickOptions: () => { isStreaming: boolean; hiddenIds: Set<number>; isolatedIds: Set<number> | null };
+}
+
+export function useTouchControls(params: UseTouchControlsParams): void {
+  const {
+    canvasRef,
+    rendererRef,
+    isInitialized,
+    touchStateRef,
+    activeToolRef,
+    isInteractingRef,
+    selectedEntityIdRef,
+    handlePickForSelection,
+    openContextMenu,
+    getPickOptions,
+  } = params;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const renderer = rendererRef.current;
+    if (!canvas || !renderer || !isInitialized) return;
+
+    const camera = renderer.getCamera();
+    const touchState = touchStateRef.current;
+    const pickSurface = createZoomSurfacePicker(renderer, camera, getPickOptions);
+    // The surface a pinch zooms in toward (#5547, the wheel's #5393): picked
+    // once per pinch, on its first zoom-in step, at the pinch midpoint. The
+    // surface step moves the camera along the ray through that point, so it
+    // stays valid while only surface steps move the camera. `pose` is the
+    // pose the last step left; a zoom-out step in between (plain zoom, which
+    // leaves that ray) forces a re-pick. Deliberately not re-picked as the
+    // midpoint drifts: two fingers jitter by more than the wheel's 4 px slop
+    // on every move, and a raycast per touchmove is what the gate is there to
+    // avoid. Cleared when a new two-finger gesture starts.
+    let pinchSurface: { point: SurfacePoint | null; pose: string } | null = null;
+    // Each pivot pick (a new one-finger gesture) supersedes a probe still in flight.
+    let pivotGesture = 0;
+    let drag: DragNavigation = 'orbit'; // a one-finger drag's move, set as a gesture's first finger lands (#9042)
+    let disposed = false;
+    const command = createCommandTouchPress(canvas, () => activeToolRef.current); // the command tool's press (#9092)
+    let pressGrabs = false; // the current press grabs for the command: it has no long press (#9092)
+    const longPress = createTouchLongPress(canvas, (x, y) => { if (touchState.tapStartedHeld) return;
+      void openContextMenuAt({ canvas, renderer, getPickOptions, openContextMenu }, x, y)
+        .catch((error: unknown) => console.warn('[Viewport] Touch context menu pick failed:', error));
+    });
+
+    // Anchor the orbit pivot to the 3D point directly under a finger.
+    // Touch UX: prefer the finger's actual hit, then fall back to ray-projection
+    // at current view distance — never to a selected entity's center, which
+    // would pivot far from the user's touch and feel disconnected.
+    const anchorOrbitPivotUnderFinger = (touch: Touch) => {
+      // Any new pivot pick supersedes a probe still in flight for an older one.
+      const gesture = ++pivotGesture;
+      // A focused clash with nothing selected orbits around the clashing pair (#4806).
+      const clashPivot = focusedClashOrbitPivot(useViewerStore.getState(), selectedEntityIdRef.current);
+      if (clashPivot) {
+        camera.setOrbitCenter(clashPivot);
+        return;
+      }
+      const rect = canvas.getBoundingClientRect();
+      const tx = touch.clientX - rect.left;
+      const ty = touch.clientY - rect.top;
+      // Outlier/sparse models (issue #1394), large models (the same
+      // input-to-first-frame BVH stall as the mouse path, orbitPivotCensus.ts)
+      // and streaming skip the CPU raycast; the picker answers them from the
+      // depth probe (#8769) instead.
+      const hit = pickSurface(tx, ty);
+      if (hit) {
+        camera.setOrbitCenter(hit);
+        return;
+      }
+      // Anchor to the scene centre (stable) rather than the drifting camera
+      // target, projected onto the finger ray (issue #1107, item 3). Matches
+      // the mouse orbit fallback in useMouseControls.
+      camera.setOrbitCenter(sceneAnchorOrbitPivot(camera, tx, ty, rect.width, rect.height));
+      if (!pickSurface.live?.()) return;
+      // A finger has no hover to prime the probe and no drag threshold, so it
+      // is usually orbiting before the probe lands: adopt the answer for the
+      // rest of this one-finger gesture. Orbit steps are incremental, so a new
+      // pivot changes the rotation from here on and never jumps the camera.
+      void pickSurface.probed?.(tx, ty).then((point) => {
+        if (point && !disposed && gesture === pivotGesture && touchState.touches.length === 1) camera.setOrbitCenter(point);
+      });
+    };
+
+    const handleTouchStart = async (e: TouchEvent) => {
+      notePenTouches(canvas, e); invalidateSelectionPick(canvas); // #9000: a Pencil press is this side's alone
+      useViewerStore.getState().setPointerInput('touch'); // the Measure hint follows the last input (#8879)
+      e.preventDefault();
+      if (touchState.touches.length === 0) drag = dragNavigationFor(activeToolRef.current); // kept until all lift
+      touchState.touches = canvasTouches(canvas, e);
+
+      // Track multi-touch to prevent false tap-select after pinch/zoom
+      if (touchState.touches.length > 1) {
+        touchState.multiTouch = true;
+        longPress.cancel(); command.cancel();
+      }
+
+      if (touchState.touches.length === 1 && !touchState.multiTouch) {
+        touchState.lastCenter = {
+          x: touchState.touches[0].clientX,
+          y: touchState.touches[0].clientY,
+        };
+        // Record tap start for tap-to-select detection
+        touchState.tapStartTime = Date.now();
+        touchState.tapStartPos = { ...touchState.lastCenter }; touchState.tapStartedHeld = isGeometryRestoreHeld(useViewerStore.getState());
+        touchState.didMove = false;
+        beginMeasurePress(touchState);
+        // A press that grabs for the command has no long press: its drag is the command's (#9092).
+        // Its rest still suppresses the touch's own native menu (#9228).
+        const grabs = command.begin(touchState.touches[0], e);
+        pressGrabs = grabs;
+        longPress.begin(touchState.touches[0], { hold: !grabs });
+
+        if (drag !== 'pan') anchorOrbitPivotUnderFinger(touchState.touches[0]); // as the mouse, a pan has no pivot
+      } else if (touchState.touches.length === 1) {
+        // Single touch after multi-touch - just update center for orbit
+        touchState.lastCenter = {
+          x: touchState.touches[0].clientX,
+          y: touchState.touches[0].clientY,
+        };
+      } else if (touchState.touches.length === 2) {
+        const dx = touchState.touches[1].clientX - touchState.touches[0].clientX;
+        const dy = touchState.touches[1].clientY - touchState.touches[0].clientY;
+        touchState.lastDistance = Math.sqrt(dx * dx + dy * dy);
+        touchState.lastCenter = {
+          x: (touchState.touches[0].clientX + touchState.touches[1].clientX) / 2,
+          y: (touchState.touches[0].clientY + touchState.touches[1].clientY) / 2,
+        };
+        // Reset gesture lock for new 2-finger interaction
+        touchState.twoFingerGesture = 'none';
+        touchState.gestureDistanceAccum = 0;
+        touchState.gesturePanAccum = 0;
+        pinchSurface = null;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      touchState.touches = canvasTouches(canvas, e);
+
+      if (touchState.touches.length === 1) {
+        if (longPress.move(touchState.touches[0])) return;
+        const dx = touchState.touches[0].clientX - touchState.lastCenter.x;
+        const dy = touchState.touches[0].clientY - touchState.lastCenter.y;
+
+        // Mark as moved if significant movement (prevents tap-select during drag)
+        if (!withinTapSlop(touchState.touches[0].clientX, touchState.touches[0].clientY, touchState.tapStartPos)) {
+          touchState.didMove = true;
+        }
+        // A possible tap leaves the camera alone (past the long-press radius, within this per-axis slop):
+        // a nudge and its interaction frame would discard the tap's pick as stale.
+        if ((!touchState.didMove && !touchState.multiTouch) || command.move(touchState.touches[0], e)) return; // or a command drag (#9092)
+
+        applyDragNavigation(camera, drag, dx, dy); // the mouse drag's move: Pan pans, Walk looks (#9042)
+        touchState.lastCenter = {
+          x: touchState.touches[0].clientX,
+          y: touchState.touches[0].clientY,
+        };
+        isInteractingRef.current = true;
+        renderer.requestRender();
+      } else if (touchState.touches.length === 2) {
+        const dx1 = touchState.touches[1].clientX - touchState.touches[0].clientX;
+        const dy1 = touchState.touches[1].clientY - touchState.touches[0].clientY;
+        const distance = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+
+        const centerX = (touchState.touches[0].clientX + touchState.touches[1].clientX) / 2;
+        const centerY = (touchState.touches[0].clientY + touchState.touches[1].clientY) / 2;
+        const panDx = centerX - touchState.lastCenter.x;
+        const panDy = centerY - touchState.lastCenter.y;
+
+        // Positive when the fingers close. `Camera.zoom` reads a positive
+        // delta as zoom OUT (as the wheel's scroll-down), so spreading the
+        // fingers zooms in, the mobile convention (#5777).
+        const zoomDelta = touchState.lastDistance - distance;
+
+        // Determine dominant gesture if not yet locked
+        if (touchState.twoFingerGesture === 'none') {
+          touchState.gestureDistanceAccum += Math.abs(zoomDelta);
+          touchState.gesturePanAccum += Math.abs(panDx) + Math.abs(panDy);
+
+          // Lock gesture after enough movement (8px threshold)
+          const threshold = 8;
+          if (touchState.gestureDistanceAccum > threshold || touchState.gesturePanAccum > threshold) {
+            touchState.twoFingerGesture =
+              touchState.gestureDistanceAccum > touchState.gesturePanAccum ? 'pinch' : 'pan';
+          }
+        }
+
+        // Apply only the locked gesture
+        if (touchState.twoFingerGesture === 'pan') {
+          camera.pan(panDx, panDy, false);
+        } else if (touchState.twoFingerGesture === 'pinch') {
+          const rect = canvas.getBoundingClientRect();
+          const x = centerX - rect.left, y = centerY - rect.top, delta = zoomDelta * 3;
+          // Only a zoom-in step (negative delta, as `Camera.zoom` reads it)
+          // can pass through a surface, so only it picks.
+          if (delta < 0) {
+            if (pinchSurface?.pose !== cameraPoseKey(camera)) pinchSurface = { point: pickSurface(x, y), pose: '' };
+            // The depth probe (#8769) is cheap: re-pick every step, keeping the known point on a miss.
+            else if (pickSurface.live?.()) pinchSurface.point = pickSurface(x, y) ?? pinchSurface.point;
+            camera.zoom(delta, false, x, y, rect.width, rect.height, false, pinchSurface.point ?? undefined);
+            pinchSurface.pose = cameraPoseKey(camera);
+          } else {
+            camera.zoom(delta, false, x, y, rect.width, rect.height);
+          }
+        }
+        // While gesture is 'none' (detecting), don't apply either — avoids jitter
+
+        touchState.lastDistance = distance;
+        touchState.lastCenter = { x: centerX, y: centerY };
+        isInteractingRef.current = true;
+        renderer.requestRender();
+      }
+    };
+
+    const handleTouchEnd = async (e: TouchEvent) => {
+      notePenTouches(canvas, e); e.preventDefault();
+      const previousTouchCount = touchState.touches.length;
+      const wasMultiTouch = touchState.multiTouch;
+      touchState.touches = canvasTouches(canvas, e);
+      const wasLongPress = touchState.touches.length === 0 ? longPress.end() : false;
+
+      // Multi-touch → single-touch transition: re-anchor everything to the
+      // remaining finger so the next orbit move computes a clean delta from
+      // the finger's actual position (not the stale 2-finger midpoint) and
+      // pivots under the finger (not the old pinch pivot).
+      if (previousTouchCount >= 2 && touchState.touches.length === 1) {
+        touchState.lastCenter = { x: touchState.touches[0].clientX, y: touchState.touches[0].clientY };
+        if (drag !== 'pan') anchorOrbitPivotUnderFinger(touchState.touches[0]);
+      }
+
+      // Only clear interaction when all fingers are lifted (gesture truly ended).
+      // Clearing earlier would briefly drop interaction mode during 2-finger → 1-finger
+      // transitions, triggering an expensive full-quality render mid-gesture.
+      if (touchState.touches.length === 0 && isInteractingRef.current) {
+        isInteractingRef.current = false;
+        renderer.requestRender();
+      }
+
+      if (touchState.touches.length === 0) {
+        camera.stopInertia();
+        pivotGesture++; // the gesture ended: a probe still in flight is moot
+
+        // One-finger taps that didn't move and are short of a long press,
+        // Either <300ms or a point-placement press before long-press (#9092, #9228).
+        // A grab has no long press, so it is a press and a release in place however long it rested.
+        const tapDuration = Date.now() - touchState.tapStartTime;
+        const tool = activeToolRef.current;
+        const tapped = previousTouchCount === 1 && !wasMultiTouch && !wasLongPress && !touchState.didMove
+          && (tapDuration < 300 || ((pressGrabs || tapDuration < HOLD_MS) && placesOnTap(viewportHandlerContext(canvas), tool)));
+        // The command tool's press is its own (#9092); Pan and Walk act on no tap
+        if (!command.end(tapped, e) && tapped && tool !== 'pan' && tool !== 'walk') {
+          const rect = canvas.getBoundingClientRect();
+          const x = touchState.tapStartPos.x - rect.left;
+          const y = touchState.tapStartPos.y - rect.top;
+
+          if (touchState.tapStartedHeld || isGeometryRestoreHeld(useViewerStore.getState())) { /* consumed: begun or ended during a reopen restore */ }
+          else if (refuseCaptureHeldPick(renderer)) markTouchSelection(canvas, x, y); // not through a capture's frame, nor its compatibility click (#9137)
+          else if (tool === 'measure') {
+            // The measure logic lives with the mouse controls; touchstart's
+            // preventDefault suppresses the compatibility click, so hand the tap over (#5856).
+            routeMeasureTap(canvas, x, y, touchState);
+          } else if (tool === 'appearance-face') {
+            // Touchend owns this tap. Record it before routing the exact hit so
+            // the browser's compatibility click cannot toggle the same face a
+            // second time through handleSelectionClick (#4555).
+            markTouchSelection(canvas, x, y);
+            const message = viewportFacePickError(pickViewportAppearanceFace(
+              renderer.raycastScene(x, y, getPickOptions())?.intersection ?? null,
+            ));
+            if (message) toast.error(translate(message));
+          } else if (tool === 'select') {
+            markTouchSelection(canvas, x, y);
+            await selectViewportTarget({ canvas, renderer, x, y, getTool: () => activeToolRef.current,
+              getPickOptions, onIfc: handlePickForSelection });
+          } else if (!routeToolTap(viewportHandlerContext(canvas), tool, x, y)) { // Section face-pick (#9042), an Annotate pin (#9123)
+            handlePickForSelection(await renderer.pick(x, y, getPickOptions()));
+          }
+        }
+
+        // Reset multi-touch and gesture lock when all touches end
+        touchState.multiTouch = false;
+        touchState.twoFingerGesture = 'none';
+        touchState.gestureDistanceAccum = 0;
+        touchState.gesturePanAccum = 0;
+      }
+    };
+
+    // Also reset interaction on touchcancel — mobile browsers can cancel
+    // gestures (system gestures, tab switch, lost focus) without touchend.
+    const handleTouchCancel = (e: TouchEvent) => {
+      notePenTouches(canvas, e); longPress.cancel(); command.cancel();
+      invalidateSelectionPick(canvas);
+      if (isInteractingRef.current) {
+        isInteractingRef.current = false;
+        renderer.requestRender();
+      }
+      touchState.touches = [];
+      touchState.multiTouch = false;
+      pivotGesture++;
+    };
+
+    // Use { passive: false } to ensure preventDefault() works on mobile
+    // Safari and Chrome mobile require this for smooth touch handling
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+    canvas.addEventListener('touchcancel', handleTouchCancel);
+    canvas.addEventListener('contextmenu', longPress.suppressNativeMenu, { capture: true });
+
+    // Prevent iOS Safari pull-to-refresh and elastic bounce on the canvas
+    const preventOverscroll = (e: TouchEvent) => {
+      if (e.target === canvas) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('touchmove', preventOverscroll, { passive: false });
+
+    return () => {
+      disposed = true;
+      invalidateSelectionPick(canvas);
+      longPress.dispose(); command.cancel();
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+      canvas.removeEventListener('touchcancel', handleTouchCancel);
+      canvas.removeEventListener('contextmenu', longPress.suppressNativeMenu, { capture: true });
+      document.removeEventListener('touchmove', preventOverscroll);
+    };
+  }, [isInitialized]);
+}
+
+export default useTouchControls;

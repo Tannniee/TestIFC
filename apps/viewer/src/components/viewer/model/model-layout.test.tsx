@@ -1,0 +1,139 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * The Model workspace's default layout rule (#6232 M2.4): Plan ‖ 3D only
+ * where the 3D pane keeps the width its HUD needs (measured, see
+ * `model-layout.ts`), measured on the split's own width (sidebar and
+ * hierarchy already paid for); an explicit pick is kept; a split with no
+ * room for both panes shows 3D alone and never squeezes the 3D pane.
+ */
+
+import '@/test/setup-dom.js';
+import { installLayout } from '@/test/dom-layout.js';
+installLayout();
+import { afterEach, beforeEach, describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { act } from 'react';
+import { useViewerStore } from '@/store';
+import { cleanup, click, render } from '@/test/render.js';
+import { seedModelingSession } from '@/test/modeling-session-fixture';
+import '@/lib/commands/modeling/builtin';
+import { HANDLE_PX, MODEL_3D_MIN_PX, PLAN_MIN_PX, effectiveModelLayout, planPaneWidth, splitFits } from './model-layout';
+// Read through the namespace so a missing helper fails these tests instead of the whole file.
+import * as modelLayout from './model-layout';
+import { ModelWorkspaceSplit } from './ModelWorkspaceSplit';
+import { ModelToolRail } from './ModelToolRail';
+
+const NEED = MODEL_3D_MIN_PX + PLAN_MIN_PX + HANDLE_PX;
+
+describe('effectiveModelLayout (#6232 M2.4)', () => {
+  it("'auto' opens Plan ‖ 3D only when both panes fit, else 3D alone", () => {
+    assert.equal(effectiveModelLayout('auto', NEED), 'split');
+    assert.equal(effectiveModelLayout('auto', NEED - 1), '3d');
+    assert.equal(splitFits(NEED - 1), false);
+  });
+
+  it('an explicit pick is kept while it fits; a split without room shows 3D, a 3D pick stays 3D', () => {
+    assert.equal(effectiveModelLayout('plan', 1600), 'plan');
+    assert.equal(effectiveModelLayout('split', 1600), 'split');
+    assert.equal(effectiveModelLayout('3d', 4000), '3d');
+    assert.equal(effectiveModelLayout('split', NEED - 1), '3d');
+    assert.equal(effectiveModelLayout('plan', NEED - 1), '3d');
+  });
+
+  it('the plan pane never leaves the 3D pane below its HUD minimum', () => {
+    for (const width of [NEED, 1200, 1600, 2400]) {
+      for (const layout of ['split', 'plan'] as const) {
+        const plan = planPaneWidth(layout, width);
+        assert.ok(width - plan - HANDLE_PX >= MODEL_3D_MIN_PX, `${layout}@${width}: 3D gets ${width - plan - HANDLE_PX}`);
+        assert.ok(plan >= PLAN_MIN_PX, `${layout}@${width}: plan gets ${plan}`);
+      }
+    }
+    assert.equal(planPaneWidth('split', 2400), 960, 'Split is 40/60 when there is room');
+    assert.equal(planPaneWidth('plan', 2400), 2400 - MODEL_3D_MIN_PX - HANDLE_PX, 'Plan: the 3D pane at its minimum');
+  });
+});
+
+/** Make the split's own element report `width`, as a narrower window (or wider side panels) would. */
+function splitWidth(width: number): () => void {
+  const proto = window.Element.prototype as unknown as { getBoundingClientRect(this: Element): DOMRect };
+  const real = proto.getBoundingClientRect;
+  proto.getBoundingClientRect = function (this: Element) {
+    const r = real.call(this);
+    return this.hasAttribute('data-model-split-width') ? ({ ...r, width, right: r.left + width } as DOMRect) : r;
+  };
+  return () => { proto.getBoundingClientRect = real; };
+}
+
+describe('planPaneResize (#9296 review)', () => {
+  const planPaneResize = (...args: Parameters<typeof modelLayout.planPaneResize>) => modelLayout.planPaneResize(...args);
+  it('keeps a dragged Split width when only the window width changes', () => {
+    assert.equal(planPaneResize('split', 'split', 1600), null, 'a resize alone leaves the dragged Split be');
+    assert.equal(planPaneResize('plan', 'plan', 1600), planPaneWidth('plan', 1600), 'Plan follows the width');
+  });
+  it('sizes the pane when it is shown or the layout switches, and collapses it when hidden', () => {
+    assert.equal(planPaneResize(null, 'split', 1600), planPaneWidth('split', 1600));
+    assert.equal(planPaneResize('plan', 'split', 1600), planPaneWidth('split', 1600));
+    assert.equal(planPaneResize('split', 'plan', 1600), planPaneWidth('plan', 1600));
+    assert.equal(planPaneResize('split', null, 1600), 'collapse');
+    assert.equal(planPaneResize(null, null, 1600), null, 'a hidden pane stays as it is');
+  });
+});
+
+describe('ModelWorkspaceSplit applies the rule (#6232 M2.4)', () => {
+  let restore: (() => void) | null = null;
+  beforeEach(async () => {
+    await seedModelingSession();
+    localStorage.removeItem('ifc-lite:model-layout');
+    useViewerStore.setState({ modelLayout: 'auto' });
+    assert.ok(useViewerStore.getState().enterModelWorkspace());
+  });
+  afterEach(() => {
+    restore?.();
+    restore = null;
+    useViewerStore.getState().exitModelWorkspace();
+    cleanup();
+  });
+
+  it('never picked, wide enough: the plan shows beside 3D', () => {
+    restore = splitWidth(1280);
+    const ui = render(<><ModelToolRail /><ModelWorkspaceSplit><div data-probe-3d /></ModelWorkspaceSplit></>);
+    assert.ok(ui.querySelector('[data-plan-view]'));
+    assert.equal(ui.querySelector('[data-model-layout]')?.getAttribute('data-model-layout'), 'split');
+  });
+
+  it('never picked, too narrow: 3D alone, the plan one click away once there is room', () => {
+    restore = splitWidth(NEED - 1);
+    // #9296: with the sidebar already folded nothing can make room.
+    act(() => useViewerStore.getState().setSidebarMode('collapsed'));
+    const ui = render(<><ModelToolRail /><ModelWorkspaceSplit><div data-probe-3d /></ModelWorkspaceSplit></>);
+    assert.equal(ui.querySelector('[data-model-plan-pane]')?.getAttribute('aria-hidden'), 'true');
+    const split = [...ui.querySelectorAll<HTMLButtonElement>('[role="radio"]')].find(button => button.textContent?.startsWith('Split'));
+    assert.ok(split && !split.disabled, 'Split stays available');
+    assert.equal(ui.querySelector('[data-model-layout-notice]') === null, true, 'entry falls back quietly (#9296)');
+    assert.equal(useViewerStore.getState().modelLayout, 'auto', 'nothing was persisted');
+    click(split);
+    assert.ok(ui.querySelector('[data-model-layout-notice]'), 'an explicit Split pick explains the fallback');
+  });
+
+  it('too narrow beside an expanded sidebar: picking Split folds it to make room (#9296)', () => {
+    restore = splitWidth(NEED - 1);
+    act(() => useViewerStore.getState().setSidebarMode('expanded'));
+    const ui = render(<><ModelToolRail /><ModelWorkspaceSplit><div data-probe-3d /></ModelWorkspaceSplit></>);
+    const split = [...ui.querySelectorAll<HTMLButtonElement>('[role="radio"]')].find(button => button.textContent?.startsWith('Split'));
+    assert.ok(split && !split.disabled, 'folding the sidebar can make room');
+    click(split);
+    assert.equal(useViewerStore.getState().sidebarMode, 'collapsed');
+    assert.equal(useViewerStore.getState().modelLayout, 'split');
+  });
+
+  it('an explicit 3D pick is kept where Split would fit', () => {
+    act(() => useViewerStore.getState().setModelLayout('3d'));
+    restore = splitWidth(1600);
+    const ui = render(<><ModelToolRail /><ModelWorkspaceSplit><div data-probe-3d /></ModelWorkspaceSplit></>);
+    assert.equal(ui.querySelector('[data-model-plan-pane]')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(ui.querySelector('[data-rail-tool="plan"]') === null, true, 'the workspace bar owns layout');
+  });
+});

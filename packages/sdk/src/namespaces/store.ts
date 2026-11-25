@@ -1,0 +1,288 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { isInstantiable, isKnownType, normalizeIfcTypeName } from '@ifc-lite/parser';
+import type {
+  CostItemParams, CostQuantityParams, CostScheduleParams, CostValueParams,
+} from '@ifc-lite/create';
+import type {
+  AddDoorInStoreParams,
+  AddPlateInStoreParams,
+  AddRoofInStoreParams,
+  AddSlabInStoreParams,
+  AddSpaceInStoreParams,
+  AddWallInStoreParams,
+  AddWindowInStoreParams,
+  EntityRef,
+  StoreBackendMethods,
+} from '../types.js';
+
+import { StoreStructuralNamespace } from './store-structural.js';
+
+/**
+ * `bim.store` — document-level edits on a parsed model.
+ *
+ * Use this for raw STEP edits that don't fit `bim.mutate.*`:
+ *   - `addEntity` to inject a new entity record
+ *   - `removeEntity` to drop an existing or newly-added entity
+ *   - `setPositionalAttribute` to edit non-IfcRoot attributes by index
+ *     (e.g. `IfcRectangleProfileDef.XDim`)
+ *
+ * For property-set / quantity / named-attribute edits use `bim.mutate.*`.
+ * For building a model from scratch use `bim.create.*`.
+ *
+ * Changes accumulate in a per-model overlay and are flushed to the IFC
+ * file on the next `bim.export.ifc({ applyMutations: true })`.
+ */
+export class StoreNamespace extends StoreStructuralNamespace {
+  /**
+   * Inject a new entity into the active model. Returns an `EntityRef`
+   * pointing at the freshly-allocated expressId.
+   *
+   * Pass `def.type` as the canonical IFC EXPRESS PascalCase name
+   * (e.g. `'IfcRectangleProfileDef'`). UPPERCASE STEP tokens are also
+   * accepted and silently normalized to PascalCase against the schema
+   * registry, so the returned `entity.type` always reflects the
+   * canonical form regardless of how the caller spelled it.
+   *
+   * Attribute conventions (mirror `EntityExtractor.extractEntity()`):
+   *   - numbers → STEP integer / REAL literal
+   *   - `"#42"` → entity reference
+   *   - `".AREA."` → enum
+   *   - `null` → `$`
+   *   - arrays → STEP list `(a,b,c)` (recursed)
+   *   - any other string → quoted STEP string
+   *
+   * `modelId` must be one the backend answers for: the headless CLI backend
+   * takes `'default'` or the file basename and throws on anything else, rather
+   * than minting a ref that `bim.mutate.*` would then refuse.
+   *
+   * @example
+   *   const profile = bim.store.addEntity('default', {
+   *     type: 'IfcRectangleProfileDef',
+   *     attributes: ['.AREA.', null, '#34', 0.6, 0.4],
+   *   });
+   */
+  addEntity(modelId: string, def: { type: string; attributes: unknown[] }): EntityRef {
+    if (!def || typeof def.type !== 'string' || def.type.length === 0) {
+      throw new TypeError('addEntity: def.type must be a non-empty IFC type string');
+    }
+    // Normalisation only canonicalises casing for known names — it leaves
+    // unknown strings untouched. The backend's StoreEditor has its own
+    // regex guard, but rejecting typos at the SDK boundary gives a much
+    // more useful error than a generic STEP-emit failure.
+    if (!isKnownType(def.type)) {
+      throw new TypeError(
+        `addEntity: unknown IFC type '${def.type}'. Pass a canonical PascalCase name (e.g. 'IfcWall').`,
+      );
+    }
+    // `isKnownType` answers "is this a real EXPRESS class" — it says yes for
+    // abstract supertypes (IfcProduct, IfcRoot, IfcRelationship, ...) too,
+    // since they are real classes, just not instantiable ones. Rejecting
+    // those here, before the backend call, gives a caller a useful error
+    // instead of a downstream STEP-emit failure or (absent this check) a
+    // silently invalid `#N=IFCPRODUCT(...)` record in the exported file
+    // (#2035).
+    if (!isInstantiable(def.type)) {
+      throw new TypeError(
+        `addEntity: '${def.type}' is an abstract IFC type and cannot be instantiated directly. Pass a concrete subtype instead.`,
+      );
+    }
+    return this.backend.store.addEntity(modelId, {
+      type: normalizeIfcTypeName(def.type),
+      attributes: def.attributes,
+    });
+  }
+
+  /**
+   * Remove an entity. Tombstones existing source entities so they're
+   * skipped on export; forgets overlay-only entities entirely. Returns
+   * false if the id is unknown to the store.
+   */
+  removeEntity(ref: EntityRef): boolean {
+    return this.backend.store.removeEntity(ref);
+  }
+
+  /**
+   * Edit a positional STEP argument on any entity by zero-based index.
+   * Use this for non-IfcRoot edits like `IfcRectangleProfileDef.XDim`
+   * (index 3) where the attribute has no symbolic name.
+   *
+   * @example
+   *   // Bump the rectangle profile width from 0.3 to 0.6
+   *   bim.store.setPositionalAttribute(profileRef, 3, 0.6);
+   */
+  setPositionalAttribute(ref: EntityRef, index: number, value: unknown): void {
+    this.backend.store.setPositionalAttribute(ref, index, value);
+  }
+
+  /**
+   * Add an IfcColumn to a parsed model, anchored to an existing storey.
+   * Emits the full STEP sub-graph (placement, profile, extruded solid,
+   * representation, IfcRelContainedInSpatialStructure) into the overlay
+   * so the column appears next to the existing model on export.
+   *
+   * `Position` is the base centre in storey-local coordinates (metres),
+   * `Width`×`Depth` selects a centred rectangle; `Profile` selects the
+   * canonical parameterised section. `RefDirection` turns its local X axis
+   * in the storey plane, and `Height` is the +Z extrusion length.
+   *
+   * @example
+   *   const storeyId = bim.query.byType('IfcBuildingStorey')[0].ref.expressId;
+   *   const col = bim.store.addColumn('default', storeyId, {
+   *     Position: [1, 1, 0],
+   *     Width: 0.3, Depth: 0.4, Height: 3,
+   *     Name: 'Column 1',
+   *   });
+   */
+  addColumn(modelId: string, storeyExpressId: number, params: Parameters<StoreBackendMethods['addColumn']>[2]): EntityRef {
+    return this.backend.store.addColumn(modelId, storeyExpressId, params);
+  }
+
+  /**
+   * Add an IfcWall from `Start` to `End` (storey-local metres). Profile
+   * spans the full length along the wall axis, centred on `Thickness`,
+   * and is extruded upward by `Height`.
+   * Refused implicit joins leave the wall added and return `notices`.
+   *
+   * @example
+   *   bim.store.addWall('default', storeyId, {
+   *     Start: [0, 0, 0], End: [5, 0, 0],
+   *     Thickness: 0.2, Height: 3, Name: 'North Wall',
+   *   });
+   */
+  addWall(modelId: string, storeyExpressId: number, params: AddWallInStoreParams): ReturnType<StoreBackendMethods['addWall']> {
+    return this.backend.store.addWall(modelId, storeyExpressId, params);
+  }
+
+  /**
+   * Add an IfcSlab. `Position` is the minimum corner; the slab extends
+   * `Width` along +X, `Depth` along +Y, and is extruded `Thickness`
+   * upward.
+   */
+  addSlab(modelId: string, storeyExpressId: number, params: AddSlabInStoreParams): EntityRef {
+    return this.backend.store.addSlab(modelId, storeyExpressId, params);
+  }
+
+  /**
+   * Add an IfcBeam between `Start` and `End` with a centred rectangle
+   * (`Width` × `Height`) or parameterised `Profile`. Local Z is the beam
+   * axis so the extrusion runs along the beam.
+   */
+  addBeam(modelId: string, storeyExpressId: number, params: Parameters<StoreBackendMethods['addBeam']>[2]): EntityRef {
+    return this.backend.store.addBeam(modelId, storeyExpressId, params);
+  }
+
+  /** Add a free-standing IfcDoor (Width × Height + thin frame depth). */
+  addDoor(modelId: string, storeyExpressId: number, params: AddDoorInStoreParams): EntityRef {
+    return this.backend.store.addDoor(modelId, storeyExpressId, params);
+  }
+
+  /** Add a free-standing IfcWindow (Width × Height + thin frame depth). */
+  addWindow(modelId: string, storeyExpressId: number, params: AddWindowInStoreParams): EntityRef {
+    return this.backend.store.addWindow(modelId, storeyExpressId, params);
+  }
+
+  /**
+   * Add an IfcSpace (room/zone) — rectangle or polygon footprint
+   * extruded vertically by `Height`. Aggregated into the storey via
+   * IfcRelAggregates (spaces are spatial-structure children, not
+   * IfcRelContainedInSpatialStructure products).
+   */
+  addSpace(modelId: string, storeyExpressId: number, params: AddSpaceInStoreParams): EntityRef {
+    return this.backend.store.addSpace(modelId, storeyExpressId, params);
+  }
+
+  /**
+   * Add an IfcRoof. Without `EdgeSlopes`/`Overhang` it is a flat roof slab
+   * (the rectangle/polygon shapes of `addSlab`, `.FLAT_ROOF.`). With them it
+   * is a roof by footprint: `EdgeSlopes[i]` (radians, 0 = gable end) slopes
+   * the edge from point i to point i+1, the underside passes through every
+   * sloped edge at `Position`'s height, and `Overhang` (metres) carries every
+   * edge out. Hip, gable, mono-pitch and L-shaped roofs; change one later with
+   * `editRoof`.
+   */
+  addRoof(modelId: string, storeyExpressId: number, params: AddRoofInStoreParams): EntityRef {
+    return this.backend.store.addRoof(modelId, storeyExpressId, params);
+  }
+
+  /**
+   * Add an IfcPlate (thin flat element) — rectangle or polygon
+   * profile extruded by Thickness. PredefinedType defaults to
+   * NOTDEFINED; pass `'CURTAIN_PANEL'` / `'SHEET'` to override.
+   */
+  addPlate(modelId: string, storeyExpressId: number, params: AddPlateInStoreParams): EntityRef {
+    return this.backend.store.addPlate(modelId, storeyExpressId, params);
+  }
+
+  /**
+   * Add an IfcMember (generic structural member — brace, post, strut)
+   * between `Start` and `End`. Same rectangular or parameterised Profile
+   * extrusion as `addBeam`; choose PredefinedType to disambiguate the role.
+   */
+  addMember(modelId: string, storeyExpressId: number, params: Parameters<StoreBackendMethods['addMember']>[2]): EntityRef {
+    return this.backend.store.addMember(modelId, storeyExpressId, params);
+  }
+
+  // -- Cost / 5D authoring on a loaded model (#4857 PR A) --------------------
+  // Panel is read-only by design; these methods are for scripts (SDK / CLI /
+  // MCP / sandbox). See docs/guide/cost-panel.md "Authoring from scripts".
+
+  /** Add an IfcCostSchedule. Refused for IFC2X3 (different attribute layout). */
+  addCostSchedule(modelId: string, params: CostScheduleParams): EntityRef {
+    return this.backend.store.addCostSchedule(modelId, params);
+  }
+
+  /** Add an IfcCostItem. `CostValues`/`CostQuantities` are optional; an empty array is refused. */
+  addCostItem(modelId: string, params: CostItemParams): EntityRef {
+    return this.backend.store.addCostItem(modelId, params);
+  }
+
+  /** Add an IfcCostValue. `AppliedValue` and `AppliedValueRef` are mutually exclusive. */
+  addCostValue(modelId: string, params: CostValueParams): EntityRef {
+    return this.backend.store.addCostValue(modelId, params);
+  }
+
+  /** Add an IfcPhysicalSimpleQuantity for `IfcCostItem.CostQuantities`. */
+  addCostQuantity(modelId: string, params: CostQuantityParams): EntityRef {
+    return this.backend.store.addCostQuantity(modelId, params);
+  }
+
+  /**
+   * Nest `childExpressIds` (IfcCostItem) under `parentExpressId` via
+   * IfcRelNests. A child already nested elsewhere is reparented: detached
+   * from its old rel (which is tombstoned if that empties it) first.
+   */
+  nestCostItems(modelId: string, parentExpressId: number, childExpressIds: number[]): EntityRef {
+    return this.backend.store.nestCostItems(modelId, parentExpressId, childExpressIds);
+  }
+
+  /** Assign `itemExpressIds` to `scheduleExpressId`'s control via IfcRelAssignsToControl. */
+  assignCostItemsToSchedule(modelId: string, scheduleExpressId: number, itemExpressIds: number[]): EntityRef {
+    return this.backend.store.assignCostItemsToSchedule(modelId, scheduleExpressId, itemExpressIds);
+  }
+
+  /** Assign `objectExpressIds` (products AND/OR tasks) to `costItemExpressId`'s control. */
+  assignToCostItem(modelId: string, costItemExpressId: number, objectExpressIds: number[]): EntityRef {
+    return this.backend.store.assignToCostItem(modelId, costItemExpressId, objectExpressIds);
+  }
+
+  /** Replace an IfcCostItem's `CostValues`. Pass `[]` to clear it (written as `$`, never `()`). */
+  setCostItemValues(modelId: string, itemExpressId: number, valueExpressIds: number[]): void {
+    this.backend.store.setCostItemValues(modelId, itemExpressId, valueExpressIds);
+  }
+
+  /**
+   * Safe-delete an IfcCostSchedule / IfcCostItem / IfcCostValue. Throws,
+   * naming referrers, if a value is still listed in another item's
+   * `CostValues` or another value's `Components` — pass `{ detach: true }`
+   * to rewrite those lists first. Deleting an item cascades to values it
+   * alone references.
+   */
+  removeCostEntity(modelId: string, expressId: number, options?: { detach?: boolean }): void {
+    this.backend.store.removeCostEntity(modelId, expressId, options);
+  }
+
+
+}

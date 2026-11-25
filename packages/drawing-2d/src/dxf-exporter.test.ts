@@ -1,0 +1,445 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * DXF exporter tests (issue #1861). Mirrors `svg-exporter.test.ts`'s fixture
+ * style so the two exporters are exercised against comparable input.
+ */
+
+import { describe, expect, it } from 'vitest';
+import { exportToDXF, isDxfDimensionExportable } from './dxf-exporter.js';
+import { parseDxf } from './dxf/parser.js';
+import {
+  DEFAULT_SECTION_CONFIG,
+  type Drawing2D,
+  type DrawingLine,
+  type DrawingPolygon,
+  type SectionPlaneConfig,
+} from './types.js';
+import type { DxfUnderlay } from './dxf/types.js';
+import type { DxfLineEntity, DxfPolylineEntity, DxfTextEntity } from './dxf/types.js';
+
+/** `DEFAULT_SECTION_CONFIG` omits `plane`; a horizontal plan cut stands in for it. */
+const PLAN_PLANE: SectionPlaneConfig = { axis: 'z', position: 0, flipped: false };
+
+const emptyDrawing = (): Drawing2D => ({
+  config: { ...DEFAULT_SECTION_CONFIG, plane: PLAN_PLANE, scale: 100 },
+  lines: [],
+  cutPolygons: [],
+  projectionPolygons: [],
+  bounds: { min: { x: 0, y: 0 }, max: { x: 10, y: 10 } },
+  stats: {
+    cutLineCount: 0,
+    projectionLineCount: 0,
+    hiddenLineCount: 0,
+    silhouetteLineCount: 0,
+    polygonCount: 0,
+    totalTriangles: 0,
+    processingTimeMs: 0,
+  },
+});
+
+function makeLine(overrides: Partial<DrawingLine> = {}): DrawingLine {
+  return {
+    line: { start: { x: 0, y: 0 }, end: { x: 5, y: 0 } },
+    category: 'cut',
+    visibility: 'visible',
+    entityId: 1,
+    ifcType: 'IfcWall',
+    modelIndex: 0,
+    depth: 0,
+    ...overrides,
+  };
+}
+
+function makePolygon(overrides: Partial<DrawingPolygon> = {}): DrawingPolygon {
+  return {
+    polygon: { outer: [{ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 4, y: 4 }, { x: 0, y: 4 }], holes: [] },
+    entityId: 2,
+    ifcType: 'IfcWall',
+    modelIndex: 0,
+    isCut: true,
+    ...overrides,
+  };
+}
+
+const underlay = (): DxfUnderlay => ({
+  name: 'site.dxf',
+  unitScale: 1,
+  skipped: {},
+  warnings: [],
+  bounds: { min: { x: 0, y: 0 }, max: { x: 10, y: 10 } },
+  layers: [
+    {
+      name: 'ANNO',
+      color: '#112233',
+      visible: true,
+      fills: [],
+      paths: [{ points: [{ x: 0, y: 0 }, { x: 10, y: 0 }], closed: false }],
+      texts: [
+        { position: { x: 5, y: 5 }, text: 'Label', height: 2, dirX: 1, dirY: 0, align: 'left', valign: 'baseline' },
+      ],
+    },
+  ],
+});
+
+describe('DXFExporter', () => {
+  it('produces parseable DXF (R12, no $INSUNITS) stating metres in the leading comment', () => {
+    const dxf = exportToDXF(emptyDrawing());
+    expect(dxf).toMatch(/^999\n.*metres/);
+    expect(dxf).toContain('$ACADVER\n1\nAC1009');
+    const doc = parseDxf(dxf);
+    expect(doc.entities).toHaveLength(0);
+  });
+
+  it('writes each drawing line as a LINE on its category layer', () => {
+    const drawing = emptyDrawing();
+    drawing.lines = [
+      makeLine({ category: 'cut', line: { start: { x: 0, y: 0 }, end: { x: 1, y: 0 } } }),
+      makeLine({ category: 'hidden', visibility: 'hidden', line: { start: { x: 0, y: 1 }, end: { x: 1, y: 1 } } }),
+    ];
+    const doc = parseDxf(exportToDXF(drawing));
+    const lines = doc.entities.filter((e): e is DxfLineEntity => e.kind === 'line');
+    expect(lines).toHaveLength(2);
+    expect(lines.map((l) => l.layer).sort()).toEqual(['IFC-CUT', 'IFC-HIDDEN']);
+  });
+
+  it('omits hidden lines when showHiddenLines is false', () => {
+    const drawing = emptyDrawing();
+    drawing.lines = [makeLine({ category: 'hidden', visibility: 'hidden' })];
+    const doc = parseDxf(exportToDXF(drawing, { showHiddenLines: false }));
+    expect(doc.entities).toHaveLength(0);
+  });
+
+  it('routes visibility-hidden lines onto the dashed IFC-HIDDEN layer regardless of category (PR #1871 review)', () => {
+    // Hidden-line removal / construction projection can mark a projection or
+    // silhouette edge `visibility: 'hidden'` without changing its category.
+    // The canvas and SVG exporters render every such line dashed; the DXF
+    // export must not leave them solid on the CONTINUOUS category layer.
+    const drawing = emptyDrawing();
+    drawing.lines = [
+      makeLine({ category: 'projection', visibility: 'hidden', line: { start: { x: 0, y: 0 }, end: { x: 1, y: 0 } } }),
+      makeLine({ category: 'silhouette', visibility: 'hidden', line: { start: { x: 0, y: 1 }, end: { x: 1, y: 1 } } }),
+      makeLine({ category: 'projection', visibility: 'visible', line: { start: { x: 0, y: 2 }, end: { x: 1, y: 2 } } }),
+    ];
+    const dxf = exportToDXF(drawing);
+    const doc = parseDxf(dxf);
+    const lines = doc.entities.filter((e): e is DxfLineEntity => e.kind === 'line');
+    expect(lines.map((l) => l.layer).sort()).toEqual(['IFC-HIDDEN', 'IFC-HIDDEN', 'IFC-PROJECTION']);
+    // The layer they land on must actually be dashed, and the DASHED LTYPE
+    // referenced must be declared in TABLES (R12 readers reject a layer
+    // referencing an undeclared linetype).
+    expect(dxf).toMatch(/IFC-HIDDEN\n70\n0\n62\n\d+\n6\nDASHED/);
+    expect(dxf).toMatch(/0\nLTYPE\n2\nDASHED\n/);
+    // The category layer the hidden lines were diverted from stays CONTINUOUS.
+    expect(dxf).toMatch(/IFC-PROJECTION\n70\n0\n62\n\d+\n6\nCONTINUOUS/);
+  });
+
+  it('still omits visibility-hidden non-hidden-category lines when showHiddenLines is false', () => {
+    const drawing = emptyDrawing();
+    drawing.lines = [makeLine({ category: 'projection', visibility: 'hidden' })];
+    const doc = parseDxf(exportToDXF(drawing, { showHiddenLines: false }));
+    expect(doc.entities).toHaveLength(0);
+  });
+
+  it('writes the DASHED linetype for the hidden layer', () => {
+    const drawing = emptyDrawing();
+    drawing.lines = [makeLine({ category: 'hidden', visibility: 'hidden' })];
+    const dxf = exportToDXF(drawing);
+    expect(dxf).toContain('2\nIFC-HIDDEN\n70\n0\n62\n');
+    expect(dxf).toMatch(/IFC-HIDDEN\n70\n0\n62\n\d+\n6\nDASHED/);
+  });
+
+  it('represents cut polygons as closed POLYLINE boundaries (hatch-as-boundary, no HATCH entity)', () => {
+    const drawing = emptyDrawing();
+    drawing.cutPolygons = [makePolygon()];
+    const dxf = exportToDXF(drawing);
+    expect(dxf).not.toContain('0\nHATCH');
+    const doc = parseDxf(dxf);
+    const polys = doc.entities.filter((e): e is DxfPolylineEntity => e.kind === 'polyline');
+    expect(polys).toHaveLength(1);
+    expect(polys[0].closed).toBe(true);
+    expect(polys[0].vertices).toHaveLength(4);
+  });
+
+  it('omits hatching when showHatching is false', () => {
+    const drawing = emptyDrawing();
+    drawing.cutPolygons = [makePolygon()];
+    const doc = parseDxf(exportToDXF(drawing, { showHatching: false }));
+    expect(doc.entities).toHaveLength(0);
+  });
+
+  it('embeds a reference underlay (paths + text), matching SVGExporter\'s underlay contract', () => {
+    const dxf = exportToDXF(emptyDrawing(), { underlays: [{ underlay: underlay() }] });
+    const doc = parseDxf(dxf);
+    const texts = doc.entities.filter((e): e is DxfTextEntity => e.kind === 'text');
+    expect(texts).toHaveLength(1);
+    expect(texts[0].text).toBe('Label');
+    const polylines = doc.entities.filter((e): e is DxfPolylineEntity => e.kind === 'polyline');
+    expect(polylines).toHaveLength(1); // the ANNO layer's open path
+    expect(polylines[0].vertices[0].x).toBeCloseTo(0);
+    expect(polylines[0].vertices[1].x).toBeCloseTo(10);
+  });
+
+  it('re-emits uniform (aligned) text as Aligned (72=3)', () => {
+    const aligned = underlay();
+    aligned.layers[0].texts = [
+      { position: { x: 1, y: 2 }, text: 'Al', height: 1, dirX: 1, dirY: 0, align: 'left', valign: 'baseline', fitWidth: 4, fitUniform: true },
+    ];
+    const dxf = exportToDXF(emptyDrawing(), {
+      underlays: [{ underlay: aligned, placement: { offsetX: 0, offsetY: 0, rotationDeg: 0, scale: 1 } }],
+    });
+    expect(dxf).toContain('72\n3\n');
+    expect(dxf).not.toContain('72\n5\n');
+    // A transform that stretches one axis changes the aspect: re-emit as Fit, not Aligned.
+    const stretched = exportToDXF(emptyDrawing(), {
+      coordinateTransform: (p) => ({ x: 2 * p.x, y: p.y }),
+      underlays: [{ underlay: aligned, placement: { offsetX: 0, offsetY: 0, rotationDeg: 0, scale: 1 } }],
+    });
+    expect(stretched).toContain('72\n5\n');
+    expect(stretched).not.toContain('72\n3\n');
+    // Stretching the axis across the baseline scales the glyph height with it.
+    const tall = parseDxf(exportToDXF(emptyDrawing(), {
+      coordinateTransform: (p) => ({ x: p.x, y: 2 * p.y }),
+      underlays: [{ underlay: aligned, placement: { offsetX: 0, offsetY: 0, rotationDeg: 0, scale: 1 } }],
+    })).entities.filter((e): e is DxfTextEntity => e.kind === 'text');
+    expect(tall[0].height).toBeCloseTo(2, 6);
+    // Plain text through a stretching transform is widened (group 41) by the stretch.
+    const plain = underlay();
+    plain.layers[0].texts = [
+      { position: { x: 1, y: 2 }, text: 'W', height: 1, dirX: 1, dirY: 0, align: 'left', valign: 'baseline', widthScale: 0.25 },
+    ];
+    const [wide] = parseDxf(exportToDXF(emptyDrawing(), {
+      coordinateTransform: (p) => ({ x: 2 * p.x, y: p.y }),
+      underlays: [{ underlay: plain, placement: { offsetX: 0, offsetY: 0, rotationDeg: 0, scale: 1 } }],
+    })).entities.filter((e): e is DxfTextEntity => e.kind === 'text');
+    expect(wide.widthScale).toBeCloseTo(0.5, 6);
+    // A uniformly scaling transform scales the glyph height with the geometry.
+    const [big] = parseDxf(exportToDXF(emptyDrawing(), {
+      coordinateTransform: (p) => ({ x: 2 * p.x, y: 2 * p.y }),
+      underlays: [{ underlay: plain, placement: { offsetX: 0, offsetY: 0, rotationDeg: 0, scale: 1 } }],
+    })).entities.filter((e): e is DxfTextEntity => e.kind === 'text');
+    expect(big.height).toBeCloseTo(2, 6);
+  });
+
+  it('re-emits aligned/fit text as Fit (72=5) so CAD spans the exact fitWidth', () => {
+    const fit = underlay();
+    fit.layers[0].texts = [
+      { position: { x: 1, y: 2 }, text: 'Fit', height: 1, dirX: 0, dirY: 1, align: 'left', valign: 'baseline', widthScale: 3, fitWidth: 4 },
+    ];
+    const dxf = exportToDXF(emptyDrawing(), {
+      underlays: [{ underlay: fit, placement: { offsetX: 0, offsetY: 0, rotationDeg: 0, scale: 2 } }],
+    });
+    expect(dxf).toContain('72\n5\n');
+    // The estimated width factor (group 41) is replaced by the second point.
+    expect(dxf.slice(dxf.indexOf('\n0\nTEXT\n'))).not.toMatch(/\n41\n/);
+    const [text] = parseDxf(dxf).entities.filter((e): e is DxfTextEntity => e.kind === 'text');
+    // Span 4 scaled by the placement (2) along the baseline.
+    expect(text.fitWidth).toBeCloseTo(8, 6);
+    // The fitted end point is part of the header extent: the placed anchor (2,4) + 8 along +Y.
+    const extMax = dxf.slice(dxf.indexOf('$EXTMAX'), dxf.indexOf('$EXTMAX') + 80).split('\n');
+    expect(Number(extMax[4])).toBeCloseTo(12, 6);
+  });
+
+  it('stacks multi-line underlay text along the rotated text direction, with placement-scaled height (PR #1871 review)', () => {
+    // Under a rotated placement the second line must follow the text's own
+    // "down" direction (local -Y mapped through the placement), not shift
+    // straight down in output space — mirroring SVGExporter's rotate()
+    // wrapper around its tspan stack.
+    const multi = underlay();
+    multi.layers[0].texts = [
+      { position: { x: 0, y: 0 }, text: 'A\nB', height: 2, dirX: 1, dirY: 0, align: 'left', valign: 'baseline' },
+    ];
+    const dxf = exportToDXF(emptyDrawing(), {
+      underlays: [{
+        underlay: multi,
+        placement: { offsetX: 0, offsetY: 0, rotationDeg: 90, scale: 2 },
+      }],
+    });
+    const texts = parseDxf(dxf).entities.filter((e): e is DxfTextEntity => e.kind === 'text');
+    expect(texts).toHaveLength(2);
+    expect(texts[0].text).toBe('A');
+    expect(texts[0].x).toBeCloseTo(0);
+    expect(texts[0].y).toBeCloseTo(0);
+    // `DxfPlacement.rotationDeg` is documented as "counter-clockwise as seen
+    // on a plan view" (drawing/screen space, +Y down) — the same convention
+    // `applyDxfPlacement` implements directly and every OTHER consumer
+    // (svg-exporter.ts's underlay mapping, dxfUnderlayMath.ts's
+    // worldToDrawing) applies by negating Y, calling `applyDxfPlacement`,
+    // then negating back for a world-space (+Y up) output. Local
+    // second-line anchor (0, -10/3): negate Y -> (0, 10/3), scale by 2 ->
+    // (0, 20/3), rotate 90 deg CCW-as-seen-on-plan (applyDxfPlacement:
+    // x' = x c + y s, y' = -x s + y c) -> (20/3, 0), negate Y back -> (20/3, 0).
+    expect(texts[1].text).toBe('B');
+    expect(texts[1].x).toBeCloseTo(20 / 3);
+    expect(texts[1].y).toBeCloseTo(0);
+    // Glyph height follows the placement scale, like the SVG exporter.
+    expect(texts[0].height).toBeCloseTo(4);
+    expect(texts[1].height).toBeCloseTo(4);
+  });
+
+  it('anchors a multi-line underlay text block by its vertical attachment, along rotated text', () => {
+    // DXF anchors the whole block: bottom grows up from the point (last line
+    // on it), middle centres on it, top grows down. Lines stack across the
+    // text's own direction (AutoCAD pitch: 5/3 of the height at factor 1), so a 90° label stacks along world X.
+    const at = (valign: 'top' | 'middle' | 'bottom', dirX: number, dirY: number) => {
+      const multi = underlay();
+      multi.layers[0].texts = [
+        { position: { x: 10, y: 20 }, text: 'A\nB\nC', height: 1, dirX, dirY, align: 'left', valign },
+      ];
+      return parseDxf(exportToDXF(emptyDrawing(), { underlays: [{ underlay: multi }] })).entities
+        .filter((e): e is DxfTextEntity => e.kind === 'text');
+    };
+    const bottom = at('bottom', 1, 0);
+    expect(bottom.map((t) => t.text)).toEqual(['A', 'B', 'C']);
+    expect(bottom.map((t) => t.y)).toEqual([20 + 10 / 3, 20 + 5 / 3, 20].map((y) => expect.closeTo(y, 5)));
+    expect(at('middle', 1, 0).map((t) => t.y)).toEqual([20 + 5 / 3, 20, 20 - 5 / 3].map((y) => expect.closeTo(y, 5)));
+    expect(at('top', 1, 0).map((t) => t.y)).toEqual([20, 20 - 5 / 3, 20 - 10 / 3].map((y) => expect.closeTo(y, 5)));
+    // Rotated 90° (reading up): "down" across the baseline is world +X.
+    const rotated = at('bottom', 0, 1);
+    expect(rotated.map((t) => t.x)).toEqual([10 - 10 / 3, 10 - 5 / 3, 10].map((x) => expect.closeTo(x, 5)));
+    expect(rotated.map((t) => t.y)).toEqual([20, 20, 20].map((y) => expect.closeTo(y, 5)));
+  });
+
+  it('applies underlay placement offset/rotation in the same sense as every other DxfPlacement consumer (world Y-up, not mirrored)', () => {
+    // `DxfPlacement` is documented as drawing space (+Y down): "Offset in
+    // metres (drawing space)" / "counter-clockwise as seen on a plan view".
+    // `svg-exporter.ts` and `dxfUnderlayMath.ts`'s `worldToDrawing` both
+    // negate Y before calling `applyDxfPlacement` (world +Y-up -> drawing
+    // +Y-down) so the SAME placement value produces the SAME visual result
+    // in the 2D canvas, the 3D overlay, and SVG export. The DXF exporter
+    // must match: it stays in world space (+Y up, no final flip — see the
+    // module docs), so it needs the negate/placement/negate-back round trip.
+    const offsetOnly = underlay();
+    offsetOnly.layers[0].texts = [];
+    offsetOnly.layers[0].paths = [{ points: [{ x: 0, y: 0 }, { x: 1, y: 0 }], closed: false }];
+    const offsetDxf = exportToDXF(emptyDrawing(), {
+      underlays: [{
+        underlay: offsetOnly,
+        placement: { offsetX: 0, offsetY: 10, rotationDeg: 0, scale: 1 },
+      }],
+    });
+    const offsetLine = parseDxf(offsetDxf).entities.find(
+      (e): e is DxfPolylineEntity => e.kind === 'polyline',
+    )!;
+    // A drawing-space offsetY of +10 shifts the underlay SOUTH (world -Y),
+    // matching worldToDrawing's `y: -(world.y - shiftY)` sign convention —
+    // not north (+Y), which is what applying the placement to the raw
+    // world point without the Y round trip would produce.
+    expect(offsetLine.vertices[0].y).toBeCloseTo(-10);
+    expect(offsetLine.vertices[1].y).toBeCloseTo(-10);
+
+    const rotateOnly = underlay();
+    rotateOnly.layers[0].texts = [];
+    // A single east-pointing (+X) segment.
+    rotateOnly.layers[0].paths = [{ points: [{ x: 0, y: 0 }, { x: 1, y: 0 }], closed: false }];
+    const rotateDxf = exportToDXF(emptyDrawing(), {
+      underlays: [{
+        underlay: rotateOnly,
+        placement: { offsetX: 0, offsetY: 0, rotationDeg: 90, scale: 1 },
+      }],
+    });
+    const rotatedLine = parseDxf(rotateDxf).entities.find(
+      (e): e is DxfPolylineEntity => e.kind === 'polyline',
+    )!;
+    // A 90-degree "counter-clockwise as seen on a plan view" rotation turns
+    // an east-pointing (+X) segment to point north (+Y) — not south (-Y),
+    // which a mirrored (clockwise) rotation would produce.
+    expect(rotatedLine.vertices[1].x).toBeCloseTo(0, 5);
+    expect(rotatedLine.vertices[1].y).toBeCloseTo(1);
+  });
+
+  it('honours underlay per-layer visibility overrides', () => {
+    const dxf = exportToDXF(emptyDrawing(), {
+      underlays: [{ underlay: underlay(), layerVisibility: { ANNO: false } }],
+    });
+    expect(dxf).not.toContain('Label');
+  });
+
+  it('applies coordinateTransform to both drawing and underlay geometry (georeference hook)', () => {
+    const drawing = emptyDrawing();
+    drawing.lines = [makeLine({ line: { start: { x: 0, y: 0 }, end: { x: 1, y: 0 } } })];
+    const shift = { x: 1000, y: -500 };
+    const dxf = exportToDXF(drawing, {
+      underlays: [{ underlay: underlay() }],
+      coordinateTransform: (p) => ({ x: p.x + shift.x, y: p.y + shift.y }),
+    });
+    const doc = parseDxf(dxf);
+    const line = doc.entities.find((e): e is DxfLineEntity => e.kind === 'line')!;
+    expect(line.x1).toBeCloseTo(1000);
+    expect(line.y1).toBeCloseTo(-500);
+    const text = doc.entities.find((e): e is DxfTextEntity => e.kind === 'text')!;
+    expect(text.x).toBeCloseTo(5 + 1000);
+    expect(text.y).toBeCloseTo(5 - 500);
+  });
+
+  it('writes polyline layers on their own layer through coordinateTransform (#6871 scan outline)', () => {
+    const ring = [{ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 4, y: 3 }];
+    const dxf = exportToDXF(emptyDrawing(), {
+      coordinateTransform: (p) => ({ x: p.x + 100, y: p.y + 50 }),
+      polylineLayers: [{ name: 'SCAN-OUTLINE', color: '#0f766e', polylines: [ring, [{ x: 1, y: 1 }, { x: 2, y: 1 }]] }],
+    });
+    const doc = parseDxf(dxf);
+    const polys = doc.entities.filter((e): e is DxfPolylineEntity => e.kind === 'polyline');
+    expect(polys).toHaveLength(2);
+    expect(polys.every((p) => p.layer === 'SCAN-OUTLINE' && p.closed)).toBe(true);
+    expect(polys[0].vertices.map((v) => [v.x, v.y])).toEqual([[100, 50], [104, 50], [104, 53]]);
+    expect(dxf).toContain('2\nSCAN-OUTLINE\n');
+  });
+});
+
+describe('DXFExporter textLayers', () => {
+  it('writes TEXT on its own layer, through coordinateTransform, with the angle measured after it', () => {
+    // A y-mirroring transform, as the plan export's toWorld applies.
+    const dxf = exportToDXF(emptyDrawing(), {
+      coordinateTransform: (p) => ({ x: p.x + 100, y: -p.y }),
+      textLayers: [{
+        name: 'DIMENSIONS-TEXT',
+        color: '#000000',
+        texts: [
+          { position: { x: 1, y: 2 }, text: '4262', height: 0.25, direction: { x: 1, y: 1 }, hAlign: 'center', vAlign: 'middle' },
+          { position: { x: 0, y: 0 }, text: 'flat', height: 0.125 },
+        ],
+      }],
+    });
+    const texts = parseDxf(dxf).entities.filter((e): e is DxfTextEntity => e.kind === 'text');
+    expect(texts).toHaveLength(2);
+    expect(texts.every((t) => t.layer === 'DIMENSIONS-TEXT')).toBe(true);
+    expect([texts[0].x, texts[0].y, texts[0].height, texts[0].text]).toEqual([101, -2, 0.25, '4262']);
+    expect([texts[0].hAlign, texts[0].vAlign]).toEqual(['center', 'middle']);
+    // (1, 1) in drawing space is (1, -1) after the mirror: -45°.
+    expect(texts[0].rotationDeg).toBeCloseTo(-45, 9);
+    expect([texts[1].rotationDeg, texts[1].hAlign, texts[1].vAlign]).toEqual([0, 'left', 'baseline']);
+  });
+
+  it('keepUpright turns text that would read upside down or top to bottom in the output frame', () => {
+    const angle = (direction: { x: number; y: number }, keepUpright: boolean) => {
+      const dxf = exportToDXF(emptyDrawing(), {
+        textLayers: [{ name: 'T', color: '#000000', texts: [{ position: { x: 0, y: 0 }, text: 'x', height: 1, direction, keepUpright }] }],
+      });
+      return parseDxf(dxf).entities.filter((e): e is DxfTextEntity => e.kind === 'text')[0].rotationDeg;
+    };
+    expect(angle({ x: -1, y: 0 }, false)).toBeCloseTo(180, 9);
+    expect(angle({ x: -1, y: 0 }, true)).toBeCloseTo(0, 9);
+    expect(angle({ x: 0, y: -1 }, true)).toBeCloseTo(90, 9);
+    expect(angle({ x: 0, y: 1 }, true)).toBeCloseTo(90, 9);
+    expect(angle({ x: 1, y: -1 }, true)).toBeCloseTo(-45, 9);
+  });
+});
+
+it('rejects invalid shared dimension graphics with the preflight predicate (#10020)', () => {
+  const point = { x: 0, y: 0 };
+  const valid = { lines: [[{ x: 0, y: 0 }, { x: 5, y: 0 }]] as [typeof point, typeof point][],
+    ticks: [], text: { at: { x: 2.5, y: 0.2 }, angle: 0, heightM: 0.3, value: 'valid' } };
+  const rejected = [
+    { ...valid, lines: [[point, point]] as [typeof point, typeof point][] },
+    ...[0, -1, NaN, Infinity].map(heightM => ({ ...valid, text: { ...valid.text, heightM } })),
+    { ...valid, text: { ...valid.text, at: { x: NaN, y: 0 } } },
+  ];
+  expect(isDxfDimensionExportable(valid)).toBe(true);
+  for (const dim of rejected) expect(isDxfDimensionExportable(dim)).toBe(false);
+  const entities = parseDxf(exportToDXF(emptyDrawing(), { dimensions: [...rejected, valid] })).entities;
+  expect(entities.filter(e => e.kind === 'text')).toHaveLength(1);
+  expect(entities.filter(e => e.kind === 'line')).toHaveLength(1);
+});

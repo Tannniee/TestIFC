@@ -1,0 +1,62 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+name: CI reporting selfcheck
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ci-reporting-selfcheck.yml'
+      - '.github/workflows/ci-reporting-outcome-probe.yml'
+      - '.github/workflows/ci-reporting-cancellation-observer.yml'
+      - '.github/workflows/report-scheduled-failure.yml'
+      - '.github/workflows/determinism.yml'
+      - '.github/workflows/export-schema-conformance.yml'
+      - '.github/workflows/ifcopenshell-parity.yml'
+      - '.github/workflows/xmatch-fixture.yml'
+      - 'scripts/check-workflow-report-paths.mjs'
+      - 'scripts/check-workflow-report-paths.test.mjs'
+      - 'scripts/build-rustdoc-index.mjs'
+      - 'scripts/build-rustdoc-index.test.mjs'
+      - 'scripts/report-scheduled-failure.mjs'
+      - 'scripts/report-scheduled-failure.test.mjs'
+  workflow_dispatch:
+
+# A new commit makes this PR's earlier run worthless; pushes, tags and manual runs are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      HAS_MERGIFY_TOKEN: ${{ secrets.MERGIFY_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Audit reporting topology
+        run: node scripts/check-workflow-report-paths.mjs
+      - name: Exercise reporting audit mutations
+        id: gate_tests
+        run: node --test --test-reporter=tap --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=mergify-junit.xml scripts/check-workflow-report-paths.test.mjs scripts/report-scheduled-failure.test.mjs
+      - name: Mergify CI Upload
+        if: (success() || failure()) && env.HAS_MERGIFY_TOKEN == 'true' && hashFiles('mergify-junit.xml') != ''
+        continue-on-error: true
+        uses: ./.github/actions/mergify-upload
+        with:
+          token: ${{ secrets.MERGIFY_TOKEN }}
+          report_path: mergify-junit.xml
+          test_step_outcome: ${{ steps.gate_tests.outcome }}

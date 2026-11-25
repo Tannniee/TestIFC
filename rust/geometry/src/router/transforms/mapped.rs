@@ -1,0 +1,196 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! `IfcMappedItem` placement: the map's `MappingOrigin` composed under the
+//! item's `MappingTarget`.
+
+use super::super::GeometryRouter;
+use crate::{math::tol, Result};
+use ifc_lite_core::{DecodedEntity, EntityDecoder};
+use nalgebra::Matrix4;
+
+impl GeometryRouter {
+    /// Resolve an `IfcMappedItem` placement in metre coordinates. The returned
+    /// column-major matrix retains the authored linear part; only translation
+    /// receives the IFC length-unit scale.
+    pub fn resolve_scaled_mapped_item_transform(
+        &self,
+        item: &DecodedEntity,
+        source: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<[f64; 16]>> {
+        self.resolve_scaled_mapped_item_transform_with_origin_loader(item, decoder,
+            |decoder| self.mapping_origin_transform(source, decoder))
+    }
+
+    /// Resolve a mapped target with a caller-supplied source-origin loader.
+    /// The loader runs after target parsing, preserving the standard error
+    /// precedence, and may reuse a parsed origin for repeated source maps.
+    pub fn resolve_scaled_mapped_item_transform_with_origin_loader<F>(
+        &self,
+        item: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+        origin: F,
+    ) -> Result<Option<[f64; 16]>>
+    where F: FnOnce(&mut EntityDecoder) -> Result<Option<Matrix4<f64>>> {
+        let target = self.mapping_target_transform(item, decoder)?;
+        let origin = origin(decoder)?;
+        let Some(mut matrix) = Self::compose_mapped_transform(target, origin) else {
+            return Ok(None);
+        };
+        self.scale_transform(&mut matrix);
+        Ok(Some(crate::math::mat4::col_major_array(&matrix)))
+    }
+
+    /// Admit the mapping in metres before source/cache work. Instance capture
+    /// consumes this already-scaled matrix later, at the placement boundary.
+    #[inline]
+    pub(crate) fn scaled_mapped_item_transform(
+        &self,
+        item: &DecodedEntity,
+        source: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Matrix4<f64>>> {
+        let mut transform = self.mapped_item_transform(item, source, decoder)?;
+        if let Some(transform) = &mut transform {
+            self.scale_transform(transform);
+        }
+        Ok(transform)
+    }
+
+    /// The full `IfcMappedItem` transform: `MappingTarget · MappingOrigin`.
+    ///
+    /// `item` is the `IfcMappedItem` (attr 1 = MappingTarget), `source` its
+    /// `IfcRepresentationMap` (attr 0 = MappingOrigin, an `IfcAxis2Placement`).
+    /// The mapped representation's items are authored in the mapping source's
+    /// coordinate system, whose placement within the map IS `MappingOrigin`, so
+    /// it applies INNERMOST — the same composition IfcOpenShell performs
+    /// (`gtrsf(MappingTarget).Multiply(trsf(MappingOrigin))`).
+    ///
+    /// Before #1985 `MappingOrigin` was dropped everywhere, so any map whose
+    /// origin was not the identity placed its geometry at the wrong spot
+    /// (scaled by the target, so a Scale=1000 target multiplied the error
+    /// 1000-fold). Returns `None` when neither attribute contributes, keeping
+    /// the "no transform to apply" fast path for the overwhelmingly common
+    /// identity-origin file.
+    pub(crate) fn mapped_item_transform(
+        &self,
+        item: &DecodedEntity,
+        source: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Matrix4<f64>>> {
+        crate::representation::mapped_transform::mapped_item_local_transform(item, source, decoder)
+    }
+
+    fn mapping_target_transform(
+        &self, item: &DecodedEntity, decoder: &mut EntityDecoder,
+    ) -> Result<Option<Matrix4<f64>>> {
+        crate::representation::mapped_transform::mapping_target(item, decoder)
+    }
+
+    fn compose_mapped_transform(
+        target: Option<Matrix4<f64>>, origin: Option<Matrix4<f64>>,
+    ) -> Option<Matrix4<f64>> {
+        crate::representation::mapped_transform::compose(target, origin)
+    }
+
+    /// `IfcRepresentationMap.MappingOrigin` (attr 0) as a 4x4, or `None` when it
+    /// is absent or null (nothing to compose), or the identity.
+    ///
+    /// A PRESENT origin that cannot be turned into a placement — a dangling
+    /// reference, or an entity that is not an `IfcAxis2Placement` — is an ERROR,
+    /// not a silent identity. Every other consumer of a broken mapped-item
+    /// transform now behaves that way: the `MappingTarget` operator parse has
+    /// always propagated (a non-`IfcDirection` axis errors), the void fast-path
+    /// probes defer the opening to the exact kernel, and the 2D drawing extractor
+    /// abandons the profile. Substituting the identity here would render the item
+    /// at a position nothing else agrees with. #1985
+    pub fn mapping_origin_transform(
+        &self,
+        source: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Matrix4<f64>>> {
+        Ok(self
+            .mapping_origin_frame(source, decoder)?
+            .filter(|m| !m.is_identity(tol::IDENTITY_EPS_STRICT)))
+    }
+
+    /// [`Self::mapping_origin_transform`] without the identity shortcut:
+    /// `None` only when the origin is absent or `$`. The textured path bakes
+    /// the frame into every part, identity included.
+    pub(crate) fn mapping_origin_frame(
+        &self,
+        source: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+    ) -> Result<Option<Matrix4<f64>>> {
+        crate::representation::mapped_transform::mapping_origin_frame(source, decoder)
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn issue_5786_cached_origin_uses_standard_mapped_composition() {
+        let content = b"#1=IFCCARTESIANPOINT((10.,20.,0.));\n\
+            #2=IFCAXIS2PLACEMENT3D(#1,$,$);\n\
+            #3=IFCREPRESENTATIONMAP(#2,#9);\n\
+            #4=IFCCARTESIANPOINT((100.,0.,0.));\n\
+            #5=IFCCARTESIANTRANSFORMATIONOPERATOR3D($,$,#4,2.,$);\n\
+            #6=IFCMAPPEDITEM(#3,#5);";
+        let router = GeometryRouter::with_scale(0.001);
+        let mut decoder = EntityDecoder::new(content);
+        let item = decoder.decode_by_id(6).unwrap();
+        let source = decoder.decode_by_id(3).unwrap();
+        let standard = router.resolve_scaled_mapped_item_transform(&item, &source, &mut decoder).unwrap();
+        let origin = router.mapping_origin_transform(&source, &mut decoder).unwrap();
+        let cached = router.resolve_scaled_mapped_item_transform_with_origin_loader(
+            &item, &mut decoder, |_| Ok(origin)).unwrap();
+        // Target(100, 0) · Scale(2) · Origin(10, 20) = (120, 40) mm.
+        // Pin both public routes to that authored result independently.
+        for transform in [standard, cached] {
+            let matrix = transform.unwrap();
+            assert_eq!(matrix[0], 2.0);
+            assert_eq!(matrix[5], 2.0);
+            assert_eq!(matrix[10], 2.0);
+            assert!((matrix[12] - 0.12).abs() < 1e-12);
+            assert!((matrix[13] - 0.04).abs() < 1e-12);
+        }
+    }
+
+    /// F3b drift 3.5: the textured type map reads its MappingOrigin through
+    /// the same reader as a mapped item. Base honoured only a 3D origin and
+    /// returned `None` (no transform) for a 2D or a wrong-typed one.
+    #[test]
+    fn the_textured_type_map_origin_honours_2d_and_refuses_a_wrong_type() {
+        let content = b"#1=IFCCARTESIANPOINT((10.,20.));\n#2=IFCDIRECTION((0.,1.));\n\
+            #3=IFCAXIS2PLACEMENT2D(#1,#2);\n#4=IFCREPRESENTATIONMAP(#3,#9);\n\
+            #5=IFCREPRESENTATIONMAP(#1,#9);\n#6=IFCREPRESENTATIONMAP($,#9);\n\
+            #10=IFCCARTESIANPOINT((0.,0.));\n#7=IFCAXIS2PLACEMENT2D(#10,$);\n\
+            #8=IFCREPRESENTATIONMAP(#7,#9);";
+        let router = GeometryRouter::with_scale(1.0);
+        let mut decoder = EntityDecoder::new(content);
+        let map = decoder.decode_by_id(4).unwrap();
+        let m = router.type_map_origin(&map, &mut decoder).unwrap().expect("a 2D origin is honoured");
+        assert_eq!((m[(0, 3)], m[(1, 3)], m[(2, 3)]), (10.0, 20.0, 0.0));
+        assert_eq!((m[(0, 0)], m[(1, 0)]), (0.0, 1.0), "X follows RefDirection");
+        // The textured path bakes an identity 2D frame too; the mapped path
+        // keeps its identity shortcut.
+        let map = decoder.decode_by_id(8).unwrap();
+        assert!(router.type_map_origin(&map, &mut decoder).unwrap().is_some());
+        assert!(router.mapping_origin_transform(&map, &mut decoder).unwrap().is_none());
+        // A cartesian point is not an IfcAxis2Placement: an error, not `None`,
+        // counted on the origin record (D3) on both routes, once.
+        assert_eq!(decoder.refused_records(), 0);
+        let map = decoder.decode_by_id(5).unwrap();
+        let message = router.type_map_origin(&map, &mut decoder).unwrap_err().to_string();
+        assert!(message.contains("not an IfcAxis2Placement"), "{message}");
+        assert_eq!(decoder.refused_records(), 1);
+        assert!(router.mapping_origin_transform(&map, &mut decoder).is_err());
+        assert_eq!(decoder.refused_records(), 1, "the same origin, counted once");
+        // `$` stays absent (no transform), as on base.
+        let map = decoder.decode_by_id(6).unwrap();
+        assert!(router.type_map_origin(&map, &mut decoder).unwrap().is_none());
+    }
+}

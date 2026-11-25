@@ -1,0 +1,391 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+import { registryProxy } from './registry-proxy.ts';
+import { viewerAliases } from './vite-aliases';
+import { collectPackageVersions } from './vite-package-versions';
+import { bundleAnalysis } from './vite-bundle-analysis';
+import { legacyManualChunk, preloadHelperChunkGroup, quickjsRuntimeChunkGroup, tslibChunkGroup } from './vite-chunks';
+import { defineConfig, loadEnv } from 'vite';
+import { retainedEngine } from './vite-plugins/retained-engine';
+import react from '@vitejs/plugin-react';
+import Icons from 'unplugin-icons/vite';
+import { FileSystemIconLoader } from 'unplugin-icons/loaders';
+import { optimize } from 'svgo';
+import wasm from 'vite-plugin-wasm';
+import topLevelAwait from 'vite-plugin-top-level-await';
+import path from 'path';
+import fs from 'fs';
+import { cesiumStaticAssets } from './vite-plugins/cesium-assets';
+import { oauthCallbackRoutes } from './vite-plugins/oauth-callback';
+import { viewerHostConfig } from './vite-plugins/viewer-host-config';
+// Same allowlist the production relay uses, so dev and prod cannot disagree
+// about which Dalux node a request reaches (#2792).
+import { daluxRelayRoute } from './vite-plugins/dalux-relay';
+import { bimcollabRelayRoute } from './vite-plugins/bimcollab-relay';
+import { bcfTokenRelayRoute } from './vite-plugins/bcf-token-relay';
+import { buildagilRelayRoute } from './vite-plugins/buildagil-relay';
+import { deploymentAssetsDir } from '../../scripts/lib/deployment-assets-dir.mjs';
+
+// --- Build-time changelog parser ---
+interface ReleaseHighlight {
+  type: 'feature' | 'fix' | 'perf';
+  text: string;
+}
+
+interface PackageRelease {
+  version: string;
+  highlights: ReleaseHighlight[];
+}
+
+interface PackageChangelog {
+  name: string;
+  releases: PackageRelease[];
+}
+
+const SKIP_BOLD_LOWER = new Set([
+  'bug fixes', 'new features', 'performance improvements', 'technical details',
+  'renderer fixes', 'parser fixes', 'viewer integration', 'fixes', 'features',
+  'breaking', 'minor changes', 'patch changes', 'dependencies',
+]);
+function isInternalName(text: string): boolean {
+  // Skip PascalCase single-word class names like "PolygonalFaceSetProcessor"
+  return /^[A-Z][a-zA-Z]+$/.test(text) && !text.includes(' ');
+}
+function categorizeHighlight(text: string): 'feature' | 'fix' | 'perf' {
+  const lower = text.toLowerCase();
+  if (lower.startsWith('fixed ') || lower.startsWith('fix ')) return 'fix';
+  if (
+    lower.includes('performance') || lower.includes('optimiz') ||
+    lower.includes('zero-copy') || lower.includes('faster') ||
+    lower.includes('batch siz')
+  ) return 'perf';
+  return 'feature';
+}
+
+function extractBulletDescription(line: string): string | null {
+  let text = line.replace(/^-\s+/, '');
+
+  // Pattern: "HASH: ### Header" -> skip inline section headers
+  if (/^[a-f0-9]{7,}:\s*###/.test(text)) return null;
+
+  // Pattern: "HASH: feat/fix/perf: DESCRIPTION"
+  const hashPrefixed = text.match(/^[a-f0-9]{7,}:\s*(?:feat|fix|perf|refactor|chore):\s*(.+)$/i);
+  if (hashPrefixed) return hashPrefixed[1].trim();
+
+  // Pattern: "HASH: DESCRIPTION" (without conventional commit prefix)
+  const hashOnly = text.match(/^[a-f0-9]{7,}:\s*(.+)$/);
+  if (hashOnly) return hashOnly[1].trim();
+
+  // Pattern: "[#PR](url) [`hash`](url) Thanks @user! - DESCRIPTION"
+  const prPattern = text.match(/Thanks\s+\[@[^\]]+\]\([^)]+\)!\s*-\s*(.+)$/);
+  if (prPattern) return prPattern[1].trim();
+
+  return null;
+}
+
+function parseChangelogs(): PackageChangelog[] {
+  const packagesDir = path.resolve(__dirname, '../../packages');
+  let dirs: string[];
+  try {
+    dirs = fs.readdirSync(packagesDir);
+  } catch {
+    return [];
+  }
+
+  const MAX_HIGHLIGHTS_PER_VERSION = 12;
+  const result: PackageChangelog[] = [];
+
+  for (const dir of dirs) {
+    const changelogPath = path.join(packagesDir, dir, 'CHANGELOG.md');
+    if (!fs.existsSync(changelogPath)) continue;
+
+    const content = fs.readFileSync(changelogPath, 'utf-8');
+
+    // Read package name from package.json
+    let pkgName = dir;
+    try {
+      const pkgJson = JSON.parse(
+        fs.readFileSync(path.join(packagesDir, dir, 'package.json'), 'utf-8')
+      );
+      pkgName = pkgJson.name || dir;
+    } catch { /* use dir name as fallback */ }
+
+    const seenVersions = new Set<string>();
+    const releases: PackageRelease[] = [];
+
+    // Split into version blocks
+    const versionBlocks = content.split(/^## /m).slice(1);
+
+    for (const block of versionBlocks) {
+      const versionMatch = block.match(/^(\d+\.\d+\.\d+)/);
+      if (!versionMatch) continue;
+      const version = versionMatch[1];
+
+      // Skip duplicate version sections within same file
+      if (seenVersions.has(version)) continue;
+      seenVersions.add(version);
+
+      const highlights = new Map<string, ReleaseHighlight>();
+      const lines = block.split('\n');
+
+      // 1) Extract top-level bullet descriptions (lines starting with "- " at root indent)
+      for (const line of lines) {
+        if (!line.startsWith('- ')) continue;
+        if (line.startsWith('- Updated dependencies')) continue;
+
+        const desc = extractBulletDescription(line);
+        if (desc && desc.length >= 10) {
+          const key = desc.toLowerCase().substring(0, 60);
+          if (!highlights.has(key)) {
+            highlights.set(key, { type: categorizeHighlight(desc), text: desc });
+          }
+        }
+      }
+
+      // 2) Extract bold items as highlights (nested feature names)
+      const boldRegex = /\*\*([^*]+)\*\*/g;
+      let match;
+      while ((match = boldRegex.exec(block)) !== null) {
+        let text = match[1].trim();
+        if (text.endsWith(':')) text = text.slice(0, -1);
+        if (text.includes('@ifc-lite/')) continue;
+        if (SKIP_BOLD_LOWER.has(text.toLowerCase())) continue;
+        if (text.length < 10) continue;
+        if (isInternalName(text)) continue;
+
+        const key = text.toLowerCase().substring(0, 60);
+        if (!highlights.has(key)) {
+          highlights.set(key, { type: categorizeHighlight(text), text });
+        }
+      }
+
+      if (highlights.size > 0) {
+        releases.push({
+          version,
+          highlights: Array.from(highlights.values()).slice(0, MAX_HIGHLIGHTS_PER_VERSION),
+        });
+      }
+    }
+
+    if (releases.length > 0) {
+      result.push({ name: pkgName, releases });
+    }
+  }
+
+  return result.sort((a, b) => {
+    const aTotal = a.releases.reduce((s, r) => s + r.highlights.length, 0);
+    const bTotal = b.releases.reduce((s, r) => s + r.highlights.length, 0);
+    return bTotal - aTotal;
+  });
+}
+
+// Read version from viewer package.json (primary app version) with root fallback
+const viewerPkg = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, './package.json'), 'utf-8')
+);
+const rootPkg = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf-8')
+);
+const appVersion = viewerPkg.version || rootPkg.version;
+// Git commit the bundle was built from, for attributing field perf/regressions
+// to a specific deploy. Vercel sets VERCEL_GIT_COMMIT_SHA, GitHub Actions sets
+// GITHUB_SHA; falls back to 'dev' for local builds.
+const buildSha = (process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || 'dev').slice(0, 12);
+
+export default defineConfig(({ mode }) => {
+  const env = { ...loadEnv(mode, __dirname, ['VITE_RETAINED_GEOMETRY', 'IFCLITE_RETAINED_ENGINE', 'VERCEL', 'VITE_REGISTRY_ENABLED', 'IFC_REGISTRY_TARGET']), ...process.env };
+  // #7955: `on` (retained preview: the retained module is eager), `lazy`
+  // (production opt-in: only a choice and dynamic imports are eager) or off.
+  const retainedMode = env.VITE_RETAINED_GEOMETRY === 'on' || env.VITE_RETAINED_GEOMETRY === 'lazy' ? env.VITE_RETAINED_GEOMETRY : 'off';
+  const retained = {
+    enabled: retainedMode !== 'off',
+    mode: retainedMode === 'lazy' ? 'lazy' : 'on',
+    directory: env.IFCLITE_RETAINED_ENGINE,
+    vercel: env.VERCEL,
+  } as const;
+  return {
+  plugins: [
+    ...(process.env.VITE_BUNDLE_ANALYSIS === '1' ? [bundleAnalysis()] : []),
+    retainedEngine(retained),
+    react(),
+    Icons({
+      compiler: 'jsx',
+      jsx: 'react',
+      customCollections: {
+        viewer: FileSystemIconLoader(path.resolve(__dirname, 'src/icons'), (svg) => {
+          const themedSvg = svg
+            .replaceAll(/#000000\b/gi, 'currentColor')
+            .replaceAll(/#0063b1\b|rgba\(\s*0\s*,\s*99\s*,\s*177\s*,\s*1\s*\)/gi, 'var(--viewer-icon-accent)');
+
+          return optimize(themedSvg, {
+            multipass: true,
+            plugins: [
+              'preset-default',
+              'removeDimensions',
+            ],
+          }).data;
+        }),
+      },
+    }),
+    wasm(),
+    // No vite-plugin-top-level-await here: the target is `esnext`, so top-level
+    // await is emitted natively. The plugin wrapped every chunk with a dynamic
+    // import() in one async function, which the browser parses on the main
+    // thread when it runs, inside the app-start task. The worker build below
+    // keeps it; scripts/check-tla-chunk-await.mjs fails if a chunk evaluated
+    // at app start is wrapped again.
+    cesiumStaticAssets(),
+    oauthCallbackRoutes(),
+    // features.json beside index.html, and the hosted entry when a config URL is set.
+    viewerHostConfig(),
+    // Dalux's API sends no CORS headers, so it must go through a same-origin
+    // relay. Dev runs the SAME handler production does (#2792), rather than a
+    // second proxy config that can drift from it.
+    daluxRelayRoute(),
+    bimcollabRelayRoute(),
+    // buildagil's API and token endpoint send CORS headers only to origins
+    // buildagil allowlisted (not previews or localhost); the
+    // token route forwards grants for the deployment's client (adding a
+    // secret server-side only for a confidential one).
+    buildagilRelayRoute(),
+    // Confidential-client token exchange for BIMcollab (#4919): the same
+    // handler as api/bcf/oauth/token.ts, secret from .env.local or the shell.
+    bcfTokenRelayRoute(),
+  ],
+  define: {
+    ...(env.VITE_REGISTRY_ENABLED === 'true' ? {
+      'import.meta.env.VITE_REGISTRY_ADDRESS': JSON.stringify(env.IFC_REGISTRY_TARGET || 'http://127.0.0.1:5000'),
+    } : {}),
+    __APP_VERSION__: JSON.stringify(appVersion),
+    __BUILD_SHA__: JSON.stringify(buildSha),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+    __RELEASE_HISTORY__: JSON.stringify(parseChangelogs()),
+    __PACKAGE_VERSIONS__: JSON.stringify(collectPackageVersions(path.resolve(__dirname, '../../packages'))),
+    CESIUM_BASE_URL: JSON.stringify('/cesium'),
+  },
+  resolve: {
+    alias: { ...viewerAliases, '@ifc-lite/viewer-retained': path.resolve(__dirname, `src/lib/retained/${{ on: 'index.ts', lazy: 'lazy.tsx', off: 'off.ts' }[retainedMode]}`) },
+  },
+  server: {
+    port: 3000,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      // Allows third-party no-cors resources like Stripe.js while preserving
+      // cross-origin isolation in modern browsers.
+      'Cross-Origin-Embedder-Policy': 'credentialless',
+    },
+    fs: {
+      allow: ['../..'],
+    },
+    proxy: {
+      ...(env.VITE_REGISTRY_ENABLED === 'true' ? registryProxy(env.IFC_REGISTRY_TARGET || 'http://127.0.0.1:5000') : {}),
+      '/api/autodesk': { target: 'http://127.0.0.1:3002', changeOrigin: false },
+      '/api/chat': {
+        // Single API source of truth lives at repo-root `api/chat.ts`.
+        // For local dev, run `pnpm dev:api` from repo root.
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/api/bsdd': {
+        target: 'https://api.bsdd.buildingsmart.org',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/bsdd/, ''),
+      },
+    },
+  },
+  build: {
+    target: 'esnext',
+    assetsDir: deploymentAssetsDir(process.env.VERCEL_DEPLOYMENT_ID, process.env.VERCEL_SKEW_PROTECTION_ENABLED), // #4886
+    chunkSizeWarningLimit: 6000,
+    // Opt-in production source maps for PostHog error tracking: without them every
+    // captured stack frame is minified soup ("Could not find sourcemap for source url").
+    //
+    // Gated on VITE_SOURCEMAP rather than always-on for two reasons: rollup's
+    // map generation for this bundle costs real build time and memory, and the
+    // Vercel builder is already tight enough that the WASM link has OOM'd it
+    // before. scripts/vercel-build.sh turns this on only when a PostHog CLI key
+    // is present - i.e. only when the maps will actually be uploaded and then
+    // deleted from the output. Declared in turbo.json's build `env` so toggling
+    // it busts the task cache instead of restoring a map-less dist.
+    sourcemap: process.env.VITE_SOURCEMAP === '1',
+    rollupOptions: {
+      // @ifc-lite/geometry's NativeBridge does a dynamic `import('@tauri-apps/api/event')`
+      // (under isTauri(), never reached on web). Rollup still resolves it
+      // statically, so externalize it to prevent a build failure. ifc-lite no
+      // longer ships a desktop app; downstream desktop builders supply
+      // @tauri-apps in their own host layer.
+      external: ['@tauri-apps/api/event'],
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        // E2E-only, not linked from the app UI: reads the laz-perf wasm
+        // asset pipeline through the real build so
+        // tests/e2e/laz-wasm.e2e.spec.ts can assert it end to end (#2097).
+        lazProbe: path.resolve(__dirname, 'laz-probe.html'),
+      },
+      output: {
+        // Rolldown's legacy `manualChunks` pulls every dependency of a chunk's
+        // modules into that chunk. packages/export -> packages/parser ->
+        // @ifc-lite/ifcx therefore dragged the IFCX parser entry points and the
+        // generated imported-geometry kernel (~600 KB) into the eager
+        // 'exporters' chunk. The higher-priority group below claims them first,
+        // without recursion, so they stay a lazy chunk reached only through the
+        // dynamic imports of '@ifc-lite/ifcx' (eager code uses the lightweight
+        // ifcx modules: types, composition, provenance, appearance-wire,
+        // detect-format). The QuickJS runtime group does the same for the
+        // 'sandbox' chunk (#9200). All other chunks keep the previous recursive
+        // behaviour.
+        codeSplitting: {
+          groups: [
+            {
+              name: 'ifcx-parser',
+              priority: 100,
+              includeDependenciesRecursively: false,
+              test: /\/packages\/ifcx\/src\/(index|imported-[^/]*|geometry-extractor|pointcloud-extractor|generated\/[^/]*)\.(ts|js)$/,
+            },
+            tslibChunkGroup,
+            quickjsRuntimeChunkGroup,
+            preloadHelperChunkGroup,
+            {
+              name: legacyManualChunk,
+              priority: 0,
+            },
+          ],
+        },
+      },
+    },
+  },
+  optimizeDeps: {
+    exclude: [
+      '@duckdb/duckdb-wasm',
+      '@ifc-lite/wasm',
+      'parquet-wasm',
+      'quickjs-emscripten',
+      '@jitl/quickjs-wasmfile-release-asyncify',
+      'esbuild-wasm',
+      // Pre-bundling missed it at startup and found it on the first model load,
+      // then reloaded the page mid-session (dev only; validation-colors e2e).
+      // Excluded, not included: the browser entry is one ESM file whose wasm the
+      // worker locates by URL, as with the emscripten builds above.
+      'rhino3dm',
+      // maplibre-gl v6 resolves its worker as a SIBLING FILE of its own module:
+      //
+      //   new URL(`./maplibre-gl-worker.mjs`, import.meta.url)
+      //
+      // Pre-bundling rewrites that module into node_modules/.vite/deps/, where
+      // no such sibling exists, so the worker 404s. Nothing throws: the style,
+      // the sprite and the TileJSON are all fetched on the main thread, the
+      // canvas and the marker paint, and only the vector tiles (parsed in the
+      // worker) never arrive. The minimap renders as an empty background with
+      // an attribution line, which reads as "no data here" rather than a bug.
+      // v5 inlined its worker as a blob, so this could not happen before.
+      'maplibre-gl',
+    ],
+  },
+  worker: {
+    format: 'es',
+    plugins: () => [retainedEngine(retained), wasm(), topLevelAwait()],
+  },
+  };
+});
