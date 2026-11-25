@@ -1,0 +1,77 @@
+{
+  "scope": "native process_geometry, not browser worker-pool or visible-frame latency",
+  "source_files": {
+    "house": {
+      "path": "F:\\Steel\\VBA\\IFC-Lite-Core104\\tests\\models\\ara3d\\AC20-FZK-Haus.ifc",
+      "sha256": "d42ab0dee01173106c16cd823b4614efe188fa15dd65195d95b9879bec59acc5"
+    },
+    "voids": {
+      "path": "F:\\Steel\\VBA\\IFC-Lite-Core104\\tests\\models\\ara3d\\ISSUE_129_N1540_17_EXE_MOD_448200_02_09_11SMC_IGC_V17.ifc",
+      "sha256": "ffdfa9a91ac6a6c301d7da0d7861dfbc3958ceb55098c143a560468702642131"
+    }
+  },
+  "fixtures": {
+    "house": {
+      "base": {
+        "parseMs": 6.0,
+        "geometryMs": 9.0,
+        "totalMs": 15.0,
+        "medianFullWallMs": 17.09355
+      },
+      "branch": {
+        "parseMs": 5.0,
+        "geometryMs": 9.0,
+        "totalMs": 14.0,
+        "medianFullWallMs": 16.7855
+      },
+      "orderedMeshPayloadIdentity": true,
+      "fingerprints": [
+        "c4d504b83ff698ea"
+      ],
+      "counts": [
+        [
+          285,
+          35940,
+          20322
+        ]
+      ],
+      "deltaPercent": {
+        "parseMs": -16.666666666666668,
+        "geometryMs": 0.0,
+        "totalMs": -6.666666666666667,
+        "medianFullWallMs": -1.8021417435231504
+      }
+    },
+    "voids": {
+      "base": {
+        "parseMs": 21.0,
+        "geometryMs": 1387.0,
+        "totalMs": 1409.0,
+        "medianFullWallMs": 1449.1031
+      },
+      "branch": {
+        "parseMs": 20.0,
+        "geometryMs": 1362.5,
+        "totalMs": 1383.5,
+        "medianFullWallMs": 1410.8795
+      },
+      "orderedMeshPayloadIdentity": true,
+      "fingerprints": [
+        "ff42e1a3f7fcf540"
+      ],
+      "counts": [
+        [
+          1402,
+          219999,
+          136807
+        ]
+      ],
+      "deltaPercent": {
+        "parseMs": -4.761904761904762,
+        "geometryMs": -1.7664023071377073,
+        "totalMs": -1.8097941802696949,
+        "medianFullWallMs": -2.6377419246429072
+      }
+    }
+  }
+}
