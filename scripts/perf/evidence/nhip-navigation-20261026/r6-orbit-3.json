@@ -1,0 +1,294 @@
+{
+  "label": "qualified-orbit-3",
+  "profiled": false,
+  "zoomFactor": 0.15,
+  "gpuTiming": false,
+  "at": "2026-10-26T12:55:32.081Z",
+  "tests": [
+    {
+      "gesture": "orbit",
+      "durationMs": 8038.914999999106,
+      "rafFps": 116.57472084651101,
+      "renderedFps": 116.3092282976128,
+      "rafIntervals": {
+        "n": 936,
+        "mean": 8.578189102564162,
+        "p50": 8.334999999962747,
+        "p95": 12.53000000002794,
+        "p99": 16.70499999995809,
+        "max": 133.27499999990687,
+        "over25": 1,
+        "over50": 1,
+        "over100": 1
+      },
+      "renderIntervals": {
+        "n": 934,
+        "mean": 8.587821199141873,
+        "p50": 7.1500000059604645,
+        "p95": 14.554999999701977,
+        "p99": 17.799999997019768,
+        "max": 133.2199999988079,
+        "over25": 1,
+        "over50": 1,
+        "over100": 1
+      },
+      "textureCall": {
+        "n": 935,
+        "mean": 0.01888770048312325,
+        "p50": 0.019999995827674866,
+        "p95": 0.0299999937415123,
+        "p99": 0.03500000387430191,
+        "max": 0.11000000685453415,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "longTasks": {
+        "n": 1,
+        "mean": 129,
+        "p50": 129,
+        "p95": 129,
+        "p99": 129,
+        "max": 129,
+        "over25": 1,
+        "over50": 1,
+        "over100": 1
+      },
+      "renderCpu": {
+        "n": 935,
+        "mean": 4.270834224475896,
+        "p50": 3.935000002384186,
+        "p95": 5.754999995231628,
+        "p99": 6.754999995231628,
+        "max": 120.95499999821186,
+        "over25": 1,
+        "over50": 1,
+        "over100": 1
+      },
+      "pickCpu": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "restoreCpu": {
+        "n": 937,
+        "mean": 0.1611632870365105,
+        "p50": 0.1600000038743019,
+        "p95": 0.3049999997019768,
+        "p99": 0.3399999961256981,
+        "max": 0.7700000032782555,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "restoredBatches": 195,
+      "pickPhases": {},
+      "gpuMs": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "gpuErrors": [],
+      "candidates": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "exhaustivePicks": 0,
+      "throttles": {
+        "0": 934,
+        "128.9699999988079": 1
+      },
+      "inputDelay": {
+        "n": 252,
+        "mean": 5.320674603154498,
+        "p50": 4.295000001788139,
+        "p95": 11.314999997615814,
+        "p99": 14.905000001192093,
+        "max": 112.91499999910593,
+        "over25": 1,
+        "over50": 1,
+        "over100": 1
+      },
+      "passes": {
+        "main": 935
+      },
+      "stats": {
+        "frame": {
+          "drawCalls": 703,
+          "batchesDrawn": 378,
+          "batchesFrustumCulled": 981,
+          "batchesContributionCulled": 0,
+          "batchesNotResident": 25,
+          "batchesAtLod1": 43,
+          "instancedDrawn": 325,
+          "instancedFrustumCulled": 4809,
+          "instancedContributionCulled": 1814,
+          "timestamp": 719105.6049999967
+        },
+        "gpu": {
+          "batches": 2126574144,
+          "meshes": 0,
+          "textured": 0,
+          "instanced": 57893232,
+          "total": 2184467376
+        },
+        "cpuBytes": 3985385412
+      },
+      "pose": {
+        "position": {
+          "x": 1244.9590654804304,
+          "y": 1090.2708913492459,
+          "z": -109.6288576583313
+        },
+        "target": {
+          "x": 323.15025311516365,
+          "y": 34.94386291503906,
+          "z": -214.09075471421238
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialPose": {
+        "position": {
+          "x": 1179.159459224994,
+          "y": 748.2848680065644,
+          "z": 641.918451395618
+        },
+        "target": {
+          "x": 323.15025311516365,
+          "y": 34.94386291503906,
+          "z": -214.09075471421238
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialRotation": {
+        "azimuth": 45,
+        "elevation": 30.508958866202807
+      },
+      "finalRotation": {
+        "azimuth": 83.53466736153632,
+        "elevation": 48.68218833831267
+      }
+    }
+  ],
+  "before": {
+    "loading": false,
+    "streaming": false,
+    "fastView": false,
+    "activeTool": "select",
+    "stats": {
+      "frame": {
+        "drawCalls": 633,
+        "batchesDrawn": 350,
+        "batchesFrustumCulled": 1034,
+        "batchesContributionCulled": 0,
+        "batchesNotResident": 0,
+        "batchesAtLod1": 33,
+        "instancedDrawn": 283,
+        "instancedFrustumCulled": 4987,
+        "instancedContributionCulled": 1678,
+        "timestamp": 707645.8900000006
+      },
+      "gpu": {
+        "batches": 2144592652,
+        "meshes": 0,
+        "textured": 0,
+        "instanced": 57893232,
+        "total": 2202485884
+      },
+      "cpuBytes": 3985385412
+    },
+    "pose": {
+      "position": {
+        "x": 1220.9629506697825,
+        "y": 1115.5679372615139,
+        "z": -190.7909373955935
+      },
+      "target": {
+        "x": 323.15025311516365,
+        "y": 34.94386291503906,
+        "z": -214.09075471421238
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 61.02769321852222
+    },
+    "canvas": [
+      {
+        "rect": {
+          "x": 1384,
+          "y": 823.3333740234375,
+          "width": 315.3333435058594,
+          "height": 180,
+          "top": 823.3333740234375,
+          "right": 1699.3333435058594,
+          "bottom": 1003.3333740234375,
+          "left": 1384
+        },
+        "w": 473,
+        "h": 270
+      },
+      {
+        "rect": {
+          "x": 0,
+          "y": 40.66666793823242,
+          "width": 1376,
+          "height": 891.3333740234375,
+          "top": 40.66666793823242,
+          "right": 1376,
+          "bottom": 932.0000419616699,
+          "left": 0
+        },
+        "w": 2064,
+        "h": 1337,
+        "viewport": "main"
+      }
+    ],
+    "view": {
+      "width": 1440,
+      "height": 960,
+      "dpr": 1.5,
+      "visibility": "visible"
+    },
+    "ui": "File\nHome\nView\nElements\nAnalyze\nAuthor\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nSORT: ELEVATION\nHIERARCHY\n4\n\nTekla Structures Project Name\n+0.00m\n\nIfcSite\n+0.00m\n\nIfcBuilding\n+0.00m\n\nIfcBuildingStorey\n+0.00m\nCLICK TO SELECT · CTRL TOGGLE\nNHIP CHINH.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n123.97 MB\nLoaded At\n10/26/26, 7:43:46 PM\nParse Time\n427,067 ms\nLENGTH UNIT\nMillimeters (0.001)\nPROJECT INFORMATION\nName\nTekla Structures Project Name\nGlobalId\n0Xyj1ZQLDAse1KMvAiP3ya\nSTATISTICS\nTotal Entities\n231,608\nBuilding Storeys\n1\nElements with Geometry\n134,522\nMax Express ID\n1,205,636\nCLASSIFICATION SYSTEMS\nNo classification systems\nEPSG:4326\nLegacy IfcSite geolocation\nEPSG\nPROJECTED CRS\nEPSG:4326\nCOORDINATE OPERATION\nE 0 N 0\nLOCATION\n0.00000, 0.00000\n© OpenStreetMap contributors © CARTO\nClick map to place pin\nGoogle Maps\nOpenStreetMap\nGoogle Earth\nToggle style\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n13.2m\nX\nZ\nY\nReady\n134.5K elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+  },
+  "settled": {
+    "queued": false,
+    "finalizing": false,
+    "fragments": false
+  }
+}
