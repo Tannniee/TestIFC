@@ -1,0 +1,3 @@
+[
+  {"path":"F:/Steel/VBA/IFC-Lite-Core104/tests/models/ara3d/ISSUE_129_N1540_17_EXE_MOD_448200_02_09_11SMC_IGC_V17.ifc","fileMb":11.473,"entities":202661,"meshes":1402,"vertices":219999,"triangles":136807,"indexBuildMs":9.46,"parseMs":20,"entityScanMs":16,"lookupMs":0,"preprocessMs":0,"geometryMs":1357,"facetedBrepMs":0,"totalMs":1378,"allTotalsMs":[1404, 1383, 1381, 1400, 1378],"allWallMs":[1412.6046999999999, 1391.8957, 1389.5536, 1409.1543, 1387.6699],"pointCacheHits":223090,"pointCacheMisses":27874,"csgFailures":41,"degenerateDropped":6,"meshFingerprintsFnv1a64":["ff42e1a3f7fcf540", "ff42e1a3f7fcf540", "ff42e1a3f7fcf540", "ff42e1a3f7fcf540", "ff42e1a3f7fcf540"]}
+]
