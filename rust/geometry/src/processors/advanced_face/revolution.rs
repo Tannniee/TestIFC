@@ -1,0 +1,234 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! IfcSurfaceOfRevolution tessellation by sweeping the generator profile.
+
+use crate::placement::{Axis1Placement, Axis2Placement};
+use crate::{scale_segments, Point3, Result, TessellationQuality};
+use ifc_lite_core::{slot, DecodedEntity, EntityDecoder};
+
+use super::edge_loop::extract_edge_loop_points_for_bounds;
+use super::bounds::{note_face_refused, noting_refusal};
+use super::curves::{resolve_present, Refused};
+use super::polyline::try_sample_curve_polyline;
+use super::surfaces::lower_planar;
+use super::plan::FaceGeometry;
+use super::analytic_plan::RevolutionPlan;
+
+/// The face's refusal (#7687), counted (D3).
+fn refused(face: &DecodedEntity) -> crate::Error {
+    note_face_refused(&face.ifc_type);
+    crate::Error::geometry(format!(
+        "surface of revolution face #{} has data that does not resolve; refusing the face",
+        face.id
+    ))
+}
+
+/// [`resolve_present`] for this face: a dangling reference refuses it.
+fn present(
+    face: &DecodedEntity,
+    attr: Option<&ifc_lite_core::AttributeValue>,
+    decoder: &mut EntityDecoder,
+) -> Result<Option<DecodedEntity>> {
+    resolve_present(attr, decoder).map_err(|Refused| refused(face))
+}
+
+/// Tessellate an `IfcSurfaceOfRevolution` face by sweeping its profile curve
+/// around the axis through the angular extent recovered from the face's edge
+/// loops. Falls back to the planar boundary approximation when the profile
+/// samples fewer than two points; unreadable data refuses the face.
+pub(super) fn lower_revolution(
+    face: &DecodedEntity,
+    surface: &DecodedEntity,
+    decoder: &mut EntityDecoder,
+    quality: TessellationQuality,
+    rtc: (f64, f64, f64),
+) -> Result<FaceGeometry> {
+    use nalgebra::Vector3;
+    use std::f64::consts::TAU;
+
+    let swept = present(face, surface.get(slot::IfcSweptSurface::SWEPT_CURVE.index()), decoder)?;
+    // IfcSurfaceOfRevolution inherits Position (optional IfcAxis2Placement3D)
+    // at slot 1 from IfcSweptSurface, and AxisPosition (IfcAxis1Placement) is
+    // its own attribute at slot 2. Reading slot 1 as the axis got the
+    // (usually null) Position, leaving axis_origin at the (0,0,0) fallback
+    // and collapsing the angular-extent calculation, the real cause of
+    // issue #674's "stem in wrong direction" defect. Position itself is
+    // applied below, once the profile is sampled.
+    // AxisPosition is mandatory. A `$`, `*`, absent or non-reference one used
+    // to revolve about the origin and +Z, an axis the file never gave; it
+    // refuses the face and counts the surface record (D3, D30), as a `$`
+    // mandatory placement Location does.
+    let Some(ap) = present(face, surface.get(slot::IfcSurfaceOfRevolution::AXIS_POSITION.index()), decoder)? else {
+        let _counted = decoder.refuse_malformed(surface.id);
+        return Err(refused(face));
+    };
+
+    // IfcAxis1Placement: 0=Location, 1=Axis(Direction). It is read whole and
+    // a read that fails refuses the face: every part used to be swallowed
+    // (`.ok()`), turning an unreadable Location into the origin and an
+    // unreadable Axis into +Z (PROC-S7, PROC-S9). A missing Axis is the IFC
+    // derived default +Z (§3.12); a zero one has no direction and takes the
+    // same default, as before. Ratios whose squared length overflows are
+    // rescaled first, so they keep their direction rather than normalising
+    // to a zero axis.
+    let axis1 = noting_refusal(face, Axis1Placement::read(&ap, decoder).map_err(Into::into))?;
+    let mut axis_dir = Vector3::from(crate::math::v3::unoverflowed(axis1.axis_or_ifc_default()))
+        .try_normalize(1e-12)
+        .unwrap_or_else(|| Vector3::new(0.0, 0.0, 1.0));
+    let mut axis_origin = Point3::from(axis1.location);
+
+    // Sample the generator profile curve. A profile whose data does not read
+    // refuses the face (#7687): the planar fallback below would draw the
+    // boundary's flat polygon in place of the curved surface. It stays for
+    // profiles this sampler does not support, which sample empty.
+    let profile = match swept {
+        Some(s) if s.ifc_type.as_str().eq_ignore_ascii_case("IFCARBITRARYOPENPROFILEDEF") => {
+            // Attribute 2 is the curve.
+            match present(face, s.get(slot::IfcArbitraryOpenProfileDef::CURVE.index()), decoder)? {
+                Some(curve) => try_sample_curve_polyline(&curve, decoder, quality),
+                None => Ok(Vec::new()),
+            }
+        }
+        Some(s) => try_sample_curve_polyline(&s, decoder, quality),
+        None => Ok(Vec::new()),
+    };
+    let mut profile_pts = profile.map_err(|Refused| refused(face))?;
+
+    if profile_pts.len() < 2 {
+        return lower_planar(face, decoder, quality, Some(rtc));
+    }
+
+    // SweptCurve and AxisPosition are both given in Position's frame
+    // (IfcSweptSurface.Position, optional since IFC4); it was ignored, so a
+    // populated Position misplaced the surface (#7687, PROC-S24). The face's
+    // bounds are already in the outer frame, so only the profile and axis
+    // move. A null Position leaves both untouched, bit for bit.
+    if let Some(position) = present(face, surface.get(slot::IfcSweptSurface::POSITION.index()), decoder)? {
+        let frame = noting_refusal(
+            face,
+            Axis2Placement::read_3d(&position, decoder).map(|p| p.matrix()).map_err(Into::into),
+        )?;
+        for p in &mut profile_pts {
+            *p = frame.transform_point(p);
+        }
+        axis_origin = frame.transform_point(&axis_origin);
+        axis_dir = frame.transform_vector(&axis_dir);
+    }
+
+    // Build an orthonormal basis (axis_x, axis_y, axis_dir).
+    let ref_dir = if axis_dir.x.abs() < 0.9 {
+        Vector3::new(1.0, 0.0, 0.0)
+    } else {
+        Vector3::new(0.0, 1.0, 0.0)
+    };
+    let axis_x = (ref_dir - axis_dir * ref_dir.dot(&axis_dir))
+        .try_normalize(1e-12)
+        .unwrap_or_else(|| Vector3::new(1.0, 0.0, 0.0));
+    let axis_y = axis_dir.cross(&axis_x);
+
+    // Determine angular extent from the boundary edge points. We project each
+    // boundary point's radial vector to a [0, TAU) angle, then find the
+    // *largest gap* between sorted angles — the face occupies the complement.
+    // This robustly handles faces that straddle the θ=π discontinuity (e.g.
+    // a fillet at θ=−π/2..π) where naive min/max gives 3π/2 instead of π/2.
+    let boundary = extract_edge_loop_points_for_bounds(face, decoder, quality)?;
+    let (a_min, span) = angular_extent(&boundary, axis_origin, axis_x, axis_y);
+    let n_angle = scale_segments((span / (TAU / 36.0)).ceil() as usize, 4, 48, quality);
+
+    // Preserve the profile's (rx, ry) — issue #674: collapsing to radius
+    // mirrored profiles on the −axis_x half to the +axis_x side, drifting
+    // door-handle SoR bulbs 180° away from their bar.
+    let local_profile: Vec<(f64, f64, f64)> = profile_pts
+        .iter()
+        .map(|p| {
+            let r = p - axis_origin;
+            (r.dot(&axis_x), r.dot(&axis_y), r.dot(&axis_dir))
+        })
+        .collect();
+
+    // Per IFC 4.3 IfcSurfaceOfRevolution: S(u, v) = R(v) * (SweptCurve(u) -
+    // AxisPosition.Location) + AxisPosition.Location, with v ∈ [0, 2π].
+    // R(0) = identity, so the swept curve is its *natural* position at v=0.
+    //
+    // `(a_min, span)` here is the angular range of the FACE BOUNDARY POINTS
+    // around the axis (computed by largest-gap detection above). For a
+    // planar profile, every profile point shares the same natural angle
+    // (the angle of the profile-plane around the axis), so the boundary
+    // angle of a point at parameter v on the swept curve is
+    //   boundary_angle = natural_angle + v
+    // and the v-range we actually need to sweep is
+    //   v ∈ [a_min − natural_angle, a_min − natural_angle + span].
+    //
+    // The previous fix dropped `a_min` and swept v ∈ [0, span] starting at
+    // the natural position — correct only when a_min happens to coincide
+    // with natural_angle. Door-handle bends (a_min = π/2, natural_angle =
+    // π) regressed: the bulb pivoted to the opposite quadrant, producing
+    // the "stem in wrong direction" defect issue #674 #674 reopened.
+    // Pick the first profile point that's clearly off-axis. atan2(0, 0)
+    // returns 0 even though the natural angle is undefined for a point
+    // sitting on the rotation axis, so a profile that starts on-axis (a
+    // common case for partial SoR faces where the profile touches the
+    // axis at one end) would skew the entire sweep by a wrong constant
+    // offset — Codex P1 on PR #799 follow-up.
+    let natural_angle = local_profile
+        .iter()
+        .find(|&&(rx, ry, _)| rx.hypot(ry) > 1e-9)
+        .map(|&(rx, ry, _)| ry.atan2(rx))
+        .unwrap_or(0.0);
+
+    Ok(FaceGeometry::Revolution(RevolutionPlan { axis_origin, axis_x, axis_y,
+        axis_dir, local_profile, n_angle, a_min, span, natural_angle, rtc }))
+}
+
+fn angular_extent(boundary: &[Point3<f64>], axis_origin: Point3<f64>,
+    axis_x: nalgebra::Vector3<f64>, axis_y: nalgebra::Vector3<f64>) -> (f64, f64) {
+    use std::f64::consts::TAU;
+    if boundary.is_empty() {
+        (0.0, TAU)
+    } else {
+        let mut angles: Vec<f64> = boundary
+            .iter()
+            .map(|p| {
+                let v = p - axis_origin;
+                let mut a = v.dot(&axis_y).atan2(v.dot(&axis_x));
+                if a < 0.0 {
+                    a += TAU;
+                }
+                a
+            })
+            .collect();
+        angles.sort_by(|a, b| crate::cmp_f64_nan_last(*a, *b)); // #7674
+        angles.dedup_by(|a, b| (*a - *b).abs() < 1e-6);
+
+        if angles.len() < 2 {
+            (0.0, TAU)
+        } else {
+            let n = angles.len();
+            let mut max_gap = 0.0;
+            let mut max_gap_idx = 0usize;
+            for i in 0..n {
+                let next = if i + 1 < n { angles[i + 1] } else { angles[0] + TAU };
+                let gap = next - angles[i];
+                if gap > max_gap {
+                    max_gap = gap;
+                    max_gap_idx = i;
+                }
+            }
+            // The face occupies the complement of the largest gap. If the
+            // boundary samples are all on one side, the largest gap is on the
+            // other side, and the face spans angles[(idx+1)%n] → angles[idx]+TAU.
+            let start = angles[(max_gap_idx + 1) % n];
+            let end_raw = angles[max_gap_idx];
+            let end = if end_raw < start { end_raw + TAU } else { end_raw };
+            let s = end - start;
+            // If the gap is near zero or full, treat it as a full revolution.
+            if s < 1e-6 || s > TAU - 1e-6 {
+                (0.0, TAU)
+            } else {
+                (start, s)
+            }
+        }
+    }
+}

@@ -1,0 +1,135 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * Compress an IFC source into the blocks {@link BlockStore} reads (#2183).
+ *
+ * Kept as a plain function rather than living inside the worker so it is
+ * directly testable and so the swap can be exercised synchronously in tests
+ * without a Worker at all. The worker is a thin shell around this.
+ */
+
+import { deflateSync } from 'fflate';
+
+import { DEFAULT_BLOCK_SIZE, type BlockedPayload } from './block-store.js';
+
+/**
+ * Deflate level.
+ *
+ * 6 rather than 4: measured on the reference model it costs ~1.2 s more of
+ * one-time worker CPU and returns 2 MB, and this runs off the main thread
+ * while the viewer is already interactive. Level 9 is not worth measuring --
+ * deflate's tail is famously poor value and the input is already at 19.7%.
+ */
+const DEFLATE_LEVEL = 6;
+
+export interface CompressedSource extends BlockedPayload {
+  /**
+   * FNV-1a over the whole source.
+   *
+   * Computed HERE, during the same pass, not lazily like the contiguous
+   * accessor's. A blocked source cannot hash itself without inflating
+   * everything, so the key has to be taken while the bytes are still
+   * contiguous -- which is why the `blocked` arm of `IfcSourceTransfer`
+   * declares it required rather than nullable.
+   */
+  contentKey: string;
+}
+
+/** Must match `fnv1a` in source-bytes.ts, or the key changes across a swap. */
+function fnv1a(bytes: Uint8Array): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < bytes.length; i++) {
+    h ^= bytes[i];
+    h = Math.imul(h, 0x01000193);
+  }
+  return `${bytes.length.toString(16)}-${(h >>> 0).toString(16)}`;
+}
+
+/**
+ * Split `source` into fixed-size blocks and deflate each one.
+ *
+ * A block is stored verbatim when deflating it does not shrink it. STEP files
+ * embed already-compressed payloads (base64 textures, for one), and without
+ * this a pathological source could compress to LARGER than it started -- which
+ * would make the whole feature impossible to gate on size honestly.
+ */
+export function compressSource(
+  source: Uint8Array,
+  blockSize: number = DEFAULT_BLOCK_SIZE,
+): CompressedSource {
+  // Integer, finite, positive. A fractional size corrupts silently rather than
+  // failing: this function slices at `i * blockSize` (truncated by subarray)
+  // while BlockStore maps offsets with Math.floor(start / blockSize), so the
+  // two disagree and reads come back wrong with no error anywhere.
+  if (!Number.isInteger(blockSize) || blockSize <= 0) {
+    throw new Error(`compressSource: blockSize must be a positive integer, got ${blockSize}`);
+  }
+
+  const totalLength = source.byteLength;
+  const blockCount = Math.ceil(totalLength / blockSize);
+  const index = new Uint32Array(blockCount + 1);
+  const storedMask = new Uint8Array(blockCount);
+  const parts: Uint8Array[] = [];
+
+  let written = 0;
+  for (let i = 0; i < blockCount; i++) {
+    const start = i * blockSize;
+    const raw = source.subarray(start, Math.min(start + blockSize, totalLength));
+    const deflated = deflateSync(raw, { level: DEFLATE_LEVEL });
+
+    index[i] = written;
+    if (deflated.byteLength < raw.byteLength) {
+      parts.push(deflated);
+      written += deflated.byteLength;
+    } else {
+      // Verbatim. Copied, because `raw` is a view into the caller's buffer and
+      // the whole point is that the caller's buffer becomes collectable.
+      const copy = new Uint8Array(raw.byteLength);
+      copy.set(raw);
+      parts.push(copy);
+      storedMask[i] = 1;
+      written += copy.byteLength;
+    }
+  }
+  index[blockCount] = written;
+
+  const blocks = new Uint8Array(written);
+  let at = 0;
+  for (const part of parts) {
+    blocks.set(part, at);
+    at += part.byteLength;
+  }
+
+  return {
+    blocks,
+    index,
+    storedMask,
+    blockSize,
+    totalLength,
+    contentKey: fnv1a(source),
+  };
+}
+
+/**
+ * Whether compressing `byteLength` is worth it.
+ *
+ * The win scales with size but the risk surface (LRU, stitching, the swap,
+ * a worker) is constant, so there is a floor below which this is all cost.
+ *
+ * 32 MiB, lowered from 150 MiB when the viewer started compacting sources. The
+ * old floor was chosen to keep the viewer's IndexedDB-restored source (a plain
+ * ArrayBuffer, structured-cloned into the worker) out of scope. The viewer no
+ * longer persists the source; a fresh parse hands the worker the
+ * SharedArrayBuffer the load already holds (no copy), and a cache restore pays
+ * one transient clone of the freshly read file into the worker. Federations
+ * are the case the old floor missed: seven typical 100-150 MB models kept every
+ * source resident while a single 343 MB model compressed. At 32 MiB a model
+ * returns roughly 25 MB or more, for one worker deflate after load.
+ */
+export const COMPRESSION_MIN_BYTES = 32 * 1024 * 1024;
+
+export function shouldCompressSource(byteLength: number): boolean {
+  return byteLength >= COMPRESSION_MIN_BYTES;
+}

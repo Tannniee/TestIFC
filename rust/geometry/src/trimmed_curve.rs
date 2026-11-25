@@ -1,0 +1,166 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! IFC interpretation of trimmed lines and circles, shared by analytic source
+//! descriptions and sampled mesh directrices. Sampling remains consumer-owned.
+
+use crate::curve_source::{
+    circle_basis, line_basis, mesh_line_basis, trim_angle, trim_point, CartesianTrimRead,
+};
+use crate::Result;
+use ifc_lite_core::{AttributeValue, DecodedEntity, EntityDecoder, IfcType};
+use std::f64::consts::TAU;
+
+#[derive(Clone, Copy)]
+pub(crate) enum TrimRecovery {
+    /// Analytic descriptions require both authored bounds and reject a zero arc.
+    RequireBoth,
+    /// The mesh path historically recovers absent bounds from the basis domain
+    /// and retains the authored span for invalid cyclically equal bounds.
+    BasisDefaults,
+    /// Profile leaves recover absent bounds but never ignore an authored invalid
+    /// CartesianPoint (#7779). This does not change other mesh consumers.
+    BasisDefaultsStrictPoints,
+}
+
+pub(crate) enum TrimmedPrimitive {
+    Line {
+        start: [f64; 3],
+        end: [f64; 3],
+    },
+    Circle {
+        center: [f64; 3],
+        normal: [f64; 3],
+        x_axis: [f64; 3],
+        y_axis: [f64; 3],
+        radius: f64,
+        start_angle: f64,
+        sweep_angle: f64,
+    },
+}
+
+/// Trim1 is the first point of the resulting curve even when SenseAgreement is
+/// false. On a line, false sense is encoded by descending basis parameters;
+/// reversing the selected points would contradict IFC4.3 IfcTrimmedCurve.
+pub(crate) fn decode_trimmed_primitive(
+    trimmed: &DecodedEntity,
+    basis: &DecodedEntity,
+    decoder: &mut EntityDecoder,
+    recovery: TrimRecovery,
+) -> Result<Option<TrimmedPrimitive>> {
+    let cartesian = trimmed.get(4).and_then(AttributeValue::as_enum) == Some("CARTESIAN");
+    let sense = trimmed.get_bool(3).unwrap_or(true);
+    let point_policy = match recovery {
+        TrimRecovery::RequireBoth => CartesianTrimRead::RequireValid,
+        TrimRecovery::BasisDefaults => CartesianTrimRead::RecoverInvalid,
+        TrimRecovery::BasisDefaultsStrictPoints => CartesianTrimRead::CanonicalLeaf,
+    };
+    match basis.ifc_type {
+        IfcType::IfcLine => {
+            let (origin, direction) = match recovery {
+                TrimRecovery::RequireBoth => line_basis(basis, decoder)?,
+                TrimRecovery::BasisDefaults | TrimRecovery::BasisDefaultsStrictPoints => {
+                    mesh_line_basis(basis, decoder)?
+                }
+            };
+            let first = trim_point(
+                trimmed.get(1),
+                origin,
+                direction,
+                cartesian,
+                point_policy,
+                decoder,
+            )?;
+            let second = trim_point(
+                trimmed.get(2),
+                origin,
+                direction,
+                cartesian,
+                point_policy,
+                decoder,
+            )?;
+            let (start, end) = match recovery {
+                TrimRecovery::RequireBoth => {
+                    let (Some(start), Some(end)) = (first, second) else {
+                        return Ok(None);
+                    };
+                    (start, end)
+                }
+                TrimRecovery::BasisDefaults | TrimRecovery::BasisDefaultsStrictPoints => {
+                    let basis_end = std::array::from_fn(|i| origin[i] + direction[i]);
+                    (first.unwrap_or(origin), second.unwrap_or(basis_end))
+                }
+            };
+            Ok(Some(TrimmedPrimitive::Line { start, end }))
+        }
+        IfcType::IfcCircle => {
+            let (center, normal, x_axis, y_axis, radius) = circle_basis(basis, decoder)?;
+            let first = trim_angle(
+                trimmed.get(1),
+                center,
+                x_axis,
+                y_axis,
+                cartesian,
+                point_policy,
+                decoder,
+            )?;
+            let second = trim_angle(
+                trimmed.get(2),
+                center,
+                x_axis,
+                y_axis,
+                cartesian,
+                point_policy,
+                decoder,
+            )?;
+            let (start_angle, end_angle) = match recovery {
+                TrimRecovery::RequireBoth => {
+                    let (Some(start), Some(end)) = (first, second) else {
+                        return Ok(None);
+                    };
+                    (start, end)
+                }
+                TrimRecovery::BasisDefaults | TrimRecovery::BasisDefaultsStrictPoints => {
+                    (first.unwrap_or(0.0), second.unwrap_or(TAU))
+                }
+            };
+            let sweep_angle = match recovery {
+                TrimRecovery::RequireBoth => {
+                    let mut sweep = (end_angle - start_angle).rem_euclid(TAU);
+                    if !sense {
+                        sweep -= TAU;
+                    }
+                    // IFC4.3 forbids cyclically equal trims on closed curves,
+                    // but the existing analytic API recovered them as full
+                    // turns. Retain that interpretation for authored files.
+                    if sweep.abs() < 1e-12 {
+                        sweep = if sense { TAU } else { -TAU };
+                    }
+                    sweep
+                }
+                TrimRecovery::BasisDefaults | TrimRecovery::BasisDefaultsStrictPoints => {
+                    // Preserve the mesh sampler's raw span and single seam wrap
+                    // for malformed out-of-range/equal authored parameters.
+                    let mut end = end_angle;
+                    if sense && end < start_angle {
+                        end += TAU;
+                    } else if !sense && end > start_angle {
+                        end -= TAU;
+                    }
+                    end - start_angle
+                }
+            };
+            Ok(Some(TrimmedPrimitive::Circle {
+                center,
+                normal,
+                x_axis,
+                y_axis,
+                radius,
+                start_angle,
+                sweep_angle,
+            }))
+        }
+        _ => Ok(None),
+    }
+}

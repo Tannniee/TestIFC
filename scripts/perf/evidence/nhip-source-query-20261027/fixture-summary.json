@@ -1,0 +1,38 @@
+{
+  "house": {
+    "interleavedPairs": 5,
+    "fingerprintFnv1a64": "c4d504b83ff698ea",
+    "payloadUnchanged": true,
+    "csgFailuresBothVariants": 0,
+    "medians": {
+      "base": {
+        "parseMs": 6,
+        "geometryMs": 17,
+        "totalMs": 24
+      },
+      "branch": {
+        "parseMs": 7,
+        "geometryMs": 17,
+        "totalMs": 25
+      }
+    }
+  },
+  "issue129": {
+    "interleavedPairs": 5,
+    "fingerprintFnv1a64": "6ec47b096fad7954",
+    "payloadUnchanged": true,
+    "csgFailuresBothVariants": 41,
+    "medians": {
+      "base": {
+        "parseMs": 22,
+        "geometryMs": 263,
+        "totalMs": 284
+      },
+      "branch": {
+        "parseMs": 22,
+        "geometryMs": 262,
+        "totalMs": 284
+      }
+    }
+  }
+}

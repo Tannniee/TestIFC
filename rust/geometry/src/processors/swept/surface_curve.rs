@@ -1,0 +1,391 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+//! `IfcSurfaceCurveSweptAreaSolid` / `IfcFixedReferenceSweptAreaSolid` — a 2D
+//! `SweptArea` profile swept along a `Directrix` curve.
+
+use crate::math::tol;
+use crate::{
+    profile::Profile2D, profiles::ProfileProcessor, Error, Mesh, Point3, Result,
+    TessellationQuality, Vector3,
+};
+use ifc_lite_core::{DecodedEntity, EntityDecoder, IfcSchema, IfcType};
+use nalgebra::Matrix4;
+
+use super::disk::directrix_is_sweepable;
+use crate::placement::Axis2Placement;
+use crate::router::GeometryProcessor;
+#[path = "surface_plan.rs"]
+mod plan;
+pub(crate) use plan::SurfaceCurveSweepPlan;
+use plan::SectionRoll;
+
+/// Processor for `IfcSurfaceCurveSweptAreaSolid` and `IfcFixedReferenceSweptAreaSolid`.
+///
+/// Sweeps the inherited `SweptArea` profile along the `Directrix` curve, then
+/// applies the solid's `Position`. This is the representation Revit emits for
+/// round HVAC duct elbows: an `IfcCircleProfileDef` swept along a trimmed
+/// circular-arc directrix. Before this processor existed the elbows produced no
+/// geometry at all because the router had no handler for the type — every
+/// duct-elbow body was silently dropped (issue #1485).
+///
+/// The roll of the section about the directrix tangent follows slot 5, as
+/// ISO 10303-42 defines it: Axis1 is the ReferenceSurface normal at the
+/// directrix point (`IfcSurfaceCurveSweptAreaSolid`) or the FixedReference
+/// projected onto the plane normal to the tangent
+/// (`IfcFixedReferenceSweptAreaSolid`), Axis3 the tangent, Axis2 = Axis3 x
+/// Axis1. This matters for every non-circular section: Revit slab edges and
+/// light fixtures sweep an arbitrary profile along a planar arc on an
+/// `IfcSurfaceOfLinearExtrusion`, and the rotation-minimising frame (RMF)
+/// rolled them 90° (width and height swapped). Reference surfaces evaluated:
+/// `IfcSurfaceOfLinearExtrusion` (normal from its own SweptCurve direction,
+/// so a directrix running against it keeps the normal) and `IfcPlane`. Any
+/// other surface, an absent slot 5, one that fails to read (logged), or a
+/// reference parallel to the tangent at any sample keeps the RMF of
+/// `IfcSweptDiskSolid` for the whole sweep, which is exact for circular
+/// profiles (the duct elbows). Both entity types share the attribute layout
+/// for slots 0..=4 and only differ in slot 5, so one processor handles both.
+pub struct SurfaceCurveSweptAreaSolidProcessor {
+    profile_processor: ProfileProcessor,
+}
+
+impl SurfaceCurveSweptAreaSolidProcessor {
+    pub fn new(schema: IfcSchema) -> Self {
+        Self {
+            profile_processor: ProfileProcessor::new(schema),
+        }
+    }
+
+    /// Resolve profiles, directrix samples and solid Position using the same
+    /// production admission. Retains raw file units, before router placement.
+    pub(crate) fn lower(
+        &self, entity: &DecodedEntity, decoder: &mut EntityDecoder,
+        quality: TessellationQuality,
+    ) -> Result<Option<SurfaceCurveSweepPlan>> {
+        // Shared IfcSweptAreaSolid attributes plus the swept-curve extension:
+        //   0: SweptArea  (IfcProfileDef)         - 2D section in xy of Position
+        //   1: Position   (IfcAxis2Placement3D)   - places the whole solid (opt.)
+        //   2: Directrix  (IfcCurve)              - path swept along
+        //   3: StartParam (IfcParameterValue)     - optional
+        //   4: EndParam   (IfcParameterValue)     - optional
+        //   5: ReferenceSurface / FixedReference  - orientation (see type docs)
+
+        // --- SweptArea -> Profile2D ------------------------------------------------
+        let profile_attr = entity.get(0).ok_or_else(|| {
+            Error::geometry("SurfaceCurveSweptAreaSolid missing SweptArea".to_string())
+        })?;
+        let profile_entity = decoder
+            .resolve_ref(profile_attr)?
+            .ok_or_else(|| Error::geometry("Failed to resolve SweptArea".to_string()))?;
+        self.profile_processor.set_tessellation_quality(quality);
+        // One sweep per disjoint area: a composite profile is several (#7685).
+        self.profile_processor.arm_solid_budget();
+        let mut regions = self
+            .profile_processor
+            .process_regions(&profile_entity, decoder, quality)?;
+        regions.retain(|region| region.outer.len() >= 3);
+        if regions.is_empty() {
+            return Ok(None);
+        }
+
+        // --- Directrix -> 3D sample points -----------------------------------------
+        let directrix_attr = entity.get(2).ok_or_else(|| {
+            Error::geometry("SurfaceCurveSweptAreaSolid missing Directrix".to_string())
+        })?;
+        let directrix = decoder
+            .resolve_ref(directrix_attr)?
+            .ok_or_else(|| Error::geometry("Failed to resolve Directrix".to_string()))?;
+
+        let start_param = entity.get_float(3);
+        let end_param = entity.get_float(4);
+        // Same directrix parametrisation as IfcSweptDiskSolid (one home). A
+        // trimmed conic (the duct-elbow case) carries its own Trim1/Trim2, so
+        // the redundant solid params are a no-op there.
+        let curve_points = self.profile_processor.get_directrix_points(
+            &directrix,
+            decoder,
+            start_param,
+            end_param,
+            quality,
+        )?;
+
+        // Refuse a non-finite sample before the dedupe below, whose `>`
+        // comparison would silently drop it (#5191).
+        if !directrix_is_sweepable(&curve_points)? {
+            return Ok(None);
+        }
+        // Drop consecutive coincident samples — a zero-length step yields a NaN
+        // tangent in the RMF and shatters the tube.
+        let mut points: Vec<Point3<f64>> = Vec::with_capacity(curve_points.len());
+        for p in curve_points {
+            if points
+                .last()
+                .is_none_or(|last: &Point3<f64>| (p - *last).norm() > tol::POINT_COINCIDENT_EPS)
+            {
+                points.push(p);
+            }
+        }
+        if points.len() < 2 {
+            return Ok(None);
+        }
+
+        // --- Position: place the whole solid ---------------------------------------
+        let position: Matrix4<f64> = match entity.get(1) {
+            Some(pos_attr) if !pos_attr.is_null() => match decoder.resolve_ref(pos_attr)? {
+                Some(pos_entity) => Axis2Placement::read_3d(&pos_entity, decoder)?.matrix(),
+                None => Matrix4::identity(),
+            },
+            _ => Matrix4::identity(),
+        };
+        for p in &mut points {
+            *p = position.transform_point(p);
+        }
+        // The placement is file data too: re-gate the placed samples (#5191).
+        if !directrix_is_sweepable(&points)? {
+            return Ok(None);
+        }
+
+        // --- Slot 5: the section roll, in the same (placed) frame as `points` ------
+        // A round section centred on the directrix is the same at any roll: it
+        // keeps the RMF, so round sweeps (the #1485 duct elbows) stay unchanged.
+        // Slot 5 only orients the section: one that fails to read keeps the
+        // RMF, the mesh this solid had before slot 5 was read, instead of
+        // dropping the solid. A refusal the decoder counted on the way stays
+        // counted.
+        let roll = section_is_round(&profile_entity, decoder).and_then(|round| {
+            if round { Ok(None) } else { self.section_roll(entity, decoder, &position, &points, quality) }
+        });
+        let roll = match roll {
+            Ok(roll) => roll,
+            Err(error) => {
+                crate::diag::diag_warn!(
+                    { entity_id = entity.id, error = %error,
+                      "surface_curve: section reference not read, keeping the rotation-minimising frame" }
+                    else {
+                        eprintln!(
+                            "[ifc-lite][surface_curve] #{}: section reference not read ({error}); \
+                             keeping the rotation-minimising frame",
+                            entity.id,
+                        );
+                    }
+                );
+                None
+            }
+        };
+
+        Ok(Some(SurfaceCurveSweepPlan { regions, points, entity_id: entity.id, roll }))
+    }
+}
+
+impl GeometryProcessor for SurfaceCurveSweptAreaSolidProcessor {
+    fn lower_owned(&self, entity: &DecodedEntity, decoder: &mut EntityDecoder,
+        quality: crate::TessellationQuality, rtc_file_units: Option<(f64, f64, f64)>)
+        -> Option<crate::Result<crate::program::OwnedConstructor>> {
+        use crate::program::constructor::Constructor;
+        if rtc_file_units.is_some() { return None; }
+        Some(self.lower(entity, decoder, quality).map(|plan| crate::program::OwnedConstructor::new(plan.map_or(Constructor::Empty, Constructor::SweptArea))))
+    }
+
+    fn process(
+        &self,
+        entity: &DecodedEntity,
+        decoder: &mut EntityDecoder,
+        _schema: &IfcSchema,
+        quality: TessellationQuality,
+    ) -> Result<Mesh> {
+        match self.lower(entity, decoder, quality)? {
+            Some(plan) => plan.evaluate(),
+            None => Ok(Mesh::new()),
+        }
+    }
+
+    fn supported_types(&self) -> Vec<IfcType> {
+        vec![
+            IfcType::IfcSurfaceCurveSweptAreaSolid,
+            IfcType::IfcFixedReferenceSweptAreaSolid,
+        ]
+    }
+}
+
+impl Default for SurfaceCurveSweptAreaSolidProcessor {
+    fn default() -> Self {
+        Self::new(IfcSchema::new())
+    }
+}
+
+impl SurfaceCurveSweptAreaSolidProcessor {
+    /// Slot 5, resolved into the placed frame of `points`: `ReferenceSurface`
+    /// for `IfcSurfaceCurveSweptAreaSolid`, `FixedReference` for
+    /// `IfcFixedReferenceSweptAreaSolid`. The reference is defined in the
+    /// solid's own frame, like the directrix, so it takes the same `position`.
+    /// `None` when the slot is empty or the surface type is not evaluated yet;
+    /// the sweep then keeps the RMF roll. An `Err` (a reference that fails to
+    /// read) does the same in `lower()`.
+    fn section_roll(
+        &self, entity: &DecodedEntity, decoder: &mut EntityDecoder, position: &Matrix4<f64>,
+        points: &[Point3<f64>], quality: TessellationQuality,
+    ) -> Result<Option<SectionRoll>> {
+        const REFERENCE: usize = 5;
+        if entity.ifc_type == IfcType::IfcFixedReferenceSweptAreaSolid {
+            return Ok(decoder
+                .direction3_at(entity, REFERENCE)?
+                .map(|d| SectionRoll::Projected(position.transform_vector(&Vector3::from(d)))));
+        }
+        let Some(surface) = decoder.resolve_optional(entity, REFERENCE)? else {
+            return Ok(None);
+        };
+        match surface.ifc_type {
+            IfcType::IfcSurfaceOfLinearExtrusion => {
+                // SweptCurve (0), Position (1), ExtrudedDirection (2), Depth (3).
+                let Some(d) = decoder.direction3_at(&surface, 2)? else {
+                    return Ok(None);
+                };
+                let Some(curve) = swept_curve(&surface, decoder)? else {
+                    return Ok(None);
+                };
+                let frame = position * surface_position(&surface, 1, decoder)?;
+                let samples: Vec<Point3<f64>> = self
+                    .profile_processor
+                    .get_directrix_points(&curve, decoder, None, None, quality)?
+                    .iter()
+                    .map(|p| frame.transform_point(p))
+                    .collect();
+                let d = frame.transform_vector(&Vector3::from(d));
+                Ok(plan::extrusion_normals(&samples, &d, points).map(SectionRoll::Normals))
+            }
+            IfcType::IfcPlane => {
+                // Position (0): the plane normal is its local +Z.
+                let frame = position * surface_position(&surface, 0, decoder)?;
+                Ok(Some(SectionRoll::Projected(frame.transform_vector(&Vector3::new(0.0, 0.0, 1.0)))))
+            }
+            _ => Ok(None),
+        }
+    }
+}
+
+/// An `IfcCircleProfileDef` / `IfcCircleHollowProfileDef` whose `Position`
+/// (slot 2) is absent or centred at the origin: rotationally symmetric about
+/// the directrix, so its roll does not change the swept shape.
+fn section_is_round(profile: &DecodedEntity, decoder: &mut EntityDecoder) -> Result<bool> {
+    if !matches!(profile.ifc_type, IfcType::IfcCircleProfileDef | IfcType::IfcCircleHollowProfileDef) {
+        return Ok(false);
+    }
+    let Some(placement) = decoder.resolve_optional(profile, 2)? else {
+        return Ok(true);
+    };
+    Ok(match decoder.point3_at(&placement, 0)? {
+        Some([x, y, _]) => x.abs() <= tol::POINT_COINCIDENT_EPS && y.abs() <= tol::POINT_COINCIDENT_EPS,
+        None => false,
+    })
+}
+
+/// The curve of an `IfcSurfaceOfLinearExtrusion`'s `SweptCurve` profile: the
+/// `Curve` / `OuterCurve` (slot 2) of an arbitrary open or closed profile.
+/// `None` for any other profile, whose curve direction we do not read.
+fn swept_curve(surface: &DecodedEntity, decoder: &mut EntityDecoder) -> Result<Option<DecodedEntity>> {
+    let Some(profile) = decoder.resolve_optional(surface, 0)? else {
+        return Ok(None);
+    };
+    let arbitrary = profile.ifc_type.is_subtype_of(IfcType::IfcArbitraryOpenProfileDef)
+        || profile.ifc_type.is_subtype_of(IfcType::IfcArbitraryClosedProfileDef);
+    if !arbitrary {
+        return Ok(None);
+    }
+    Ok(decoder.resolve_optional(&profile, 2)?)
+}
+
+/// An elementary surface's optional `IfcAxis2Placement3D` as a matrix.
+fn surface_position(surface: &DecodedEntity, slot: usize, decoder: &mut EntityDecoder) -> Result<Matrix4<f64>> {
+    Ok(match decoder.resolve_optional(surface, slot)? {
+        Some(placement) => Axis2Placement::read_3d(&placement, decoder)?.matrix(),
+        None => Matrix4::identity(),
+    })
+}
+
+/// Sweep a 2D `profile` (outer boundary + holes) along the directrix samples
+/// `points`, placing the section into each per-sample frame `(perp1, perp2)`.
+/// Emits side walls for every loop plus triangulated end caps, then computes
+/// smooth per-vertex normals in the directrix-local frame (small coordinates,
+/// precise) exactly like `IfcSweptDiskSolid`.
+///
+/// Vertex layout is one contiguous "ring" per directrix sample, each ring
+/// ordered as `outer` points then every hole's points — the same order
+/// `Profile2D::triangulate` emits, so the cap triangle indices address ring
+/// slots directly.
+fn sweep_profile_along_frames(
+    profile: &Profile2D,
+    points: &[Point3<f64>],
+    perp1s: &[Vector3<f64>],
+    perp2s: &[Vector3<f64>],
+) -> Result<Mesh> {
+    let n = points.len();
+    if n < 2 || perp1s.len() != n || perp2s.len() != n {
+        return Ok(Mesh::new());
+    }
+
+    // Loop slices in triangulation order: outer first, then each hole.
+    let loops: Vec<&[nalgebra::Point2<f64>]> = std::iter::once(profile.outer.as_slice())
+        .chain(profile.holes.iter().map(|h| h.as_slice()))
+        .collect();
+    let ring_len: usize = loops.iter().map(|l| l.len()).sum();
+    if ring_len < 3 {
+        return Ok(Mesh::new());
+    }
+
+    let mut mesh = Mesh::with_capacity(n * ring_len, 0);
+
+    // Ring vertices, sample by sample. Placeholder normals are overwritten by
+    // calculate_normals below.
+    let placeholder = Vector3::new(0.0, 0.0, 1.0);
+    for i in 0..n {
+        let p = points[i];
+        let u = perp1s[i];
+        let v = perp2s[i];
+        for loop_pts in &loops {
+            for pt in loop_pts.iter() {
+                mesh.add_vertex(p + u * pt.x + v * pt.y, placeholder);
+            }
+        }
+    }
+
+    // Side walls: connect ring i to ring i+1 for each loop, wrapping the loop.
+    // `calculate_normals` uses (v1-v0)x(v2-v0); with a CCW outer loop the winding
+    // below yields +perp1 (radially outward) face normals. A CW hole loop flips
+    // the sign so its wall normal faces into the void.
+    for i in 0..n - 1 {
+        let base_i = (i * ring_len) as u32;
+        let base_next = ((i + 1) * ring_len) as u32;
+        let mut loop_start = 0u32;
+        for loop_pts in &loops {
+            let m = loop_pts.len() as u32;
+            if m >= 2 {
+                for j in 0..m {
+                    let jn = (j + 1) % m;
+                    let a = base_i + loop_start + j;
+                    let b = base_i + loop_start + jn;
+                    let c = base_next + loop_start + j;
+                    let d = base_next + loop_start + jn;
+                    mesh.add_triangle(a, d, c);
+                    mesh.add_triangle(a, b, d);
+                }
+            }
+            loop_start += m;
+        }
+    }
+
+    // End caps from the profile triangulation (handles holes). The start cap
+    // faces -tangent (reversed winding), the end cap faces +tangent.
+    if let Ok(tri) = profile.triangulate() {
+        let base_first = 0u32;
+        let base_last = ((n - 1) * ring_len) as u32;
+        for t in tri.indices.chunks_exact(3) {
+            let (i0, i1, i2) = (t[0] as u32, t[1] as u32, t[2] as u32);
+            mesh.add_triangle(base_first + i0, base_first + i2, base_first + i1);
+            mesh.add_triangle(base_last + i0, base_last + i1, base_last + i2);
+        }
+    }
+
+    crate::calculate_normals(&mut mesh);
+    Ok(mesh)
+}

@@ -1,0 +1,103 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/**
+ * The **Matched** section of the compare results list (issue #1891), kept out
+ * of `CompareResultsList` so both stay under the module-size house rule
+ * (AGENTS.md).
+ *
+ * These rows do not come from `diff.entries` at all - they come from
+ * `diff.contentMatches`, and only its RETIRING kinds (`renamed` / `moved` /
+ * `reshaped` / `respecified`): the engine retired these elements'
+ * `added`/`deleted` entries, so without this section their counts drop out of
+ * the panel with no row saying where they went.
+ *
+ * The non-retiring kinds (`duplicated` / `deduplicated` / `ambiguous`) are
+ * listed in `CompareSuggestions` (#4955), where a user can decide a pair.
+ */
+
+import { Link2, MousePointerClick } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
+import { COMPARE_COLORS, rgbaCss, type RGBA } from '@/lib/compare/overlay';
+import { MATCH_KIND_HINT, MATCH_KIND_LABEL } from '@/lib/compare/contentMatches';
+import type { CompareMatchRow } from './changeRow';
+import { AnalysisResultList } from '../analysis/AnalysisResultList';
+
+/** Right-hand summary for a row: the kind, plus the group shape when the match
+ *  is not a simple pair, plus the move distance when the engine measured one. */
+function matchRowSummary(row: CompareMatchRow): string {
+  const parts = [MATCH_KIND_LABEL[row.kind]];
+  if (row.baseCount !== 1 || row.headCount !== 1) parts.push(`${row.baseCount}:${row.headCount}`);
+  if (row.distance !== undefined && row.distance > 0) parts.push(`${row.distance.toFixed(3)} m`);
+  return parts.join(' · ');
+}
+
+interface MatchSectionProps {
+  rows: CompareMatchRow[];
+  selectedKey: string | null;
+  onFocus: (row: CompareMatchRow) => void;
+  onFocusGroup: (rows: CompareMatchRow[]) => void;
+}
+
+function MatchSection({
+  rows,
+  selectedKey,
+  onFocus,
+  onFocusGroup,
+  label,
+  title,
+  color,
+  Icon,
+}: MatchSectionProps & { label: string; title: string; color: RGBA; Icon: typeof Link2 }) {
+  if (rows.length === 0) return null;
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => onFocusGroup(rows)}
+        title={title}
+        className="group w-full flex items-center gap-1.5 px-1 py-1 text-xs font-medium rounded hover:bg-muted transition-colors"
+      >
+        <Icon className="h-3.5 w-3.5" style={{ color: rgbaCss(color) }} />
+        <span>{label}</span>
+        <span className="text-muted-foreground">({rows.length})</span>
+        <MousePointerClick className="h-3 w-3 ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
+      </button>
+      <AnalysisResultList className="max-h-80" items={rows} getKey={(row) => row.key}
+        estimateSize={() => 26} renderRow={(row) => (
+          <button
+            key={row.key}
+            onClick={() => onFocus(row)}
+            title={MATCH_KIND_HINT[row.kind]}
+            className={cn(
+              'w-full text-left rounded px-2 py-1 flex items-center gap-2 hover:bg-muted transition-colors min-w-0',
+              selectedKey === row.key && 'bg-muted',
+            )}
+          >
+            <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ backgroundColor: rgbaCss(color) }} />
+            <span className="min-w-0 flex-1 truncate text-xs">{row.name || row.ifcType}</span>
+            <span className="shrink-0 text-2xs text-muted-foreground">{matchRowSummary(row)}</span>
+          </button>
+        )}
+      />
+    </div>
+  );
+}
+
+export function CompareMatchGroups({ rows, selectedKey, onFocus, onFocusGroup }: MatchSectionProps) {
+  const { t } = useTranslation();
+  return (
+    <MatchSection
+      rows={rows.filter((row) => row.retiring)}
+      selectedKey={selectedKey}
+      onFocus={onFocus}
+      onFocusGroup={onFocusGroup}
+      label={t('comparePanel.matchGroups.matchedLabel')}
+      title={t('comparePanel.matchGroups.selectAllTitle')}
+      color={COMPARE_COLORS.matched}
+      Icon={Link2}
+    />
+  );
+}

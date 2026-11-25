@@ -1,0 +1,82 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+//! Bounded, event-driven LandXML 1.0, 1.1, and 1.2 source ingestion.
+//!
+//! This crate intentionally stops at durable LandXML semantic records. It
+//! neither fabricates IFC nor creates renderer meshes; later adapters own
+//! coordinate systems, mesh partitioning, and presentation.
+//!
+//! Every parse path is the same pipeline: `xml::Decoder` (UTF-8 and UTF-16),
+//! `xml::TokenScanner` (lexical bounds), quick-xml (the XML grammar),
+//! `xml::Driver` (the one front end: work, depth, names, attributes,
+//! namespaces, the document element, text) and one `xml::FamilyHandler` per
+//! family (terrain, plan, alignment, pipe). The stream feeds the same driver
+//! one token at a time, so pull and stream share every semantic transition;
+//! the differential tests pin the one documented exception (a `<Units>` that
+//! arrives after the stream has committed to an assumed unit).
+
+pub mod alignment;
+mod capture;
+mod limits;
+mod model;
+mod numeric;
+mod parser;
+mod pipe_parser;
+mod pipes;
+mod plan;
+mod profile;
+mod profile_circular;
+mod profile_evaluator;
+mod semantics;
+mod source;
+mod stream;
+mod terrain;
+mod terrain_validation;
+mod xml;
+
+pub use limits::{LandXmlCancellation, LandXmlCancellationFlag, LandXmlLimits};
+pub use model::{
+    LandXmlCanonicalVertex, LandXmlCapabilities, LandXmlCoordinateSystem, LandXmlDiagnosticCode,
+    LandXmlError, LandXmlExtension, LandXmlPoint, LandXmlPolyline, LandXmlProperties,
+    LandXmlRenderState, LandXmlSourceId, LandXmlSourcePoint, LandXmlSurface, LandXmlSurfaceKind,
+    LandXmlTerrainDiagnostic, LandXmlTerrainDiagnosticCode, LandXmlTinDocument,
+    LandXmlTopologyOrigin, LandXmlUnits, LandXmlVersionCapability,
+};
+pub use parser::{
+    classify_landxml_version, parse_landxml_tin, parse_landxml_tin_with_cancel,
+    LANDXML_10_NAMESPACE, LANDXML_11_NAMESPACE, LANDXML_12_NAMESPACE,
+};
+pub use profile::{
+    LandXmlAlignment, LandXmlCapabilityDiagnostic, LandXmlCapabilityDiagnosticCode,
+    LandXmlCrossSection, LandXmlCrossSectionPoint, LandXmlCrossSectionPointDataFormat,
+    LandXmlCrossSectionSegment, LandXmlCrossSectionSurface, LandXmlCrossSectionSurfaceKind,
+    LandXmlGradeLine, LandXmlPreservedOnlyExtension, LandXmlPreservedOnlyExtensionKind,
+    LandXmlProfile, LandXmlProfileEvaluationError, LandXmlProfileKind, LandXmlProfilePoint,
+    LandXmlRoadway, LandXmlVerticalCurve, LandXmlVerticalCurveKind,
+};
+pub use plan::{
+    parse_landxml_document, parse_landxml_plan, parse_landxml_plan_with_cancel, LandXmlCgPoint,
+    LandXmlDocument, LandXmlGeometryKind, LandXmlMonument, LandXmlParcel, LandXmlParcelProbe,
+    LandXmlParcelState, LandXmlPlanDocument, LandXmlPlanFeature, LandXmlPlanGeometry,
+    LandXmlPlanLimits, LandXmlPlanPoint, LandXmlPlanPointLocation, LandXmlPlanResolver,
+    LandXmlPlanSourceBatch,
+};
+pub use source::{parse_landxml_source, parse_landxml_source_with_cancel, LandXmlSource, LandXmlSourceLimits};
+pub use pipe_parser::{parse_landxml_pipe_networks, parse_landxml_pipe_networks_with_cancel};
+pub use pipes::{
+    LandXmlPipe, LandXmlPipeConnectivity, LandXmlPipeFeature, LandXmlPipeFlow, LandXmlPipeGeometry,
+    LandXmlPipeInvert, LandXmlPipeMeasure, LandXmlPipeNetwork, LandXmlPipeNetworkCollection,
+    LandXmlPipeNetworkDocument, LandXmlPipePart, LandXmlPipePosition, LandXmlPipeProperties,
+    LandXmlPipeRefusal, LandXmlPipeSourceBatch, LandXmlPipeStructure, LandXmlPipeUnits,
+    LandXmlStructurePart,
+};
+pub use stream::{
+    LandXmlMetadataRecord, LandXmlMetadataRecordFragment, LandXmlMetadataStreamAssembler, LandXmlMetadataStreamEnd,
+    LandXmlMetadataStreamEvent, LandXmlMetadataStreamHeader, LandXmlStreamEvent,
+    LandXmlStreamHeader, LandXmlStreamMetadata, LandXmlStreamSummary, LandXmlSurfaceComponent,
+    LandXmlSurfaceFragment, LandXmlTinStreamSession, MAX_LANDXML_STREAM_DRAIN_BYTES,
+    MAX_LANDXML_STREAM_EVENT_BYTES, MAX_LANDXML_STREAM_INPUT_CHUNK_BYTES,
+    MAX_LANDXML_STREAM_QUEUED_BYTES, MAX_LANDXML_STREAM_QUEUED_EVENTS,
+};
