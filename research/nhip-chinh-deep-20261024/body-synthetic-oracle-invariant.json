@@ -1,0 +1,190 @@
+[
+  {
+    "fixture": "body-synthetic-rotated",
+    "native": {
+      "vertices": 2181,
+      "triangles": 960,
+      "volume": 0.07265926976475988,
+      "area": 9.49349612991482
+    },
+    "oracle": {
+      "vertices": 208,
+      "triangles": 416,
+      "volume": 0.07367542860263306,
+      "area": 9.495695634126008
+    },
+    "csgFailures": {
+      "degenerate_triangles_dropped": 0,
+      "entity_scan_time_ms": 0,
+      "faceted_brep_time_ms": 0,
+      "from_cache": false,
+      "geometry_diagnostics": {
+        "classification": {
+          "diagonal": 0,
+          "nonRectangular": 5,
+          "rectangular": 0,
+          "total": 5
+        },
+        "failuresByReason": [
+          {
+            "count": 1,
+            "reason": "KernelError"
+          }
+        ],
+        "hostsWithOpenings": 1,
+        "oversizedRefDrops": 0,
+        "productsWithFailures": 1,
+        "rectFast": {
+          "deferHostNotBox": 0,
+          "deferNearEdge": 0,
+          "deferNoOpenings": 0,
+          "deferNotThrough": 0,
+          "deferOffFace": 0,
+          "deferTooManyOpenings": 0,
+          "fired": 0,
+          "openingsCut": 0
+        },
+        "schemaVersion": 3,
+        "silentNoOps": 0,
+        "totalCsgFailures": 1,
+        "totalUnsupportedItems": 0,
+        "unsupportedItemsByType": [],
+        "worstHosts": [
+          {
+            "bbox": {
+              "max": [
+                18.940977096557617,
+                87.10284423828125,
+                56.55574417114258
+              ],
+              "min": [
+                15.539790153503418,
+                84.99456024169922,
+                53.564544677734375
+              ]
+            },
+            "csgFailures": 1,
+            "firstFailureLabel": "KernelError",
+            "ifcType": "IfcMember",
+            "openings": 5,
+            "productId": 100,
+            "triangleCount": 965
+          }
+        ]
+      },
+      "geometry_time_ms": 82,
+      "lookup_time_ms": 0,
+      "parse_time_ms": 0,
+      "point_cache_hits": 0,
+      "point_cache_misses": 0,
+      "preprocess_time_ms": 0,
+      "products_with_failures": 1,
+      "total_csg_failures": 1,
+      "total_meshes": 1,
+      "total_time_ms": 83,
+      "total_triangles": 960,
+      "total_vertices": 2181
+    },
+    "sampledMaxDistanceMm": 0.05540938737609616,
+    "nativeWitnessWorldMeters": [
+      1000015.5604104996,
+      2000086.9769744873,
+      55.470481872558594
+    ],
+    "nativeWitnessToOracleMm": 0.014323337974303447
+  },
+  {
+    "fixture": "body-synthetic-split",
+    "native": {
+      "vertices": 3404,
+      "triangles": 1270,
+      "volume": 0.07111925370053152,
+      "area": 9.319025529073809
+    },
+    "oracle": {
+      "vertices": 224,
+      "triangles": 440,
+      "volume": 0.07207542860951169,
+      "area": 9.321295634270129
+    },
+    "csgFailures": {
+      "degenerate_triangles_dropped": 0,
+      "entity_scan_time_ms": 0,
+      "faceted_brep_time_ms": 0,
+      "from_cache": false,
+      "geometry_diagnostics": {
+        "classification": {
+          "diagonal": 1,
+          "nonRectangular": 5,
+          "rectangular": 0,
+          "total": 6
+        },
+        "failuresByReason": [
+          {
+            "count": 2,
+            "reason": "KernelError"
+          }
+        ],
+        "hostsWithOpenings": 1,
+        "oversizedRefDrops": 0,
+        "productsWithFailures": 1,
+        "rectFast": {
+          "deferHostNotBox": 0,
+          "deferNearEdge": 0,
+          "deferNoOpenings": 0,
+          "deferNotThrough": 0,
+          "deferOffFace": 0,
+          "deferTooManyOpenings": 0,
+          "fired": 0,
+          "openingsCut": 0
+        },
+        "schemaVersion": 3,
+        "silentNoOps": 0,
+        "totalCsgFailures": 2,
+        "totalUnsupportedItems": 0,
+        "unsupportedItemsByType": [],
+        "worstHosts": [
+          {
+            "bbox": {
+              "max": [
+                18.940977096557617,
+                87.10284423828125,
+                56.55574417114258
+              ],
+              "min": [
+                15.539790153503418,
+                84.99456024169922,
+                53.564544677734375
+              ]
+            },
+            "csgFailures": 2,
+            "firstFailureLabel": "KernelError",
+            "ifcType": "IfcMember",
+            "openings": 6,
+            "productId": 100,
+            "triangleCount": 1301
+          }
+        ]
+      },
+      "geometry_time_ms": 152,
+      "lookup_time_ms": 0,
+      "parse_time_ms": 0,
+      "point_cache_hits": 0,
+      "point_cache_misses": 0,
+      "preprocess_time_ms": 0,
+      "products_with_failures": 1,
+      "total_csg_failures": 2,
+      "total_meshes": 1,
+      "total_time_ms": 153,
+      "total_triangles": 1270,
+      "total_vertices": 3404
+    },
+    "sampledMaxDistanceMm": 0.07964684779714747,
+    "nativeWitnessWorldMeters": [
+      1000017.9747573852,
+      2000085.0637039184,
+      55.40774841308594
+    ],
+    "nativeWitnessToOracleMm": 0.042849428285949426
+  }
+]

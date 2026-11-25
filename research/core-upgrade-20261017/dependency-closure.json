@@ -1,0 +1,32 @@
+{
+  "target": "61d209288c1b117d405628ead302d0ee700bd2a0",
+  "seeds": [
+    "@ifc-lite/data",
+    "@ifc-lite/parser",
+    "@ifc-lite/geometry",
+    "@ifc-lite/renderer",
+    "@ifc-lite/wasm",
+    "@ifc-lite/spatial",
+    "@ifc-lite/export"
+  ],
+  "runtime_workspace_closure": [
+    "@ifc-lite/codegen",
+    "@ifc-lite/data",
+    "@ifc-lite/encoding",
+    "@ifc-lite/export",
+    "@ifc-lite/geometry",
+    "@ifc-lite/ifcx",
+    "@ifc-lite/load-trace",
+    "@ifc-lite/mutations",
+    "@ifc-lite/parser",
+    "@ifc-lite/pointcloud",
+    "@ifc-lite/regex-guard",
+    "@ifc-lite/renderer",
+    "@ifc-lite/spatial",
+    "@ifc-lite/wasm",
+    "@ifc-lite/wasm-lifecycle"
+  ],
+  "new_local_packages": [
+    "packages/load-trace/package.json"
+  ]
+}

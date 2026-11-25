@@ -1,0 +1,4891 @@
+{
+  "checked_utc": "2026-11-05T01:28:17.826591+00:00",
+  "source": "F:\\Steel\\VBA\\IFC-Lite-Core104",
+  "base": "61d209288c1b117d405628ead302d0ee700bd2a0",
+  "ui_base": "e79f27342beb01a6f30d9b63c44795ecd118f4de",
+  "local": {
+    "head": "13e402c42884c479fc22437c2e8f7a8c5dad53c5",
+    "branch": "codex/nhip-geometry-20261024"
+  },
+  "targets": {
+    "production": {
+      "sha": "7ef97b25c6d7e9ee1a28ffc2f39185cfa206cd99",
+      "commit": "7ef97b25c6d7e9ee1a28ffc2f39185cfa206cd99 2026-11-04T13:12:11Z fix(perf): pin the qualification runners to the high-performance GPU (Refs #7955) (#8787)",
+      "rust_version": "28.2.0",
+      "rust_members": [
+        "rust/imported-geometry",
+        "rust/core",
+        "rust/diff",
+        "rust/diff-wasm",
+        "rust/geometry",
+        "rust/geometry-runtime",
+        "rust/retained-native",
+        "rust/processing",
+        "rust/clash",
+        "rust/ffi",
+        "rust/export",
+        "rust/wasm-bindings",
+        "rust/landxml",
+        "rust/cloud-import",
+        "rust/testkit",
+        "apps/server"
+      ],
+      "viewer_version": "5.5.0",
+      "package_count": 65,
+      "packages": [
+        {
+          "name": "@ifc-lite/ai",
+          "local": "0.2.0",
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "Provider-independent AI request core: transport contract, typed outcomes, root budgets, usage receipts and bounded JSON output parsing",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/bcf",
+          "local": "5.0.1",
+          "upstream": "5.2.1",
+          "private": false,
+          "description": "BIM Collaboration Format (BCF) support for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/bcf-api",
+          "local": "0.3.0",
+          "upstream": "0.4.0",
+          "private": false,
+          "description": "BCF API (OpenCDE) REST client for connecting to BCF servers",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/cache",
+          "local": "3.7.2",
+          "upstream": "3.7.4",
+          "private": false,
+          "description": "Binary cache format for IFC-Lite - fast model loading",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/charts",
+          "local": "0.9.0",
+          "upstream": "0.9.1",
+          "private": false,
+          "description": "Headless chart data binding for IFC-Lite: aggregate model rows into buckets that keep their element ids, build ECharts options, render SVG",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/clash",
+          "local": "2.4.4",
+          "upstream": "2.4.7",
+          "private": false,
+          "description": "Clash detection for IFC-Lite — representation-agnostic core engine + source adapters",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/cli",
+          "local": "0.41.0",
+          "upstream": "0.45.1",
+          "private": false,
+          "description": "CLI toolkit for IFC files — query, validate, export, create, and script BIM data",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/codegen",
+          "local": "1.18.1",
+          "upstream": "1.19.1",
+          "private": false,
+          "description": "TypeScript code generator from IFC EXPRESS schemas",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/collab",
+          "local": "0.10.0",
+          "upstream": "0.10.0",
+          "private": false,
+          "description": "Real-time collaborative BIM via CRDT on IFCX",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/collab-server",
+          "local": "0.9.0",
+          "upstream": "0.9.1",
+          "private": false,
+          "description": "Reference websocket sync server for @ifc-lite/collab",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/create",
+          "local": "5.1.0",
+          "upstream": "5.1.3",
+          "private": false,
+          "description": "IFC creation from scratch — walls, slabs, beams, columns, stairs, roofs with geometry, properties and quantities",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/data",
+          "local": "6.2.0",
+          "upstream": "6.4.0",
+          "private": false,
+          "description": "Columnar data structures for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/diff",
+          "local": "0.10.0",
+          "upstream": "0.13.1",
+          "private": false,
+          "description": "Headless model-diff engine for IFC-Lite — classifies entities as added/modified/deleted/unchanged across two revisions, with separable data vs geometry scope.",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/documents-api",
+          "local": "0.2.1",
+          "upstream": "0.2.1",
+          "private": false,
+          "description": "OpenCDE Documents API 1.0 client: select, download, query and upload documents against a buildingSMART Documents API server",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/drawing-2d",
+          "local": "4.2.0",
+          "upstream": "5.0.0",
+          "private": false,
+          "description": "2D architectural drawing generation from IFC models - section cuts, floor plans, and elevations",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/embed-protocol",
+          "local": "1.15.0",
+          "upstream": "1.15.0",
+          "private": false,
+          "description": "Shared postMessage protocol types for ifc-lite embed viewer and SDK",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/embed-sdk",
+          "local": "1.15.1",
+          "upstream": "1.15.1",
+          "private": false,
+          "description": "SDK for embedding the IFC-Lite 3D viewer in any web page via iframe",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/encoding",
+          "local": "2.3.0",
+          "upstream": "2.4.0",
+          "private": false,
+          "description": "IFC string encoding/decoding and property value parsing for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/export",
+          "local": "4.11.0",
+          "upstream": "4.13.3",
+          "private": false,
+          "description": "Export formats for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/extensions",
+          "local": "0.11.0",
+          "upstream": "0.12.0",
+          "private": false,
+          "description": "Extension manifest, capability grammar, and slot registry for ifc-lite user customization",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/flow",
+          "local": "0.7.0",
+          "upstream": "0.7.1",
+          "private": false,
+          "description": "Keyed-data graph runtime for BIM workflows: typed ports, item/list/group lifting, memoised evaluation, and element tracking for re-runnable graphs",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/flow-nodes",
+          "local": "0.10.0",
+          "upstream": "0.12.2",
+          "private": false,
+          "description": "Standard node library for @ifc-lite/flow over the ifc-lite SDK: model reads and writes, tables, viewer, and a sandboxed Script node",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/geometry",
+          "local": "7.8.1",
+          "upstream": "8.1.0",
+          "private": false,
+          "description": "Geometry processing bridge for IFC-Lite - exact-arithmetic CSG, streamed across workers",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/ids",
+          "local": "3.3.6",
+          "upstream": "3.4.4",
+          "private": false,
+          "description": "IDS (Information Delivery Specification) support for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/ids-agent",
+          "local": "0.2.6",
+          "upstream": "0.2.11",
+          "private": false,
+          "description": "Headless IDS authoring agent: a tool-calling loop over the IDS Studio op vocabulary, grounded by the gate, producing reviewable proposals",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/ids-authoring",
+          "local": "0.2.6",
+          "upstream": "0.3.4",
+          "private": false,
+          "description": "Headless IDS authoring core: Studio document with stable node ids, typed invertible operations, a grounding gate against the IFC schema tables, history, sidecar and re-identification",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/ifcx",
+          "local": "4.4.0",
+          "upstream": "4.6.0",
+          "private": false,
+          "description": "IFC5 (IFCX) parser for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/lens",
+          "local": "2.2.0",
+          "upstream": "2.2.1",
+          "private": false,
+          "description": "Rule-based 3D filtering and colorization for IFC models",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/lists",
+          "local": "3.1.7",
+          "upstream": "3.2.0",
+          "private": false,
+          "description": "Configurable property tables and schedules from IFC data for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/load-trace",
+          "local": "0.3.0",
+          "upstream": "0.3.0",
+          "private": false,
+          "description": "Dependency-free load-trace spans: performance.measure plus a per-load, cross-thread span tree with worker clock alignment and Chrome-trace export",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/mcp",
+          "local": "0.27.0",
+          "upstream": "0.29.0",
+          "private": false,
+          "description": "Model Context Protocol server for ifc-lite — agent-native BIM via MCP (stdio + Streamable HTTP)",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/merge",
+          "local": "0.4.7",
+          "upstream": "0.5.0",
+          "private": false,
+          "description": "Three-way merge engine for IFCX layers — MergePlan with auto-merged ops and explicit conflict records, merge-layer emission, rebase, and revert.",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/mutations",
+          "local": "3.2.0",
+          "upstream": "3.2.0",
+          "private": false,
+          "description": "Mutation tracking and property editing for IFC-Lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/oauth-pkce",
+          "local": "0.3.0",
+          "upstream": "0.3.0",
+          "private": false,
+          "description": "Browser OAuth 2.0 Authorization Code + PKCE flow, shared by ifc-lite's file-source providers",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/oci",
+          "local": null,
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "OCI distribution client (tags, manifests, digest-verified blobs, blob and manifest push) with an injected fetch, for Node and browsers",
+          "status": "new",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/opencde-foundation",
+          "local": "0.3.0",
+          "upstream": "0.3.0",
+          "private": false,
+          "description": "buildingSMART OpenCDE Foundation API client: version discovery, auth discovery, OAuth2 flows and the shared HTTP client used by every OpenCDE service client",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/parser",
+          "local": "9.5.1",
+          "upstream": "9.9.0",
+          "private": false,
+          "description": "IFC/STEP parser for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/plugin-api",
+          "local": "0.5.0",
+          "upstream": "0.5.0",
+          "private": false,
+          "description": "Dependency-free type surface for ifc-lite file-source plugins",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/pointcloud",
+          "local": "0.12.0",
+          "upstream": "0.14.0",
+          "private": false,
+          "description": "Point cloud decoders and types for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/provenance",
+          "local": "0.2.0",
+          "upstream": "0.2.0",
+          "private": true,
+          "description": "Canonical node-hash specification and certificate library for proof-carrying model changes.",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/query",
+          "local": "2.5.2",
+          "upstream": "2.5.4",
+          "private": false,
+          "description": "Query system for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/regex-guard",
+          "local": "0.3.0",
+          "upstream": "0.3.0",
+          "private": false,
+          "description": "A shared, dependency-free guard against catastrophic-backtracking (ReDoS) regex patterns compiled from untrusted input",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/renderer",
+          "local": "6.4.0",
+          "upstream": "7.1.0",
+          "private": false,
+          "description": "WebGPU renderer for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/report-contract",
+          "local": "0.1.0",
+          "upstream": "0.1.0",
+          "private": true,
+          "description": "Shared reviewed error report protocol",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/rules",
+          "local": "0.7.7",
+          "upstream": "0.8.0",
+          "private": false,
+          "description": "Filter-rule vocabulary, evaluator and .rules.json information-validation engine for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/sandbox",
+          "local": "2.12.0",
+          "upstream": "2.12.1",
+          "private": false,
+          "description": "QuickJS-in-WASM sandboxed script execution for ifc-lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/sdk",
+          "local": "9.5.0",
+          "upstream": "9.6.1",
+          "private": false,
+          "description": "Scripting SDK for ifc-lite — the bim.* API for BIM automation",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/semantic",
+          "local": "0.2.1",
+          "upstream": "0.2.3",
+          "private": false,
+          "description": "Portable semantic datasets, profiles, validation and IFC identity resolution",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/server-bin",
+          "local": "2.0.1",
+          "upstream": "3.0.1",
+          "private": false,
+          "description": "Pre-built IFC-Lite server binary - run without Docker or Rust",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/server-client",
+          "local": "4.0.1",
+          "upstream": "5.1.1",
+          "private": false,
+          "description": "TypeScript client SDK for IFC-Lite Server",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/solar",
+          "local": "1.15.5",
+          "upstream": "1.15.5",
+          "private": false,
+          "description": "Solar position, sunrise/sunset and 3D sun-path geometry for IFC-Lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-autodesk",
+          "local": "0.2.1",
+          "upstream": "0.2.1",
+          "private": false,
+          "description": "Autodesk Forma and Data Exchange cloud-source provider for ifc-lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-bimcollab",
+          "local": null,
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "BIMcollab Documents file-source provider for ifc-lite",
+          "status": "new",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-buildagil",
+          "local": null,
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "buildagil openCDE documents file-source provider for ifc-lite",
+          "status": "new",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-dalux",
+          "local": "0.4.1",
+          "upstream": "0.4.1",
+          "private": false,
+          "description": "Dalux Build (Box) file-source provider for ifc-lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-dropbox",
+          "local": "0.4.0",
+          "upstream": "0.4.0",
+          "private": false,
+          "description": "Dropbox file-source provider for ifc-lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-fixture",
+          "local": "0.3.1",
+          "upstream": "0.3.1",
+          "private": true,
+          "description": "In-memory FileSourceProvider fixture and conformance test kit for ifc-lite file-source plugins",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-msgraph",
+          "local": "0.4.0",
+          "upstream": "0.4.0",
+          "private": false,
+          "description": "Microsoft Graph file-source provider for the signed-in user's own OneDrive",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/spatial",
+          "local": "1.15.0",
+          "upstream": "1.15.1",
+          "private": false,
+          "description": "Spatial indexing for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/timing-ladder",
+          "local": "0.1.0",
+          "upstream": "0.1.0",
+          "private": true,
+          "description": "The shared doubling-size timing ladder used to pin that a decision stays linear on hostile input, measured in CPU time so contention on the runner cannot fake a failure",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/viewer-core",
+          "local": "0.2.26",
+          "upstream": "0.2.28",
+          "private": false,
+          "description": "Interactive 3D viewer for IFC models — WebGL 2 browser viewer with REST API",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/wasm",
+          "local": "10.4.0",
+          "upstream": "12.2.0",
+          "private": false,
+          "description": "WebAssembly bindings for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/wasm-lifecycle",
+          "local": "0.2.0",
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "Shared WASM engine load-retry classification and cross-realm panic-forwarding, used by @ifc-lite/geometry and @ifc-lite/parser",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/world-frame-fixtures",
+          "local": "0.1.4",
+          "upstream": "0.1.5",
+          "private": true,
+          "description": "World-frame test fixture corpus: per-element RTC origins, far-from-origin coordinates, and the normal-projected f32 noise bound they demand",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "create-ifc-lite",
+          "local": "1.15.1",
+          "upstream": "1.16.0",
+          "private": false,
+          "description": "Create IFC-Lite projects with one command",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        }
+      ],
+      "package_summary": {
+        "same-version": 21,
+        "version-changed": 41,
+        "new": 3
+      },
+      "core_runtime_closure": [
+        "@ifc-lite/codegen",
+        "@ifc-lite/data",
+        "@ifc-lite/encoding",
+        "@ifc-lite/export",
+        "@ifc-lite/geometry",
+        "@ifc-lite/ifcx",
+        "@ifc-lite/load-trace",
+        "@ifc-lite/mutations",
+        "@ifc-lite/parser",
+        "@ifc-lite/pointcloud",
+        "@ifc-lite/regex-guard",
+        "@ifc-lite/renderer",
+        "@ifc-lite/spatial",
+        "@ifc-lite/wasm",
+        "@ifc-lite/wasm-lifecycle"
+      ],
+      "viewer_runtime_closure": [
+        "@ifc-lite/ai",
+        "@ifc-lite/bcf",
+        "@ifc-lite/bcf-api",
+        "@ifc-lite/cache",
+        "@ifc-lite/charts",
+        "@ifc-lite/clash",
+        "@ifc-lite/codegen",
+        "@ifc-lite/collab",
+        "@ifc-lite/create",
+        "@ifc-lite/data",
+        "@ifc-lite/diff",
+        "@ifc-lite/documents-api",
+        "@ifc-lite/drawing-2d",
+        "@ifc-lite/encoding",
+        "@ifc-lite/export",
+        "@ifc-lite/extensions",
+        "@ifc-lite/flow",
+        "@ifc-lite/flow-nodes",
+        "@ifc-lite/geometry",
+        "@ifc-lite/ids",
+        "@ifc-lite/ids-agent",
+        "@ifc-lite/ids-authoring",
+        "@ifc-lite/ifcx",
+        "@ifc-lite/lens",
+        "@ifc-lite/lists",
+        "@ifc-lite/load-trace",
+        "@ifc-lite/mcp",
+        "@ifc-lite/merge",
+        "@ifc-lite/mutations",
+        "@ifc-lite/oauth-pkce",
+        "@ifc-lite/opencde-foundation",
+        "@ifc-lite/parser",
+        "@ifc-lite/plugin-api",
+        "@ifc-lite/pointcloud",
+        "@ifc-lite/query",
+        "@ifc-lite/regex-guard",
+        "@ifc-lite/renderer",
+        "@ifc-lite/report-contract",
+        "@ifc-lite/rules",
+        "@ifc-lite/sandbox",
+        "@ifc-lite/sdk",
+        "@ifc-lite/semantic",
+        "@ifc-lite/server-client",
+        "@ifc-lite/solar",
+        "@ifc-lite/source-autodesk",
+        "@ifc-lite/source-bimcollab",
+        "@ifc-lite/source-buildagil",
+        "@ifc-lite/source-dalux",
+        "@ifc-lite/source-dropbox",
+        "@ifc-lite/source-msgraph",
+        "@ifc-lite/spatial",
+        "@ifc-lite/viewer-core",
+        "@ifc-lite/wasm",
+        "@ifc-lite/wasm-lifecycle"
+      ],
+      "changed_paths_vs_integrated_upstream": 6493,
+      "changes_by_area": {
+        ".changeset": 43,
+        ".claude": 1,
+        ".config": 1,
+        ".gitattributes": 1,
+        ".github": 37,
+        ".gitignore": 1,
+        ".mergify.yml": 1,
+        "AGENTS.md": 1,
+        "Cargo.lock": 1,
+        "Cargo.toml": 1,
+        "README.md": 1,
+        "api": 3,
+        "apps/autodesk-service": 2,
+        "apps/cloud-service": 2,
+        "apps/landing": 1,
+        "apps/report-service": 2,
+        "apps/server": 69,
+        "apps/viewer": 853,
+        "apps/viewer-embed": 8,
+        "clippy.toml": 1,
+        "docs": 241,
+        "examples": 110,
+        "knip.json": 1,
+        "licenses": 155,
+        "mkdocs.yml": 1,
+        "native": 54,
+        "package.json": 1,
+        "packages/ai": 2,
+        "packages/bcf": 14,
+        "packages/bcf-api": 7,
+        "packages/cache": 4,
+        "packages/charts": 3,
+        "packages/clash": 6,
+        "packages/cli": 71,
+        "packages/codegen": 16,
+        "packages/collab": 3,
+        "packages/collab-server": 5,
+        "packages/create": 15,
+        "packages/create-ifc-lite": 3,
+        "packages/data": 17,
+        "packages/diff": 103,
+        "packages/documents-api": 2,
+        "packages/drawing-2d": 26,
+        "packages/embed-protocol": 2,
+        "packages/embed-sdk": 2,
+        "packages/encoding": 6,
+        "packages/export": 71,
+        "packages/extensions": 15,
+        "packages/flow": 3,
+        "packages/flow-nodes": 13,
+        "packages/geometry": 37,
+        "packages/ids": 17,
+        "packages/ids-agent": 3,
+        "packages/ids-authoring": 5,
+        "packages/ifcx": 41,
+        "packages/lens": 4,
+        "packages/lists": 9,
+        "packages/load-trace": 2,
+        "packages/mcp": 27,
+        "packages/merge": 14,
+        "packages/mutations": 2,
+        "packages/oauth-pkce": 2,
+        "packages/oci": 28,
+        "packages/opencde-foundation": 2,
+        "packages/parser": 39,
+        "packages/plugin-api": 2,
+        "packages/pointcloud": 17,
+        "packages/provenance": 4,
+        "packages/query": 6,
+        "packages/regex-guard": 2,
+        "packages/renderer": 167,
+        "packages/report-contract": 2,
+        "packages/rules": 15,
+        "packages/sandbox": 3,
+        "packages/sdk": 7,
+        "packages/semantic": 8,
+        "packages/server-bin": 3,
+        "packages/server-client": 7,
+        "packages/solar": 2,
+        "packages/source-autodesk": 2,
+        "packages/source-bimcollab": 15,
+        "packages/source-buildagil": 18,
+        "packages/source-dalux": 3,
+        "packages/source-dropbox": 2,
+        "packages/source-fixture": 2,
+        "packages/source-msgraph": 2,
+        "packages/spatial": 3,
+        "packages/timing-ladder": 2,
+        "packages/viewer": 2,
+        "packages/wasm": 28,
+        "packages/wasm-lifecycle": 2,
+        "packages/world-frame-fixtures": 3,
+        "patches": 3,
+        "playwright.config.ts": 1,
+        "pnpm-lock.yaml": 1,
+        "requirements-docs.txt": 1,
+        "rust-major-offset.json": 1,
+        "rust/AGENTS.md": 1,
+        "rust/clash": 5,
+        "rust/core": 346,
+        "rust/csg-thread-bench": 1,
+        "rust/diff": 82,
+        "rust/diff-wasm": 26,
+        "rust/export": 263,
+        "rust/ffi": 5,
+        "rust/geometry": 918,
+        "rust/geometry-runtime": 46,
+        "rust/imported-geometry": 12,
+        "rust/landxml": 95,
+        "rust/processing": 459,
+        "rust/python": 19,
+        "rust/retained-native": 140,
+        "rust/testkit": 7,
+        "rust/wasm-bindings": 131,
+        "scripts": 427,
+        "server": 9,
+        "tests": 900,
+        "tools": 28,
+        "tsconfig.json": 1,
+        "turbo.json": 1,
+        "vercel.json": 1
+      },
+      "untracked_collisions": [],
+      "merge_summary": {
+        "add-delete-review": 104,
+        "text-conflict": 125,
+        "clean-text-merge": 108,
+        "already-matches": 4
+      },
+      "dry_merges": [
+        {
+          "path": ".changeset/cli-scan-completeness-warning.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/dbref-datum-shift.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/export-bytype-append-linear.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/ifc4x3-sectioned-profile-handedness.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-crs-name.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-federation-refusal-names-datums.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-georef-assumptions.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-terrain-export-options.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-terrain-export.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-text-references.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/loose-forks-fetch.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/mcp-scan-completeness-warning.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/modern-meals-pump.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/ninety-kings-work.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/old-planets-walk.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/page-operand-decoders.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/page-operand-export.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/page-operand-tools.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/pset-definition-set-export.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/pset-definition-set-parser.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/section-extra-clip-planes.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/section-multiple-planes-sdk-bcf.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/section-plane-caps-frames.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/server-admission-cache-policy-7676.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/server-client-parquet-cache-fallback-7676.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/server-client-stream-cache-key-7676.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/server-upload-admission-7676.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/silly-bananas-wave.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/silver-symbols-rhyme.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/step-page-directive-scan.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/step-record-frame-trivia.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/step-string-literal-end.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/step-writer-appended-records.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/stray-apostrophe-scan.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/sunny-monkeys-tap.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/total-order-float-sorts.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/wet-ravens-start.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".config/nextest.toml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".gitattributes",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": ".github/actions/setup-wasm-build/action.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/autodesk-cloud.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/browser-frames.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/ci-reporting-selfcheck.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/claude-review.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/determinism.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/docker.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/docs.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/export-schema-conformance.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/field-verdict.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/fuzz.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/geometry-census-heavy.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/ifcopenshell-parity.yml",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": ".github/workflows/label-authority.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/perf-ratchet-lower.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/pr-agent-review.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/pr-risk-label.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/python-wheels.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": ".github/workflows/report-service.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/reporter-6729.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/sdk-canary.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/server-binaries.yml",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": ".github/workflows/test.yml",
+          "status": "text-conflict",
+          "regions": 38
+        },
+        {
+          "path": ".gitignore",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "AGENTS.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "Cargo.lock",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "Cargo.toml",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "README.md",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/autodesk-service/package.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/autodesk-service/vitest.config.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/cloud-service/package.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/cloud-service/vitest.config.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/report-service/package.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/report-service/vitest.config.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/server/Cargo.toml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/server/src/routes/parse/ifczip_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/server/src/routes/parse/upload.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/server/src/services/data_model/materials.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/server/src/services/data_model/metadata.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/server/src/services/data_model/mod.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/server/src/services/data_model/quantities.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/server/src/services/parquet_data_model_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer-embed/CHANGELOG.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer-embed/package.json",
+          "status": "text-conflict",
+          "regions": 5
+        },
+        {
+          "path": "apps/viewer/package.json",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/bootstrap.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/ChunkErrorBoundary.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/mcp/playground-dispatcher.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/HierarchyPanel.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/PropertiesPanel.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewCube.tsx",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewerLayout.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/Viewport.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportContainer.tsx",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportContainer.windowDrop.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportOverlays.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportWelcomeCard.tsx",
+          "status": "text-conflict",
+          "regions": 10
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/WelcomeFooterChips.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/commandPaletteCommandsTypes.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/flow/FlowPanel.player-publish.test.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/flow/FlowPanel.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/elementSubtree.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/revealGlobalId.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/treeDataBuilder.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/useHierarchyTree.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/useRevealSelection.ts",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/MaterialTotalsPanel.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/ModelMetadataPanel.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/selectionSummary.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ribbon/RibbonToolbar.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/settings/GeneralSection.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/settings/PerformanceSection.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/sidebar/ActivityBar.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/sidebar/SidebarDock.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-mobile.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-panels.test.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-panels.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/MeasureQuantities.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionHint.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionPanel.tsx",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionToolbar.box.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionToolbar.tsx",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useAnimationLoop.renderThrow.test.tsx",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useAnimationLoop.ts",
+          "status": "text-conflict",
+          "regions": 7
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useGeometryStreaming.ts",
+          "status": "text-conflict",
+          "regions": 5
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.clash-pivot.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.fly.test.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useRenderUpdates.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useTouchControls.one-pipeline.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useTouchControls.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/viewcube-box.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/hooks/ids/idsWorkerClient.ts",
+          "status": "already-matches"
+        },
+        {
+          "path": "apps/viewer/src/hooks/useClash.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/hooks/useIfcLoader.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/hooks/usePanelControls.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/hooks/zoneFacts.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/i18n/catalogues/flow-panel.en.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/i18n/catalogues/viewport-lighting.en.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/i18n/en.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/index.css",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/charts/datasets/elements.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/commands/modeling/authored-kinds.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/flow/publish-provenance.test.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/flow/publish-provenance.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/loadReport.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/model-indices.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/spatial-index.test.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/spatial-index.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/panels/registry.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/panels/renderPanelBody.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/scripts/templates/bim-globals.d.ts",
+          "status": "already-matches"
+        },
+        {
+          "path": "apps/viewer/src/lib/wall-edit.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/wasm-prewarm.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/createViewerActions.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/flowSlice.test.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/store/slices/mutation-history-apply.ts",
+          "status": "already-matches"
+        },
+        {
+          "path": "apps/viewer/src/store/slices/sidebarSlice.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiPreferences.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiSlice.helpers.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiSlice.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/teardown-registry.test.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/types.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/test/bcf-http-server.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/viewer/src/test/contrast/render-harness.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/utils/serverEntityTable.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/utils/viewportUtils.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/workers/idsValidation.worker.ts",
+          "status": "already-matches"
+        },
+        {
+          "path": "docs/architecture/mesh-determinism.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "docs/guide/cli.md",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "docs/guide/rendering.md",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "examples/babylonjs-viewer/package.json",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "examples/collab-demo/package.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "examples/headless-workflows/README.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "examples/headless-workflows/package.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "examples/threejs-collab/package.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "examples/threejs-viewer/package.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "package.json",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "packages/data/package.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "packages/flow-nodes/README.md",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/flow-nodes/src/bcf-publication-local-bounds.test.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "packages/geometry/src/index.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/mcp/src/safe-path.test.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/parser/src/columnar-parser.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/camera-animation.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/camera.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/instanced-rte.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "packages/renderer/src/pick-types.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-batch-upload.ts",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "packages/renderer/src/scene-contents.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-device-recovery.test.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-geometry.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-precision.ts",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "packages/renderer/src/scene-raycaster.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene.ts",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "playwright.config.ts",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "status": "text-conflict",
+          "regions": 392
+        },
+        {
+          "path": "rust/core/src/project_units/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/src/lib.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/src/parquet_bos.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/src/parquet_bos_tests.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/export/src/rebar_fabrication_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/src/rebar_schedule_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/tests/export_golden.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/analytic/profile_tests.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/bool2d.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/csg/group_cut.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/csg/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/kernel/arrangement/boolean.rs",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "rust/geometry/src/kernel/arrangement/classify.rs",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "rust/geometry/src/kernel/arrangement/mod.rs",
+          "status": "text-conflict",
+          "regions": 5
+        },
+        {
+          "path": "rust/geometry/src/kernel/mesh_bridge.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/kernel/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/kernel/tritri.rs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "rust/geometry/src/lib.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/processors/boolean/mod.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/processors/extrusion.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/processors/mod.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/profiles/curves_2d.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/profiles/mod.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/construction.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "rust/geometry/src/router/layers.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/mod.rs",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "rust/geometry/src/router/processing.rs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "rust/geometry/src/router/rep_filter.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "rust/geometry/src/router/rtc_offset.rs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "rust/geometry/src/router/voids/bool2d_path.rs",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "rust/geometry/src/router/voids/bool2d_path_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/router/voids/geom.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/voids/mod.rs",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "rust/geometry/src/router/voids/prism_cut.rs",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "rust/geometry/src/router/voids/prism_cut/tjunction_close.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/voids/probe.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/voids/representation.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/voids/staged.rs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "rust/geometry/src/router/voids/synthesis.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/test_support.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/tests/triangulation_invariance.rs",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "rust/processing/src/analytic_export/walk_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/src/element.rs",
+          "status": "text-conflict",
+          "regions": 11
+        },
+        {
+          "path": "rust/processing/src/element_degenerate.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/processing/src/element_mesh_build.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/processing/src/element_tests.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/processing/src/processor/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/src/processor/site_local.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/src/processor/site_local_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/src/style/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/tests/analytic_definitions.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/tests/symbolic_golden.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/wasm-bindings/src/api/gpu_meshes/batch_partition.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/add-sourcemap-refs.mjs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/agents-md-budget.txt",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/ai-eval/ids/packages.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/api-surface.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/augment-epsg-proj4.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/browser-cold-inputs.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-ci-path-coverage.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-ci-path-coverage.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-codegen-sync.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-codegen-sync.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-refwalk-guards.mjs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/check-rtc-frame-copies.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-server-browser-type-parity.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-source-text-assertions.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-test-revert-oracle.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-tla-chunk-await.mjs",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "scripts/check-tla-chunk-await.test.mjs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/check-workflow-report-paths.mjs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/ci-path-coverage-allowlist.txt",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/ci-prepare-wheel-matrix.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/ci-push-replay.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/ci-push-replay.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/docs/check-doc-samples.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/fetch-prebuilt-wasm.mjs",
+          "status": "text-conflict",
+          "regions": 7
+        },
+        {
+          "path": "scripts/fetch-prebuilt-wasm.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/float-sort-comparator-allowlist.txt",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/generate-epsg-index.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/lib/ci-path-coverage.mjs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/lib/license-header.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/license-header.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/pr-review-signal.test.mjs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/lib/revert-oracle-browser-run.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/revert-oracle-inert.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/rust-major-offset.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/tla-chunk-prologue.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/module-size-allowlist.txt",
+          "status": "text-conflict",
+          "regions": 9
+        },
+        {
+          "path": "scripts/perf-ratchet/measure-browser-frames.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/README.md",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "scripts/perf/ab.sh",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "scripts/perf/browser-ab-report.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/perf/build-csg-work-bundle.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/build-csg-work-bundle.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/check-frame-results.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/field-verdict-fetch.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/field-verdict.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/field-verdict.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/frame-ratchet-evidence.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/instructions.sh",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/tsconfig.frames.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/review/input-exclusions.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/rust-api-surface.json",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/sync-versions.test.mjs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/unused-locals-baseline.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/vercel-build.sh",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/viewer-benchmark-gpu-health.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/xmatch/build-output-guard.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/review-next-action-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-corrections-clarify-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-corrections-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-corrections-stale-expected-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-corrections-text-boolean-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-explain-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-explain-wrong-count-negative.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/benchmark/README.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "tests/benchmark/frames/begin-frame-driver.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/benchmark/frames/frame-evidence.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/benchmark/frames/frame-rig.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/benchmark/gpu-health.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/assistant-check-authoring.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/compare-impact-6921.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/document-text.e2e.spec.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "tests/e2e/federation-control-triplet.rendering.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "tests/e2e/model-reposition.e2e.spec.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "tests/e2e/ortho-depth-nudge.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/reporter-6729.config.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/reporter-6729.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/saved-clash-reports-6947.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/selection-mask-depth.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/selection-mask-depth.gpu.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/viewer-dev-server.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/evidence/reporter-6729/README.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/perf-ratchets/bundle.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/perf-ratchets/native-instructions-large.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/perf-ratchets/native-instructions.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tools/ifcopenshell_reference/README.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "tools/ifcopenshell_reference/dump_reference.py",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "tools/ifcopenshell_reference/reference_validation.py",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tools/ifcopenshell_reference/test_reference_validation.py",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tools/ifcopenshell_reference/test_surface_coverage.py",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "turbo.json",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "vercel.json",
+          "status": "clean-text-merge",
+          "regions": 0
+        }
+      ]
+    },
+    "main": {
+      "sha": "2cf5d2fa7f7831aa8282c944d7a2a67fa3cf878e",
+      "commit": "2cf5d2fa7f7831aa8282c944d7a2a67fa3cf878e 2026-11-05T00:38:10Z test(viewer): BCF viewpoint roundtrip with a Gaussian capture loaded (#8566) (#8822)",
+      "rust_version": "28.2.0",
+      "rust_members": [
+        "rust/imported-geometry",
+        "rust/core",
+        "rust/diff",
+        "rust/diff-wasm",
+        "rust/geometry",
+        "rust/geometry-runtime",
+        "rust/retained-native",
+        "rust/processing",
+        "rust/clash",
+        "rust/ffi",
+        "rust/export",
+        "rust/wasm-bindings",
+        "rust/landxml",
+        "rust/cloud-import",
+        "rust/testkit",
+        "apps/server"
+      ],
+      "viewer_version": "5.5.0",
+      "package_count": 65,
+      "packages": [
+        {
+          "name": "@ifc-lite/ai",
+          "local": "0.2.0",
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "Provider-independent AI request core: transport contract, typed outcomes, root budgets, usage receipts and bounded JSON output parsing",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/bcf",
+          "local": "5.0.1",
+          "upstream": "5.2.1",
+          "private": false,
+          "description": "BIM Collaboration Format (BCF) support for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/bcf-api",
+          "local": "0.3.0",
+          "upstream": "0.4.0",
+          "private": false,
+          "description": "BCF API (OpenCDE) REST client for connecting to BCF servers",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/cache",
+          "local": "3.7.2",
+          "upstream": "3.7.4",
+          "private": false,
+          "description": "Binary cache format for IFC-Lite - fast model loading",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/charts",
+          "local": "0.9.0",
+          "upstream": "0.9.1",
+          "private": false,
+          "description": "Headless chart data binding for IFC-Lite: aggregate model rows into buckets that keep their element ids, build ECharts options, render SVG",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/clash",
+          "local": "2.4.4",
+          "upstream": "2.4.7",
+          "private": false,
+          "description": "Clash detection for IFC-Lite — representation-agnostic core engine + source adapters",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/cli",
+          "local": "0.41.0",
+          "upstream": "0.45.1",
+          "private": false,
+          "description": "CLI toolkit for IFC files — query, validate, export, create, and script BIM data",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/codegen",
+          "local": "1.18.1",
+          "upstream": "1.19.1",
+          "private": false,
+          "description": "TypeScript code generator from IFC EXPRESS schemas",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/collab",
+          "local": "0.10.0",
+          "upstream": "0.10.0",
+          "private": false,
+          "description": "Real-time collaborative BIM via CRDT on IFCX",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/collab-server",
+          "local": "0.9.0",
+          "upstream": "0.9.1",
+          "private": false,
+          "description": "Reference websocket sync server for @ifc-lite/collab",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/create",
+          "local": "5.1.0",
+          "upstream": "5.1.3",
+          "private": false,
+          "description": "IFC creation from scratch — walls, slabs, beams, columns, stairs, roofs with geometry, properties and quantities",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/data",
+          "local": "6.2.0",
+          "upstream": "6.4.0",
+          "private": false,
+          "description": "Columnar data structures for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/diff",
+          "local": "0.10.0",
+          "upstream": "0.13.1",
+          "private": false,
+          "description": "Headless model-diff engine for IFC-Lite — classifies entities as added/modified/deleted/unchanged across two revisions, with separable data vs geometry scope.",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/documents-api",
+          "local": "0.2.1",
+          "upstream": "0.2.1",
+          "private": false,
+          "description": "OpenCDE Documents API 1.0 client: select, download, query and upload documents against a buildingSMART Documents API server",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/drawing-2d",
+          "local": "4.2.0",
+          "upstream": "5.0.0",
+          "private": false,
+          "description": "2D architectural drawing generation from IFC models - section cuts, floor plans, and elevations",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/embed-protocol",
+          "local": "1.15.0",
+          "upstream": "1.15.0",
+          "private": false,
+          "description": "Shared postMessage protocol types for ifc-lite embed viewer and SDK",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/embed-sdk",
+          "local": "1.15.1",
+          "upstream": "1.15.1",
+          "private": false,
+          "description": "SDK for embedding the IFC-Lite 3D viewer in any web page via iframe",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/encoding",
+          "local": "2.3.0",
+          "upstream": "2.4.0",
+          "private": false,
+          "description": "IFC string encoding/decoding and property value parsing for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/export",
+          "local": "4.11.0",
+          "upstream": "4.13.3",
+          "private": false,
+          "description": "Export formats for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/extensions",
+          "local": "0.11.0",
+          "upstream": "0.12.0",
+          "private": false,
+          "description": "Extension manifest, capability grammar, and slot registry for ifc-lite user customization",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/flow",
+          "local": "0.7.0",
+          "upstream": "0.7.1",
+          "private": false,
+          "description": "Keyed-data graph runtime for BIM workflows: typed ports, item/list/group lifting, memoised evaluation, and element tracking for re-runnable graphs",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/flow-nodes",
+          "local": "0.10.0",
+          "upstream": "0.12.2",
+          "private": false,
+          "description": "Standard node library for @ifc-lite/flow over the ifc-lite SDK: model reads and writes, tables, viewer, and a sandboxed Script node",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/geometry",
+          "local": "7.8.1",
+          "upstream": "8.1.0",
+          "private": false,
+          "description": "Geometry processing bridge for IFC-Lite - exact-arithmetic CSG, streamed across workers",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/ids",
+          "local": "3.3.6",
+          "upstream": "3.4.4",
+          "private": false,
+          "description": "IDS (Information Delivery Specification) support for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/ids-agent",
+          "local": "0.2.6",
+          "upstream": "0.2.11",
+          "private": false,
+          "description": "Headless IDS authoring agent: a tool-calling loop over the IDS Studio op vocabulary, grounded by the gate, producing reviewable proposals",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/ids-authoring",
+          "local": "0.2.6",
+          "upstream": "0.3.4",
+          "private": false,
+          "description": "Headless IDS authoring core: Studio document with stable node ids, typed invertible operations, a grounding gate against the IFC schema tables, history, sidecar and re-identification",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/ifcx",
+          "local": "4.4.0",
+          "upstream": "4.6.0",
+          "private": false,
+          "description": "IFC5 (IFCX) parser for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/lens",
+          "local": "2.2.0",
+          "upstream": "2.2.1",
+          "private": false,
+          "description": "Rule-based 3D filtering and colorization for IFC models",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/lists",
+          "local": "3.1.7",
+          "upstream": "3.2.0",
+          "private": false,
+          "description": "Configurable property tables and schedules from IFC data for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/load-trace",
+          "local": "0.3.0",
+          "upstream": "0.3.0",
+          "private": false,
+          "description": "Dependency-free load-trace spans: performance.measure plus a per-load, cross-thread span tree with worker clock alignment and Chrome-trace export",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/mcp",
+          "local": "0.27.0",
+          "upstream": "0.29.0",
+          "private": false,
+          "description": "Model Context Protocol server for ifc-lite — agent-native BIM via MCP (stdio + Streamable HTTP)",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/merge",
+          "local": "0.4.7",
+          "upstream": "0.5.0",
+          "private": false,
+          "description": "Three-way merge engine for IFCX layers — MergePlan with auto-merged ops and explicit conflict records, merge-layer emission, rebase, and revert.",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/mutations",
+          "local": "3.2.0",
+          "upstream": "3.2.0",
+          "private": false,
+          "description": "Mutation tracking and property editing for IFC-Lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/oauth-pkce",
+          "local": "0.3.0",
+          "upstream": "0.3.0",
+          "private": false,
+          "description": "Browser OAuth 2.0 Authorization Code + PKCE flow, shared by ifc-lite's file-source providers",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/oci",
+          "local": null,
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "OCI distribution client (tags, manifests, digest-verified blobs, blob and manifest push) with an injected fetch, for Node and browsers",
+          "status": "new",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/opencde-foundation",
+          "local": "0.3.0",
+          "upstream": "0.3.0",
+          "private": false,
+          "description": "buildingSMART OpenCDE Foundation API client: version discovery, auth discovery, OAuth2 flows and the shared HTTP client used by every OpenCDE service client",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/parser",
+          "local": "9.5.1",
+          "upstream": "9.9.0",
+          "private": false,
+          "description": "IFC/STEP parser for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/plugin-api",
+          "local": "0.5.0",
+          "upstream": "0.5.0",
+          "private": false,
+          "description": "Dependency-free type surface for ifc-lite file-source plugins",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/pointcloud",
+          "local": "0.12.0",
+          "upstream": "0.14.0",
+          "private": false,
+          "description": "Point cloud decoders and types for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/provenance",
+          "local": "0.2.0",
+          "upstream": "0.2.0",
+          "private": true,
+          "description": "Canonical node-hash specification and certificate library for proof-carrying model changes.",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/query",
+          "local": "2.5.2",
+          "upstream": "2.5.4",
+          "private": false,
+          "description": "Query system for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/regex-guard",
+          "local": "0.3.0",
+          "upstream": "0.3.0",
+          "private": false,
+          "description": "A shared, dependency-free guard against catastrophic-backtracking (ReDoS) regex patterns compiled from untrusted input",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/renderer",
+          "local": "6.4.0",
+          "upstream": "7.1.0",
+          "private": false,
+          "description": "WebGPU renderer for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/report-contract",
+          "local": "0.1.0",
+          "upstream": "0.1.0",
+          "private": true,
+          "description": "Shared reviewed error report protocol",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/rules",
+          "local": "0.7.7",
+          "upstream": "0.8.0",
+          "private": false,
+          "description": "Filter-rule vocabulary, evaluator and .rules.json information-validation engine for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/sandbox",
+          "local": "2.12.0",
+          "upstream": "2.12.1",
+          "private": false,
+          "description": "QuickJS-in-WASM sandboxed script execution for ifc-lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/sdk",
+          "local": "9.5.0",
+          "upstream": "9.6.1",
+          "private": false,
+          "description": "Scripting SDK for ifc-lite — the bim.* API for BIM automation",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/semantic",
+          "local": "0.2.1",
+          "upstream": "0.2.3",
+          "private": false,
+          "description": "Portable semantic datasets, profiles, validation and IFC identity resolution",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/server-bin",
+          "local": "2.0.1",
+          "upstream": "3.0.1",
+          "private": false,
+          "description": "Pre-built IFC-Lite server binary - run without Docker or Rust",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/server-client",
+          "local": "4.0.1",
+          "upstream": "5.1.1",
+          "private": false,
+          "description": "TypeScript client SDK for IFC-Lite Server",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/solar",
+          "local": "1.15.5",
+          "upstream": "1.15.5",
+          "private": false,
+          "description": "Solar position, sunrise/sunset and 3D sun-path geometry for IFC-Lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-autodesk",
+          "local": "0.2.1",
+          "upstream": "0.2.1",
+          "private": false,
+          "description": "Autodesk Forma and Data Exchange cloud-source provider for ifc-lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-bimcollab",
+          "local": null,
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "BIMcollab Documents file-source provider for ifc-lite",
+          "status": "new",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-buildagil",
+          "local": null,
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "buildagil openCDE documents file-source provider for ifc-lite",
+          "status": "new",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-dalux",
+          "local": "0.4.1",
+          "upstream": "0.4.1",
+          "private": false,
+          "description": "Dalux Build (Box) file-source provider for ifc-lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-dropbox",
+          "local": "0.4.0",
+          "upstream": "0.4.0",
+          "private": false,
+          "description": "Dropbox file-source provider for ifc-lite",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-fixture",
+          "local": "0.3.1",
+          "upstream": "0.3.1",
+          "private": true,
+          "description": "In-memory FileSourceProvider fixture and conformance test kit for ifc-lite file-source plugins",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/source-msgraph",
+          "local": "0.4.0",
+          "upstream": "0.4.0",
+          "private": false,
+          "description": "Microsoft Graph file-source provider for the signed-in user's own OneDrive",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/spatial",
+          "local": "1.15.0",
+          "upstream": "1.15.1",
+          "private": false,
+          "description": "Spatial indexing for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/timing-ladder",
+          "local": "0.1.0",
+          "upstream": "0.1.0",
+          "private": true,
+          "description": "The shared doubling-size timing ladder used to pin that a decision stays linear on hostile input, measured in CPU time so contention on the runner cannot fake a failure",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/viewer-core",
+          "local": "0.2.26",
+          "upstream": "0.2.28",
+          "private": false,
+          "description": "Interactive 3D viewer for IFC models — WebGL 2 browser viewer with REST API",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/wasm",
+          "local": "10.4.0",
+          "upstream": "12.2.0",
+          "private": false,
+          "description": "WebAssembly bindings for IFC-Lite",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/wasm-lifecycle",
+          "local": "0.2.0",
+          "upstream": "0.2.0",
+          "private": false,
+          "description": "Shared WASM engine load-retry classification and cross-realm panic-forwarding, used by @ifc-lite/geometry and @ifc-lite/parser",
+          "status": "same-version",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "@ifc-lite/world-frame-fixtures",
+          "local": "0.1.4",
+          "upstream": "0.1.5",
+          "private": true,
+          "description": "World-frame test fixture corpus: per-element RTC origins, far-from-origin coordinates, and the normal-projected f32 noise bound they demand",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        },
+        {
+          "name": "create-ifc-lite",
+          "local": "1.15.1",
+          "upstream": "1.16.0",
+          "private": false,
+          "description": "Create IFC-Lite projects with one command",
+          "status": "version-changed",
+          "source_changed_vs_base": true
+        }
+      ],
+      "package_summary": {
+        "same-version": 21,
+        "version-changed": 41,
+        "new": 3
+      },
+      "core_runtime_closure": [
+        "@ifc-lite/codegen",
+        "@ifc-lite/data",
+        "@ifc-lite/encoding",
+        "@ifc-lite/export",
+        "@ifc-lite/geometry",
+        "@ifc-lite/ifcx",
+        "@ifc-lite/load-trace",
+        "@ifc-lite/mutations",
+        "@ifc-lite/parser",
+        "@ifc-lite/pointcloud",
+        "@ifc-lite/regex-guard",
+        "@ifc-lite/renderer",
+        "@ifc-lite/spatial",
+        "@ifc-lite/wasm",
+        "@ifc-lite/wasm-lifecycle"
+      ],
+      "viewer_runtime_closure": [
+        "@ifc-lite/ai",
+        "@ifc-lite/bcf",
+        "@ifc-lite/bcf-api",
+        "@ifc-lite/cache",
+        "@ifc-lite/charts",
+        "@ifc-lite/clash",
+        "@ifc-lite/codegen",
+        "@ifc-lite/collab",
+        "@ifc-lite/create",
+        "@ifc-lite/data",
+        "@ifc-lite/diff",
+        "@ifc-lite/documents-api",
+        "@ifc-lite/drawing-2d",
+        "@ifc-lite/encoding",
+        "@ifc-lite/export",
+        "@ifc-lite/extensions",
+        "@ifc-lite/flow",
+        "@ifc-lite/flow-nodes",
+        "@ifc-lite/geometry",
+        "@ifc-lite/ids",
+        "@ifc-lite/ids-agent",
+        "@ifc-lite/ids-authoring",
+        "@ifc-lite/ifcx",
+        "@ifc-lite/lens",
+        "@ifc-lite/lists",
+        "@ifc-lite/load-trace",
+        "@ifc-lite/mcp",
+        "@ifc-lite/merge",
+        "@ifc-lite/mutations",
+        "@ifc-lite/oauth-pkce",
+        "@ifc-lite/opencde-foundation",
+        "@ifc-lite/parser",
+        "@ifc-lite/plugin-api",
+        "@ifc-lite/pointcloud",
+        "@ifc-lite/query",
+        "@ifc-lite/regex-guard",
+        "@ifc-lite/renderer",
+        "@ifc-lite/report-contract",
+        "@ifc-lite/rules",
+        "@ifc-lite/sandbox",
+        "@ifc-lite/sdk",
+        "@ifc-lite/semantic",
+        "@ifc-lite/server-client",
+        "@ifc-lite/solar",
+        "@ifc-lite/source-autodesk",
+        "@ifc-lite/source-bimcollab",
+        "@ifc-lite/source-buildagil",
+        "@ifc-lite/source-dalux",
+        "@ifc-lite/source-dropbox",
+        "@ifc-lite/source-msgraph",
+        "@ifc-lite/spatial",
+        "@ifc-lite/viewer-core",
+        "@ifc-lite/wasm",
+        "@ifc-lite/wasm-lifecycle"
+      ],
+      "changed_paths_vs_integrated_upstream": 6589,
+      "changes_by_area": {
+        ".changeset": 51,
+        ".claude": 1,
+        ".config": 1,
+        ".gitattributes": 1,
+        ".github": 37,
+        ".gitignore": 1,
+        ".mergify.yml": 1,
+        "AGENTS.md": 1,
+        "Cargo.lock": 1,
+        "Cargo.toml": 1,
+        "README.md": 1,
+        "api": 3,
+        "apps/autodesk-service": 2,
+        "apps/cloud-service": 2,
+        "apps/landing": 1,
+        "apps/report-service": 2,
+        "apps/server": 69,
+        "apps/viewer": 901,
+        "apps/viewer-embed": 8,
+        "clippy.toml": 1,
+        "docs": 244,
+        "examples": 110,
+        "knip.json": 1,
+        "licenses": 155,
+        "mkdocs.yml": 1,
+        "native": 54,
+        "package.json": 1,
+        "packages/ai": 2,
+        "packages/bcf": 14,
+        "packages/bcf-api": 7,
+        "packages/cache": 4,
+        "packages/charts": 3,
+        "packages/clash": 6,
+        "packages/cli": 71,
+        "packages/codegen": 16,
+        "packages/collab": 3,
+        "packages/collab-server": 5,
+        "packages/create": 15,
+        "packages/create-ifc-lite": 3,
+        "packages/data": 17,
+        "packages/diff": 103,
+        "packages/documents-api": 2,
+        "packages/drawing-2d": 26,
+        "packages/embed-protocol": 2,
+        "packages/embed-sdk": 2,
+        "packages/encoding": 6,
+        "packages/export": 71,
+        "packages/extensions": 15,
+        "packages/flow": 3,
+        "packages/flow-nodes": 13,
+        "packages/geometry": 37,
+        "packages/ids": 17,
+        "packages/ids-agent": 3,
+        "packages/ids-authoring": 5,
+        "packages/ifcx": 41,
+        "packages/lens": 4,
+        "packages/lists": 9,
+        "packages/load-trace": 2,
+        "packages/mcp": 27,
+        "packages/merge": 14,
+        "packages/mutations": 2,
+        "packages/oauth-pkce": 2,
+        "packages/oci": 28,
+        "packages/opencde-foundation": 2,
+        "packages/parser": 39,
+        "packages/plugin-api": 2,
+        "packages/pointcloud": 26,
+        "packages/provenance": 4,
+        "packages/query": 6,
+        "packages/regex-guard": 2,
+        "packages/renderer": 182,
+        "packages/report-contract": 2,
+        "packages/rules": 15,
+        "packages/sandbox": 3,
+        "packages/sdk": 7,
+        "packages/semantic": 8,
+        "packages/server-bin": 3,
+        "packages/server-client": 7,
+        "packages/solar": 2,
+        "packages/source-autodesk": 2,
+        "packages/source-bimcollab": 15,
+        "packages/source-buildagil": 18,
+        "packages/source-dalux": 3,
+        "packages/source-dropbox": 2,
+        "packages/source-fixture": 2,
+        "packages/source-msgraph": 2,
+        "packages/spatial": 3,
+        "packages/timing-ladder": 2,
+        "packages/viewer": 2,
+        "packages/wasm": 28,
+        "packages/wasm-lifecycle": 2,
+        "packages/world-frame-fixtures": 3,
+        "patches": 3,
+        "playwright.config.ts": 1,
+        "pnpm-lock.yaml": 1,
+        "requirements-docs.txt": 1,
+        "rust-major-offset.json": 1,
+        "rust/AGENTS.md": 1,
+        "rust/clash": 5,
+        "rust/core": 346,
+        "rust/csg-thread-bench": 1,
+        "rust/diff": 82,
+        "rust/diff-wasm": 26,
+        "rust/export": 263,
+        "rust/ffi": 5,
+        "rust/geometry": 918,
+        "rust/geometry-runtime": 46,
+        "rust/imported-geometry": 12,
+        "rust/landxml": 95,
+        "rust/processing": 459,
+        "rust/python": 19,
+        "rust/retained-native": 141,
+        "rust/testkit": 7,
+        "rust/wasm-bindings": 131,
+        "scripts": 429,
+        "server": 9,
+        "tests": 910,
+        "tools": 28,
+        "tsconfig.json": 1,
+        "turbo.json": 1,
+        "vercel.json": 1
+      },
+      "untracked_collisions": [],
+      "merge_summary": {
+        "add-delete-review": 104,
+        "text-conflict": 126,
+        "clean-text-merge": 110,
+        "already-matches": 4
+      },
+      "dry_merges": [
+        {
+          "path": ".changeset/cli-scan-completeness-warning.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/dbref-datum-shift.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/export-bytype-append-linear.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/ifc4x3-sectioned-profile-handedness.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-crs-name.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-federation-refusal-names-datums.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-georef-assumptions.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-terrain-export-options.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-terrain-export.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/landxml-text-references.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/loose-forks-fetch.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/mcp-scan-completeness-warning.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/modern-meals-pump.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/ninety-kings-work.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/old-planets-walk.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/page-operand-decoders.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/page-operand-export.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/page-operand-tools.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/pset-definition-set-export.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/pset-definition-set-parser.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/section-extra-clip-planes.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/section-multiple-planes-sdk-bcf.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/section-plane-caps-frames.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/server-admission-cache-policy-7676.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/server-client-parquet-cache-fallback-7676.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/server-client-stream-cache-key-7676.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/server-upload-admission-7676.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/silly-bananas-wave.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/silver-symbols-rhyme.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/step-page-directive-scan.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/step-record-frame-trivia.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/step-string-literal-end.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/step-writer-appended-records.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/stray-apostrophe-scan.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/sunny-monkeys-tap.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/total-order-float-sorts.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".changeset/wet-ravens-start.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".config/nextest.toml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".gitattributes",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": ".github/actions/setup-wasm-build/action.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/autodesk-cloud.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/browser-frames.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/ci-reporting-selfcheck.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/claude-review.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/determinism.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/docker.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/docs.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/export-schema-conformance.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/field-verdict.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/fuzz.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/geometry-census-heavy.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/ifcopenshell-parity.yml",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": ".github/workflows/label-authority.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/perf-ratchet-lower.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/pr-agent-review.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/pr-risk-label.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/python-wheels.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": ".github/workflows/report-service.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/reporter-6729.yml",
+          "status": "add-delete-review"
+        },
+        {
+          "path": ".github/workflows/sdk-canary.yml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": ".github/workflows/server-binaries.yml",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": ".github/workflows/test.yml",
+          "status": "text-conflict",
+          "regions": 38
+        },
+        {
+          "path": ".gitignore",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "AGENTS.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "Cargo.lock",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "Cargo.toml",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "README.md",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/autodesk-service/package.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/autodesk-service/vitest.config.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/cloud-service/package.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/cloud-service/vitest.config.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/report-service/package.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/report-service/vitest.config.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/server/Cargo.toml",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/server/src/routes/parse/ifczip_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/server/src/routes/parse/upload.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/server/src/services/data_model/materials.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/server/src/services/data_model/metadata.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/server/src/services/data_model/mod.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/server/src/services/data_model/quantities.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/server/src/services/parquet_data_model_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer-embed/CHANGELOG.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer-embed/package.json",
+          "status": "text-conflict",
+          "regions": 5
+        },
+        {
+          "path": "apps/viewer/package.json",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/bootstrap.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/ChunkErrorBoundary.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/mcp/playground-dispatcher.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/HierarchyPanel.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/PropertiesPanel.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewCube.tsx",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewerLayout.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/Viewport.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportContainer.tsx",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportContainer.windowDrop.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportOverlays.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportWelcomeCard.tsx",
+          "status": "text-conflict",
+          "regions": 10
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/WelcomeFooterChips.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/commandPaletteCommandsTypes.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/flow/FlowPanel.player-publish.test.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/flow/FlowPanel.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/elementSubtree.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/revealGlobalId.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/treeDataBuilder.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/useHierarchyTree.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/useRevealSelection.ts",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/MaterialTotalsPanel.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/ModelMetadataPanel.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/selectionSummary.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ribbon/RibbonToolbar.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/settings/GeneralSection.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/settings/PerformanceSection.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/sidebar/ActivityBar.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/sidebar/SidebarDock.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-mobile.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-panels.test.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-panels.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/MeasureQuantities.tsx",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/MeasureToolbar.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionHint.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionPanel.tsx",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionToolbar.box.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionToolbar.tsx",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/measure-ribbon.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useAnimationLoop.renderThrow.test.tsx",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useAnimationLoop.ts",
+          "status": "text-conflict",
+          "regions": 7
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useGeometryStreaming.ts",
+          "status": "text-conflict",
+          "regions": 5
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.clash-pivot.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.fly.test.tsx",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.ts",
+          "status": "text-conflict",
+          "regions": 5
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useRenderUpdates.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useTouchControls.one-pipeline.test.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useTouchControls.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/viewcube-box.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/hooks/ids/idsWorkerClient.ts",
+          "status": "already-matches"
+        },
+        {
+          "path": "apps/viewer/src/hooks/useClash.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/hooks/useIfcLoader.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/hooks/usePanelControls.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/hooks/zoneFacts.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/i18n/catalogues/flow-panel.en.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/i18n/catalogues/viewport-lighting.en.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/i18n/en.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/index.css",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/charts/datasets/elements.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/commands/modeling/authored-kinds.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/flow/publish-provenance.test.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/flow/publish-provenance.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/loadReport.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/model-indices.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/spatial-index.test.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/spatial-index.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/panels/registry.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/panels/renderPanelBody.tsx",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/scripts/templates/bim-globals.d.ts",
+          "status": "already-matches"
+        },
+        {
+          "path": "apps/viewer/src/lib/wall-edit.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/wasm-prewarm.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/createViewerActions.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/flowSlice.test.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/store/slices/mutation-history-apply.ts",
+          "status": "already-matches"
+        },
+        {
+          "path": "apps/viewer/src/store/slices/sidebarSlice.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiPreferences.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiSlice.helpers.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiSlice.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/teardown-registry.test.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/types.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "apps/viewer/src/test/bcf-http-server.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "apps/viewer/src/test/contrast/render-harness.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/utils/serverEntityTable.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/utils/viewportUtils.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "apps/viewer/src/workers/idsValidation.worker.ts",
+          "status": "already-matches"
+        },
+        {
+          "path": "docs/architecture/mesh-determinism.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "docs/guide/cli.md",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "docs/guide/rendering.md",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "examples/babylonjs-viewer/package.json",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "examples/collab-demo/package.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "examples/headless-workflows/README.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "examples/headless-workflows/package.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "examples/threejs-collab/package.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "examples/threejs-viewer/package.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "package.json",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "packages/data/package.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "packages/flow-nodes/README.md",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/flow-nodes/src/bcf-publication-local-bounds.test.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "packages/geometry/src/index.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/mcp/src/safe-path.test.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/parser/src/columnar-parser.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/README.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "packages/renderer/src/camera-animation.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/camera.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/instanced-rte.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "packages/renderer/src/pick-types.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-batch-upload.ts",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "packages/renderer/src/scene-contents.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-device-recovery.test.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-geometry.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-precision.ts",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "packages/renderer/src/scene-raycaster.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene.ts",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "playwright.config.ts",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "status": "text-conflict",
+          "regions": 392
+        },
+        {
+          "path": "rust/core/src/project_units/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/src/lib.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/src/parquet_bos.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/src/parquet_bos_tests.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/export/src/rebar_fabrication_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/src/rebar_schedule_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/export/tests/export_golden.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/analytic/profile_tests.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/bool2d.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/csg/group_cut.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/csg/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/kernel/arrangement/boolean.rs",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "rust/geometry/src/kernel/arrangement/classify.rs",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "rust/geometry/src/kernel/arrangement/mod.rs",
+          "status": "text-conflict",
+          "regions": 5
+        },
+        {
+          "path": "rust/geometry/src/kernel/mesh_bridge.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/kernel/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/kernel/tritri.rs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "rust/geometry/src/lib.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/processors/boolean/mod.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/processors/extrusion.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/processors/mod.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/profiles/curves_2d.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/profiles/mod.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/construction.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "rust/geometry/src/router/layers.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/mod.rs",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "rust/geometry/src/router/processing.rs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "rust/geometry/src/router/rep_filter.rs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "rust/geometry/src/router/rtc_offset.rs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "rust/geometry/src/router/voids/bool2d_path.rs",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "rust/geometry/src/router/voids/bool2d_path_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/src/router/voids/geom.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/voids/mod.rs",
+          "status": "text-conflict",
+          "regions": 6
+        },
+        {
+          "path": "rust/geometry/src/router/voids/prism_cut.rs",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "rust/geometry/src/router/voids/prism_cut/tjunction_close.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/voids/probe.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/voids/representation.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/router/voids/staged.rs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "rust/geometry/src/router/voids/synthesis.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/geometry/src/test_support.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/geometry/tests/triangulation_invariance.rs",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "rust/processing/src/analytic_export/walk_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/src/element.rs",
+          "status": "text-conflict",
+          "regions": 11
+        },
+        {
+          "path": "rust/processing/src/element_degenerate.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/processing/src/element_mesh_build.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/processing/src/element_tests.rs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "rust/processing/src/processor/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/src/processor/site_local.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/src/processor/site_local_tests.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/src/style/mod.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/tests/analytic_definitions.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/processing/tests/symbolic_golden.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "rust/wasm-bindings/src/api/gpu_meshes/batch_partition.rs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/add-sourcemap-refs.mjs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/agents-md-budget.txt",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/ai-eval/ids/packages.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/api-surface.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/augment-epsg-proj4.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/browser-cold-inputs.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-ci-path-coverage.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-ci-path-coverage.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-codegen-sync.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-codegen-sync.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-refwalk-guards.mjs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/check-rtc-frame-copies.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-server-browser-type-parity.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-source-text-assertions.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-test-revert-oracle.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/check-tla-chunk-await.mjs",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "scripts/check-tla-chunk-await.test.mjs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/check-workflow-report-paths.mjs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/ci-path-coverage-allowlist.txt",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/ci-prepare-wheel-matrix.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/ci-push-replay.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/ci-push-replay.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/docs/check-doc-samples.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/fetch-prebuilt-wasm.mjs",
+          "status": "text-conflict",
+          "regions": 7
+        },
+        {
+          "path": "scripts/fetch-prebuilt-wasm.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/float-sort-comparator-allowlist.txt",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/generate-epsg-index.ts",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/lib/ci-path-coverage.mjs",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/lib/license-header.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/license-header.test.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/pr-review-signal.test.mjs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/lib/revert-oracle-browser-run.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/revert-oracle-inert.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/rust-major-offset.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/lib/tla-chunk-prologue.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/module-size-allowlist.txt",
+          "status": "text-conflict",
+          "regions": 10
+        },
+        {
+          "path": "scripts/perf-ratchet/measure-browser-frames.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/README.md",
+          "status": "text-conflict",
+          "regions": 3
+        },
+        {
+          "path": "scripts/perf/ab.sh",
+          "status": "text-conflict",
+          "regions": 4
+        },
+        {
+          "path": "scripts/perf/browser-ab-report.mjs",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/perf/build-csg-work-bundle.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/build-csg-work-bundle.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/check-frame-results.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/field-verdict-fetch.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/field-verdict.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/field-verdict.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/frame-ratchet-evidence.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/instructions.sh",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/perf/tsconfig.frames.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/review/input-exclusions.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/rust-api-surface.json",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "scripts/sync-versions.test.mjs",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "scripts/unused-locals-baseline.json",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/vercel-build.sh",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "scripts/viewer-benchmark-gpu-health.test.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "scripts/xmatch/build-output-guard.mjs",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/review-next-action-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-corrections-clarify-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-corrections-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-corrections-stale-expected-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-corrections-text-boolean-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-explain-release.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/ai-eval/recordings/validation-explain-wrong-count-negative.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/benchmark/README.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "tests/benchmark/frames/begin-frame-driver.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/benchmark/frames/frame-evidence.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/benchmark/frames/frame-rig.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/benchmark/gpu-health.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/assistant-check-authoring.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/compare-impact-6921.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/document-text.e2e.spec.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "tests/e2e/federation-control-triplet.rendering.ts",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "tests/e2e/model-reposition.e2e.spec.ts",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "tests/e2e/ortho-depth-nudge.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/reporter-6729.config.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/reporter-6729.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/saved-clash-reports-6947.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/selection-mask-depth.e2e.spec.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/selection-mask-depth.gpu.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/e2e/viewer-dev-server.ts",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/evidence/reporter-6729/README.md",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/perf-ratchets/bundle.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/perf-ratchets/native-instructions-large.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tests/perf-ratchets/native-instructions.json",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tools/ifcopenshell_reference/README.md",
+          "status": "text-conflict",
+          "regions": 1
+        },
+        {
+          "path": "tools/ifcopenshell_reference/dump_reference.py",
+          "status": "clean-text-merge",
+          "regions": 0
+        },
+        {
+          "path": "tools/ifcopenshell_reference/reference_validation.py",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tools/ifcopenshell_reference/test_reference_validation.py",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "tools/ifcopenshell_reference/test_surface_coverage.py",
+          "status": "add-delete-review"
+        },
+        {
+          "path": "turbo.json",
+          "status": "text-conflict",
+          "regions": 2
+        },
+        {
+          "path": "vercel.json",
+          "status": "clean-text-merge",
+          "regions": 0
+        }
+      ]
+    }
+  },
+  "limits": [
+    "Package presence/version is not proof that a feature is connected to the desktop UI.",
+    "Text merge results are risk estimates, not build, test, geometry, or performance evidence.",
+    "Core/package base is production 61d209; custom viewer base remains v10.3.0 because the UI was deliberately retained.",
+    "Tracked and nonignored untracked application files and indexes are fingerprinted; ignored build caches are outside that set."
+  ],
+  "preserved_release": {
+    "IFC-Lite.exe": {
+      "path": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-nhip-load-20261027-r7\\IFC-Lite.exe",
+      "bytes": 45432320,
+      "sha256": "0a957e98ca82f23a56192313d9179dd6d4f9d71cd81c27fce0d87456dd76dff8"
+    },
+    "source.patch": {
+      "path": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-nhip-load-20261027-r7\\source.patch",
+      "bytes": 521803,
+      "sha256": "af628c4b58ec8ed2f54593785dd587e377bdb3ae712b2905fe82fbc7b28793a2"
+    },
+    "qualification.json": {
+      "path": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-nhip-load-20261027-r7\\qualification.json",
+      "bytes": 3315,
+      "sha256": "9402727dfce65550457bd4aece5d179294c69a304d14c655856d285f979f1327"
+    }
+  },
+  "application_sources_and_indexes_unchanged": true
+}

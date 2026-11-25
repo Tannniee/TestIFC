@@ -1,0 +1,15 @@
+{
+  "application_source_files_verified": 240,
+  "changed_or_missing": [],
+  "exe_hash_matches": true,
+  "exe_sha256": "1b9a8879c4ff556324cf3aaa459b58d2fcd8f1d03fda22579bd861e98fbc1d4b",
+  "head_unchanged": true,
+  "branch_unchanged": true,
+  "staged_paths": [],
+  "research_artifacts": [
+    "RESEARCH.vi.md",
+    "audit-upstream.py",
+    "dependency-closure.json",
+    "evidence.json"
+  ]
+}

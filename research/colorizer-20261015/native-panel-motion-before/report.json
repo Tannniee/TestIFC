@@ -1,0 +1,142 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-interactions-20261016-r2\\IFC-Lite.exe",
+  "model": "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-colorizer-ux-njdXja",
+  "assertions": [
+    {
+      "name": "quiet startup: no hierarchy, collapsed ribbon/sidebar, no welcome or privacy toast",
+      "evidence": {
+        "leftCollapsed": true,
+        "ribbonCollapsed": true,
+        "sidebarMode": "collapsed"
+      }
+    },
+    {
+      "name": "all requested panel surfaces remain opaque while content animates",
+      "evidence": [
+        {
+          "id": "sources",
+          "opaque": false,
+          "intermediateFrames": 3,
+          "duration": "0.14s"
+        },
+        {
+          "id": "zones",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "layers",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "loadReport",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "changes",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "cost",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "measurements",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "extensions",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "environment",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "pointclouds",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "model",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "changeSets",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        },
+        {
+          "id": "placement",
+          "opaque": false,
+          "intermediateFrames": 9,
+          "duration": "0.14s"
+        }
+      ]
+    },
+    {
+      "name": "Placement Georeference switches on a permanent background",
+      "evidence": {
+        "opaque": false,
+        "intermediateFrames": 9
+      }
+    },
+    {
+      "name": "Placement Local switches on a permanent background",
+      "evidence": {
+        "opaque": false,
+        "intermediateFrames": 9
+      }
+    },
+    {
+      "name": "Placement Georeference switches on a permanent background",
+      "evidence": {
+        "opaque": false,
+        "intermediateFrames": 9
+      }
+    },
+    {
+      "name": "Placement Local switches on a permanent background",
+      "evidence": {
+        "opaque": false,
+        "intermediateFrames": 9
+      }
+    },
+    {
+      "name": "actual clash rows animate between real model regions",
+      "evidence": {
+        "settledMs": 440.02500000000146,
+        "distinct": 44
+      }
+    },
+    {
+      "name": "rapid clash changes settle on the last requested region"
+    },
+    {
+      "name": "reduced motion disables panel and clash transitions"
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "ok": true
+}

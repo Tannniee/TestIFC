@@ -1,0 +1,770 @@
+{
+  "name": "Local",
+  "frames": [
+    {
+      "time": 0,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 9.944999999999709,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 19.970000000001164,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 29.974999999998545,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0,
+      "transform": "matrix(1, 0, 0, 1, 0, 4)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 39.95499999999811,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0,
+      "transform": "matrix(1, 0, 0, 1, 0, 4)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 49.95999999999913,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.287978,
+      "transform": "matrix(1, 0, 0, 1, 0, 2.84809)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 59.965000000000146,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.539689,
+      "transform": "matrix(1, 0, 0, 1, 0, 1.84124)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 69.95499999999811,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.709388,
+      "transform": "matrix(1, 0, 0, 1, 0, 1.16245)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 79.95999999999913,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.812437,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.750252)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 89.97000000000116,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.876454,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.494184)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 99.97499999999854,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.918083,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.327667)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 109.96500000000015,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.9461,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.215599)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 120.0099999999984,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.96545,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.138199)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 129.9399999999987,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.978663,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.0853471)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 140.0099999999984,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.987813,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.0487464)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 149.97999999999956,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.993793,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.0248261)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 159.95000000000073,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.997481,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.010075)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 169.99499999999898,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 0.999428,
+      "transform": "matrix(1, 0, 0, 1, 0, 0.00228832)",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 180.09500000000116,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 189.9549999999981,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 199.97499999999854,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 210,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 219.98500000000058,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 229.97499999999854,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 239.98500000000058,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 249.9399999999987,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 259.97000000000116,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 269.9549999999981,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 279.97499999999854,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 290,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 299.9500000000007,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 309.9549999999981,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 319.96500000000015,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 329.98999999999796,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 339.98999999999796,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 349.97000000000116,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 359.9850000000006,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 369.9850000000006,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 379.9549999999981,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 390.02999999999884,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 399.97000000000116,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 409.9500000000007,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 419.9549999999981,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 429.96500000000015,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 439.9549999999981,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 450.0099999999984,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 459.97499999999854,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 469.97000000000116,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 479.97499999999854,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 489.9599999999991,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    },
+    {
+      "time": 500.0149999999994,
+      "background": "rgba(0, 0, 0, 0)",
+      "surfaceOpacity": 1,
+      "contentOpacity": 1,
+      "transform": "none",
+      "duration": "0.14s",
+      "name": "viewer-panel-enter",
+      "canvas": {
+        "x": 0,
+        "y": 41,
+        "width": 1376,
+        "height": 891
+      }
+    }
+  ]
+}

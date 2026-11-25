@@ -1,0 +1,385 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-interactions-20261016-r2\\IFC-Lite.exe",
+  "model": "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-colorizer-ux-50lqGO",
+  "assertions": [
+    {
+      "name": "quiet startup: no hierarchy, collapsed ribbon/sidebar, no welcome or privacy toast",
+      "evidence": {
+        "leftCollapsed": true,
+        "ribbonCollapsed": true,
+        "sidebarMode": "collapsed"
+      }
+    },
+    {
+      "name": "ribbon expands without resizing or moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 14
+      }
+    },
+    {
+      "name": "ribbon collapses without resizing or moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 15
+      }
+    },
+    {
+      "name": "one actual double-click toggles ribbon in both directions, four consecutive times"
+    },
+    {
+      "name": "Hierarchy opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 14
+      }
+    },
+    {
+      "name": "Hierarchy closes over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 16
+      }
+    },
+    {
+      "name": "properties opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 15
+      }
+    },
+    {
+      "name": "properties closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 16
+      }
+    },
+    {
+      "name": "model opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "model closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "appearance opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "appearance closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "bcf opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 15
+      }
+    },
+    {
+      "name": "bcf closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 20
+      }
+    },
+    {
+      "name": "validation opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "validation closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "lens opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "lens closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "clash opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "clash closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "sources opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 16
+      }
+    },
+    {
+      "name": "sources closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 20
+      }
+    },
+    {
+      "name": "zones opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "zones closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "loadReport opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "loadReport closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "cost opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "cost closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 20
+      }
+    },
+    {
+      "name": "environment opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 20
+      }
+    },
+    {
+      "name": "environment closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "pointclouds opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 20
+      }
+    },
+    {
+      "name": "pointclouds closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "measurements opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "measurements closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "changes opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 20
+      }
+    },
+    {
+      "name": "changes closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "colorizer opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "colorizer closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "Plan/3D: Hierarchy opens without resizing the 3D pane",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 16
+      }
+    },
+    {
+      "name": "Plan/3D: Hierarchy closes without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "Plan/3D: Properties opens without resizing the 3D pane",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 16
+      }
+    },
+    {
+      "name": "Plan/3D: Properties closes without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "Plan/3D: ribbon expands without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 13
+      }
+    },
+    {
+      "name": "Plan/3D: ribbon collapses without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 10
+      }
+    },
+    {
+      "name": "bottom panel opens without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "bottom panel closes without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "group checkbox drives 3D selection highlight; compact Save as and visible transparency",
+      "evidence": {
+        "selected": 1968,
+        "saveBox": {
+          "x": 1300.09375,
+          "y": 888,
+          "width": 63.90625,
+          "height": 32
+        },
+        "panelBox": {
+          "x": 1059,
+          "y": 65,
+          "width": 317,
+          "height": 867
+        }
+      }
+    },
+    {
+      "name": "changing all grouping modes retains the identical preview layer without repeated colour uploads"
+    },
+    {
+      "name": "orbit selection / multi-selection / PAN preserve camera pose"
+    },
+    {
+      "name": "right-click quick colour paints the five picked objects and exports the same draft",
+      "evidence": {
+        "picked": [
+          58,
+          145921,
+          147928,
+          142617,
+          92148
+        ],
+        "bytes": 11874073
+      }
+    },
+    {
+      "name": "quick-colour shares Colorizer undo"
+    },
+    {
+      "name": "Box to plane restores camera smoothly",
+      "evidence": {
+        "distinctCameraPoses": 41
+      }
+    },
+    {
+      "name": "saved quick-colour IFC reopens in native with identical geometry totals",
+      "evidence": {
+        "vertices": 1917264,
+        "triangles": 1681800
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    "[UnitExtractor] IFCPROJECT entity could not be read, defaulting to meters (unconfirmed — see issue #2104)",
+    "[Viewport] frameSelection: No selection or geometry"
+  ],
+  "ok": true
+}

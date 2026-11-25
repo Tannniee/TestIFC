@@ -1,0 +1,51 @@
+{
+  "jobs": {
+    "type": "Uint32Array",
+    "length": 522471
+  },
+  "totalJobs": 174157,
+  "unitScale": 0.001,
+  "planeAngleToRadians": 1,
+  "rtcOffset": {
+    "type": "Float64Array",
+    "length": 3
+  },
+  "needsShift": true,
+  "buildingRotation": 0.42785655784873866,
+  "voidKeys": {
+    "type": "Uint32Array",
+    "length": 7679
+  },
+  "voidCounts": {
+    "type": "Uint32Array",
+    "length": 7679
+  },
+  "voidValues": {
+    "type": "Uint32Array",
+    "length": 38432
+  },
+  "styleIds": {
+    "type": "Uint32Array",
+    "length": 33456
+  },
+  "styleColors": {
+    "type": "Uint8Array",
+    "length": 133824
+  },
+  "styleFinishes": {
+    "type": "Float32Array",
+    "length": 66912
+  },
+  "materialElementIds": {
+    "type": "Uint32Array",
+    "length": 0
+  },
+  "materialColorCounts": {
+    "type": "Uint32Array",
+    "length": 0
+  },
+  "materialColors": {
+    "type": "Uint8Array",
+    "length": 0
+  }
+}

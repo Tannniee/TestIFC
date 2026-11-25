@@ -1,0 +1,230 @@
+M apps/server/src/services/data_model/classifications.rs
+ M apps/server/src/services/data_model/documents.rs
+ M apps/server/src/services/data_model/material_units.rs
+ M apps/server/src/services/data_model/materials.rs
+ M apps/server/src/services/data_model/metadata.rs
+ M apps/server/src/services/data_model/mod.rs
+ M apps/server/src/services/data_model/properties.rs
+ M apps/server/src/services/data_model/quantities.rs
+ M apps/server/src/services/data_model/relationships.rs
+ M apps/server/src/services/data_model/rooted.rs
+ M apps/server/src/services/data_model/spatial.rs
+ M apps/server/src/services/data_model/types.rs
+ M apps/server/src/services/parquet_data_model_tests.rs
+ M apps/viewer/src/components/ChunkErrorBoundary.tsx
+ M apps/viewer/src/components/mcp/playground-dispatcher.ts
+ M apps/viewer/src/components/ui/panel-motion.css
+ M apps/viewer/src/components/viewer/BottomStrip.header.test.tsx
+ M apps/viewer/src/components/viewer/BottomStrip.tsx
+ M apps/viewer/src/components/viewer/EntityContextMenu.tsx
+ M apps/viewer/src/components/viewer/PropertiesPanel.tsx
+ M apps/viewer/src/components/viewer/ViewerLayout.tsx
+ M apps/viewer/src/components/viewer/Viewport.tsx
+ M apps/viewer/src/components/viewer/ViewportContainer.tsx
+ M apps/viewer/src/components/viewer/ViewportOverlays.tsx
+ M apps/viewer/src/components/viewer/commandPaletteCommandsTypes.ts
+ M apps/viewer/src/components/viewer/hierarchy/elementSubtree.ts
+ M apps/viewer/src/components/viewer/hierarchy/revealGlobalId.ts
+ M apps/viewer/src/components/viewer/hierarchy/treeDataBuilder.ts
+ M apps/viewer/src/components/viewer/hierarchy/useHierarchyTree.ts
+ M apps/viewer/src/components/viewer/hierarchy/useRevealSelection.ts
+ M apps/viewer/src/components/viewer/model/ModelToolRail.test.tsx
+ M apps/viewer/src/components/viewer/model/ModelToolRail.tsx
+ M apps/viewer/src/components/viewer/model/ModelWorkspaceSplit.tsx
+ M apps/viewer/src/components/viewer/properties/MaterialTotalsPanel.tsx
+ M apps/viewer/src/components/viewer/properties/ModelMetadataPanel.tsx
+ M apps/viewer/src/components/viewer/properties/selectionSummary.ts
+ M apps/viewer/src/components/viewer/ribbon/RibbonToolbar.tsx
+ M apps/viewer/src/components/viewer/ribbon/tabs/AuthorTab.tsx
+ M apps/viewer/src/components/viewer/ribbon/tabs/ViewTab.environment-panel.test.tsx
+ M apps/viewer/src/components/viewer/settings/PerformanceSection.test.tsx
+ M apps/viewer/src/components/viewer/settings/PerformanceSection.tsx
+ M apps/viewer/src/components/viewer/sidebar/SidebarDock.tsx
+ M apps/viewer/src/components/viewer/sidebar/SidebarPanelHost.tsx
+ M apps/viewer/src/components/viewer/surface-commands-panels.test.ts
+ M apps/viewer/src/components/viewer/surface-commands-panels.ts
+ M apps/viewer/src/components/viewer/toolbar/appearance-entrypoints.test.tsx
+ M apps/viewer/src/components/viewer/toolbar/cloud-sources-entrypoints.test.tsx
+ M apps/viewer/src/components/viewer/toolbar/detached-panel-latch.test.tsx
+ M apps/viewer/src/components/viewer/toolbar/useWorkspacePanelControls.ts
+ M apps/viewer/src/components/viewer/tools/MeasureQuantities.tsx
+ M apps/viewer/src/components/viewer/tools/MeasureToolbar.test.tsx
+ M apps/viewer/src/components/viewer/tools/MeasureToolbar.tsx
+ M apps/viewer/src/components/viewer/tools/measure-ribbon.test.tsx
+ M apps/viewer/src/components/viewer/useAnimationLoop.renderThrow.test.tsx
+ M apps/viewer/src/components/viewer/useAnimationLoop.ts
+ M apps/viewer/src/components/viewer/useGeometryStreaming.ts
+ M apps/viewer/src/components/viewer/useModelRotationSync.test.ts
+ M apps/viewer/src/components/viewer/useMouseControls.clash-pivot.test.tsx
+ M apps/viewer/src/components/viewer/useMouseControls.fly.test.tsx
+ M apps/viewer/src/components/viewer/useMouseControls.ts
+ M apps/viewer/src/components/viewer/useTestIfcNavigation.ts
+ M apps/viewer/src/components/viewer/useTouchControls.one-pipeline.test.tsx
+ M apps/viewer/src/components/viewer/zone-apportionment-ribbon.test.tsx
+ M apps/viewer/src/hooks/ingest/nativeIfcContract.ts
+ M apps/viewer/src/hooks/ingest/nativeIfcLoad.ts
+ M apps/viewer/src/hooks/ingest/nativeIfcRuntime.test.ts
+ M apps/viewer/src/hooks/ingest/nativeIfcStore.test.ts
+ M apps/viewer/src/hooks/ingest/nativeIfcStore.ts
+ M apps/viewer/src/hooks/useClash.ts
+ M apps/viewer/src/hooks/useIfcLoader.ts
+ M apps/viewer/src/hooks/usePanelControls.ts
+ M apps/viewer/src/hooks/usePrivacyDisclosure.ts
+ M apps/viewer/src/hooks/zoneFacts.ts
+ M apps/viewer/src/i18n/catalogues/settings.en.ts
+ M apps/viewer/src/i18n/en.ts
+ M apps/viewer/src/lib/charts/datasets/elements.ts
+ M apps/viewer/src/lib/clash/clash-framing.ts
+ M apps/viewer/src/lib/clash/group-focus-framing.ts
+ M apps/viewer/src/lib/clash/group-focus.test.ts
+ M apps/viewer/src/lib/lists/prepare-providers.ts
+ M apps/viewer/src/lib/model-placement/model-indices.ts
+ M apps/viewer/src/lib/model-placement/spatial-index.test.ts
+ M apps/viewer/src/lib/model-placement/spatial-index.ts
+ M apps/viewer/src/lib/panels/registry.ts
+ M apps/viewer/src/lib/panels/renderPanelBody.tsx
+ M apps/viewer/src/lib/section/testifc-box-controller.test.ts
+ M apps/viewer/src/lib/section/testifc-box-controller.ts
+ M apps/viewer/src/lib/using-declaration-build.test.ts
+ M apps/viewer/src/store/constants.ts
+ M apps/viewer/src/store/createViewerActions.ts
+ M apps/viewer/src/store/mutation-permission.ts
+ M apps/viewer/src/store/slices/sidebarSlice.ts
+ M apps/viewer/src/store/slices/uiSlice.ts
+ M apps/viewer/src/store/teardown-registry.test.ts
+ M apps/viewer/src/test/contrast/extract-classname.ts
+ M apps/viewer/src/test/contrast/render-harness.ts
+ M apps/viewer/src/utils/loadingUtils.ts
+ M apps/viewer/src/utils/serverDataModel.ts
+ M apps/viewer/src/utils/serverEntityTable.ts
+ M apps/viewer/src/utils/serverRelationships.ts
+ M desktop/README.md
+ M desktop/native-bootstrap.ts
+ M desktop/native-client.ts
+ M desktop/package.json
+ M desktop/src-tauri/Cargo.lock
+ M desktop/src-tauri/Cargo.toml
+ M desktop/src-tauri/src/commands.rs
+ M desktop/src-tauri/src/lib.rs
+ M desktop/src-tauri/src/main.rs
+ M desktop/src-tauri/src/native.rs
+ M desktop/src-tauri/src/native_tests.rs
+ M desktop/src-tauri/src/packet.rs
+ M desktop/src-tauri/tests/native_backend.rs
+ M docs/guide/rendering.md
+ M packages/data/README.md
+ M packages/data/src/relationship-graph.ts
+ M packages/geometry/README.md
+ M packages/geometry/src/index.ts
+ M packages/geometry/src/packed-instanced-decoder.test.ts
+ M packages/geometry/src/packed-instanced-decoder.ts
+ M packages/parser/README.md
+ M packages/parser/src/columnar-parser.ts
+ M packages/parser/src/project-units.ts
+ M packages/parser/src/types.ts
+ M packages/renderer/README.md
+ M packages/renderer/src/camera-home-fit.test.ts
+ M packages/renderer/src/camera.ts
+ M packages/renderer/src/instanced-render.ts
+ M packages/renderer/src/instanced-rte.ts
+ M packages/renderer/src/lod-simplify.ts
+ M packages/renderer/src/pick-types.ts
+ M packages/renderer/src/picking-manager.ts
+ M packages/renderer/src/quantize.ts
+ M packages/renderer/src/relative-to-eye.ts
+ M packages/renderer/src/scene-batch-upload.ts
+ M packages/renderer/src/scene-contents.ts
+ M packages/renderer/src/scene-geometry.ts
+ M packages/renderer/src/scene-instance-bounds.ts
+ M packages/renderer/src/scene-local-bounds.test.ts
+ M packages/renderer/src/scene-precision.ts
+ M packages/renderer/src/scene-raycaster.ts
+ M packages/renderer/src/scene.ts
+ M packages/spatial/README.md
+ M packages/spatial/src/bvh.test.ts
+ M packages/spatial/src/spatial-index-builder.test.ts
+ M packages/spatial/src/spatial-index-builder.ts
+ M rust/core/src/project_units/mod.rs
+ M rust/export/src/lib.rs
+ M scripts/api-surface.json
+ M scripts/perf/README.md
+ M scripts/rust-api-surface.json
+?? .changeset/native-cooperative-load.md
+?? .changeset/native-instance-inspection-units.md
+?? .changeset/native-shard-colors.md
+?? .changeset/pvf-renderer-packing.md
+?? .changeset/red-views-hug.md
+?? .changeset/two-words-reply.md
+?? apps/server/src/services/data_model/cancellation.rs
+?? apps/server/src/services/data_model/project_units.rs
+?? apps/viewer/src/components/viewer/DrawingWorkspaceSplit.test.tsx
+?? apps/viewer/src/components/viewer/DrawingWorkspaceSplit.tsx
+?? apps/viewer/src/components/viewer/SafeModeNotice.tsx
+?? apps/viewer/src/components/viewer/StableViewport.tsx
+?? apps/viewer/src/components/viewer/ViewportStartScreen.tsx
+?? apps/viewer/src/components/viewer/colorizer/
+?? apps/viewer/src/components/viewer/hierarchy/storeyDisplayElevation.ts
+?? apps/viewer/src/components/viewer/hierarchy/treeDataBuilder.cooperative.test.ts
+?? apps/viewer/src/components/viewer/hierarchy/useRevealSelection.pending.test.tsx
+?? apps/viewer/src/components/viewer/hierarchy/useStructuralHierarchy.ts
+?? apps/viewer/src/components/viewer/instanced-shard-drain.test.ts
+?? apps/viewer/src/components/viewer/instanced-shard-drain.ts
+?? apps/viewer/src/components/viewer/interactionRenderBudget.test.ts
+?? apps/viewer/src/components/viewer/interactionRenderBudget.ts
+?? apps/viewer/src/components/viewer/navigationRenderQuality.ts
+?? apps/viewer/src/components/viewer/sidebar/SidebarPanelHost.extension-state.test.tsx
+?? apps/viewer/src/components/viewer/useStageInsets.ts
+?? apps/viewer/src/hooks/ingest/nativeGeometryStream.test.ts
+?? apps/viewer/src/i18n/catalogues/colorizer.en.ts
+?? apps/viewer/src/i18n/catalogues/desktop-shell.en.ts
+?? apps/viewer/src/lib/colorizer/
+?? apps/viewer/src/lib/desktop-shell.ts
+?? apps/viewer/src/lib/model-placement/pick-candidates.test.ts
+?? apps/viewer/src/lib/model-placement/pick-candidates.ts
+?? apps/viewer/src/store/slices/navigationRenderSettings.ts
+?? apps/viewer/src/utils/runCooperatively.ts
+?? apps/viewer/src/utils/serverDataModelSlicing.test.ts
+?? desktop/APP-QUALITY-AUDIT.md
+?? desktop/CLEANUP.md
+?? desktop/COLORIZER-UX-VALIDATION.md
+?? desktop/COLORIZER-VALIDATION.md
+?? desktop/Clean-OldBuilds.ps1
+?? desktop/INTERACTION-UX-VALIDATION.md
+?? desktop/NATIVE-RUST-DEEP-AUDIT.md
+?? desktop/NATIVE-RUST-FOLLOWUP.md
+?? desktop/NAVIGATION-RENDER-250MS.md
+?? desktop/PANEL-MOTION-VALIDATION.md
+?? desktop/PVF-CRASH-VALIDATION.md
+?? desktop/PVF-RESPONSIVENESS-VALIDATION.md
+?? desktop/UI-QUALITY-CONTRACT.md
+?? desktop/native-colorizer.ts
+?? desktop/native-entity-columns.ts
+?? desktop/native-geometry-stream.ts
+?? desktop/native-semantics.ts
+?? desktop/quality-smoke.mjs
+?? desktop/src-tauri/src/colorizer.rs
+?? desktop/src-tauri/src/colorizer_tests.rs
+?? desktop/src-tauri/src/packet_batches.rs
+?? desktop/src-tauri/src/packet_batches_tests.rs
+?? desktop/src-tauri/src/partition.rs
+?? desktop/src-tauri/src/partition_tests.rs
+?? desktop/src-tauri/src/semantic.rs
+?? desktop/src-tauri/src/semantic_model.rs
+?? desktop/src-tauri/src/semantic_probe.rs
+?? desktop/src-tauri/src/semantic_tests.rs
+?? desktop/src-tauri/tests/semantic_cancellation.rs
+?? desktop/src-tauri/tests/semantic_units.rs
+?? docs/guide/colorizer.md
+?? packages/geometry/src/instanced-shard-layout.ts
+?? packages/renderer/src/batch-slicing.ts
+?? packages/renderer/src/geometry-staging.test.ts
+?? packages/renderer/src/geometry-staging.ts
+?? packages/renderer/src/instanced-packing-parity.test.ts
+?? packages/renderer/src/pick-order-map.ts
+?? packages/renderer/src/scene-batch-placement.ts
+?? packages/renderer/src/scene-batch-slicing.test.ts
+?? packages/renderer/src/scene-owned-instance-bounds.test.ts
+?? packages/renderer/src/scene-raycast-candidates.test.ts
+?? research/
+?? rust/export/examples/colorizer.rs
+?? rust/export/src/colorizer/

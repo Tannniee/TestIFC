@@ -1,0 +1,572 @@
+[
+  {
+    "id": 463,
+    "type": "IfcVoidingFeature",
+    "Name": "CUTPART",
+    "ObjectType": null,
+    "dims": [
+      11.085211922647431,
+      12.78251215768978,
+      15.387979947740817
+    ],
+    "triangles": 48,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-457",
+        "rgb": "colour 0.572549 0.219608 0.694118"
+      }
+    ],
+    "seconds": 0.09300374984741211
+  },
+  {
+    "id": 475,
+    "type": "IfcVoidingFeature",
+    "Name": "CUTPART",
+    "ObjectType": null,
+    "dims": [
+      10.255701456335373,
+      12.091637274250388,
+      14.98250847929819
+    ],
+    "triangles": 48,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-457",
+        "rgb": "colour 0.572549 0.219608 0.694118"
+      }
+    ],
+    "seconds": 0.003948211669921875
+  },
+  {
+    "id": 855,
+    "type": "IfcVoidingFeature",
+    "Name": "PLATE",
+    "ObjectType": null,
+    "dims": [
+      13.179762058891356,
+      12.385403890628368,
+      15.899578177277327
+    ],
+    "triangles": 12,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-399",
+        "rgb": "colour 0.686275 0.505882 0.752941"
+      }
+    ],
+    "seconds": 0.003949880599975586
+  },
+  {
+    "id": 865,
+    "type": "IfcVoidingFeature",
+    "Name": "PLATE",
+    "ObjectType": null,
+    "dims": [
+      13.243225322687067,
+      12.242172487312928,
+      15.971268425454767
+    ],
+    "triangles": 12,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-399",
+        "rgb": "colour 0.686275 0.505882 0.752941"
+      }
+    ],
+    "seconds": 0.0025322437286376953
+  },
+  {
+    "id": 1072,
+    "type": "IfcVoidingFeature",
+    "Name": "PLATE",
+    "ObjectType": null,
+    "dims": [
+      13.179762059124187,
+      12.385403891094029,
+      15.899578176616359
+    ],
+    "triangles": 12,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-399",
+        "rgb": "colour 0.686275 0.505882 0.752941"
+      }
+    ],
+    "seconds": 0.002350330352783203
+  },
+  {
+    "id": 1080,
+    "type": "IfcVoidingFeature",
+    "Name": "PLATE",
+    "ObjectType": null,
+    "dims": [
+      13.243225323152728,
+      12.24217248777859,
+      15.971268424957024
+    ],
+    "triangles": 12,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-399",
+        "rgb": "colour 0.686275 0.505882 0.752941"
+      }
+    ],
+    "seconds": 0.0028867721557617188
+  },
+  {
+    "id": 2391,
+    "type": "IfcVoidingFeature",
+    "Name": "PLATE",
+    "ObjectType": null,
+    "dims": [
+      2.0348376121837646,
+      1.2031490770168602,
+      1.8368212118848106
+    ],
+    "triangles": 204,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2386",
+        "rgb": "colour 0.117647 0.262745 0.513725"
+      }
+    ],
+    "seconds": 0.008346080780029297
+  },
+  {
+    "id": 2404,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.0683383607538417,
+      0.06625643651932478,
+      0.06345829713718842
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.004486799240112305
+  },
+  {
+    "id": 2412,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06833836133591831,
+      0.06625643488951027,
+      0.0634582989327086
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.003290891647338867
+  },
+  {
+    "id": 2420,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.0683383607538417,
+      0.06625643651932478,
+      0.06345829713718842
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.0032835006713867188
+  },
+  {
+    "id": 2428,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06833836133591831,
+      0.06625643488951027,
+      0.0634582989327086
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.003668546676635742
+  },
+  {
+    "id": 2467,
+    "type": "IfcVoidingFeature",
+    "Name": "PLATE",
+    "ObjectType": null,
+    "dims": [
+      2.1243681171908975,
+      1.2589699095115066,
+      1.829399940406482
+    ],
+    "triangles": 204,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2386",
+        "rgb": "colour 0.117647 0.262745 0.513725"
+      }
+    ],
+    "seconds": 0.0032215118408203125
+  },
+  {
+    "id": 2478,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      2.2222030436387286,
+      0.27963529410772026,
+      1.725209353170662
+    ],
+    "triangles": 724,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2351",
+        "rgb": "colour 0.12549 0.792157 0.615686"
+      }
+    ],
+    "seconds": 0.03623485565185547
+  },
+  {
+    "id": 2484,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      2.2222030436387286,
+      0.27963529410772026,
+      1.725209353170662
+    ],
+    "triangles": 724,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2351",
+        "rgb": "colour 0.12549 0.792157 0.615686"
+      }
+    ],
+    "seconds": 0.03613448143005371
+  },
+  {
+    "id": 2497,
+    "type": "IfcVoidingFeature",
+    "Name": "DWGPROFILE",
+    "ObjectType": null,
+    "dims": [
+      0.7713297621812671,
+      1.3114491382148117,
+      0.8504834163735708
+    ],
+    "triangles": 436,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2492",
+        "rgb": "colour 0.615686 0.615686 0.662745"
+      }
+    ],
+    "seconds": 0.019024372100830078
+  },
+  {
+    "id": 2503,
+    "type": "IfcVoidingFeature",
+    "Name": "DWGPROFILE",
+    "ObjectType": null,
+    "dims": [
+      0.7713297621812671,
+      1.3114491382148117,
+      0.8504834163735708
+    ],
+    "triangles": 436,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2492",
+        "rgb": "colour 0.615686 0.615686 0.662745"
+      }
+    ],
+    "seconds": 0.021183013916015625
+  },
+  {
+    "id": 2509,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06909459619782865,
+      0.06624395097605884,
+      0.06258692045212655
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.003143310546875
+  },
+  {
+    "id": 2515,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06909459677990526,
+      0.06624394934624434,
+      0.06258692234754903
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.0033483505249023438
+  },
+  {
+    "id": 2521,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06909459619782865,
+      0.06624395097605884,
+      0.06258692045212655
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.0034465789794921875
+  },
+  {
+    "id": 2527,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06909459677990526,
+      0.06624394981190562,
+      0.06258692225933515
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.003472566604614258
+  },
+  {
+    "id": 2566,
+    "type": "IfcVoidingFeature",
+    "Name": "PLATE",
+    "ObjectType": null,
+    "dims": [
+      2.194623025250621,
+      1.291860354365781,
+      1.8556726807641155
+    ],
+    "triangles": 204,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2386",
+        "rgb": "colour 0.117647 0.262745 0.513725"
+      }
+    ],
+    "seconds": 0.0026006698608398438
+  },
+  {
+    "id": 2572,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      2.2400631905766204,
+      0.30168189806863666,
+      1.6999474839983932
+    ],
+    "triangles": 724,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2351",
+        "rgb": "colour 0.12549 0.792157 0.615686"
+      }
+    ],
+    "seconds": 0.0314486026763916
+  },
+  {
+    "id": 2578,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      2.2400631905766204,
+      0.30168189806863666,
+      1.6999474839983932
+    ],
+    "triangles": 724,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2351",
+        "rgb": "colour 0.12549 0.792157 0.615686"
+      }
+    ],
+    "seconds": 0.0357203483581543
+  },
+  {
+    "id": 2584,
+    "type": "IfcVoidingFeature",
+    "Name": "DWGPROFILE",
+    "ObjectType": null,
+    "dims": [
+      0.772685963078402,
+      1.3115239515900612,
+      0.8484698209263968
+    ],
+    "triangles": 436,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2492",
+        "rgb": "colour 0.615686 0.615686 0.662745"
+      }
+    ],
+    "seconds": 0.02105426788330078
+  },
+  {
+    "id": 2590,
+    "type": "IfcVoidingFeature",
+    "Name": "DWGPROFILE",
+    "ObjectType": null,
+    "dims": [
+      0.772685963078402,
+      1.3115239515900612,
+      0.8484698209263968
+    ],
+    "triangles": 436,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2492",
+        "rgb": "colour 0.615686 0.615686 0.662745"
+      }
+    ],
+    "seconds": 0.021910429000854492
+  },
+  {
+    "id": 2596,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06934734049718827,
+      0.0662358517292887,
+      0.062254153990345173
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.004067182540893555
+  },
+  {
+    "id": 2602,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06934734096284956,
+      0.06623585056513548,
+      0.06225415579506688
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.003794431686401367
+  },
+  {
+    "id": 2608,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06934734049718827,
+      0.0662358517292887,
+      0.062254153990345173
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.003405332565307617
+  },
+  {
+    "id": 2614,
+    "type": "IfcVoidingFeature",
+    "Name": "BEAM",
+    "ObjectType": null,
+    "dims": [
+      0.06934734096284956,
+      0.06623585056513548,
+      0.06225415579506688
+    ],
+    "triangles": 60,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-786",
+        "rgb": "colour 0.356863 0.592157 0.137255"
+      }
+    ],
+    "seconds": 0.0036306381225585938
+  },
+  {
+    "id": 2653,
+    "type": "IfcVoidingFeature",
+    "Name": "PLATE",
+    "ObjectType": null,
+    "dims": [
+      2.262189324363135,
+      1.3237376725301147,
+      1.880270292512776
+    ],
+    "triangles": 204,
+    "materials": [
+      {
+        "name": "IfcSurfaceStyleRendering-2386",
+        "rgb": "colour 0.117647 0.262745 0.513725"
+      }
+    ],
+    "seconds": 0.0028018951416015625
+  }
+]

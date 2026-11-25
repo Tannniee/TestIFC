@@ -1,0 +1,106 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-colorizer-ux-20261016-r2\\IFC-Lite.exe",
+  "model": "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-colorizer-ux-B80Dbu",
+  "assertions": [
+    {
+      "name": "quiet startup: no hierarchy, collapsed ribbon/sidebar, no welcome or privacy toast",
+      "evidence": {
+        "leftCollapsed": true,
+        "ribbonCollapsed": true,
+        "sidebarMode": "collapsed"
+      }
+    },
+    {
+      "name": "opening Colorizer automatically reads groups, with no Model/Edit mode or preparation step"
+    },
+    {
+      "name": "loaded-model ribbon animation",
+      "evidence": {
+        "action": "Collapse the ribbon",
+        "intermediateFrames": 15,
+        "p95FrameGapMs": 10.06500000000051,
+        "maxFrameGapMs": 10.505000000001019
+      }
+    },
+    {
+      "name": "loaded-model ribbon animation",
+      "evidence": {
+        "action": "Expand the ribbon",
+        "intermediateFrames": 15,
+        "p95FrameGapMs": 10.050000000001091,
+        "maxFrameGapMs": 10.19000000000051
+      }
+    },
+    {
+      "name": "ribbon respects reduced motion"
+    },
+    {
+      "name": "second click collapses Colorizer without Properties; third click restores the draft"
+    },
+    {
+      "name": "grouping updates automatically without a Regroup button"
+    },
+    {
+      "name": "save from ordinary view mode creates a full IFC",
+      "evidence": {
+        "output": "F:\\Steel\\VBA\\IFC-Lite\\research\\colorizer-20261015\\native-ux\\ui-gray-red.ifc",
+        "bytes": 11874073
+      }
+    },
+    {
+      "name": "saved IFC reopens in native with equal geometry totals",
+      "evidence": {
+        "vertices": 1917264,
+        "triangles": 1681800
+      }
+    },
+    {
+      "name": "five noncontiguous members picked by Ctrl+click are painted and saved separately",
+      "evidence": {
+        "picked": [
+          {
+            "globalId": 58,
+            "ref": {
+              "modelId": "32802646-11b4-4e40-b0e7-3cdfd7157eb6",
+              "expressId": 58
+            }
+          },
+          {
+            "globalId": 145921,
+            "ref": {
+              "modelId": "32802646-11b4-4e40-b0e7-3cdfd7157eb6",
+              "expressId": 145921
+            }
+          },
+          {
+            "globalId": 81179,
+            "ref": {
+              "modelId": "32802646-11b4-4e40-b0e7-3cdfd7157eb6",
+              "expressId": 81179
+            }
+          },
+          {
+            "globalId": 159039,
+            "ref": {
+              "modelId": "32802646-11b4-4e40-b0e7-3cdfd7157eb6",
+              "expressId": 159039
+            }
+          },
+          {
+            "globalId": 170012,
+            "ref": {
+              "modelId": "32802646-11b4-4e40-b0e7-3cdfd7157eb6",
+              "expressId": 170012
+            }
+          }
+        ],
+        "gestures": 5,
+        "bytes": 11874488
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "ok": true
+}

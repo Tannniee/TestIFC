@@ -1,0 +1,39 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-colorizer-20261016-r2\\IFC-Lite.exe",
+  "model": "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-colorizer-LH9pY1",
+  "assertions": [
+    {
+      "name": "native model remains source-less before and after opt-in preparation",
+      "evidence": {
+        "sourceBytes": 0,
+        "loadPath": "native",
+        "meshes": 4568,
+        "name": "hangarvd_f10_ tan base_f01_colored.ifc",
+        "vertices": 1917264,
+        "triangles": 1681800,
+        "products": 14509
+      }
+    },
+    {
+      "name": "source preparation and section discovery",
+      "evidence": {
+        "elapsedMs": 1376.8519000000006,
+        "groups": 75,
+        "products": 14509
+      }
+    },
+    {
+      "name": "whole-model gray then PIPE red, including undo/redo",
+      "evidence": {
+        "1,0,0,1": 1968,
+        "0.5019607843137255,0.5019607843137255,0.5019607843137255,1": 12541
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    "[UnitExtractor] IFCPROJECT entity could not be read, defaulting to meters (unconfirmed — see issue #2104)"
+  ],
+  "ok": true
+}

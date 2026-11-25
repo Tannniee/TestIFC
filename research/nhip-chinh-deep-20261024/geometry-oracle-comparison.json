@@ -1,0 +1,338 @@
+[
+  {
+    "cohort": "native-current-reference",
+    "id": 434,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 683,
+      "triangles": 268,
+      "volume": 1.5459846326116058,
+      "area": 124.76182621255577
+    },
+    "oracle": {
+      "vertices": 52,
+      "triangles": 100,
+      "volume": 1.5458066069368919,
+      "area": 124.76191629337876
+    },
+    "maxBoundsDeltaMm": 0.009152950539714766,
+    "sampledMaxSurfaceDistanceMm": 0.016266514034319474,
+    "directedSampleCounts": [
+      1755,
+      452
+    ],
+    "relativeVolumeErrorPercent": 0.011516684811348455
+  },
+  {
+    "cohort": "native-current-reference",
+    "id": 820,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 482,
+      "triangles": 180,
+      "volume": 1.2110864939506516,
+      "area": 97.9463090388353
+    },
+    "oracle": {
+      "vertices": 48,
+      "triangles": 92,
+      "volume": 1.2111553488009141,
+      "area": 97.946423763293
+    },
+    "maxBoundsDeltaMm": 0.013357959687709808,
+    "sampledMaxSurfaceDistanceMm": 0.0625091988194862,
+    "directedSampleCounts": [
+      1202,
+      416
+    ],
+    "relativeVolumeErrorPercent": 0.005685055210357847
+  },
+  {
+    "cohort": "native-current-reference",
+    "id": 64951,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 23073,
+      "triangles": 5640,
+      "volume": 0.08955257986953717,
+      "area": 11.63575278374108
+    },
+    "oracle": {
+      "vertices": 1280,
+      "triangles": 2560,
+      "volume": 0.08933984735676485,
+      "area": 11.636202423094979
+    },
+    "maxBoundsDeltaMm": 3.1183339888229966,
+    "sampledMaxSurfaceDistanceMm": 7.024246357352262,
+    "directedSampleCounts": [
+      45633,
+      11520
+    ],
+    "relativeVolumeErrorPercent": 0.23811604683272347
+  },
+  {
+    "cohort": "native-current-reference",
+    "id": 266636,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 581,
+      "triangles": 313,
+      "volume": 2.6046812495109353,
+      "area": 146.79718370771195
+    },
+    "oracle": {
+      "vertices": 52,
+      "triangles": 104,
+      "volume": 2.623089669963759,
+      "area": 147.8399982933281
+    },
+    "maxBoundsDeltaMm": 2.020362298935652,
+    "sampledMaxSurfaceDistanceMm": 39.96226827733646,
+    "directedSampleCounts": [
+      1833,
+      468
+    ],
+    "relativeVolumeErrorPercent": 0.701783879659668
+  },
+  {
+    "cohort": "native-current-reference",
+    "id": 322443,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 672,
+      "triangles": 288,
+      "volume": 2.604407940204233,
+      "area": 146.79314223971022
+    },
+    "oracle": {
+      "vertices": 52,
+      "triangles": 104,
+      "volume": 2.623089655059159,
+      "area": 147.83999849713177
+    },
+    "maxBoundsDeltaMm": 1.6803591279312968,
+    "sampledMaxSurfaceDistanceMm": 39.96760920255766,
+    "directedSampleCounts": [
+      1824,
+      468
+    ],
+    "relativeVolumeErrorPercent": 0.7122026812501374
+  },
+  {
+    "cohort": "native-current-reference",
+    "id": 344051,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 811,
+      "triangles": 336,
+      "volume": 2.7419905245221514,
+      "area": 154.56542040612675
+    },
+    "oracle": {
+      "vertices": 64,
+      "triangles": 128,
+      "volume": 2.762141468211698,
+      "area": 155.67617698120756
+    },
+    "maxBoundsDeltaMm": 0.8753356523811817,
+    "sampledMaxSurfaceDistanceMm": 40.49059206438464,
+    "directedSampleCounts": [
+      2155,
+      576
+    ],
+    "relativeVolumeErrorPercent": 0.7295406090330706
+  },
+  {
+    "cohort": "native-semantic-class-control",
+    "id": 434,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 154,
+      "triangles": 100,
+      "volume": 1.545787616824261,
+      "area": 124.76198888505716
+    },
+    "oracle": {
+      "vertices": 52,
+      "triangles": 100,
+      "volume": 1.5458066069368919,
+      "area": 124.76191629337876
+    },
+    "maxBoundsDeltaMm": 0.0016621779650449753,
+    "sampledMaxSurfaceDistanceMm": 0.006949346854856486,
+    "directedSampleCounts": [
+      554,
+      452
+    ],
+    "relativeVolumeErrorPercent": 0.0012284921377374394
+  },
+  {
+    "cohort": "native-semantic-class-control",
+    "id": 820,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 144,
+      "triangles": 92,
+      "volume": 1.2111586876360951,
+      "area": 97.94640492434026
+    },
+    "oracle": {
+      "vertices": 48,
+      "triangles": 92,
+      "volume": 1.2111553488009141,
+      "area": 97.946423763293
+    },
+    "maxBoundsDeltaMm": 0.006300164386630058,
+    "sampledMaxSurfaceDistanceMm": 0.006679254612615699,
+    "directedSampleCounts": [
+      512,
+      416
+    ],
+    "relativeVolumeErrorPercent": 0.00027567356939841567
+  },
+  {
+    "cohort": "native-semantic-class-control",
+    "id": 64951,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 3840,
+      "triangles": 2560,
+      "volume": 0.08933996358281864,
+      "area": 11.636239809659994
+    },
+    "oracle": {
+      "vertices": 1280,
+      "triangles": 2560,
+      "volume": 0.08933984735676485,
+      "area": 11.636202423094979
+    },
+    "maxBoundsDeltaMm": 0.006620539352297783,
+    "sampledMaxSurfaceDistanceMm": 0.012961345248478825,
+    "directedSampleCounts": [
+      14080,
+      11520
+    ],
+    "relativeVolumeErrorPercent": 0.00013009430530715318
+  },
+  {
+    "cohort": "native-semantic-class-control",
+    "id": 266636,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 167,
+      "triangles": 104,
+      "volume": 2.6233531557797303,
+      "area": 147.84014363868036
+    },
+    "oracle": {
+      "vertices": 52,
+      "triangles": 104,
+      "volume": 2.623089669963759,
+      "area": 147.8399982933281
+    },
+    "maxBoundsDeltaMm": 0.006064539775252342,
+    "sampledMaxSurfaceDistanceMm": 0.009014874361744921,
+    "directedSampleCounts": [
+      583,
+      468
+    ],
+    "relativeVolumeErrorPercent": 0.010044864992167581
+  },
+  {
+    "cohort": "native-semantic-class-control",
+    "id": 322443,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 172,
+      "triangles": 104,
+      "volume": 2.622904446383053,
+      "area": 147.8399420600235
+    },
+    "oracle": {
+      "vertices": 52,
+      "triangles": 104,
+      "volume": 2.623089655059159,
+      "area": 147.83999849713177
+    },
+    "maxBoundsDeltaMm": 0.03933953121304512,
+    "sampledMaxSurfaceDistanceMm": 0.04193311066128815,
+    "directedSampleCounts": [
+      588,
+      468
+    ],
+    "relativeVolumeErrorPercent": 0.007060707046328437
+  },
+  {
+    "cohort": "native-semantic-class-control",
+    "id": 344051,
+    "referenceOnly": true,
+    "native": {
+      "vertices": 185,
+      "triangles": 128,
+      "volume": 2.7621366182071463,
+      "area": 155.6761189172757
+    },
+    "oracle": {
+      "vertices": 64,
+      "triangles": 128,
+      "volume": 2.762141468211698,
+      "area": 155.67617698120756
+    },
+    "maxBoundsDeltaMm": 0.02966378815472126,
+    "sampledMaxSurfaceDistanceMm": 0.04724994274449738,
+    "directedSampleCounts": [
+      697,
+      576
+    ],
+    "relativeVolumeErrorPercent": 0.00017558856443687543
+  },
+  {
+    "cohort": "native-current-body",
+    "id": 2361,
+    "referenceOnly": false,
+    "native": {
+      "vertices": 1185,
+      "triangles": 584,
+      "volume": 0.07248233271100306,
+      "area": 9.342784117926028
+    },
+    "oracle": {
+      "vertices": 144,
+      "triangles": 288,
+      "volume": 0.07248511214232513,
+      "area": 9.342094718068473
+    },
+    "maxBoundsDeltaMm": 0.012756790965795517,
+    "sampledMaxSurfaceDistanceMm": 0.8551683755939684,
+    "directedSampleCounts": [
+      3521,
+      1296
+    ],
+    "relativeVolumeErrorPercent": 0.0038344857860083963
+  },
+  {
+    "cohort": "native-current-body",
+    "id": 2444,
+    "referenceOnly": false,
+    "native": {
+      "vertices": 18180,
+      "triangles": 6533,
+      "volume": 0.07117174362224021,
+      "area": 9.201016322819662
+    },
+    "oracle": {
+      "vertices": 1296,
+      "triangles": 2592,
+      "volume": 0.07045904881485814,
+      "area": 9.200594628274429
+    },
+    "maxBoundsDeltaMm": 0.008108997107569849,
+    "sampledMaxSurfaceDistanceMm": 41.23946968428588,
+    "directedSampleCounts": [
+      44312,
+      11664
+    ],
+    "relativeVolumeErrorPercent": 1.0115021695152195
+  }
+]

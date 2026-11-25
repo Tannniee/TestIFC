@@ -1,0 +1,137 @@
+[
+  {
+    "id": 2467,
+    "profile": "#2463=IfcArbitraryClosedProfileDef(.AREA.,'PL30',#2462)",
+    "depth": 30.0,
+    "directionInHostSolidAxes": [
+      1.0000000000200415,
+      6.56999999404384e-08,
+      -5.569326666510221e-10
+    ],
+    "baseInHostSolid": [
+      -15.000049829483032,
+      729.9999989271164,
+      -499.99999994039536
+    ]
+  },
+  {
+    "id": 2478,
+    "profile": "#2473=IfcArbitraryClosedProfileDef(.AREA.,'RC65-5',#2472)",
+    "depth": 16.0,
+    "directionInHostSolidAxes": [
+      -1.0000000000200415,
+      -6.56999999404384e-08,
+      5.569326666510221e-10
+    ],
+    "baseInHostSolid": [
+      8.000079989433289,
+      -1125.0000001192093,
+      -1557.051070034504
+    ]
+  },
+  {
+    "id": 2484,
+    "profile": "#2473=IfcArbitraryClosedProfileDef(.AREA.,'RC65-5',#2472)",
+    "depth": 16.0,
+    "directionInHostSolidAxes": [
+      1.0000000000200415,
+      6.56999999404384e-08,
+      -5.569326666510221e-10
+    ],
+    "baseInHostSolid": [
+      -8.000059962272644,
+      1124.9999998807907,
+      -1557.051070034504
+    ]
+  },
+  {
+    "id": 2497,
+    "profile": "#2490=IfcArbitraryClosedProfileDef(.AREA.,'RC750A',#2489)",
+    "depth": 16.0,
+    "directionInHostSolidAxes": [
+      1.0000000000200415,
+      6.56999999404384e-08,
+      -5.569326666510221e-10
+    ],
+    "baseInHostSolid": [
+      -8.0,
+      0.0,
+      -3009.1021400094032
+    ]
+  },
+  {
+    "id": 2503,
+    "profile": "#2490=IfcArbitraryClosedProfileDef(.AREA.,'RC750A',#2489)",
+    "depth": 16.0,
+    "directionInHostSolidAxes": [
+      -1.0000000000200415,
+      -6.56999999404384e-08,
+      5.569326666510221e-10
+    ],
+    "baseInHostSolid": [
+      8.00000011920929,
+      -1.1920928955078125e-07,
+      -104.99786001443863
+    ]
+  },
+  {
+    "id": 2509,
+    "profile": "#2399=IfcArbitraryClosedProfileDef(.AREA.,'D70',#2398)",
+    "depth": 16.0,
+    "directionInHostSolidAxes": [
+      -1.0000000000200415,
+      -6.56999999404384e-08,
+      5.569326666510221e-10
+    ],
+    "baseInHostSolid": [
+      7.999920129776001,
+      1229.9999997615814,
+      -3114.1021400094032
+    ]
+  },
+  {
+    "id": 2515,
+    "profile": "#2399=IfcArbitraryClosedProfileDef(.AREA.,'D70',#2398)",
+    "depth": 16.0,
+    "directionInHostSolidAxes": [
+      -1.0000000000200435,
+      -1.1999999882661427e-08,
+      5.569326666510221e-10
+    ],
+    "baseInHostSolid": [
+      8.000010013580322,
+      -1229.9986001253128,
+      -3114.1020700335503
+    ]
+  },
+  {
+    "id": 2521,
+    "profile": "#2399=IfcArbitraryClosedProfileDef(.AREA.,'D70',#2398)",
+    "depth": 16.0,
+    "directionInHostSolidAxes": [
+      1.0000000000200415,
+      6.56999999404384e-08,
+      -5.569326666510221e-10
+    ],
+    "baseInHostSolid": [
+      -8.000079870223999,
+      1229.9999998807907,
+      -5.960464477539063e-08
+    ]
+  },
+  {
+    "id": 2527,
+    "profile": "#2399=IfcArbitraryClosedProfileDef(.AREA.,'D70',#2398)",
+    "depth": 16.0,
+    "directionInHostSolidAxes": [
+      1.0000000000200435,
+      -5.551115123125783e-17,
+      1.430672802449351e-10
+    ],
+    "baseInHostSolid": [
+      -7.999989986419678,
+      -1229.998430132866,
+      6.99758529663086e-05
+    ]
+  }
+]

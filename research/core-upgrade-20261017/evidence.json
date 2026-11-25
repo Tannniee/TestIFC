@@ -1,0 +1,1428 @@
+{
+  "checked_utc": "2026-10-16T19:35:58.968024+00:00",
+  "root": "F:\\Steel\\VBA\\IFC-Lite",
+  "branch": "codex/desktop-v10.3.0",
+  "head": "471284f476d64a659ae607eeec2115ca3afcb9fe",
+  "origin": "https://github.com/LTplus-AG/ifc-lite.git",
+  "shallow": "true",
+  "base": "e79f27342beb01a6f30d9b63c44795ecd118f4de",
+  "tracked_modified_vs_head": 150,
+  "untracked_before_audit_excluding_this_folder": 436,
+  "tracked_local_delta_vs_base": 269,
+  "local_versions": {
+    "package.json": "10.3.0",
+    "apps/viewer/package.json": "4.0.0",
+    "packages/wasm/package.json": "10.3.0",
+    "packages/geometry/package.json": "7.7.0",
+    "packages/parser/package.json": "9.2.0",
+    "packages/renderer/package.json": "6.0.1",
+    "packages/data/package.json": "6.1.0",
+    "packages/spatial/package.json": "1.15.0",
+    "packages/export/package.json": "4.9.0",
+    "Cargo.toml:workspace.package": "20.3.0"
+  },
+  "source_fingerprints": {
+    ".changeset/native-cooperative-load.md": "98bf6c1970e471130793993a4ca8e7806247234255487875fddbfd7ad18af9ee",
+    ".changeset/native-instance-inspection-units.md": "2db192c9b1a9b3364da934b88b99a504b59eb5287d96a79c39a93b72d1c68414",
+    ".changeset/native-shard-colors.md": "69b1df7c67964f292386a3d76299ce4d4914795f625d2d9e2a16a3a5b41473b0",
+    ".changeset/pvf-renderer-packing.md": "138a6ab005f28da235d23ce207ead25b5329ae4cbfe50ff42fa9acb535fec5cf",
+    ".changeset/red-views-hug.md": "60b70fed157a7c1a9cb3c7d8d9bcd22434799499c501109e4d5f9520e8b14be7",
+    ".changeset/two-words-reply.md": "728c33cc0b519ef8f5044da240b281f0a1893e2842ca2f73468e5d6279b259d9",
+    "apps/server/src/services/data_model/cancellation.rs": "d75a74933531d41ea2d7a7cba5e86ba8ef6b2d818c629c2fa240b091700b9b2a",
+    "apps/server/src/services/data_model/classifications.rs": "d46dc1122c8064d90ecec70bb6ffcb92e632b91fa5de15894420dce7e8548c32",
+    "apps/server/src/services/data_model/documents.rs": "e65f638321dde5fc737dec68c5b3bfe440a93ce14492395a0ab0f6a125e5f174",
+    "apps/server/src/services/data_model/material_units.rs": "efa0e0d90804f193d227e1439ab10907ccaddab5de35ea962659950cc73d8866",
+    "apps/server/src/services/data_model/materials.rs": "a10cf7a0b842c32d366ee10324d3e979b8290f39dbdb1e9cf6dcffdb5f268a9b",
+    "apps/server/src/services/data_model/metadata.rs": "6e85e49a8efd77aa7060c9cd7beb2b85c4198ec9003215c51c5a0e60841367fc",
+    "apps/server/src/services/data_model/mod.rs": "14b61b2abf0f47f7ba261d2780c88afd0ac6f1fe3f5c8e9b35dec17e7f4767cc",
+    "apps/server/src/services/data_model/project_units.rs": "dc2accd9e000ea2ad4f64a30fb17ebe434f546e0bf2749ca50aa60a226b295db",
+    "apps/server/src/services/data_model/properties.rs": "4f2c2861101f0cac80200ba117f297ee76d9afa2856968161c3ce7b5bc1ff827",
+    "apps/server/src/services/data_model/quantities.rs": "738b63409b6255985d1785497e3f0b0e61ea8bb81e44d4fa5859d52e4eace7d5",
+    "apps/server/src/services/data_model/relationships.rs": "b16f055bae9e3935989b355a97e11f2aa421e9f7d206c2f4dfc00301677fdc40",
+    "apps/server/src/services/data_model/rooted.rs": "07883eb6a6e84b9ffcf219be566f2c31802633b9e9dba0b9ed00bb78ce9461b5",
+    "apps/server/src/services/data_model/spatial.rs": "584feb754b23e1233cecb6b7646ad9df56b1d0c044bf86d72db118a7d0306b63",
+    "apps/server/src/services/data_model/types.rs": "9ee8b31a0cbc0c87a5787ef52f317a5eda3468798e1bbdf5d1e2ed1d16ab6a1d",
+    "apps/server/src/services/parquet_data_model_tests.rs": "88781998a6bf37bc15250e0b5a3411d9a51139ba5a2bd68995675560ff681aee",
+    "apps/viewer/src/components/ChunkErrorBoundary.tsx": "e0874a8dc47901193dbaefee4d4dc17fc46668d043fcd809d67ce67ff1847566",
+    "apps/viewer/src/components/mcp/playground-dispatcher.ts": "9fc1ee79993c881619e16ca707cdcbbff37ce061a29c6d9065328609b96edfa3",
+    "apps/viewer/src/components/ui/panel-motion.css": "06bff2e176b3dfd459c3690d3a200307cb43d58aba6834c4710bac1f3d8a0655",
+    "apps/viewer/src/components/viewer/BottomStrip.header.test.tsx": "8342c0778b6521d1e134a69a7aabcac0e1cca1994965df081494a2684d7001bc",
+    "apps/viewer/src/components/viewer/BottomStrip.tsx": "979dc5483289f320cf6890baffdea0b97821749c2ed82fb7b60e0671ccfc04d2",
+    "apps/viewer/src/components/viewer/DrawingWorkspaceSplit.test.tsx": "ee74a1b538b7b917d21fb3eacedc903f1520cabe32b4633e4c3886c68fdccbaa",
+    "apps/viewer/src/components/viewer/DrawingWorkspaceSplit.tsx": "92f44523042e8eec8f62c8a5f1a96d458565129e1fdaabdc5f480d535c55dc4c",
+    "apps/viewer/src/components/viewer/EntityContextMenu.tsx": "49f2c06287f86d8298baffbe1d964f241016fcadf7ebb051690041f0bf4dce17",
+    "apps/viewer/src/components/viewer/PropertiesPanel.tsx": "dd804e12a970650c5e1c475c6b0923d99d5c12e4d77d9a41176c541784cdaa21",
+    "apps/viewer/src/components/viewer/SafeModeNotice.tsx": "eb0b7a20527af09a034cff32d4fde4d85a2cae039dd5f3978f4fed719f9ecd76",
+    "apps/viewer/src/components/viewer/StableViewport.tsx": "da796c5fdb651c01a59a36f88f73f7cc4e39d3e0a8c3c25df93fb5a443bda8b3",
+    "apps/viewer/src/components/viewer/ViewerLayout.tsx": "1a11f78cd0702f85567d5e19092aeddcc9108c059e62c2209d44e91047f266af",
+    "apps/viewer/src/components/viewer/Viewport.tsx": "75c4947a0213d047238b2580b9f625a1401355b925dc8d281ba81af480013886",
+    "apps/viewer/src/components/viewer/ViewportContainer.tsx": "a50c645ee3295cb4d28b52541e030782bbf5fb3f4244f042c1177562292197b0",
+    "apps/viewer/src/components/viewer/ViewportOverlays.tsx": "382ccebc9a353066a2dd55e5519c079b3b87758e7d5cdbe427783a85fa187c37",
+    "apps/viewer/src/components/viewer/ViewportStartScreen.tsx": "5064ae3dc90ed3c81ebfb2a1ec9969a8eaa102d786baf28991bbafcb00ebc1d8",
+    "apps/viewer/src/components/viewer/colorizer/ColorizerPanel.test.tsx": "7c3b31393b9d5e74bcce52834394d46fdf5971ba1b8d9ceb982987d60567bfd9",
+    "apps/viewer/src/components/viewer/colorizer/ColorizerPanel.tsx": "a5451b2843e0e567ce73d37cbba15312c713c46373947de668b24172856a1312",
+    "apps/viewer/src/components/viewer/colorizer/ColorizerWorkspace.test.tsx": "34ffcc5f792fa29448866e86b551bb64a219c03883f5b36577def33e2df0ce82",
+    "apps/viewer/src/components/viewer/colorizer/ColorizerWorkspace.tsx": "eda0b5aad771932dd1243a861144e693c293c3a96b3e56b5b17078995d23b077",
+    "apps/viewer/src/components/viewer/colorizer/QuickColorMenu.tsx": "1ffcb671e1a5aefcf9f02691fa31f6b8c82435d0c4ffd2dcab91d91cc881a7c1",
+    "apps/viewer/src/components/viewer/colorizer/useColorizer.ts": "4f7b94dd15fb3e4023dde85b4e4e48bc87ec626187993eabd14f085058ba05fd",
+    "apps/viewer/src/components/viewer/commandPaletteCommandsTypes.ts": "1cb9876ca982f44eaa7428099f1e0fa7d3847578ab4f6db14ffac4e41dd1b9ac",
+    "apps/viewer/src/components/viewer/hierarchy/elementSubtree.ts": "5bd393bde9b1e677b9021657a9660b850629269c078321b1ada32232d2d74642",
+    "apps/viewer/src/components/viewer/hierarchy/revealGlobalId.ts": "ac39ec97742dad3e595026aed95826a3c36195fb292c245821f53ba412a29d32",
+    "apps/viewer/src/components/viewer/hierarchy/storeyDisplayElevation.ts": "d56fd224782752c9cf4267fa5cb79dbf312abf13d402da37875f9396946e9a17",
+    "apps/viewer/src/components/viewer/hierarchy/treeDataBuilder.cooperative.test.ts": "561395c849919a47e0036eb8754b69406aaed996943a4cc9e4da17cb9281673d",
+    "apps/viewer/src/components/viewer/hierarchy/treeDataBuilder.ts": "a2313ff73cdcb87f8f07590ce98f32b8264b5791a4b130b0300d92f1e4a9eb8c",
+    "apps/viewer/src/components/viewer/hierarchy/useHierarchyTree.ts": "ebcc04db342ccc535840a4113530447e84fde6e314ab880b8106da487746692a",
+    "apps/viewer/src/components/viewer/hierarchy/useRevealSelection.pending.test.tsx": "40b8434f16e922adc0d81063c1ef8a487c2f2a7caccbebb2b038e8c2ffbdb497",
+    "apps/viewer/src/components/viewer/hierarchy/useRevealSelection.ts": "d01fe03f975abfa84222844ab0bf0878c22d6102b12cab01fcf09dd0e9344fd8",
+    "apps/viewer/src/components/viewer/hierarchy/useStructuralHierarchy.ts": "bef1552e2e5c6fc9b72771b4962eed3168bd9ce1b2e575534e45b5da1c98d050",
+    "apps/viewer/src/components/viewer/instanced-shard-drain.test.ts": "74a6a3f151eeff2a276ed462ba77200d27726ca9c0504d4f91bee256976d1153",
+    "apps/viewer/src/components/viewer/instanced-shard-drain.ts": "ceaefa731f18e600886df1a748d4435f50b5ee0290be072418eaa476fd67c913",
+    "apps/viewer/src/components/viewer/interactionRenderBudget.test.ts": "e72f51b24ff8426ff23a60de0343c1d21bc1e5f010ab03dd2ddaa3ed7b07d9a8",
+    "apps/viewer/src/components/viewer/interactionRenderBudget.ts": "a5227dd68ddfa501a654b21265e699cbc9828e87f2d22d4b927bfc8f3bafc0e3",
+    "apps/viewer/src/components/viewer/model/ModelToolRail.test.tsx": "4bc55c9d0c03f710382f4cb79ed8fe8d40d4103d15eed321330b889f223021f0",
+    "apps/viewer/src/components/viewer/model/ModelToolRail.tsx": "56fb2b303c9cc028ab09cd0817ddbe4f22219cd4e9a9ac57f2900c5d3993a966",
+    "apps/viewer/src/components/viewer/model/ModelWorkspaceSplit.tsx": "70cb5f35928f994a7975fe2e5f1d92d1d665db3b181a85066b9ed22c07755038",
+    "apps/viewer/src/components/viewer/navigationRenderQuality.ts": "7c68c81ed00fb3e7a9974e14c064d5f1d0a28fe3976c5cc1deb55bec833bc80a",
+    "apps/viewer/src/components/viewer/properties/MaterialTotalsPanel.tsx": "04a65d6c393bebc905ca309e02c57f62f40bb1114995289fb272e58a75e728d6",
+    "apps/viewer/src/components/viewer/properties/ModelMetadataPanel.tsx": "d29ca94d5eac5f6faf78a34566d7ed855fb0dd05d04b53cee83b1df8aac19cda",
+    "apps/viewer/src/components/viewer/properties/selectionSummary.ts": "1bcaa9b68e8a2faeb074bf9c8e93f311f4b188453f0105c027240f4ffbc8ae22",
+    "apps/viewer/src/components/viewer/ribbon/RibbonToolbar.tsx": "ed1adc8880435c81e0f1c553b09eee8b3efed1d583b045afb6beb6c09bd2357b",
+    "apps/viewer/src/components/viewer/ribbon/tabs/AuthorTab.tsx": "d7ca4e1fcc771010c7028748afc2b1078c2cde124791c17579b7f4d4a86fbdf2",
+    "apps/viewer/src/components/viewer/ribbon/tabs/ViewTab.environment-panel.test.tsx": "8a56e732f4e7d07aefb0313e5e2656cdf5c816c048b7da8e6ed2333e47fae6b4",
+    "apps/viewer/src/components/viewer/settings/PerformanceSection.test.tsx": "aeefbb16079b47364b37efc96cd5da3f11adccdbba982ff22859adfb38c4b475",
+    "apps/viewer/src/components/viewer/settings/PerformanceSection.tsx": "5f0a3eb0c1fd1cc41f27e1d6305450169fb4201dc60663b863e90867c81d8ef3",
+    "apps/viewer/src/components/viewer/sidebar/SidebarDock.tsx": "ad9009e113c8305c7f4130522fb05269c8e96f24e8cabc407bbf675bbdf9a2bd",
+    "apps/viewer/src/components/viewer/sidebar/SidebarPanelHost.extension-state.test.tsx": "6d1434c1d7fd6f0209d101b57a9e5358771ff33a6d87143bcf8f6147025cdea6",
+    "apps/viewer/src/components/viewer/sidebar/SidebarPanelHost.tsx": "58b332fa7b329bdb43d685301d61f30d9faf580263d73afd0da687ac4669d488",
+    "apps/viewer/src/components/viewer/surface-commands-panels.test.ts": "0cfd8c4648f429dc99c92e24013dc748bada7366d834753ffff619489bb0d1e9",
+    "apps/viewer/src/components/viewer/surface-commands-panels.ts": "f9a2ae0e80e608a76be284591724e302e3fc0c61379706eb7b6c0bca351f7e2d",
+    "apps/viewer/src/components/viewer/toolbar/appearance-entrypoints.test.tsx": "2741f4b06bb4f41156d5b897a2982afc93927789fcee5c15713d2fe28e012a56",
+    "apps/viewer/src/components/viewer/toolbar/cloud-sources-entrypoints.test.tsx": "ea6614bd6c771089d3b348b0e9119f20f57dcbe0ad390aaaed0c79b9bc4a3160",
+    "apps/viewer/src/components/viewer/toolbar/detached-panel-latch.test.tsx": "967f148fbbbfc20f24ceea9f78ec1d14935ce4854d521808fad9a9ce0aba7c31",
+    "apps/viewer/src/components/viewer/toolbar/useWorkspacePanelControls.ts": "13227d712b9ea361bfd4de53c4f6cda2cd5c66baf7f827caa497a0063096f2d7",
+    "apps/viewer/src/components/viewer/tools/MeasureQuantities.tsx": "2c928393df90e0bb08573461a490ef441a6327a8f230d19ca366401a2948870d",
+    "apps/viewer/src/components/viewer/tools/MeasureToolbar.test.tsx": "a65e2a05709d8b4b03392762315b445aa44a43f85c4893c47d7894746cee5aba",
+    "apps/viewer/src/components/viewer/tools/MeasureToolbar.tsx": "2a8cc6343c0a4764d8228052c2cc913448f07fde04db243b43da4d4d68a3af74",
+    "apps/viewer/src/components/viewer/tools/measure-ribbon.test.tsx": "90684921c212d316b504e144542c4c464e2947c3d2aeb0dd7ca04f05eaeb6fdf",
+    "apps/viewer/src/components/viewer/useAnimationLoop.renderThrow.test.tsx": "fed7f93288f39ff74f40790cdeaed9d9e322dc7f66ec4076b76db27650bafc38",
+    "apps/viewer/src/components/viewer/useAnimationLoop.ts": "9afa35b33ae06a8024d39284ceb4f158d618f98a7b377069696b322b77bdd7f9",
+    "apps/viewer/src/components/viewer/useGeometryStreaming.ts": "a78382df79d8f268e2d93bcf895492acdb97957dca831acf2fd2bdef3deb7d7f",
+    "apps/viewer/src/components/viewer/useModelRotationSync.test.ts": "da3aab5861be10b5c79453336f583f9e67467f1069070bc5005ea3cc5d400fa1",
+    "apps/viewer/src/components/viewer/useMouseControls.clash-pivot.test.tsx": "4b172eaa308cdf3369c28d7d74b14cf99ac6120a2edf647b37d8af707288a276",
+    "apps/viewer/src/components/viewer/useMouseControls.fly.test.tsx": "18f8d45d4c482311c98a6ce287bf44a7ee75530cb6bc264e034857ff211e2202",
+    "apps/viewer/src/components/viewer/useMouseControls.ts": "1862398f17b8f9754df2809cd713098e1a923c17806dbd80e7a77f6cf997bbd1",
+    "apps/viewer/src/components/viewer/useStageInsets.ts": "6511d892f5c63a54c08163d7dbf246f1370ca1c45e7799a353ab9e5022aa28d8",
+    "apps/viewer/src/components/viewer/useTestIfcNavigation.ts": "f365ad60eb72d06bd0d697e81a9f72988a4a49bd2c771c2849bad55f01d0b597",
+    "apps/viewer/src/components/viewer/useTouchControls.one-pipeline.test.tsx": "8384001db8a25e46f2f056088a9f12c69fd917e6cfd1a7af7717a8edb06c54b1",
+    "apps/viewer/src/components/viewer/zone-apportionment-ribbon.test.tsx": "d35fb0e085c200a1a0c0047ce9f601fa19dadc4b29e2f64c2707abf289676053",
+    "apps/viewer/src/hooks/ingest/nativeGeometryStream.test.ts": "29602e54ebafee89489025913951bffdf8cc97e21e42d04d99f31be07323cfe5",
+    "apps/viewer/src/hooks/ingest/nativeIfcContract.ts": "bb2dca0c4f5d160a4b312fb38a824d5315dc8e579748d27266974a1084990504",
+    "apps/viewer/src/hooks/ingest/nativeIfcLoad.ts": "526c6749fb5cf7188879c7b7cd7ea129bc616052bffee1b3c7be3ea65b4e909d",
+    "apps/viewer/src/hooks/ingest/nativeIfcRuntime.test.ts": "61a6173c6b5ffcfb39d68556dae7f7e44d62ba52fb9e83004956d5c19257e3e1",
+    "apps/viewer/src/hooks/ingest/nativeIfcStore.test.ts": "51530acddccfe4e5912958731e53b8b03901dbfe0453d77e58d4b4be76522c9c",
+    "apps/viewer/src/hooks/ingest/nativeIfcStore.ts": "0c1816c19a95658e3dbfa82f6e9d4f81840630be1f50c4b49c69b68053f90c60",
+    "apps/viewer/src/hooks/useClash.ts": "f3792761bbe8c69a07a4bca42c1c685e168fa95e22a9176ee4263e46d4876b79",
+    "apps/viewer/src/hooks/useIfcLoader.ts": "feaa25d411c1e8aaf49efec11e0c5d5c6cb2fe95c66e86aed9bffaeadc3ae363",
+    "apps/viewer/src/hooks/usePanelControls.ts": "161fc6b2b6711652e26c64a987f4df2af9afdc18dd05a4870b220927e2545347",
+    "apps/viewer/src/hooks/usePrivacyDisclosure.ts": "871a7c62bb11a4ac6ea50e5f378e54d5a5daaf756b817d373bbac5635aa2fd5d",
+    "apps/viewer/src/hooks/zoneFacts.ts": "c145a065ec7ef413433e6da0b11ec582b815731fcaae3fe7127c3080db549eb8",
+    "apps/viewer/src/i18n/catalogues/colorizer.en.ts": "d83a36f9a03896d9822268fbec52dffedff15b738aa7e8699b415c8bbbb82ee1",
+    "apps/viewer/src/i18n/catalogues/desktop-shell.en.ts": "63a928432d0192701a0208d53f1532de98e1748bcb614b293fac8356bbce17b5",
+    "apps/viewer/src/i18n/catalogues/settings.en.ts": "d2be13d46706b276444b8e0b5625062676edc269cb0228c9c67909529e49d5cb",
+    "apps/viewer/src/i18n/en.ts": "36a40c02ae632676c81a336d986ae81eb89fa44f2f034ce97a9c932b759772ee",
+    "apps/viewer/src/lib/charts/datasets/elements.ts": "86781274650125e395816f3a7d4ecbb3f6bcf527a6621776545f3a44985df4a8",
+    "apps/viewer/src/lib/clash/clash-framing.ts": "19e62c385335d899d39078171925526665ee7bdcf59572548719aae8a83cb0ac",
+    "apps/viewer/src/lib/clash/group-focus-framing.ts": "df5742d46371f49c92fc8244198f53310a96dd2a16015ad01dda6f1fb292bf24",
+    "apps/viewer/src/lib/clash/group-focus.test.ts": "b72fae93a700c61f0c1e735ad548423f24778369ec1e436315e2cb78399f0345",
+    "apps/viewer/src/lib/colorizer/draft.ts": "dd9bd716903d359784a20e3a332378e50194593c2e634c70f89f98502fe81319",
+    "apps/viewer/src/lib/colorizer/quick-paint.ts": "f1459fbb05c00516e8ecea5b0f8cc1cdf2343019e1c3f07ab084fb54c029c44e",
+    "apps/viewer/src/lib/colorizer/snapshot.ts": "2c110063d43eb159091409d6a202e14dde38ccc367254194e5b6316dcf20f80f",
+    "apps/viewer/src/lib/colorizer/types.ts": "8859542bd777492bd55460e310542f8bb0fcd3b0c824f11ef0d9a732e79b25e4",
+    "apps/viewer/src/lib/desktop-shell.ts": "bfba9f7188be0179d65357681eeb70d5d9655cd4387b0602aa3824597f169b51",
+    "apps/viewer/src/lib/lists/prepare-providers.ts": "f9a37e752e5001d01fb89be7c8d3a02cd1645a5baca723a1cd694e7c722d3a50",
+    "apps/viewer/src/lib/model-placement/model-indices.ts": "b93d6516708e6b993503a2d1b0f2f666a4fad83f15c691488717b9b43d963731",
+    "apps/viewer/src/lib/model-placement/pick-candidates.test.ts": "dfa8dd5e570e3878ed6c38587b9240772cd819d927224f3ba25162c6bb7a1a61",
+    "apps/viewer/src/lib/model-placement/pick-candidates.ts": "e16349dcff7fc6553e5dc9b0610a752e048bfa8448452aace168c607feb63a9b",
+    "apps/viewer/src/lib/model-placement/spatial-index.test.ts": "27e883e275b6a16d3a3aa605bda8e20af4422f88db84ec40597614bb2ba74188",
+    "apps/viewer/src/lib/model-placement/spatial-index.ts": "06768d2d5c3c9baa42983f4ff777b0c4e2ad4131213f1c6c583c1bb9bfb4989a",
+    "apps/viewer/src/lib/panels/registry.ts": "dfd4df9cffc5eb8fd1b96310c8a25e6c163fd963fa6f54dc03c14d222354055c",
+    "apps/viewer/src/lib/panels/renderPanelBody.tsx": "615ea92765ce969099de6bea3dce494ac7ab945e867e8c4277c0638933aeb15c",
+    "apps/viewer/src/lib/section/testifc-box-controller.test.ts": "d3e9463ca0a3f8559868bd85c35b21635c5f597c6236043ca244b447d37b8da4",
+    "apps/viewer/src/lib/section/testifc-box-controller.ts": "1166eadade0c2a6ddd9d239cedc89e1599da831210f6b47fe31575689596eb52",
+    "apps/viewer/src/lib/using-declaration-build.test.ts": "f83eb55a0291e66974b5e0d85b7e74bc9f48d225db1656346b88279252a1691f",
+    "apps/viewer/src/store/constants.ts": "0cf5ce6747b1fae5db78bf7640bbf470d8e57a286783dfd3e17a056dc81587b5",
+    "apps/viewer/src/store/createViewerActions.ts": "34633d36a1cbea03d099318c5718271608c983386d325d6d1fb8e4589dde3375",
+    "apps/viewer/src/store/mutation-permission.ts": "2bb6c27f661d5aa5ffb3fa018fe5cf067b1e5bc191ba538837618b750bbaa6ed",
+    "apps/viewer/src/store/slices/navigationRenderSettings.ts": "23a5a7e7c57daf5d88dc6663e71c58ad27b9908ae75a9b40831b472bea20d51f",
+    "apps/viewer/src/store/slices/sidebarSlice.ts": "090703bf676bcafff9958b17b4a23fdffc3e820afa5aedda4cd60510238cfdbb",
+    "apps/viewer/src/store/slices/uiSlice.ts": "d8598e9696cc0ac9acda7c3d9c7bf3dd320bb2ac9921acb18a854e8ef7dfd446",
+    "apps/viewer/src/store/teardown-registry.test.ts": "815e36205d89acc0df12d8e6a7dd1de1aeac356021f027883b6c598228eb1b49",
+    "apps/viewer/src/test/contrast/extract-classname.ts": "6d14dc254a6c1a29975c5ce98f8643e61e23c54bb456fc03d1530f8af572294e",
+    "apps/viewer/src/test/contrast/render-harness.ts": "7f8836feb4dca1b4b4aa450c84f396ebd61c56131afced0e275ae26e0918077b",
+    "apps/viewer/src/utils/loadingUtils.ts": "c73bb5d0528d2aeacd9644a879be641241af607e24f7a0bb699864707def51b3",
+    "apps/viewer/src/utils/runCooperatively.ts": "200e9f4857489a4632d6e87e81e99fb031202413c0b3f90d90870c9a771e4f1b",
+    "apps/viewer/src/utils/serverDataModel.ts": "72c08cc0658239cc149a70ca0eb50a103303f8998420458e5b69651689f2daa5",
+    "apps/viewer/src/utils/serverDataModelSlicing.test.ts": "43e8785bcedceeac1b6ed248fa06aa6b133fd2fa6dac2e3636c90ee1bc83b25f",
+    "apps/viewer/src/utils/serverEntityTable.ts": "fcf435b05f185bc37ac1563319ba3daf6267317bb3d4f9ac382e0b5ea39f4de7",
+    "apps/viewer/src/utils/serverRelationships.ts": "03889b9feacc4558b4e2603b7a9f4e267865b6f2e7fe20aaed008182bfb49062",
+    "desktop/APP-QUALITY-AUDIT.md": "bb5af6018ec8a780903988913997cba1d136992836f0c7f69d74a852c4c9f45c",
+    "desktop/CLEANUP.md": "5452c8aa393964f3ee1530c6d1f2d27d866edc1df8cbf0c1d586468f7218a858",
+    "desktop/COLORIZER-UX-VALIDATION.md": "064a49ed951bda4554b793eb5dd7374d85533f70e9f717d9089f5e71afb09129",
+    "desktop/COLORIZER-VALIDATION.md": "28150691676d1155ecc96562fb1cc8eb0985b77fb89243fab160ddf5dc65abbc",
+    "desktop/Clean-OldBuilds.ps1": "d719644083e302d0f000f79c4ff57c10ca6e5972f068b6d0361e01e7f19bfd7e",
+    "desktop/INTERACTION-UX-VALIDATION.md": "0aa7a1db15a80dc69c79d04296661ffa5020b1ece0f669381140811fbfd62f5b",
+    "desktop/NATIVE-RUST-DEEP-AUDIT.md": "3e76962e7a0a41f3713c2a4ccd4167e504f1a2d1660ecb48ec78b6bb9e255bae",
+    "desktop/NATIVE-RUST-FOLLOWUP.md": "873fea9dde68199edc0501850c59da27c8e622243f8d716cf84fbdcba8969c76",
+    "desktop/NAVIGATION-RENDER-250MS.md": "2dd7e13b3b4346aeee614fa7ae7199a975592f109f40abf96d92be4d45101500",
+    "desktop/PANEL-MOTION-VALIDATION.md": "c573699c9a0027d7d7316e7fbc4f5c856d23e769a44d3d79579a83d83641f4b5",
+    "desktop/PVF-CRASH-VALIDATION.md": "5d39fb87e5cfe2d4b38703b1489a30e33d15294f4e145fa9ffd170e06fd65311",
+    "desktop/PVF-RESPONSIVENESS-VALIDATION.md": "994c8ce486d5fbeb416433f3f612b69517f641d04912e438bb4c389cc4291277",
+    "desktop/README.md": "f3a48dd2255e545382ebf26e5bee51c3f4188685db22490de7f5bf011d2464a3",
+    "desktop/UI-QUALITY-CONTRACT.md": "a62641da3462f4058d790cbae1079043ab11b7151ac7141e77606f5a9a914c2f",
+    "desktop/native-bootstrap.ts": "7035261893a84e3d9ab8d106870d50f6e432631e4123656c15298560ee911cb9",
+    "desktop/native-client.ts": "23a863d2fc6fe059417a27235e4c216fb630978cd25650e03d3f515ef2e94965",
+    "desktop/native-colorizer.ts": "69e459f1f30c5dee7c5d6f6b5f6a3af22002a521b1feb281742b0c3896ec1b75",
+    "desktop/native-entity-columns.ts": "27fdd8702da6a675f58c532101f97a5f78d5b0df764cda576de3140ed8f3c1d7",
+    "desktop/native-geometry-stream.ts": "f15b1656e7a05af8a2f7bc3782baeb63d1b4e80dab8f68be676a33772b3b9130",
+    "desktop/native-semantics.ts": "81eb1f1c6eedeb38b02e02c3b840d5d43d06514bfa50500d1043fced51d54115",
+    "desktop/package.json": "032e1fb81ac9bf4a80a00d007887b391eeca71c4c0a145c662e9e532aa7752e6",
+    "desktop/quality-smoke.mjs": "d70a10bacedbabdb0cc9294b8b5801accd35022462372dfad4becd1daa3d018f",
+    "desktop/src-tauri/Cargo.lock": "5cbb3769541184f1e7564e972b4e33dc7a028a9047093c7b61239761cfde60e2",
+    "desktop/src-tauri/Cargo.toml": "4e526af5a4c7f5d3e2d78e08bd13e72e375689bc284f39499983008b575988c1",
+    "desktop/src-tauri/src/colorizer.rs": "5cd4010d299fcd0550c708409e8ab17fdebc23d1541f2311c149680cd9ca6389",
+    "desktop/src-tauri/src/colorizer_tests.rs": "7de5dbd228545a835d6d2072e2a0544c04e5675ce2a3e979f59051a5f8b220eb",
+    "desktop/src-tauri/src/commands.rs": "b0a802d8285dbdd6d2c64a1f9267d43b31d25b5254afbe46b34a9f509050bc5b",
+    "desktop/src-tauri/src/lib.rs": "6045cb600b4d91da5ab17c3d20dc3ae8c657f50868a8e926ed7764749a61314d",
+    "desktop/src-tauri/src/main.rs": "273c71457f5604a75486a683063caa13581d1ffc389185fd4277264915ca2c5d",
+    "desktop/src-tauri/src/native.rs": "06ca2f3eaa2f66bf34fb64763427aefe0df8539e1d4d6cd5e1e3c26f165bc7c7",
+    "desktop/src-tauri/src/native_tests.rs": "659623c3e9c088cd1d52507b84eac5e5f161ee98f09204367e1bb836574416ad",
+    "desktop/src-tauri/src/packet.rs": "884e25d8764b69e0df2d8be8122791f032968430374427f1d066f5502de97dc4",
+    "desktop/src-tauri/src/packet_batches.rs": "fe0278ac824a919a1224b6ab1a806a1c01a0644025935c3f9c4276951b4fffb3",
+    "desktop/src-tauri/src/packet_batches_tests.rs": "8ea1679dc692b8258ddd7183e4251b793590d844182f19369825a0691ed1108a",
+    "desktop/src-tauri/src/partition.rs": "78a962950a1446652d1d8492e8e162c00f15195c67fa95a8be4df238a6ef442d",
+    "desktop/src-tauri/src/partition_tests.rs": "600f577ecad1a9ab4355185fec61769d518d1a07beb611cb082020f5d62459f7",
+    "desktop/src-tauri/src/semantic.rs": "39af41b311a7a0665eba99d082f6b90584421dde07a45d3cdbf9a4587e2a5d02",
+    "desktop/src-tauri/src/semantic_model.rs": "92b08d9fb34ba9ab123a909e0a160a4674bf05dc6321a25968d938e17667a2ef",
+    "desktop/src-tauri/src/semantic_probe.rs": "9c4e5dada4444a6977dd072e72aa7c3bb91c466ff9b9a39b6178f4538dfb2cb5",
+    "desktop/src-tauri/src/semantic_tests.rs": "67fcff73686c472317cee0ebe36bdf58aba78f9ee341eeb3fd8225cec38bbde3",
+    "desktop/src-tauri/tests/native_backend.rs": "2ee8edc7d5ad81d4c36696c70467c43d6e89924e399b11ad430389076996cd8f",
+    "desktop/src-tauri/tests/semantic_cancellation.rs": "b2413244a46bbf829d791c3eb5dd6f3433a15f62bcac7a365f7541666e150a58",
+    "desktop/src-tauri/tests/semantic_units.rs": "21477eb8e7947a3419caa355fa12b9d23fc0ac7a0ad1d5445db025093796bdb2",
+    "docs/guide/colorizer.md": "a05410f67bbc4e28cbd71d67821c8b40c685b1f3163e37b2229ffffdc3e35aea",
+    "docs/guide/rendering.md": "b5628407704111762e1f19fb8f8b892bca86177aae69de105d31471bcfd62abf",
+    "packages/data/README.md": "a5c1a8bcb0306e9ba312e5d3e5142d5b403d552d18391b3f791bf0b24b1cfc22",
+    "packages/data/src/relationship-graph.ts": "6a4d4cb0c0ce4d724ae270da103391d3afbf6ee1126858ade24bb0360c8b40be",
+    "packages/geometry/README.md": "402a2e8b61e93ecf52254583eb1d3e46643f646b72d4428f1bc404e16ce771dd",
+    "packages/geometry/src/index.ts": "07684cf95ebfd20257e783ffef95b91bdb5ef6a4ce628eb4c3f6a488e73b1ea9",
+    "packages/geometry/src/instanced-shard-layout.ts": "30afcf580a4eabc16c40f04ba60dfdcc5b3515568e59957bbc55e77e594b6659",
+    "packages/geometry/src/packed-instanced-decoder.test.ts": "e67a1bcbbbf9f4cf02f2edc14f79a927d3a92db3bed0f05587746169479d04a6",
+    "packages/geometry/src/packed-instanced-decoder.ts": "db23a3b7b0cc4e5d2a810a4be69c6d4321a63853aae9ca3d24217d686dc060cd",
+    "packages/parser/README.md": "8daba39314c6258b948c54876bef2b23c5718fbdba1dc78d7fb515d1cf3e1a20",
+    "packages/parser/src/columnar-parser.ts": "f5c146d2bfa832b5a954e1cfb12593687bbd5e30a2d2724de5d4d3695ca1c282",
+    "packages/parser/src/project-units.ts": "e7d2b5fd6f1297f0b7a4737cfb60c8018f9b16bbcabb3fb6dec80e0ce362a056",
+    "packages/parser/src/types.ts": "d7ffcda7ad57dfdb60d9f65f92ff812a04891a729ac8364d56b4ae0c54c95a61",
+    "packages/renderer/README.md": "6135398de1e38ed0be43ee6010724f71c720749e76e10ec639431aaffd4e4677",
+    "packages/renderer/src/batch-slicing.ts": "df793322459596a8c1950e8263b88e3165d866b6c680f5886d1cfb1f7ac256ab",
+    "packages/renderer/src/camera-home-fit.test.ts": "208a99f1d41b8f807f1e3b02eab7800b84a11981c9a8dab90286a43ef85e273d",
+    "packages/renderer/src/camera.ts": "87c9a1c447a1ca117ddae2a00e3cb54fa911089fb42dc790bed05acc56f3c4e2",
+    "packages/renderer/src/geometry-staging.test.ts": "14949a1183829526185e059dcc88c9a3c85edabdfe5adf34465e9f121f46d4e7",
+    "packages/renderer/src/geometry-staging.ts": "88c788d4a9d659158427a43a92067fa1056950335af1e425de9a275208f7ffbf",
+    "packages/renderer/src/instanced-packing-parity.test.ts": "c25033ccd8d18038e0020933290cd4b984001435f977c29da0ae1fa57081624d",
+    "packages/renderer/src/instanced-render.ts": "6d90311a0cea685c18aced2fdf3184213608dea1dd0b3ee3baa930f2e0cf283a",
+    "packages/renderer/src/instanced-rte.ts": "6fe72b97c3644142fc5e65fa83ab9dfc1bac323b8b1388844634346b526771a4",
+    "packages/renderer/src/lod-simplify.ts": "111029767ee833a84e29d62933a4cba00ebebcdcfc79b77faa4576b506df65c2",
+    "packages/renderer/src/pick-order-map.ts": "07cf19e0711de220b345fef3aefbd166409f09e1555aac27ae903d398788a1a8",
+    "packages/renderer/src/pick-types.ts": "a15027ea3ef44828b023e8a2cdc416e5a9b4ce098857558367624700d1a0d03f",
+    "packages/renderer/src/picking-manager.ts": "6363352f09fd899fa1941ff4416f48528aa8ac03b04ac87090ce79f89e56a42e",
+    "packages/renderer/src/quantize.ts": "bb64946e4e031206584ea6c648d17c5af3c9d70038ec9b84600a6b02737ce5f1",
+    "packages/renderer/src/relative-to-eye.ts": "4f4685f58a87f52cbd14aac4ca231e25cfad886fcbeb16ad1e61d958822d98c8",
+    "packages/renderer/src/scene-batch-placement.ts": "eecbabb36fe290a5dda7a0a55c40eb38cdec136ba89c6e280229ba3cdf20328c",
+    "packages/renderer/src/scene-batch-slicing.test.ts": "4101a42742aad2703cb26ab1f949e9c60225781d3f0abf3112b951dac9e7e777",
+    "packages/renderer/src/scene-batch-upload.ts": "83566d639e3c3cfef22fd89db68ae2fb679a8619af447d7688c03b3b8331e043",
+    "packages/renderer/src/scene-contents.ts": "b01008d0edab6da7713ec5399898ed220deed6f0f8f209a14d994e691881d463",
+    "packages/renderer/src/scene-geometry.ts": "98b53e30b96d31a476fc86d9f73093d151e7648b2525fdd1191dd37f75269d20",
+    "packages/renderer/src/scene-instance-bounds.ts": "9ed62064fe0cfe61521ac426d647064f80e11f7f1b53a0fb3540b7ae1f002ca7",
+    "packages/renderer/src/scene-local-bounds.test.ts": "cc43d46dd85baf1e26331ba6cc30a8b6f9f4e3388d53621cc761de4cb3b4c759",
+    "packages/renderer/src/scene-owned-instance-bounds.test.ts": "492c884caf9e23ded227629ccd6920d879f6991fe22e02a5245e842ea1ebd333",
+    "packages/renderer/src/scene-precision.ts": "f1b872e376bff04d401b3f3fdb28aa80179bafa52c99b1173a149051098764b3",
+    "packages/renderer/src/scene-raycast-candidates.test.ts": "632f6720bb1bfd1f013bf1d2418e92e67e49d7e11df213d21456419928537c43",
+    "packages/renderer/src/scene-raycaster.ts": "6fcb4d51cefecbf36efd3622161d4fd7adfe04184b9c2962094d545f5b8c3481",
+    "packages/renderer/src/scene.ts": "4b0f605e31fcefb14fe82a5487a80bbf92ea71befeace763245fbb1aace57874",
+    "packages/spatial/README.md": "806f156e5bc660673f04cecedea9fe132153e7ad2b86745f952c5b3dfd04209d",
+    "packages/spatial/src/bvh.test.ts": "5ef7543928e0af02edcbafe7a8822fff0aa99bac5ff4cd48210c24c5c2ca6a12",
+    "packages/spatial/src/spatial-index-builder.test.ts": "5ec4cf00d9cc7c242b14ceb07a3fe956035b81f7ead7e5e77106ae55987604bc",
+    "packages/spatial/src/spatial-index-builder.ts": "85c8fe3947f3d58c554e817c4a5e5155d6ff8c11d555532b6d81ec20f082541f",
+    "rust/core/src/project_units/mod.rs": "963337e40716beecb7527a9b9136eeca7b76432d8211a1add801b4360a0c9fa9",
+    "rust/export/examples/colorizer.rs": "c273915ca1253017ba10edeb13eb92ecee1e2654f38317cc0a4f49d64663ca20",
+    "rust/export/src/colorizer/catalog.rs": "6287da90544520a35302160651dafacc65b6812d9c290984d6d218c921f7fd31",
+    "rust/export/src/colorizer/mod.rs": "a43b1cce043d383193c9704fa65c3014c630f27a52e9ef0ea6b0febc450cc358",
+    "rust/export/src/colorizer/paint.rs": "e1bf8536489cd6f74ebc62c8ebaec88a5e27e33f2f1328daa3812240e05ebe3e",
+    "rust/export/src/colorizer/source.rs": "186de72eae54d9e01ec5b3edcce054c8e7a3914a30447ab050e90543f8e8e2bf",
+    "rust/export/src/colorizer/tests.rs": "f510653b1b297244977a490ea105e2805346328b4323abd66aa970defbf647b2",
+    "rust/export/src/lib.rs": "c8eb8167bf7fb28ccd3329adbb2c5ca3ded07864f05cacc95ac05a3daad6c010",
+    "scripts/api-surface.json": "bb4d311292d30fd2dc14e2b77eb08f9affb38226a8bfb943b98bfbf6c8b3dcc5",
+    "scripts/perf/README.md": "ff1c591928d48a4d946106ca1f6dc4fb98cdb9ccf07fb85dda4bdd375bd7fd43"
+  },
+  "targets": {
+    "production": {
+      "ref": "61d209288c1b117d405628ead302d0ee700bd2a0",
+      "commit": "61d209288c1b117d405628ead302d0ee700bd2a0 2026-10-16T08:47:15+02:00 fix(export): one emit path, one id allocator, one record index for the STEP writers (#7682) (#7715)",
+      "versions": {
+        "package.json": "10.4.0",
+        "apps/viewer/package.json": "5.1.5",
+        "packages/wasm/package.json": "10.4.0",
+        "packages/geometry/package.json": "7.8.1",
+        "packages/parser/package.json": "9.5.1",
+        "packages/renderer/package.json": "6.4.0",
+        "packages/data/package.json": "6.2.0",
+        "packages/spatial/package.json": "1.15.0",
+        "packages/export/package.json": "4.11.0",
+        "Cargo.toml:workspace.package": "20.4.0"
+      },
+      "upstream_changed_paths_vs_base": 8370,
+      "upstream_changes_by_area": {
+        ".changeset": 37,
+        ".config": 1,
+        ".gitattributes": 1,
+        ".github": 38,
+        ".gitignore": 1,
+        "AGENTS.md": 1,
+        "Cargo.lock": 1,
+        "Cargo.toml": 1,
+        "README.md": 1,
+        "RELEASE.md": 1,
+        "apps/autodesk-exchange-worker": 5,
+        "apps/autodesk-service": 33,
+        "apps/cloud-service": 24,
+        "apps/landing": 1,
+        "apps/report-service": 83,
+        "apps/server": 64,
+        "apps/viewer": 2434,
+        "apps/viewer-embed": 2,
+        "deploy": 18,
+        "docs": 1701,
+        "examples": 22,
+        "legal": 2,
+        "mkdocs.yml": 1,
+        "package.json": 1,
+        "packages/ai": 26,
+        "packages/bcf": 5,
+        "packages/bcf-api": 7,
+        "packages/cache": 15,
+        "packages/charts": 7,
+        "packages/clash": 1,
+        "packages/cli": 115,
+        "packages/codegen": 1,
+        "packages/collab": 1,
+        "packages/collab-server": 22,
+        "packages/create": 116,
+        "packages/create-ifc-lite": 21,
+        "packages/data": 11,
+        "packages/diff": 1,
+        "packages/documents-api": 2,
+        "packages/drawing-2d": 5,
+        "packages/embed-protocol": 1,
+        "packages/embed-sdk": 2,
+        "packages/encoding": 4,
+        "packages/export": 56,
+        "packages/extensions": 5,
+        "packages/flow": 17,
+        "packages/flow-nodes": 48,
+        "packages/geometry": 42,
+        "packages/ids": 115,
+        "packages/ids-agent": 52,
+        "packages/ids-authoring": 178,
+        "packages/ifcx": 7,
+        "packages/lens": 6,
+        "packages/lists": 8,
+        "packages/load-trace": 22,
+        "packages/mcp": 102,
+        "packages/merge": 1,
+        "packages/mutations": 16,
+        "packages/oauth-pkce": 5,
+        "packages/opencde-foundation": 5,
+        "packages/parser": 96,
+        "packages/plugin-api": 5,
+        "packages/pointcloud": 34,
+        "packages/provenance": 1,
+        "packages/query": 2,
+        "packages/regex-guard": 1,
+        "packages/renderer": 124,
+        "packages/report-contract": 5,
+        "packages/rules": 23,
+        "packages/sandbox": 12,
+        "packages/sdk": 100,
+        "packages/semantic": 37,
+        "packages/server-bin": 6,
+        "packages/server-client": 5,
+        "packages/solar": 1,
+        "packages/source-autodesk": 18,
+        "packages/source-dalux": 2,
+        "packages/source-dropbox": 8,
+        "packages/source-fixture": 2,
+        "packages/source-msgraph": 9,
+        "packages/spatial": 2,
+        "packages/timing-ladder": 1,
+        "packages/viewer": 2,
+        "packages/wasm": 4,
+        "packages/wasm-lifecycle": 1,
+        "packages/world-frame-fixtures": 1,
+        "patches": 1,
+        "playwright.config.ts": 1,
+        "pnpm-lock.yaml": 1,
+        "rust-major-offset.json": 1,
+        "rust/AGENTS.md": 1,
+        "rust/clash": 3,
+        "rust/cloud-import": 6,
+        "rust/core": 22,
+        "rust/csg-thread-bench": 1,
+        "rust/export": 97,
+        "rust/ffi": 3,
+        "rust/geometry": 63,
+        "rust/landxml": 30,
+        "rust/processing": 59,
+        "rust/python": 10,
+        "rust/wasm-bindings": 18,
+        "scripts": 1343,
+        "server": 1,
+        "shared": 1,
+        "tests": 667,
+        "tools": 14,
+        "tsconfig.json": 1,
+        "turbo.json": 1,
+        "vercel.json": 1
+      },
+      "local_overlap_count": 87,
+      "untracked_path_collisions": [],
+      "dry_merges": [
+        {
+          "path": "apps/server/src/services/data_model/classifications.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/documents.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/materials.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/metadata.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/mod.rs",
+          "status": "text-conflict",
+          "conflict_regions": 6
+        },
+        {
+          "path": "apps/server/src/services/data_model/properties.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/quantities.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/relationships.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/types.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/bootstrap.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/ChunkErrorBoundary.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/mcp/playground-dispatcher.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/HierarchyPanel.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/PropertiesPanel.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewerLayout.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/Viewport.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportContainer.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportContainer.windowDrop.test.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportOverlays.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportWelcomeCard.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/commandPaletteCommandsTypes.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/revealGlobalId.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/treeDataBuilder.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/useHierarchyTree.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/useRevealSelection.ts",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/MaterialTotalsPanel.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/ModelMetadataPanel.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/selectionSummary.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ribbon/RibbonToolbar.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/settings/GeneralSection.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/sidebar/ActivityBar.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/sidebar/SidebarDock.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-mobile.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-panels.test.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-panels.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/MeasureQuantities.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionHint.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionPanel.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionToolbar.box.test.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionToolbar.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useAnimationLoop.renderThrow.test.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useAnimationLoop.ts",
+          "status": "text-conflict",
+          "conflict_regions": 5
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useGeometryStreaming.ts",
+          "status": "text-conflict",
+          "conflict_regions": 5
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.fly.test.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useRenderUpdates.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/hooks/useClash.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/hooks/useIfcLoader.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/hooks/zoneFacts.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/i18n/catalogues/viewport-lighting.en.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/i18n/en.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/index.css",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/charts/datasets/elements.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/model-indices.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/spatial-index.test.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/spatial-index.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/panels/registry.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/panels/renderPanelBody.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/wasm-prewarm.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/createViewerActions.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/sidebarSlice.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiPreferences.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiSlice.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/teardown-registry.test.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/types.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/test/contrast/render-harness.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "docs/guide/rendering.md",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/geometry/README.md",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/geometry/src/index.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/parser/README.md",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/parser/src/columnar-parser.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/parser/src/project-units.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/README.md",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/camera-animation.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "packages/renderer/src/camera-controls.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/camera.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "packages/renderer/src/pick-types.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "packages/renderer/src/picking-manager.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/relative-to-eye.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-contents.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-geometry.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-raycaster.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "rust/export/src/lib.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "rust/geometry/src/router/rtc_offset.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "scripts/api-surface.json",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "scripts/perf/README.md",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        }
+      ],
+      "text_conflict_file_count": 35
+    },
+    "main": {
+      "ref": "74d097d01f96df892ffa09e69c5c82e628be7d5c",
+      "commit": "74d097d01f96df892ffa09e69c5c82e628be7d5c 2026-10-16T21:20:40+02:00 test(processing): function-length ratchet, 150-line limit, 90-row seeded allowlist (#7697) (#7764)",
+      "versions": {
+        "package.json": "10.4.0",
+        "apps/viewer/package.json": "5.1.5",
+        "packages/wasm/package.json": "10.4.0",
+        "packages/geometry/package.json": "7.8.1",
+        "packages/parser/package.json": "9.5.1",
+        "packages/renderer/package.json": "6.4.0",
+        "packages/data/package.json": "6.2.0",
+        "packages/spatial/package.json": "1.15.0",
+        "packages/export/package.json": "4.11.0",
+        "Cargo.toml:workspace.package": "21.4.0"
+      },
+      "upstream_changed_paths_vs_base": 8686,
+      "upstream_changes_by_area": {
+        ".changeset": 48,
+        ".config": 1,
+        ".gitattributes": 1,
+        ".github": 38,
+        ".gitignore": 1,
+        "AGENTS.md": 1,
+        "Cargo.lock": 1,
+        "Cargo.toml": 1,
+        "README.md": 1,
+        "RELEASE.md": 1,
+        "apps/autodesk-exchange-worker": 5,
+        "apps/autodesk-service": 33,
+        "apps/cloud-service": 24,
+        "apps/landing": 1,
+        "apps/report-service": 83,
+        "apps/server": 74,
+        "apps/viewer": 2444,
+        "apps/viewer-embed": 2,
+        "deploy": 18,
+        "docs": 1738,
+        "examples": 22,
+        "legal": 2,
+        "mkdocs.yml": 1,
+        "package.json": 1,
+        "packages/ai": 26,
+        "packages/bcf": 5,
+        "packages/bcf-api": 7,
+        "packages/cache": 15,
+        "packages/charts": 7,
+        "packages/clash": 1,
+        "packages/cli": 118,
+        "packages/codegen": 1,
+        "packages/collab": 1,
+        "packages/collab-server": 22,
+        "packages/create": 116,
+        "packages/create-ifc-lite": 21,
+        "packages/data": 11,
+        "packages/diff": 1,
+        "packages/documents-api": 2,
+        "packages/drawing-2d": 5,
+        "packages/embed-protocol": 1,
+        "packages/embed-sdk": 2,
+        "packages/encoding": 4,
+        "packages/export": 66,
+        "packages/extensions": 5,
+        "packages/flow": 17,
+        "packages/flow-nodes": 48,
+        "packages/geometry": 42,
+        "packages/ids": 115,
+        "packages/ids-agent": 52,
+        "packages/ids-authoring": 178,
+        "packages/ifcx": 7,
+        "packages/lens": 6,
+        "packages/lists": 8,
+        "packages/load-trace": 22,
+        "packages/mcp": 104,
+        "packages/merge": 1,
+        "packages/mutations": 16,
+        "packages/oauth-pkce": 5,
+        "packages/opencde-foundation": 5,
+        "packages/parser": 104,
+        "packages/plugin-api": 5,
+        "packages/pointcloud": 34,
+        "packages/provenance": 1,
+        "packages/query": 2,
+        "packages/regex-guard": 1,
+        "packages/renderer": 124,
+        "packages/report-contract": 5,
+        "packages/rules": 24,
+        "packages/sandbox": 12,
+        "packages/sdk": 100,
+        "packages/semantic": 37,
+        "packages/server-bin": 6,
+        "packages/server-client": 5,
+        "packages/solar": 1,
+        "packages/source-autodesk": 18,
+        "packages/source-dalux": 2,
+        "packages/source-dropbox": 8,
+        "packages/source-fixture": 2,
+        "packages/source-msgraph": 9,
+        "packages/spatial": 2,
+        "packages/timing-ladder": 1,
+        "packages/viewer": 2,
+        "packages/wasm": 4,
+        "packages/wasm-lifecycle": 1,
+        "packages/world-frame-fixtures": 1,
+        "patches": 1,
+        "playwright.config.ts": 1,
+        "pnpm-lock.yaml": 1,
+        "rust-major-offset.json": 1,
+        "rust/AGENTS.md": 1,
+        "rust/clash": 3,
+        "rust/cloud-import": 6,
+        "rust/core": 39,
+        "rust/csg-thread-bench": 1,
+        "rust/export": 141,
+        "rust/ffi": 3,
+        "rust/geometry": 122,
+        "rust/landxml": 65,
+        "rust/processing": 101,
+        "rust/python": 10,
+        "rust/wasm-bindings": 25,
+        "scripts": 1355,
+        "server": 1,
+        "shared": 1,
+        "tests": 675,
+        "tools": 14,
+        "tsconfig.json": 1,
+        "turbo.json": 1,
+        "vercel.json": 1
+      },
+      "local_overlap_count": 89,
+      "untracked_path_collisions": [],
+      "dry_merges": [
+        {
+          "path": "apps/server/src/services/data_model/classifications.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/documents.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/materials.rs",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/server/src/services/data_model/metadata.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/mod.rs",
+          "status": "text-conflict",
+          "conflict_regions": 8
+        },
+        {
+          "path": "apps/server/src/services/data_model/properties.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/quantities.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/relationships.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/data_model/types.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/server/src/services/parquet_data_model_tests.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/bootstrap.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/ChunkErrorBoundary.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/mcp/playground-dispatcher.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/HierarchyPanel.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/PropertiesPanel.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewerLayout.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/Viewport.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportContainer.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportContainer.windowDrop.test.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportOverlays.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ViewportWelcomeCard.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/commandPaletteCommandsTypes.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/revealGlobalId.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/treeDataBuilder.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/useHierarchyTree.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/hierarchy/useRevealSelection.ts",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/MaterialTotalsPanel.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/ModelMetadataPanel.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/properties/selectionSummary.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/ribbon/RibbonToolbar.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/settings/GeneralSection.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/sidebar/ActivityBar.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/sidebar/SidebarDock.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-mobile.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-panels.test.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/surface-commands-panels.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/MeasureQuantities.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionHint.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionPanel.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionToolbar.box.test.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/tools/SectionToolbar.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useAnimationLoop.renderThrow.test.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 3
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useAnimationLoop.ts",
+          "status": "text-conflict",
+          "conflict_regions": 5
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useGeometryStreaming.ts",
+          "status": "text-conflict",
+          "conflict_regions": 5
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.fly.test.tsx",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useMouseControls.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/components/viewer/useRenderUpdates.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/hooks/useClash.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/hooks/useIfcLoader.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/hooks/zoneFacts.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/i18n/catalogues/viewport-lighting.en.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/i18n/en.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/index.css",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/charts/datasets/elements.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/model-indices.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/spatial-index.test.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/model-placement/spatial-index.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/panels/registry.ts",
+          "status": "text-conflict",
+          "conflict_regions": 2
+        },
+        {
+          "path": "apps/viewer/src/lib/panels/renderPanelBody.tsx",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/lib/wasm-prewarm.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/createViewerActions.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/sidebarSlice.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiPreferences.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/slices/uiSlice.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/teardown-registry.test.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "apps/viewer/src/store/types.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "apps/viewer/src/test/contrast/render-harness.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "docs/guide/rendering.md",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/geometry/README.md",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/geometry/src/index.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/parser/README.md",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/parser/src/columnar-parser.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/parser/src/project-units.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/README.md",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/camera-animation.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "packages/renderer/src/camera-controls.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/camera.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "packages/renderer/src/pick-types.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "packages/renderer/src/picking-manager.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/relative-to-eye.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-contents.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-geometry.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene-raycaster.ts",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "packages/renderer/src/scene.ts",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "rust/export/src/lib.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "rust/geometry/src/router/processing.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "rust/geometry/src/router/rtc_offset.rs",
+          "status": "clean-text-merge",
+          "conflict_regions": 0
+        },
+        {
+          "path": "scripts/api-surface.json",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        },
+        {
+          "path": "scripts/perf/README.md",
+          "status": "text-conflict",
+          "conflict_regions": 1
+        }
+      ],
+      "text_conflict_file_count": 36
+    }
+  },
+  "limits": [
+    "Tree/content comparison does not require a complete ancestry in the shallow checkout.",
+    "Dry three-way merge is text compatibility only, not compilation or runtime evidence.",
+    "No worktree merge, dependency install, app build or application test is performed.",
+    "A version match does not establish source identity; main and production are compared separately."
+  ],
+  "protected_exe": {
+    "path": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-quality-audit-20261017\\IFC-Lite.exe",
+    "sha256": "1b9a8879c4ff556324cf3aaa459b58d2fcd8f1d03fda22579bd861e98fbc1d4b",
+    "bytes": 44248064
+  },
+  "source_unchanged_during_audit": true
+}

@@ -1,0 +1,62 @@
+{
+  "scope": "Existing Colorizer and synthetic IFC4 geometry; not IFC Lite runtime",
+  "mapped_two_pass": {
+    "colors": {
+      "IfcBeam": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "IfcColumn": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ]
+    },
+    "input_bytes": 1194,
+    "final_bytes": 3268
+  },
+  "mapped_parent_style_vs_leaf_style": {
+    "requested_beam": "#ff0000",
+    "observed_colors": {
+      "IfcBeam": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ],
+      "IfcColumn": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ]
+    },
+    "occurrence_parent_style_overrode_existing_leaf_style": false
+  },
+  "indexed_map_survives_style_replacement": {
+    "requested": "#808080",
+    "independent_engine_materials": [
+      [
+        0.5019607843137255,
+        0.5019607843137255,
+        0.5019607843137255
+      ]
+    ],
+    "indexed_colour_maps_remaining": 1,
+    "input_engine_materials": [
+      [
+        0.75,
+        0.7,
+        0.7
+      ]
+    ],
+    "oracle_limit": "IfcOpenShell 0.8.5 did not expose the indexed palette as geometry materials even before recolouring. This run proves only that the indexed map remains attached. IFC Lite source explicitly uses it for palette splits."
+  }
+}

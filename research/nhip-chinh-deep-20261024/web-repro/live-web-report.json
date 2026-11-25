@@ -1,0 +1,217 @@
+{
+  "site": "https://www.ifclite.com/",
+  "time": "2026-10-24T06:47:58.139Z",
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "warning",
+      "text": "[SpatialHierarchyBuilder] No storeys found in spatial hierarchy"
+    },
+    {
+      "type": "warning",
+      "text": "[SpatialHierarchyBuilder] No buildings found in spatial hierarchy"
+    }
+  ],
+  "errors": [],
+  "blockedWrites": [
+    {
+      "method": "POST",
+      "url": "https://me.kis.v2.scr.kaspersky-labs.com/3AFE8FDF-70E9-4FC2-8C18-09876434338A/90657229-0B7C-472E-85C7-BBD1EB845731/to/wsm.sessionActivated?tm=2026-10-24T06%3A48%3A08.585Z"
+    },
+    {
+      "method": "POST",
+      "url": "https://me.kis.v2.scr.kaspersky-labs.com/3AFE8FDF-70E9-4FC2-8C18-09876434338A/90657229-0B7C-472E-85C7-BBD1EB845731/to/wsm.sessionActivated?tm=2026-10-24T06%3A48%3A08.589Z&second=true"
+    },
+    {
+      "method": "POST",
+      "url": "https://me.kis.v2.scr.kaspersky-labs.com/3AFE8FDF-70E9-4FC2-8C18-09876434338A/90657229-0B7C-472E-85C7-BBD1EB845731/to/dp.onGetFields?tm=2026-10-24T06%3A48%3A21.282Z"
+    },
+    {
+      "method": "POST",
+      "url": "https://me.kis.v2.scr.kaspersky-labs.com/3AFE8FDF-70E9-4FC2-8C18-09876434338A/90657229-0B7C-472E-85C7-BBD1EB845731/to/dp.onGetFields?tm=2026-10-24T06%3A48%3A21.398Z&second=true"
+    }
+  ],
+  "assets": [
+    "https://www.ifclite.com/assets/dpl_AQp9AEFp9rmkoKsa4BqtbDQZjwUW/ensure-wasm-4j2f81Hn.js",
+    "https://www.ifclite.com/assets/dpl_AQp9AEFp9rmkoKsa4BqtbDQZjwUW/ifc-lite_bg-BjRaH06z.wasm",
+    "https://www.ifclite.com/assets/dpl_AQp9AEFp9rmkoKsa4BqtbDQZjwUW/ifc-lite_bg-BjRaH06z.wasm"
+  ],
+  "before": {
+    "title": "IFClite Viewer",
+    "url": "https://www.ifclite.com/",
+    "body": "File\nHome\nView\nElements\nAnalyze\nAuthor\nCommands…\nCtrl+K\nSettings\nOpen\nOpen model from disk\nCloud Sources\nCloud sources (connected CDEs)\nAdd model\nRefresh\nSave Federation Setup\nOpen Federation Setup\nModel Tags\nMODEL\nIFC\nAnonymized\nModified IFC\nGLB\nKMZ\nCesium ion\nUSD\nEnergy\nLandXML (terrain)\nCSV\nJSON\nScreenshot\nPDF\nEXPORT\nShare\nShare: link-based multiuser collaboration\nCollaboration room\nCollaboration session — not in a session yet\nSHARE\nHIERARCHY\n\nNO MODEL\n\nStructure will appear here when loaded\n\nIFClite\n\nIFC toolkit for the open web\n\nLoad demo project\n\nA small sample building. No account, nothing uploaded.\n\nOpen model file\n\nor drop files here\n.ifc .ifcx .ifczip .glb .gltf .las .laz .ply .pcd .e57 .pts .xyz .xml\n\nOR\nStart blank\nOpen from cloud\nDrive with any LLM\nTry the Layers demo\n\nnew untitled project · or LLM via MCP\n\nNew here?\nTake the two minute tour\nLocal model viewing runs on your device.\nNew here?\nifclite.dev →\nSHORTCUTS\n?\nIFClite stores an action log on your device. The hosted viewer also sends anonymous product analytics unless you opt out in Privacy settings.\nPrivacy settings\nPROPERTIES\n\nNO SELECTION\n\nSelect an element to view details\n\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\nReady\n0 elements\nWebGPU\nActivity\nPresent\nDefault\nv5.2.0\nifclite.dev →",
+    "inputs": [
+      {
+        "id": "file-input-open",
+        "accept": ".ifc,.ifcx,.ifczip,.glb,.gltf,.las,.laz,.ply,.pcd,.e57,.pts,.xyz,.xml,.dxf,.bin,.png,.jpg,.jpeg,.tif,.tiff,.tfw,.tifw,.pgw,.pngw,.jgw,.jpgw,.wld,.prj"
+      },
+      {
+        "id": "file-input-add",
+        "accept": ".ifc,.ifcx,.ifczip,.glb,.gltf,.las,.laz,.ply,.pcd,.e57,.pts,.xyz,.xml,.dxf,.bin,.png,.jpg,.jpeg,.tif,.tiff,.tfw,.tifw,.pgw,.pngw,.jgw,.jpgw,.wld,.prj"
+      },
+      {
+        "id": "",
+        "accept": ".json,application/json"
+      },
+      {
+        "id": "",
+        "accept": ""
+      },
+      {
+        "id": "",
+        "accept": ".ifc,.ifcx,.ifczip,.glb,.gltf,.las,.laz,.ply,.pcd,.e57,.pts,.xyz,.xml,.dxf,.bin,.png,.jpg,.jpeg,.tif,.tiff,.tfw,.tifw,.pgw,.pngw,.jgw,.jpgw,.wld,.prj"
+      }
+    ],
+    "store": true
+  },
+  "last": {
+    "body": "File\nHome\nView\nElements\nAnalyze\nAuthor\nCommands…\nCtrl+K\nSettings\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nSORT: ELEVATION\nHIERARCHY\n1\n\nTekla Structures Project Name\nCLICK TO SELECT · CTRL TOGGLE\nFRONT\nBACK\nTOP\nBTM\nRIGHT\nLEFT\n10.4m\nX\nZ\nY\nIFClite stores an action log on your device. The hosted viewer also sends anonymous product analytics unless you opt out in Privacy settings.\nPrivacy settings\nMINIMAL-ORIGINAL.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n10.6 KB\nLoaded At\n10/24/26, 1:48:21 PM\nParse Time\n10 ms\nLENGTH UNIT\nMillimeters (0.001)\nPROJECT INFORMATION\nName\nTekla Structures Project Name\nGlobalId\n0Xyj1ZQLDAse1KMvAiP3ya\nSTATISTICS\nTotal Entities\n132\nBuilding Storeys\n1\nElements with Geometry\n1\nMax Express ID\n1,215,023\nCLASSIFICATION SYSTEMS\nNo classification systems\nEPSG:4326\nLegacy IfcSite geolocation\nEPSG\nPROJECTED CRS\nEPSG:4326\nCOORDINATE OPERATION\nE 0 N 0\nLOCATION\n0.00000, 0.00000\nClick map to set origin\nGoogle Maps\nOpenStreetMap\nGoogle Earth\nToggle style\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\nReady\n1 element\nWebGPU\nModel\nLoad model (minimal-original.ifc): Complete \nActivity\nPresent\nDefault\nv5.2.0\nifclite.dev →",
+    "loading": false,
+    "models": [
+      {
+        "id": "45640872-e039-42db-8060-81d854c9ba10",
+        "name": "minimal-original.ifc",
+        "meshes": 4
+      }
+    ]
+  },
+  "state": {
+    "typeVisibility": {
+      "spaces": false,
+      "spatialZones": false,
+      "openings": false,
+      "virtualElements": false,
+      "site": true,
+      "ifcAnnotations": true,
+      "ifcGrid": true
+    },
+    "meshes": [
+      {
+        "id": 322443,
+        "type": "IfcBeam",
+        "color": [
+          0.125490203499794,
+          0.7921568751335144,
+          0.615686297416687,
+          1
+        ],
+        "triangles": 308
+      },
+      {
+        "id": 322450,
+        "type": "IfcVoidingFeature",
+        "color": [
+          0.572549045085907,
+          0.21960784494876862,
+          0.6941176652908325,
+          1
+        ],
+        "triangles": 12
+      },
+      {
+        "id": 322456,
+        "type": "IfcVoidingFeature",
+        "color": [
+          0.572549045085907,
+          0.21960784494876862,
+          0.6941176652908325,
+          1
+        ],
+        "triangles": 12
+      },
+      {
+        "id": 322462,
+        "type": "IfcVoidingFeature",
+        "color": [
+          0.11764705926179886,
+          0.26274511218070984,
+          0.5137255191802979,
+          1
+        ],
+        "triangles": 44
+      }
+    ],
+    "keys": [
+      "clearStoreySelection",
+      "clearSelection",
+      "clearEntitySelection",
+      "hideEntity",
+      "hideEntities",
+      "clearIsolation",
+      "clearClassFilter",
+      "clearAllFilters",
+      "clearGhost",
+      "clearMergeLayersPendingReload",
+      "clearGeometryModePendingReload",
+      "clearGeomTierOverride",
+      "clearHover",
+      "cameraRotation",
+      "cameraCallbacks",
+      "cameraRotationListeners",
+      "clearSectionPlanes",
+      "clearMeasurements",
+      "clearEdgeLock",
+      "clearMeasurementConstraintEdge",
+      "clearPendingColorUpdates",
+      "clearPendingMeshColorUpdates",
+      "clearPendingMeshRemovals",
+      "clearPendingMeshEdits",
+      "clearInstancedShards",
+      "clearPendingMeshTranslations",
+      "clearPendingMeshRotations",
+      "clearAllModels",
+      "clearMutationView",
+      "clearMutations",
+      "clearAllMutations",
+      "clearDrawing2D",
+      "clearCustomRules",
+      "clearMeasure2DResults",
+      "clearPolygonArea2DResults",
+      "clearTextAnnotations2D",
+      "clearCloudAnnotations2D",
+      "clearDxfUnderlays",
+      "clearAllAnnotations2D",
+      "clearSheet",
+      "clearBcfProject",
+      "clearIdsDocument",
+      "clearIdsValidationReport",
+      "clearValidationRuleSetDraft",
+      "clearPinboard",
+      "clearBasket",
+      "clearHierarchyBasketSelection",
+      "clearClashSolid",
+      "clearClashFocus",
+      "clearClashExclusions",
+      "clearClash",
+      "clearCompareExcludedTypes",
+      "clearCompare",
+      "clearLayerStack",
+      "clearChatAttachments",
+      "clearChatMessages",
+      "clearGeneratedSchedule",
+      "clearOverlayLayers",
+      "clearSearchModelFilter",
+      "clearFilterRules",
+      "clearAllFilterGroups",
+      "clearAllAnnotations",
+      "clearScanDetection",
+      "clearAllZoneSets",
+      "clearSourceTags"
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "id": "motion-1",
+    "a": {
+      "key": "3zwbLjFu95Lh4bGAhyNQGF",
+      "ref": 11561,
+      "model": "8ba17779-2cc0-4e9e-930a-6a675b503732",
+      "tag": "Motion 1 A"
+    },
+    "b": {
+      "key": "3XGfXTcb91cwCWhUP8yD1d",
+      "ref": 37883,
+      "model": "8ba17779-2cc0-4e9e-930a-6a675b503732",
+      "tag": "Motion 1 B"
+    },
+    "rule": "motion",
+    "status": "hard",
+    "distance": -0.01,
+    "point": [
+      1.899999976158142,
+      37.52020072937012,
+      -87.5
+    ],
+    "bounds": {
+      "min": [
+        1.7999999523162842,
+        37.370201110839844,
+        -87.66500091552734
+      ],
+      "max": [
+        2,
+        37.67020034790039,
+        -87.33499908447266
+      ]
+    },
+    "severity": "major"
+  },
+  {
+    "id": "motion-2",
+    "a": {
+      "key": "0Z63isKdr5FBAOQnuhfOhd",
+      "ref": 27032,
+      "model": "8ba17779-2cc0-4e9e-930a-6a675b503732",
+      "tag": "Motion 2 A"
+    },
+    "b": {
+      "key": "3HTceKhJr2MfTGDfNAVXbI",
+      "ref": 40297,
+      "model": "8ba17779-2cc0-4e9e-930a-6a675b503732",
+      "tag": "Motion 2 B"
+    },
+    "rule": "motion",
+    "status": "hard",
+    "distance": -0.01,
+    "point": [
+      27.799800872802734,
+      26.100000381469727,
+      -14.511886596679688
+    ],
+    "bounds": {
+      "min": [
+        27.674800872802734,
+        26,
+        -14.57450008392334
+      ],
+      "max": [
+        27.924800872802734,
+        26.200000762939453,
+        -14.449273109436035
+      ]
+    },
+    "severity": "major"
+  },
+  {
+    "id": "motion-3",
+    "a": {
+      "key": "3cLnEa24DATfU_LYzguD6O",
+      "ref": 36841,
+      "model": "8ba17779-2cc0-4e9e-930a-6a675b503732",
+      "tag": "Motion 3 A"
+    },
+    "b": {
+      "key": "0WfVKj2114uQWJ0rYcqRle",
+      "ref": 44654,
+      "model": "8ba17779-2cc0-4e9e-930a-6a675b503732",
+      "tag": "Motion 3 B"
+    },
+    "rule": "motion",
+    "status": "hard",
+    "distance": -0.01,
+    "point": [
+      84.29980087280273,
+      26.100000381469727,
+      -99.625
+    ],
+    "bounds": {
+      "min": [
+        84.09980010986328,
+        26,
+        -99.75
+      ],
+      "max": [
+        84.49980163574219,
+        26.200000762939453,
+        -99.5
+      ]
+    },
+    "severity": "major"
+  }
+]

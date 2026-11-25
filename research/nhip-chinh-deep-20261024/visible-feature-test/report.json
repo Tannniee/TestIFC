@@ -1,0 +1,1593 @@
+{
+  "exe": "F:/Steel/VBA/IFC-Lite/desktop/release/10.4.0-packages-audit-20261020-r3/IFC-Lite.exe",
+  "model": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\reports\\nhip-chinh-20261024\\without-void-relations\\diagnostic-without-void-relations.ifc",
+  "profile": "F:\\Steel\\VBA\\IFC-Lite\\research\\nhip-chinh-deep-20261024\\visible-feature-test\\webview-profile-1792823944656",
+  "started": "2026-10-24T06:39:04.664Z",
+  "console": [
+    {
+      "type": "log",
+      "text": "[Viewport] spatial chunk bucketing on (cellSize=32m)"
+    },
+    {
+      "type": "log",
+      "text": "[Viewport] GPU residency budget on (2048MB)"
+    },
+    {
+      "type": "log",
+      "text": "[Viewport] host residency budget on (3072MB)"
+    },
+    {
+      "type": "log",
+      "text": "[Viewport] LOD1 on (below 48px projected)"
+    },
+    {
+      "type": "log",
+      "text": "[Viewport] quantized vertices on (12B lattice)"
+    },
+    {
+      "type": "log",
+      "text": "[GeomSync] new file currentLength=794320 lastLength=0 releaseAfterFinalize=false"
+    },
+    {
+      "type": "log",
+      "text": "[GeomSync] stream transition complete geometryLength=794320 queued=true batches=0"
+    }
+  ],
+  "errors": [],
+  "states": [
+    {
+      "seconds": 3.96,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "FC in native backend\n2%\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nReading IFC in native backend · 2%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nReading IFC in native backend\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 5.09,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "FC in native backend\n6%\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nReading IFC in native backend · 6%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nReading IFC in native backend\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 6.49,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": " in native backend\n11%\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nReading IFC in native backend · 11%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nReading IFC in native backend\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 7.55,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Rust geometry · 0 meshes\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 0 meshes\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 0 meshes\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 8.64,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "s…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 16 / 174,157 elements · 20%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 16 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 9.65,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 10.66,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 11.67,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 12.69,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 13.7,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 14.71,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 15.72,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 16.74,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 17.76,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 18.78,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 19.79,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 20.8,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 21.82,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 22.83,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 23.83,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 24.84,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 25.86,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 65,552 / 174,157 elements · 43%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 65,552 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 26.86,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 27.88,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 28.88,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 29.9,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 30.92,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 31.94,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 32.95,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 33.98,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 34.98,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 35.99,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 37,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 38.01,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 39.02,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 40.05,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 41.05,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 42.05,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 43.06,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 44.06,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 45.06,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 46.07,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 47.08,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 131,088 / 174,157 elements · 65%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 131,088 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 48.09,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 49.09,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 50.1,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 51.12,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 52.13,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 53.14,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 54.16,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 55.18,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 56.19,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 57.22,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 58.24,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 59.25,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 60.26,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 61.26,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 62.26,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "Reposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative Rust geometry · 174,157 / 174,157 elements · 80%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative Rust geometry · 174,157 / 174,157 elements\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 63.27,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "rarchy\n85%\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nNative BIM properties and hierarchy · 85%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nNative BIM properties and hierarchy\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 64.28,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nReceiving native BIM properties and hierarchy · 88%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nReceiving native BIM properties and hierarchy\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 65.29,
+      "state": {
+        "loading": true,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null
+          }
+        ],
+        "body": "\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nHIERARCHY\nBuilding the hierarchy. You can explore the geometry while model details load.\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nSTATISTICS\nTotal Entities\nN/A\nBuilding Storeys\n0\nElements with Geometry\n0\nMax Express ID\n0\nCLASSIFICATION SYSTEMS\nNo classification systems\nNo georeferencing\nAdd Georeferencing\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\n\nLoading diagnostic-without-void-relations.ifc\n\nLoading diagnostic-without-void-relations.ifc:\nReceiving native BIM properties and hierarchy · 93%\nCancel\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n10.9m\nX\nZ\nY\nReceiving native BIM properties and hierarchy\nCANCEL\n0 elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    },
+    {
+      "seconds": 67.73,
+      "state": {
+        "loading": false,
+        "native": {},
+        "models": [
+          {
+            "name": "diagnostic-without-void-relations.ifc",
+            "error": null,
+            "path": "native",
+            "meshes": 794320,
+            "entities": 193176
+          }
+        ],
+        "body": "sition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nSORT: ELEVATION\nHIERARCHY\n0\nCLICK TO SELECT · CTRL TOGGLE\nDIAGNOSTIC-WITHOUT-VOID-RELATIONS.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n121.08 MB\nLoaded At\n10/24/26, 1:39:07 PM\nParse Time\n54,594 ms\nLENGTH UNIT\nMillimeters (0.001)\nPROJECT INFORMATION\nName\nTekla Structures Project Name\nGlobalId\n0Xyj1ZQLDAse1KMvAiP3ya\nSTATISTICS\nTotal Entities\n193,176\nBuilding Storeys\n1\nElements with Geometry\n134,522\nMax Express ID\n1,167,204\nCLASSIFICATION SYSTEMS\nNo classification systems\nEPSG:4326\nLegacy IfcSite geolocation\nEPSG\nPROJECTED CRS\nEPSG:4326\nCOORDINATE OPERATION\nE 0 N 0\nLOCATION\nResolving coordinates...\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n87.7m\nX\nZ\nY\nReady\n134.5K elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+      }
+    }
+  ],
+  "events": [],
+  "pid": 28644,
+  "backend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "featureLeakage": {
+    "models": 1,
+    "idOffset": 0,
+    "typeVisibility": {
+      "spaces": false,
+      "spatialZones": false,
+      "openings": false,
+      "virtualElements": false,
+      "site": true,
+      "ifcAnnotations": true,
+      "ifcGrid": true
+    },
+    "types": {
+      "IfcMember": 1000,
+      "IfcFastener": 37336,
+      "IfcBeam": 13419,
+      "IfcVoidingFeature": 2944,
+      "IfcPlate": 2465,
+      "IfcFooting": 6,
+      "IfcMechanicalFastener": 737150
+    },
+    "featureEntities": 2944,
+    "largest": [
+      {
+        "id": 322462,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          509.8648376464844,
+          9.975441932678223,
+          -346.79669189453125
+        ],
+        "max": [
+          537.1257934570312,
+          12.547441482543945,
+          -291.1264343261719
+        ],
+        "dimensions": [
+          27.260955810546875,
+          2.5719995498657227,
+          55.670257568359375
+        ]
+      },
+      {
+        "id": 344072,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          509.8358459472656,
+          9.975441932678223,
+          -346.8603820800781
+        ],
+        "max": [
+          537.0967407226562,
+          12.547442436218262,
+          -291.19012451171875
+        ],
+        "dimensions": [
+          27.260894775390625,
+          2.572000503540039,
+          55.670257568359375
+        ]
+      },
+      {
+        "id": 330807,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          370.18182373046875,
+          10.742644309997559,
+          -283.174072265625
+        ],
+        "max": [
+          397.4427490234375,
+          13.314643859863281,
+          -227.5038299560547
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67024230957031
+        ]
+      },
+      {
+        "id": 333258,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          387.2070007324219,
+          10.649242401123047,
+          -290.8611145019531
+        ],
+        "max": [
+          414.4679260253906,
+          13.22124195098877,
+          -235.1908721923828
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67024230957031
+        ]
+      },
+      {
+        "id": 340581,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          387.1779479980469,
+          10.649242401123047,
+          -290.9248046875
+        ],
+        "max": [
+          414.4388732910156,
+          13.22124195098877,
+          -235.2545623779297
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67024230957031
+        ]
+      },
+      {
+        "id": 346605,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          370.21087646484375,
+          10.742644309997559,
+          -283.1103820800781
+        ],
+        "max": [
+          397.4718017578125,
+          13.314643859863281,
+          -227.4401397705078
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67024230957031
+        ]
+      },
+      {
+        "id": 266657,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          92.21133422851562,
+          9.886940002441406,
+          -156.411376953125
+        ],
+        "max": [
+          119.47224426269531,
+          12.458939552307129,
+          -100.74114227294922
+        ],
+        "dimensions": [
+          27.260910034179688,
+          2.5719995498657227,
+          55.67023468017578
+        ]
+      },
+      {
+        "id": 269795,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          -31.301759719848633,
+          9.208246231079102,
+          -100.0857925415039
+        ],
+        "max": [
+          -4.040839195251465,
+          11.780245780944824,
+          -44.415557861328125
+        ],
+        "dimensions": [
+          27.260920524597168,
+          2.5719995498657227,
+          55.67023468017578
+        ]
+      },
+      {
+        "id": 283904,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          92.2403793334961,
+          9.886940002441406,
+          -156.34768676757812
+        ],
+        "max": [
+          119.50128936767578,
+          12.458939552307129,
+          -100.67745208740234
+        ],
+        "dimensions": [
+          27.260910034179688,
+          2.5719995498657227,
+          55.67023468017578
+        ]
+      },
+      {
+        "id": 319654,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          -31.272716522216797,
+          9.208246231079102,
+          -100.02210235595703
+        ],
+        "max": [
+          -4.0117950439453125,
+          11.780245780944824,
+          -44.35186767578125
+        ],
+        "dimensions": [
+          27.260921478271484,
+          2.5719995498657227,
+          55.67023468017578
+        ]
+      },
+      {
+        "id": 260682,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          108.34487915039062,
+          9.975441932678223,
+          -163.69180297851562
+        ],
+        "max": [
+          135.6057891845703,
+          12.547441482543945,
+          -108.02157592773438
+        ],
+        "dimensions": [
+          27.260910034179688,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 272880,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          247.96981811523438,
+          10.742644309997559,
+          -227.44180297851562
+        ],
+        "max": [
+          275.2307434082031,
+          13.314643859863281,
+          -171.77157592773438
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 274875,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          231.00270080566406,
+          10.649242401123047,
+          -219.62738037109375
+        ],
+        "max": [
+          258.2636413574219,
+          13.22124195098877,
+          -163.9571533203125
+        ],
+        "dimensions": [
+          27.260940551757812,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 286017,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          230.97369384765625,
+          10.649242401123047,
+          -219.69107055664062
+        ],
+        "max": [
+          258.2345886230469,
+          13.22124195098877,
+          -164.02084350585938
+        ],
+        "dimensions": [
+          27.260894775390625,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 289047,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          108.31583404541016,
+          9.975441932678223,
+          -163.7554931640625
+        ],
+        "max": [
+          135.57675170898438,
+          12.547441482543945,
+          -108.08526611328125
+        ],
+        "dimensions": [
+          27.26091766357422,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 292032,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          247.9988555908203,
+          10.742644309997559,
+          -227.37811279296875
+        ],
+        "max": [
+          275.259765625,
+          13.314643859863281,
+          -171.7078857421875
+        ],
+        "dimensions": [
+          27.260910034179688,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 324352,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          525.9403076171875,
+          9.886940002441406,
+          -354.2044982910156
+        ],
+        "max": [
+          553.2012329101562,
+          12.458939552307129,
+          -298.5342712402344
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 327189,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          649.453369140625,
+          9.208246231079102,
+          -410.53009033203125
+        ],
+        "max": [
+          676.7142944335938,
+          11.780245780944824,
+          -354.85986328125
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 337210,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          525.9693603515625,
+          9.886940002441406,
+          -354.14080810546875
+        ],
+        "max": [
+          553.2302856445312,
+          12.458939552307129,
+          -298.4705810546875
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 372024,
+        "color": [
+          0.11764706,
+          0.2627451,
+          0.5137255,
+          1
+        ],
+        "triangles": 44,
+        "min": [
+          649.482421875,
+          9.208246231079102,
+          -410.4664001464844
+        ],
+        "max": [
+          676.7433471679688,
+          11.780245780944824,
+          -354.7961730957031
+        ],
+        "dimensions": [
+          27.26092529296875,
+          2.5719995498657227,
+          55.67022705078125
+        ]
+      },
+      {
+        "id": 64181,
+        "color": [
+          0.1254902,
+          0.7921569,
+          0.6156863,
+          1
+        ],
+        "triangles": 12,
+        "min": [
+          72.23412322998047,
+          21.76657485961914,
+          -144.20156860351562
+        ],
+        "max": [
+          92.67916870117188,
+          47.90694808959961,
+          -130.5
+        ],
+        "dimensions": [
+          20.445045471191406,
+          26.14037322998047,
+          13.701568603515625
+        ]
+      },
+      {
+        "id": 67843,
+        "color": [
+          0.1254902,
+          0.7921569,
+          0.6156863,
+          1
+        ],
+        "triangles": 12,
+        "min": [
+          72.46625518798828,
+          21.76657485961914,
+          -144.4169921875
+        ],
+        "max": [
+          92.91681671142578,
+          47.90694808959961,
+          -130.71405029296875
+        ],
+        "dimensions": [
+          20.4505615234375,
+          26.14037322998047,
+          13.70294189453125
+        ]
+      },
+      {
+        "id": 75348,
+        "color": [
+          0.1254902,
+          0.7921569,
+          0.6156863,
+          1
+        ],
+        "triangles": 12,
+        "min": [
+          -20.35080337524414,
+          21.76657485961914,
+          -99.2472915649414
+        ],
+        "max": [
+          3.2426271438598633,
+          47.90694808959961,
+          -92.44715118408203
+        ],
+        "dimensions": [
+          23.593430519104004,
+          26.14037322998047,
+          6.800140380859375
+        ]
+      },
+      {
+        "id": 77018,
+        "color": [
+          0.1254902,
+          0.7921569,
+          0.6156863,
+          1
+        ],
+        "triangles": 12,
+        "min": [
+          -20.669282913208008,
+          21.76657485961914,
+          -99.21236419677734
+        ],
+        "max": [
+          2.928813934326172,
+          47.90694808959961,
+          -92.40897369384766
+        ],
+        "dimensions": [
+          23.59809684753418,
+          26.14037322998047,
+          6.8033905029296875
+        ]
+      },
+      {
+        "id": 89402,
+        "color": [
+          0.1254902,
+          0.7921569,
+          0.6156863,
+          1
+        ],
+        "triangles": 12,
+        "min": [
+          135.75921630859375,
+          21.76657485961914,
+          -131.83551025390625
+        ],
+        "max": [
+          156.20977783203125,
+          47.90694808959961,
+          -118.132568359375
+        ],
+        "dimensions": [
+          20.4505615234375,
+          26.14037322998047,
+          13.70294189453125
+        ]
+      }
+    ],
+    "camera": {
+      "position": {
+        "x": 1183.2226789711071,
+        "y": 754.498891055431,
+        "z": 645.9816709609963
+      },
+      "target": {
+        "x": 323.15025329589844,
+        "y": 37.77186965942383,
+        "z": -214.09075471421238
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 406.85128799930493
+    }
+  },
+  "hiddenFeatureIds": 38432,
+  "completed": true,
+  "finished": "2026-10-24T06:40:19.680Z"
+}

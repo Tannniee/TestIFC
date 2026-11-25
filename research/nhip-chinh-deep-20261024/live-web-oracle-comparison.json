@@ -1,0 +1,74 @@
+[
+  {
+    "case": "reference-original",
+    "id": 322443,
+    "viewer": "live www.ifclite.com v5.2.0",
+    "geometry": {
+      "vertices": 573,
+      "triangles": 308,
+      "volume": 2.6044152232916526,
+      "area": 146.79694433153355
+    },
+    "oracle": {
+      "vertices": 52,
+      "triangles": 104,
+      "volume": 2.623089655059159,
+      "area": 147.83999849713177
+    },
+    "sampledMaxSurfaceDistanceMm": 39.955240691727234,
+    "directedSampleCounts": [
+      1805,
+      468
+    ],
+    "maxBoundsDeltaMm": 1.7107394523918629,
+    "relativeVolumeErrorPercent": 0.711925028238706
+  },
+  {
+    "case": "reference-class-control",
+    "id": 322443,
+    "viewer": "live www.ifclite.com v5.2.0",
+    "geometry": {
+      "vertices": 169,
+      "triangles": 104,
+      "volume": 2.6230883288080307,
+      "area": 147.84001327888262
+    },
+    "oracle": {
+      "vertices": 52,
+      "triangles": 104,
+      "volume": 2.623089655059159,
+      "area": 147.83999849713177
+    },
+    "sampledMaxSurfaceDistanceMm": 0.001901555667568965,
+    "directedSampleCounts": [
+      585,
+      468
+    ],
+    "maxBoundsDeltaMm": 0.0012605451047420502,
+    "relativeVolumeErrorPercent": 5.056064804788966e-05
+  },
+  {
+    "case": "body-original",
+    "id": 2444,
+    "viewer": "live www.ifclite.com v5.2.0",
+    "geometry": {
+      "vertices": 17376,
+      "triangles": 6491,
+      "volume": 0.07019554587654102,
+      "area": 9.200878238241236
+    },
+    "oracle": {
+      "vertices": 1296,
+      "triangles": 2592,
+      "volume": 0.07045904881485814,
+      "area": 9.200594628274429
+    },
+    "sampledMaxSurfaceDistanceMm": 0.7554816160883966,
+    "directedSampleCounts": [
+      43340,
+      11664
+    ],
+    "maxBoundsDeltaMm": 0.023011816665530205,
+    "relativeVolumeErrorPercent": 0.3739802661962004
+  }
+]

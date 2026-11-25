@@ -1,0 +1,49 @@
+{
+  "features": 38432,
+  "referenceOnlyFeatures": 13640,
+  "featureRepresentations": [
+    {
+      "identifier": "Reference",
+      "type": "SolidModel",
+      "count": 12598
+    },
+    {
+      "identifier": "Reference",
+      "type": "Tessellation",
+      "count": 1042
+    },
+    {
+      "identifier": "Body",
+      "type": "SolidModel",
+      "count": 24245
+    },
+    {
+      "identifier": "Body",
+      "type": "Tessellation",
+      "count": 547
+    }
+  ],
+  "hostCount": 7679,
+  "hostRepresentations": [
+    {
+      "identifier": "Body",
+      "type": "Tessellation",
+      "count": 2604
+    },
+    {
+      "identifier": "CoG",
+      "type": "Point",
+      "count": 7679
+    },
+    {
+      "identifier": "Body",
+      "type": "SolidModel",
+      "count": 5075
+    },
+    {
+      "identifier": "Axis",
+      "type": "Curve3D",
+      "count": 4838
+    }
+  ]
+}

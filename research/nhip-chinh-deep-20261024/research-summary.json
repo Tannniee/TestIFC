@@ -1,0 +1,172 @@
+{
+  "date": "2026-10-24",
+  "objective": "Investigate native load stalls and incorrect geometry of Nhip chinh.ifc, including the live IFC-Lite web viewer. Research only.",
+  "originalIfc": {
+    "path": "F:\\Working\\IFC Temp\\Nhip chinh.ifc",
+    "bytes": 129987273,
+    "sha256": "110b48aeb00b183667fe5f973685100f6dbbc9375b34c10f899ca5a75b8e3085"
+  },
+  "packagedExe": {
+    "path": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-packages-audit-20261020-r3\\IFC-Lite.exe",
+    "sha256": "ede20104a6152a308bdb50fed44f870d1ac5d0539e623e150abb311325b89545",
+    "engine": "20.4.0"
+  },
+  "liveWeb": {
+    "url": "https://www.ifclite.com/",
+    "viewerVersion": "5.2.0",
+    "upstreamMainAndProductionAtRead": "b0412a0fbd5d9722c8024416545e55272d5a050d",
+    "originalMinimalBytes": 10850,
+    "originalOutputMeshes": 4,
+    "classControlOutputMeshes": 1,
+    "referenceOriginalHostTriangles": 308,
+    "referenceClassControlHostTriangles": 104,
+    "bodyHost2444KernelErrors": 4
+  },
+  "census": {
+    "features": 38432,
+    "referenceOnlyFeatures": 13640,
+    "featureRepresentations": [
+      {
+        "identifier": "Reference",
+        "type": "SolidModel",
+        "count": 12598
+      },
+      {
+        "identifier": "Reference",
+        "type": "Tessellation",
+        "count": 1042
+      },
+      {
+        "identifier": "Body",
+        "type": "SolidModel",
+        "count": 24245
+      },
+      {
+        "identifier": "Body",
+        "type": "Tessellation",
+        "count": 547
+      }
+    ],
+    "hostCount": 7679,
+    "hostRepresentations": [
+      {
+        "identifier": "Body",
+        "type": "Tessellation",
+        "count": 2604
+      },
+      {
+        "identifier": "CoG",
+        "type": "Point",
+        "count": 7679
+      },
+      {
+        "identifier": "Body",
+        "type": "SolidModel",
+        "count": 5075
+      },
+      {
+        "identifier": "Axis",
+        "type": "Curve3D",
+        "count": 4838
+      }
+    ]
+  },
+  "findings": [
+    "Reference-only IfcVoidingFeature is incorrectly meshed and treated as an implicit subtraction operand because the existing Reference policy checks only the IfcOpeningElement branch.",
+    "IfcVoidingFeature bypasses opening display colour/type visibility/instancing exclusions; giant authored negative features are displayed opaque.",
+    "Body-represented feature cutters must remain active. Host 2444 independently reproduces four informational accepted-open-topology KernelError diagnostics in native and live web.",
+    "The native host first emits 16 elements then uses a 65536-element throughput batch, delaying progress during expensive CSG."
+  ],
+  "researchControl": {
+    "nature": "Class substitution only in a separate reduced diagnostic IFC, not a product fix or user delivery. The original input was not changed.",
+    "originalSeconds": 25.0681408,
+    "classControlSeconds": 0.0151448,
+    "originalCsgFailures": 19,
+    "classControlCsgFailures": 0,
+    "endToEndPerformanceVerdict": "Not established; reduced changed-input observations are not a worker-pool or full-model performance benchmark."
+  },
+  "surfaceComparison": {
+    "method": "Two-way sampled point-to-triangle distance, world coordinates reconstructed in f64; vertices and four barycentric samples per source triangle. Not exact Hausdorff distance. Independent IfcOpenShell 0.8.5 / OpenCASCADE reference. Reference-only hosts are read with implicit opening subtraction disabled, per IFC semantics; real Body hosts retain it.",
+    "nativeReferenceMaxSampledSurfaceMm": 40.49059206438464,
+    "classControlReferenceMaxSampledSurfaceMm": 0.04724994274449738,
+    "liveWebSamples": [
+      {
+        "case": "reference-original",
+        "id": 322443,
+        "viewer": "live www.ifclite.com v5.2.0",
+        "geometry": {
+          "vertices": 573,
+          "triangles": 308,
+          "volume": 2.6044152232916526,
+          "area": 146.79694433153355
+        },
+        "oracle": {
+          "vertices": 52,
+          "triangles": 104,
+          "volume": 2.623089655059159,
+          "area": 147.83999849713177
+        },
+        "sampledMaxSurfaceDistanceMm": 39.955240691727234,
+        "directedSampleCounts": [
+          1805,
+          468
+        ],
+        "maxBoundsDeltaMm": 1.7107394523918629,
+        "relativeVolumeErrorPercent": 0.711925028238706
+      },
+      {
+        "case": "reference-class-control",
+        "id": 322443,
+        "viewer": "live www.ifclite.com v5.2.0",
+        "geometry": {
+          "vertices": 169,
+          "triangles": 104,
+          "volume": 2.6230883288080307,
+          "area": 147.84001327888262
+        },
+        "oracle": {
+          "vertices": 52,
+          "triangles": 104,
+          "volume": 2.623089655059159,
+          "area": 147.83999849713177
+        },
+        "sampledMaxSurfaceDistanceMm": 0.001901555667568965,
+        "directedSampleCounts": [
+          585,
+          468
+        ],
+        "maxBoundsDeltaMm": 0.0012605451047420502,
+        "relativeVolumeErrorPercent": 5.056064804788966e-05
+      },
+      {
+        "case": "body-original",
+        "id": 2444,
+        "viewer": "live www.ifclite.com v5.2.0",
+        "geometry": {
+          "vertices": 17376,
+          "triangles": 6491,
+          "volume": 0.07019554587654102,
+          "area": 9.200878238241236
+        },
+        "oracle": {
+          "vertices": 1296,
+          "triangles": 2592,
+          "volume": 0.07045904881485814,
+          "area": 9.200594628274429
+        },
+        "sampledMaxSurfaceDistanceMm": 0.7554816160883966,
+        "directedSampleCounts": [
+          43340,
+          11664
+        ],
+        "maxBoundsDeltaMm": 0.023011816665530205,
+        "relativeVolumeErrorPercent": 0.3739802661962004
+      }
+    ]
+  },
+  "productionCodeChanged": false,
+  "productRebuilt": false,
+  "githubWriteOrPush": false,
+  "originalPreserved": true,
+  "exePreserved": true
+}

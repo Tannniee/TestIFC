@@ -1,0 +1,26 @@
+[
+  {
+    "hostRepresentations": "(('Body', 'Tessellation'),)",
+    "featureRepresentations": "(('Reference', 'SolidModel'),)",
+    "relationships": 12598,
+    "hosts": 2230
+  },
+  {
+    "hostRepresentations": "(('Body', 'Tessellation'),)",
+    "featureRepresentations": "(('Reference', 'Tessellation'),)",
+    "relationships": 1042,
+    "hosts": 490
+  },
+  {
+    "hostRepresentations": "(('Body', 'SolidModel'),)",
+    "featureRepresentations": "(('Body', 'SolidModel'),)",
+    "relationships": 24245,
+    "hosts": 4643
+  },
+  {
+    "hostRepresentations": "(('Body', 'SolidModel'),)",
+    "featureRepresentations": "(('Body', 'Tessellation'),)",
+    "relationships": 547,
+    "hosts": 472
+  }
+]

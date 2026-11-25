@@ -1,0 +1,130 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-panel-motion-20261016\\IFC-Lite.exe",
+  "model": "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-colorizer-ux-NkbmaO",
+  "assertions": [
+    {
+      "name": "quiet startup: no hierarchy, collapsed ribbon/sidebar, no welcome or privacy toast",
+      "evidence": {
+        "leftCollapsed": true,
+        "ribbonCollapsed": true,
+        "sidebarMode": "collapsed"
+      }
+    },
+    {
+      "name": "all requested panel surfaces remain opaque while content animates",
+      "evidence": [
+        {
+          "id": "sources",
+          "opaque": true,
+          "intermediateFrames": 14,
+          "duration": "0.32s"
+        },
+        {
+          "id": "zones",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "layers",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "loadReport",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "changes",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "cost",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "measurements",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "extensions",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "environment",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "pointclouds",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "model",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "changeSets",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        },
+        {
+          "id": "placement",
+          "opaque": true,
+          "intermediateFrames": 26,
+          "duration": "0.32s"
+        }
+      ]
+    },
+    {
+      "name": "Placement Georeference switches on a permanent background",
+      "evidence": {
+        "opaque": true,
+        "intermediateFrames": 26
+      }
+    },
+    {
+      "name": "Placement Local switches on a permanent background",
+      "evidence": {
+        "opaque": true,
+        "intermediateFrames": 26
+      }
+    },
+    {
+      "name": "Placement Georeference switches on a permanent background",
+      "evidence": {
+        "opaque": true,
+        "intermediateFrames": 26
+      }
+    },
+    {
+      "name": "Placement Local switches on a permanent background",
+      "evidence": {
+        "opaque": true,
+        "intermediateFrames": 26
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "failure": "page.evaluate: TypeError: s.setClashExclusions is not a function\n    at eval (eval at evaluate (:311:30), <anonymous>:14:7)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at F:\\Steel\\VBA\\IFC-Lite\\research\\colorizer-20261015\\e2e-panel-surface.mjs:107:29",
+  "body": "File\nHome\nView\nElements\nAnalyze\nAuthor\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nSORT: ELEVATION\nHIERARCHY\n45\nStacked\nSolo\nExploded\nChoose Solo storey on a row to show only that level\n\nhangarvd_f10_ tan base_f01\n+0.00m\n\nSite\n+0.00m\n\nBuilding\n+0.00m\n\nTOP LEVEL\n+41.50m\n\nLEVEL 41\n+41.26m\n\nLEVEL 40\n+41.05m\n\nLEVEL 39\n+40.83m\n\nLEVEL 38\n+40.61m\n\nLEVEL 37\n+40.49m\n\nLEVEL 36\n+40.38m\n\nLEVEL 35\n+40.16m\n\nLEVEL 34\n+39.94m\n\nLEVEL 33\n+39.73m\n\nLEVEL 32\n+39.54m\n\nLEVEL 31\n+39.33m\n\nLEVEL 30\n+39.22m\n\nLEVEL 29\n+39.11m\n\nLEVEL 28\n+38.91m\n\nLEVEL 27\n+38.71m\n\nLEVEL 26\n+38.49m\n\nLEVEL 25\n+38.29m\n\nLEVEL 24\n+38.08m\n\nLEVEL 23\n+37.98m\nCLICK TO SELECT · CTRL TOGGLE\nPlacement\nLocal\nGeoreference\n\nNO MODELS SELECTED\n\nChoose the models to move, then start repositioning.\n\nhangarvd_f10_ tan base_f01_colored.ifc\nStart repositioning\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n31.2m\nX\nZ\nY\nReady\n14.5K elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+}

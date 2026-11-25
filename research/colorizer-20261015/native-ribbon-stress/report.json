@@ -1,0 +1,50 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-colorizer-ux-20261016-r2\\IFC-Lite.exe",
+  "model": "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-colorizer-ux-3Cjkua",
+  "assertions": [
+    {
+      "name": "quiet startup: no hierarchy, collapsed ribbon/sidebar, no welcome or privacy toast",
+      "evidence": {
+        "leftCollapsed": true,
+        "ribbonCollapsed": true,
+        "sidebarMode": "collapsed"
+      }
+    },
+    {
+      "name": "opening Colorizer automatically reads groups, with no Model/Edit mode or preparation step"
+    },
+    {
+      "name": "loaded-model ribbon animation",
+      "evidence": {
+        "action": "Collapse the ribbon",
+        "intermediateFrames": 15,
+        "p95FrameGapMs": 10.05999999999949,
+        "maxFrameGapMs": 10.1200000000008
+      }
+    },
+    {
+      "name": "loaded-model ribbon animation",
+      "evidence": {
+        "action": "Expand the ribbon",
+        "intermediateFrames": 15,
+        "p95FrameGapMs": 10.075000000000728,
+        "maxFrameGapMs": 10.345000000001164
+      }
+    },
+    {
+      "name": "ribbon respects reduced motion"
+    },
+    {
+      "name": "rapid ribbon reversals",
+      "evidence": {
+        "maxHeightStep": 17.921875,
+        "maxFrameGapMs": 19.970000000001164,
+        "intermediateFrames": 52
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "ok": true
+}

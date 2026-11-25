@@ -1,0 +1,217 @@
+{
+  "features": [
+    {
+      "id": 322462,
+      "record": "#322462=IfcVoidingFeature('2bBKkgEY59nfNjfqqIxZa9',$,'PLATE','PL60000',$,#322459,#322461,'(?)',.HOLE.)",
+      "hosts": [
+        322443
+      ],
+      "ownOpenings": 0,
+      "representations": [
+        {
+          "id": 322460,
+          "identifier": "Reference",
+          "type": "SolidModel",
+          "items": [
+            {
+              "id": 260679,
+              "type": "IfcExtrudedAreaSolid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 344072,
+      "record": "#344072=IfcVoidingFeature('2A7oVM5x16HvBwYQd41VfI',$,'PLATE','PL60000',$,#344069,#344071,'(?)',.HOLE.)",
+      "hosts": [
+        344051
+      ],
+      "ownOpenings": 0,
+      "representations": [
+        {
+          "id": 344070,
+          "identifier": "Reference",
+          "type": "SolidModel",
+          "items": [
+            {
+              "id": 260679,
+              "type": "IfcExtrudedAreaSolid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 266657,
+      "record": "#266657=IfcVoidingFeature('1EZJg829f5fP0WMhl2YPOK',$,'PLATE','PL60000',$,#266654,#266656,'(?)',.HOLE.)",
+      "hosts": [
+        266636
+      ],
+      "ownOpenings": 0,
+      "representations": [
+        {
+          "id": 266655,
+          "identifier": "Reference",
+          "type": "SolidModel",
+          "items": [
+            {
+              "id": 260679,
+              "type": "IfcExtrudedAreaSolid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 269795,
+      "record": "#269795=IfcVoidingFeature('1ohdirg_X5WRt$FZNxYiIY',$,'PLATE','PL60000',$,#269792,#269794,'(?)',.HOLE.)",
+      "hosts": [
+        269768
+      ],
+      "ownOpenings": 0,
+      "representations": [
+        {
+          "id": 269793,
+          "identifier": "Reference",
+          "type": "SolidModel",
+          "items": [
+            {
+              "id": 260679,
+              "type": "IfcExtrudedAreaSolid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 330807,
+      "record": "#330807=IfcVoidingFeature('1Nkp_viQb1BuVqm5igv7jg',$,'PLATE','PL60000',$,#330804,#330806,'(?)',.HOLE.)",
+      "hosts": [
+        330787
+      ],
+      "ownOpenings": 0,
+      "representations": [
+        {
+          "id": 330805,
+          "identifier": "Reference",
+          "type": "SolidModel",
+          "items": [
+            {
+              "id": 260679,
+              "type": "IfcExtrudedAreaSolid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 64951,
+      "record": "#64951=IfcBeam('3r3yRif7v9mR1uadnMpMEn',$,'GAN','PL16x2830',$,#64377,#64950,'345Mpa',.NOTDEFINED.)",
+      "hosts": [],
+      "ownOpenings": 21,
+      "representations": [
+        {
+          "id": 64944,
+          "identifier": "Body",
+          "type": "Tessellation",
+          "items": [
+            {
+              "id": 64943,
+              "type": "IfcPolygonalFaceSet"
+            }
+          ]
+        },
+        {
+          "id": 64947,
+          "identifier": "Axis",
+          "type": "Curve3D",
+          "items": [
+            {
+              "id": 64946,
+              "type": "IfcIndexedPolyCurve"
+            }
+          ]
+        },
+        {
+          "id": 64949,
+          "identifier": "CoG",
+          "type": "Point",
+          "items": [
+            {
+              "id": 64948,
+              "type": "IfcCartesianPoint"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 434,
+      "record": "#434=IfcPlate('3qvB8XC0H2kRTfHdUKPz1Q',$,'PHAN VO','PL25',$,#397,#433,'345Mpa',.NOTDEFINED.)",
+      "hosts": [],
+      "ownOpenings": 2,
+      "representations": [
+        {
+          "id": 430,
+          "identifier": "Body",
+          "type": "Tessellation",
+          "items": [
+            {
+              "id": 429,
+              "type": "IfcPolygonalFaceSet"
+            }
+          ]
+        },
+        {
+          "id": 432,
+          "identifier": "CoG",
+          "type": "Point",
+          "items": [
+            {
+              "id": 431,
+              "type": "IfcCartesianPoint"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 820,
+      "record": "#820=IfcBeam('2xrNQjD6r0ZBG6EAeRgn2c',$,'PHAN VO','PL25*3200',$,#784,#819,'345Mpa',.NOTDEFINED.)",
+      "hosts": [],
+      "ownOpenings": 2,
+      "representations": [
+        {
+          "id": 816,
+          "identifier": "Body",
+          "type": "Tessellation",
+          "items": [
+            {
+              "id": 815,
+              "type": "IfcPolygonalFaceSet"
+            }
+          ]
+        },
+        {
+          "id": 818,
+          "identifier": "CoG",
+          "type": "Point",
+          "items": [
+            {
+              "id": 817,
+              "type": "IfcCartesianPoint"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "hostIds": [
+    266636,
+    269768,
+    322443,
+    330787,
+    344051
+  ]
+}
