@@ -1,0 +1,57 @@
+{
+  "oracle": "IfcOpenShell 0.8.5",
+  "output": "F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\packages-audit-20261019\\interactions-r3\\ui-five-selected.ifc",
+  "red": 5,
+  "gray": 14504,
+  "body_items": 14509,
+  "non_presentation_records_unchanged": 184677,
+  "geometry_samples": [
+    {
+      "expressId": 58,
+      "triangles": 12
+    },
+    {
+      "expressId": 92148,
+      "triangles": 260
+    },
+    {
+      "expressId": 142617,
+      "triangles": 44
+    },
+    {
+      "expressId": 145921,
+      "triangles": 44
+    },
+    {
+      "expressId": 147928,
+      "triangles": 32
+    },
+    {
+      "expressId": 103,
+      "triangles": 44
+    },
+    {
+      "expressId": 142,
+      "triangles": 44
+    },
+    {
+      "expressId": 156,
+      "triangles": 44
+    },
+    {
+      "expressId": 169,
+      "triangles": 44
+    },
+    {
+      "expressId": 182,
+      "triangles": 44
+    },
+    {
+      "expressId": 195,
+      "triangles": 44
+    }
+  ],
+  "source_sha256": "df595b8d150b09dabbc48e21f6efd1b26a0f35ab07636a02d0b51896b94894a2",
+  "output_sha256": "bc26ce12c8e3e6fd49a550a26d4a3929b1e5e2261e843037d651e665bf1378a7",
+  "bytes": 11874073
+}

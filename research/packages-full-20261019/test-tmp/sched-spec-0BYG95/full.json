@@ -1,0 +1,9 @@
+{
+  "type": "IfcDoor",
+  "columns": "Name=Name",
+  "where": "Pset_DoorCommon.IsExternal=true",
+  "sort": "Name",
+  "groupBy": "Name",
+  "subtotals": "count",
+  "format": "json"
+}

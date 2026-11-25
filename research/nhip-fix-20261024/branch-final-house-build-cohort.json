@@ -1,0 +1,3 @@
+[
+  {"path":"tests/models/ara3d/AC20-FZK-Haus.ifc","fileMb":2.409,"entities":44249,"meshes":285,"vertices":35940,"triangles":20322,"indexBuildMs":1.58,"parseMs":6,"entityScanMs":3,"lookupMs":1,"preprocessMs":1,"geometryMs":9,"facetedBrepMs":0,"totalMs":15,"allTotalsMs":[25, 16, 15, 16, 16],"allWallMs":[27.1855, 17.623, 16.883100000000002, 17.8782, 17.528200000000002],"pointCacheHits":52156,"pointCacheMisses":9228,"csgFailures":0,"degenerateDropped":0,"meshFingerprintsFnv1a64":["c4d504b83ff698ea", "c4d504b83ff698ea", "c4d504b83ff698ea", "c4d504b83ff698ea", "c4d504b83ff698ea"]}
+]

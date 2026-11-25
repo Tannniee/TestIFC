@@ -1,0 +1,146 @@
+[
+  {
+    "workScale": 256,
+    "feature": 198908,
+    "hostFrameRayYZM": [
+      -1.041,
+      -1.86
+    ],
+    "sourceCutterIntersectionsXM": [
+      -0.0080487042729566,
+      0.007951295785545365
+    ],
+    "finalMaterialIntersectionsXM": [
+      0.007951283890707237,
+      0.008000016212463379
+    ],
+    "sourceBlindSkinMicrometres": 48.704214454634716,
+    "finalBlindSkinMicrometres": 48.73232175614181
+  },
+  {
+    "workScale": 256,
+    "feature": 198920,
+    "hostFrameRayYZM": [
+      1.041,
+      -1.86
+    ],
+    "sourceCutterIntersectionsXM": [
+      -0.008048524274199028,
+      0.007951475745744433
+    ],
+    "finalMaterialIntersectionsXM": [
+      0.007951471180918877,
+      0.008000016212463379
+    ],
+    "sourceBlindSkinMicrometres": 48.52425425556743,
+    "finalBlindSkinMicrometres": 48.54503154450192
+  },
+  {
+    "workScale": 256,
+    "feature": 198952,
+    "hostFrameRayYZM": [
+      1.11,
+      -2.4
+    ],
+    "sourceCutterIntersectionsXM": [
+      -0.008062630435927443,
+      0.007937369602435199
+    ],
+    "finalMaterialIntersectionsXM": [
+      0.007937384620446195,
+      0.008000016212463379
+    ],
+    "sourceBlindSkinMicrometres": 62.63039756480154,
+    "finalBlindSkinMicrometres": 62.63159201718403
+  },
+  {
+    "workScale": 256,
+    "feature": 198956,
+    "hostFrameRayYZM": [
+      -1.11,
+      -2.4
+    ],
+    "sourceCutterIntersectionsXM": [
+      -0.008062779091675751,
+      0.00793722092586192
+    ],
+    "finalMaterialIntersectionsXM": [
+      0.007937205705272652,
+      0.008000016212463379
+    ],
+    "sourceBlindSkinMicrometres": 62.77907413808001,
+    "finalBlindSkinMicrometres": 62.81050719072687
+  },
+  {
+    "workScale": 16,
+    "feature": 198908,
+    "hostFrameRayYZM": [
+      -1.041,
+      -1.86
+    ],
+    "sourceCutterIntersectionsXM": [
+      -0.0080487042729566,
+      0.007951295785545365
+    ],
+    "finalMaterialIntersectionsXM": [
+      0.007951053524782307,
+      0.008000373840332031
+    ],
+    "sourceBlindSkinMicrometres": 48.704214454634716,
+    "finalBlindSkinMicrometres": 49.32031554972377
+  },
+  {
+    "workScale": 16,
+    "feature": 198920,
+    "hostFrameRayYZM": [
+      1.041,
+      -1.86
+    ],
+    "sourceCutterIntersectionsXM": [
+      -0.008048524274199028,
+      0.007951475745744433
+    ],
+    "finalMaterialIntersectionsXM": [
+      0.007951372823636903,
+      0.008000373840332031
+    ],
+    "sourceBlindSkinMicrometres": 48.52425425556743,
+    "finalBlindSkinMicrometres": 49.001016695127824
+  },
+  {
+    "workScale": 16,
+    "feature": 198952,
+    "hostFrameRayYZM": [
+      1.11,
+      -2.4
+    ],
+    "sourceCutterIntersectionsXM": [
+      -0.008062630435927443,
+      0.007937369602435199
+    ],
+    "finalMaterialIntersectionsXM": [
+      0.007937267489309622,
+      0.008000373840332031
+    ],
+    "sourceBlindSkinMicrometres": 62.63039756480154,
+    "finalBlindSkinMicrometres": 63.10635102240933
+  },
+  {
+    "workScale": 16,
+    "feature": 198956,
+    "hostFrameRayYZM": [
+      -1.11,
+      -2.4
+    ],
+    "sourceCutterIntersectionsXM": [
+      -0.008062779091675751,
+      0.00793722092586192
+    ],
+    "finalMaterialIntersectionsXM": [
+      0.007937267249962257,
+      0.008000373840332031
+    ],
+    "sourceBlindSkinMicrometres": 62.77907413808001,
+    "finalBlindSkinMicrometres": 63.106590369774175
+  }
+]

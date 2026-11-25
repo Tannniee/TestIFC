@@ -1,0 +1,13 @@
+{
+  "viewer": {
+    "tests": 13819,
+    "pass": 13794,
+    "fail": 0,
+    "skipped": 25
+  },
+  "rust": {
+    "passed": 4796,
+    "failed": 0,
+    "ignored": 41
+  }
+}

@@ -1,0 +1,17 @@
+event-listener v5.4.1
+├── async-lock v3.4.2
+│   ├── async-global-executor v2.4.1
+│   │   └── async-std v1.13.2
+│   │       └── cacache v13.1.0
+│   │           └── ifc-lite-server v20.4.0 (F:\Steel\VBA\IFC-Lite-Core104\apps\server)
+│   └── async-std v1.13.2 (*)
+├── async-process v2.5.0
+│   └── async-std v1.13.2 (*)
+└── event-listener-strategy v0.5.4
+    ├── async-channel v2.5.0
+    │   ├── async-global-executor v2.4.1 (*)
+    │   ├── async-process v2.5.0 (*)
+    │   └── blocking v1.6.2
+    │       ├── async-global-executor v2.4.1 (*)
+    │       └── async-process v2.5.0 (*)
+    └── async-lock v3.4.2 (*)

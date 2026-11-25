@@ -1,0 +1,38 @@
+{
+  "header": {
+    "id": "blake3:ef2f02ed20993ccbfe52037f5d9ab9e7bd190e25753f21305a464b61e0e1b2e3",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "bob"
+      },
+      "intent": "Bump rating, checks waived",
+      "created": "2026-10-19T03:20:17.951Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:3c3f05cad30b9941132d517c5384cc7bc990fc59a40e86e4e7c64f60f10e4464"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI90"
+      }
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+# @ifc-lite/renderer
+
+CPU picking accepts an optional `PickOptions.raycastCandidates(origin, direction)`
+provider. Its set must contain **every** possible hit in the scene's global ID
+space, from current world-space bounds for all loaded models, including instances.
+Return `undefined` while an index is missing, incomplete or stale to use exhaustive
+intersection; an empty set is a definitive miss. Hidden/isolation filters, section
+clipping, exact triangles, model ownership and representation item IDs still apply.
+`Scene.raycast` accepts the same optional set as its final argument. Callers must
+invalidate their candidates after geometry, placement or model ownership changes.
+
+`Scene.getInstancedEntityBounds(expressId, modelIndex?)` returns a world-space
+broad-phase box without expanding instance triangles. Supply the renderer model
+index when federated models have overlapping entity IDs; the scoped query unions
+only that owner's current occurrences and retains their canonical f64 anchors.
+
+WebGPU-based 3D renderer for IFClite. Zero-copy from WASM linear memory to GPU buffers, hardware frustum culling, GPU-accelerated picking, section planes, multi-model federation.
+
+## Installation
+
+```bash
+npm install @ifc-lite/renderer
+```
+
+## Render an IFC model
+
+```typescript
+import { Renderer } from '@ifc-lite/renderer';
+import { GeometryProcessor } from '@ifc-lite/geometry';
+
+const renderer = new Renderer(canvas);
+const geometry = new GeometryProcessor();
+await Promise.all([renderer.init(), geometry.init()]);
+
+const meshes = [];
+for await (const event of geometry.processAdaptive(new Uint8Array(buffer))) {
+  if (event.type === 'batch') meshes.push(...event.meshes);
+}
+renderer.loadGeometry(meshes);
+renderer.requestRender();
+```
+
+`loadGeometry()` accepts a `GeometryResult` from `@ifc-lite/geometry` or a raw `MeshData[]`. The renderer keeps geometry in GPU buffers; subsequent `requestRender()` calls coalesce into a single frame.
+
+Camera zoom refuses a step that would move the eye or target outside the renderer's supported source-coordinate envelope (±1,000,000,000 metres per axis). The previous pose, cursor anchor and orbit pivot remain intact, so reversing the gesture works. If another control has already moved outside the envelope, zoom may recover incrementally: each accepted step must strictly reduce the largest absolute eye/target coordinate until the pose is supported again. This applies to ordinary, cursor-anchored, fast, surface and inertial zoom. Orthographic zoom keeps its existing scale behavior while its cursor translation observes the same coordinate boundary.
+
+## Inspect GPU pass timing
+
+Timestamp queries are opt-in. Enable them before rendering, then read resolved
+samples after frames have submitted:
+
+```typescript
+renderer.setGpuFrameTiming(true);
+renderer.render();
+const timing = renderer.getGpuFrameTiming();
+console.log(timing.mode, timing.frames);
+```
+
+`gpu-queries` samples report each render pass in milliseconds. `unsupported`
+means the actual device lacks timestamp queries; no CPU or queue-completion
+value is substituted. Readback is asynchronous, so the first snapshot can be
+empty. Frames arriving during a pending map are skipped, and the bounded sample
+history reports overwritten frames. Errors and resource epochs identify invalid
+or interrupted captures. Device loss clears old samples before observers run;
+recovery preserves the opt-in setting and starts a new epoch. Disable with
+`renderer.setGpuFrameTiming(false)` to release the timing resources.
+
+## Recover from GPU device loss
+
+```typescript
+renderer.onDeviceLost(async () => {
+  const result = await renderer.recoverDevice();
+  if (result.ok === false) {
+    console.error('Renderer recovery failed:', result.reason);
+  } else if (result.omissions.length > 0) {
+    console.warn('Recovered with transient layers cleared:', result.omissions);
+  }
+});
+```
+
+`recoverDevice()` requests a replacement adapter/device and rebuilds the GPU
+scene in place, preserving the `Renderer`, camera, IFC geometry, model
+placements, visibility, selection and colour overrides. Concurrent calls share
+one attempt. It returns a typed failure instead of presenting an incomplete
+scene when CPU geometry has been released, a finalizer or authoring transaction
+is active, cold geometry cannot be restored, or public `addMesh()` content has
+no CPU source. Retained streaming fragments are rebuilt from their CPU owners;
+the pending queue resumes from its existing cursor only after recovery commits.
+Frame and stream-end consumers cannot access the staged replacement device.
+Clearing or replacing the source during an awaited recovery refuses that attempt
+without consuming the new load's queue. Append-only pending arrivals are retained.
+Point clouds, reference images and transient overlay layers are reported in
+`omissions` when they must be reloaded by the host.
+
+## Pick an entity
+
+```typescript
+canvas.addEventListener('click', async (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const hit = await renderer.pick(e.clientX - rect.left, e.clientY - rect.top);
+
+  if (hit) {
+    console.log(`Clicked expressId ${hit.expressId} at`, hit.worldXYZ);
+    // Selection is a per-frame render option, not a stateful setter.
+    renderer.render({ selectedIds: new Set([hit.expressId]) });
+  }
+});
+```
+
+For exact world-space hits with surface normals, use `raycastScene(x, y)` — slower but returns the precise intersection point, normal and, where provenance is unambiguous, the federation model, representation item and canonical evaluated-surface triangle.
+
+## Section planes
+
+```typescript
+// Cut the model with an axis-aligned section plane (a per-frame render option)
+renderer.render({
+  sectionPlane: {
+    axis: 'down',          // 'side' | 'down' | 'front' (X / Y / Z)
+    position: 50,          // 0-100 percentage of model bounds
+    enabled: true,
+    flipped: false,
+  },
+});
+
+// Disable
+renderer.render({ sectionPlane: { axis: 'down', position: 50, enabled: false } });
+```
+
+## Visibility + colour overrides
+
+```typescript
+// Hide a list of entities (per-frame render option)
+renderer.render({ hiddenIds: new Set([12345, 12346, 12347]) });
+
+// Solo a subset (everything else gets the ghost treatment)
+renderer.render({ isolatedIds: new Set([42]) });
+
+// Tint specific entities (RGBA 0-1) via the scene's color overrides
+renderer.getScene().setColorOverrides(
+  new Map([
+    [42, [1, 0, 0, 1]],   // bright red
+    [99, [0, 1, 0, 0.4]], // semi-transparent green
+  ]),
+  renderer.getGPUDevice()!,
+  renderer.getPipeline()!,
+);
+renderer.requestRender();
+```
+
+## Multi-model federation
+
+```typescript
+import { federationRegistry } from '@ifc-lite/renderer';
+
+// The highest expressId in each model decides the offset spacing
+const maxArchExpressId = 500_000;
+const maxStructExpressId = 250_000;
+
+// Register each model with a unique ID offset
+federationRegistry.registerModel('arch', maxArchExpressId);
+federationRegistry.registerModel('struct', maxStructExpressId);
+
+// Now picks return globalIds; resolve back to (modelId, expressId)
+const hit = await renderer.pick(x, y);
+const { modelId, expressId } = federationRegistry.fromGlobalId(hit.expressId);
+```
+
+## API
+
+See the [Rendering Guide](https://ifclite.dev/docs/guide/rendering/) and [API Reference](https://ifclite.dev/docs/api/typescript/#ifc-literenderer).
+
+## License
+
+[MPL-2.0](../../LICENSE)
+
+Registered raster references are available through `renderer.getReferenceImages()`; see the [rendering guide](../../docs/guide/rendering.md#registered-raster-references) for identity, coordinates, resource ownership and picking.
+
+### Exact surface tools and clipping
+
+`renderer.hasActiveClipping()` reports whether the last rendered frame applied
+section, terrain or box clipping. It reads the retained render snapshot, so
+mutating a previous options object does not change the answer.
+`raycastScene()` applies that same clip state while walking triangles, so a
+clipped front face cannot hide a visible face behind it.
+
+### Streaming preparation and cancellation
+
+`Scene.finalizeStreamingAsync()` yields inside large flat-batch bounds,
+interleaving, quantization and LOD preparation as well as between batches.
+The synchronous path drains the same numeric operations. A complete GPU batch
+is published only after its preparation succeeds. Clearing the scene cancels
+pending work and releases unpublished GPU buffers. Temporary staging leases
+remain exclusive across yields, and model translation is reconciled before
+publication. Individual GPU calls and small synchronous batches can still
+exceed the scheduling budget; it is not a strict frame-time guarantee.

@@ -1,0 +1,5 @@
+{
+  "type": "IfcDoor",
+  "columns": "Name=Name",
+  "sort": "Name:asc"
+}

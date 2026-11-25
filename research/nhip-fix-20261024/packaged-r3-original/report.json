@@ -1,0 +1,5170 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-nhip-geometry-20261024-r3\\IFC-Lite.exe",
+  "model": "F:/Working/IFC Temp/Nhip chinh.ifc",
+  "started": "2026-10-24T17:42:16.414Z",
+  "states": [
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Reading IFC in native backend",
+          "percent": 2
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 309.2,
+      "seconds": 4.072
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Reading IFC in native backend",
+          "percent": 5
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 266,
+      "seconds": 5.354
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Reading IFC in native backend",
+          "percent": 8
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 197.5,
+      "seconds": 6.552
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Reading IFC in native backend",
+          "percent": 12
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 705.6,
+      "seconds": 8.269
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 16 / 174,157 elements",
+          "percent": 20.005512267666532
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.2,
+      "seconds": 9.276
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 4,112 / 174,157 elements",
+          "percent": 21.416652790298407
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 10.279
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 4,112 / 174,157 elements",
+          "percent": 21.416652790298407
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.8,
+      "seconds": 11.285
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 12,304 / 174,157 elements",
+          "percent": 24.238933835562165
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2,
+      "seconds": 12.29
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 16,400 / 174,157 elements",
+          "percent": 25.650074358194043
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 12.4,
+      "seconds": 13.316
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 20,496 / 174,157 elements",
+          "percent": 27.061214880825922
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 22.4,
+      "seconds": 14.346
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 20,496 / 174,157 elements",
+          "percent": 27.061214880825922
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 7.1,
+      "seconds": 15.353
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 20,496 / 174,157 elements",
+          "percent": 27.061214880825922
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.8,
+      "seconds": 16.362
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 20,496 / 174,157 elements",
+          "percent": 27.061214880825922
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.3,
+      "seconds": 17.367
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 20,496 / 174,157 elements",
+          "percent": 27.061214880825922
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.2,
+      "seconds": 18.372
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 24,592 / 174,157 elements",
+          "percent": 28.472355403457797
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 8.2,
+      "seconds": 19.382
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 28,688 / 174,157 elements",
+          "percent": 29.88349592608968
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 7.4,
+      "seconds": 20.391
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+          "percent": 31.294636448721555
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 30.2,
+      "seconds": 21.421
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+          "percent": 31.294636448721555
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 4205.6,
+      "seconds": 26.638
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+          "percent": 31.294636448721555
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.3,
+      "seconds": 27.642
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+          "percent": 31.294636448721555
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.5,
+      "seconds": 28.648
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+          "percent": 31.294636448721555
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 29.652
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+          "percent": 31.294636448721555
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 30.656
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+          "percent": 31.294636448721555
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.1,
+      "seconds": 31.661
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+          "percent": 31.294636448721555
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.8,
+      "seconds": 32.664
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+          "percent": 32.70577697135343
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2,
+      "seconds": 33.681
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+          "percent": 32.70577697135343
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 10.6,
+      "seconds": 34.704
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+          "percent": 32.70577697135343
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 8.2,
+      "seconds": 35.72
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+          "percent": 32.70577697135343
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.5,
+      "seconds": 36.724
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+          "percent": 32.70577697135343
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.8,
+      "seconds": 37.726
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+          "percent": 32.70577697135343
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.1,
+      "seconds": 38.733
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+          "percent": 32.70577697135343
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 4.3,
+      "seconds": 39.737
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 18.9,
+      "seconds": 40.771
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 23.9,
+      "seconds": 41.796
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 42.803
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 5.8,
+      "seconds": 43.82
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 8.2,
+      "seconds": 44.828
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 38,
+      "seconds": 45.868
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6,
+      "seconds": 46.885
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 37.6,
+      "seconds": 47.93
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1508.8,
+      "seconds": 50.449
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.5,
+      "seconds": 51.453
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 52.459
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+          "percent": 34.11691749398531
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 53.462
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+          "percent": 35.52805801661719
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 69.9,
+      "seconds": 54.536
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+          "percent": 35.52805801661719
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 26.9,
+      "seconds": 55.568
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+          "percent": 35.52805801661719
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 56.578
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+          "percent": 35.52805801661719
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.8,
+      "seconds": 57.585
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+          "percent": 35.52805801661719
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.2,
+      "seconds": 58.59
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+          "percent": 35.52805801661719
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.5,
+      "seconds": 59.598
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+          "percent": 35.52805801661719
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 60.603
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6.7,
+      "seconds": 61.612
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 62.615
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.8,
+      "seconds": 63.621
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2,
+      "seconds": 64.63
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.5,
+      "seconds": 65.633
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 66.635
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 67.637
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 68.642
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.4,
+      "seconds": 69.644
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.7,
+      "seconds": 70.651
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 71.655
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.8,
+      "seconds": 72.662
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 73.666
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.9,
+      "seconds": 74.671
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.6,
+      "seconds": 75.672
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+          "percent": 36.93919853924906
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.8,
+      "seconds": 76.676
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 57,360 / 174,157 elements",
+          "percent": 39.76147958451283
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.9,
+      "seconds": 77.686
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+          "percent": 41.1726201071447
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 32.2,
+      "seconds": 78.719
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+          "percent": 41.1726201071447
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 5231.1,
+      "seconds": 84.964
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+          "percent": 41.1726201071447
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 156.2,
+      "seconds": 86.12
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+          "percent": 41.1726201071447
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 87.124
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+          "percent": 41.1726201071447
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.8,
+      "seconds": 88.129
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+          "percent": 42.58376062977658
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 89.132
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+          "percent": 42.58376062977658
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6.6,
+      "seconds": 90.149
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+          "percent": 42.58376062977658
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 31,
+      "seconds": 91.184
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+          "percent": 42.58376062977658
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 242.6,
+      "seconds": 92.45
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+          "percent": 42.58376062977658
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 152.4,
+      "seconds": 93.634
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+          "percent": 42.58376062977658
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.1,
+      "seconds": 94.639
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+          "percent": 42.58376062977658
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 95.643
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+          "percent": 43.99490115240846
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 96.649
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+          "percent": 43.99490115240846
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 4.9,
+      "seconds": 97.661
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+          "percent": 43.99490115240846
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 98.677
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+          "percent": 43.99490115240846
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 11047.7,
+      "seconds": 110.727
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+          "percent": 43.99490115240846
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3529.5,
+      "seconds": 115.295
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+          "percent": 43.99490115240846
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.1,
+      "seconds": 116.3
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 7.4,
+      "seconds": 117.315
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 9.1,
+      "seconds": 118.332
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 21.7,
+      "seconds": 119.355
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 14.5,
+      "seconds": 120.381
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 21.2,
+      "seconds": 121.408
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 755.4,
+      "seconds": 123.204
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 12603.1,
+      "seconds": 136.882
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 884.1,
+      "seconds": 138.766
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+          "percent": 45.40604167504034
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.5,
+      "seconds": 139.772
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+          "percent": 46.81718219767222
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 14,
+      "seconds": 140.791
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+          "percent": 46.81718219767222
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 14.4,
+      "seconds": 141.814
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+          "percent": 46.81718219767222
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 39.3,
+      "seconds": 142.854
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+          "percent": 46.81718219767222
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1288.3,
+      "seconds": 145.15
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+          "percent": 46.81718219767222
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 12566.5,
+      "seconds": 158.779
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+          "percent": 46.81718219767222
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 824.7,
+      "seconds": 160.611
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+          "percent": 46.81718219767222
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.5,
+      "seconds": 161.613
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+          "percent": 46.81718219767222
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2,
+      "seconds": 162.618
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+          "percent": 48.22832272030409
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2,
+      "seconds": 163.63
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+          "percent": 48.22832272030409
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 27.7,
+      "seconds": 164.664
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+          "percent": 48.22832272030409
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 16481.8,
+      "seconds": 182.159
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+          "percent": 48.22832272030409
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1692.6,
+      "seconds": 184.857
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+          "percent": 49.639463242935975
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 7.1,
+      "seconds": 185.865
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+          "percent": 49.639463242935975
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 34.4,
+      "seconds": 186.908
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+          "percent": 49.639463242935975
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 7087.5,
+      "seconds": 195.029
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+          "percent": 49.639463242935975
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 9262.2,
+      "seconds": 205.328
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+          "percent": 49.639463242935975
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 60.6,
+      "seconds": 206.389
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+          "percent": 49.639463242935975
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.3,
+      "seconds": 207.393
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+          "percent": 49.639463242935975
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.4,
+      "seconds": 208.395
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+          "percent": 51.05060376556786
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.5,
+      "seconds": 209.403
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+          "percent": 51.05060376556786
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 228.4,
+      "seconds": 210.634
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+          "percent": 51.05060376556786
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 16973.4,
+      "seconds": 228.614
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+          "percent": 51.05060376556786
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1307.8,
+      "seconds": 230.923
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+          "percent": 51.05060376556786
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.6,
+      "seconds": 231.924
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+          "percent": 52.461744288199725
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 32.5,
+      "seconds": 232.96
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+          "percent": 52.461744288199725
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 20.8,
+      "seconds": 233.991
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+          "percent": 52.461744288199725
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 750.6,
+      "seconds": 235.754
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+          "percent": 52.461744288199725
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 16733.7,
+      "seconds": 253.59
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+          "percent": 52.461744288199725
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1072.3,
+      "seconds": 255.662
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 98,320 / 174,157 elements",
+          "percent": 53.8728848108316
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 256.675
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 98,320 / 174,157 elements",
+          "percent": 53.8728848108316
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 7.2,
+      "seconds": 257.687
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 102,416 / 174,157 elements",
+          "percent": 55.28402533346348
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 258.695
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+          "percent": 56.69516585609536
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 259.698
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+          "percent": 56.69516585609536
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.6,
+      "seconds": 260.709
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+          "percent": 56.69516585609536
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 25.6,
+      "seconds": 261.734
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+          "percent": 56.69516585609536
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2751.1,
+      "seconds": 265.501
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+          "percent": 56.69516585609536
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 4745.8,
+      "seconds": 271.299
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+          "percent": 56.69516585609536
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.2,
+      "seconds": 272.307
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+          "percent": 56.69516585609536
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.1,
+      "seconds": 273.313
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+          "percent": 58.10630637872724
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 7.2,
+      "seconds": 274.325
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+          "percent": 58.10630637872724
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6.5,
+      "seconds": 275.336
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+          "percent": 58.10630637872724
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6.7,
+      "seconds": 276.345
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+          "percent": 58.10630637872724
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 27.8,
+      "seconds": 277.377
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+          "percent": 58.10630637872724
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6449.3,
+      "seconds": 284.845
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+          "percent": 58.10630637872724
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 294,
+      "seconds": 286.14
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+          "percent": 58.10630637872724
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.5,
+      "seconds": 287.141
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+          "percent": 58.10630637872724
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.8,
+      "seconds": 288.145
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 114,704 / 174,157 elements",
+          "percent": 59.517446901359115
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.6,
+      "seconds": 289.153
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 114,704 / 174,157 elements",
+          "percent": 59.517446901359115
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 4.2,
+      "seconds": 290.169
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 114,704 / 174,157 elements",
+          "percent": 59.517446901359115
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6.2,
+      "seconds": 291.175
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 118,800 / 174,157 elements",
+          "percent": 60.928587423991
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 15.9,
+      "seconds": 292.199
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 118,800 / 174,157 elements",
+          "percent": 60.928587423991
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.6,
+      "seconds": 293.207
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 122,896 / 174,157 elements",
+          "percent": 62.33972794662287
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.9,
+      "seconds": 294.211
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 122,896 / 174,157 elements",
+          "percent": 62.33972794662287
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.3,
+      "seconds": 295.217
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 126,992 / 174,157 elements",
+          "percent": 63.750868469254755
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6.3,
+      "seconds": 296.234
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 126,992 / 174,157 elements",
+          "percent": 63.750868469254755
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.5,
+      "seconds": 297.237
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 131,088 / 174,157 elements",
+          "percent": 65.16200899188664
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 5.3,
+      "seconds": 298.253
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 131,088 / 174,157 elements",
+          "percent": 65.16200899188664
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 20,
+      "seconds": 299.281
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 131,088 / 174,157 elements",
+          "percent": 65.16200899188664
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.5,
+      "seconds": 300.286
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 135,184 / 174,157 elements",
+          "percent": 66.5731495145185
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 3.1,
+      "seconds": 301.303
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 135,184 / 174,157 elements",
+          "percent": 66.5731495145185
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 23.7,
+      "seconds": 302.327
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 139,280 / 174,157 elements",
+          "percent": 67.98429003715039
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.9,
+      "seconds": 303.336
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 139,280 / 174,157 elements",
+          "percent": 67.98429003715039
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 25.9,
+      "seconds": 304.374
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 143,376 / 174,157 elements",
+          "percent": 69.39543055978226
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 305.375
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 143,376 / 174,157 elements",
+          "percent": 69.39543055978226
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 306.38
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 147,472 / 174,157 elements",
+          "percent": 70.80657108241414
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2,
+      "seconds": 307.39
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 147,472 / 174,157 elements",
+          "percent": 70.80657108241414
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 308.4
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 151,568 / 174,157 elements",
+          "percent": 72.21771160504602
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 5.7,
+      "seconds": 309.415
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 151,568 / 174,157 elements",
+          "percent": 72.21771160504602
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 310.419
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 155,664 / 174,157 elements",
+          "percent": 73.6288521276779
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.5,
+      "seconds": 311.422
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 155,664 / 174,157 elements",
+          "percent": 73.6288521276779
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.6,
+      "seconds": 312.432
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 159,760 / 174,157 elements",
+          "percent": 75.03999265030978
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 9.8,
+      "seconds": 313.447
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 159,760 / 174,157 elements",
+          "percent": 75.03999265030978
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.2,
+      "seconds": 314.454
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 163,856 / 174,157 elements",
+          "percent": 76.45113317294167
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 4.6,
+      "seconds": 315.463
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 163,856 / 174,157 elements",
+          "percent": 76.45113317294167
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 5.8,
+      "seconds": 316.47
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 167,952 / 174,157 elements",
+          "percent": 77.86227369557353
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6.5,
+      "seconds": 317.49
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 167,952 / 174,157 elements",
+          "percent": 77.86227369557353
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.6,
+      "seconds": 318.494
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 172,048 / 174,157 elements",
+          "percent": 79.2734142182054
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 6.5,
+      "seconds": 319.504
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 172,048 / 174,157 elements",
+          "percent": 79.2734142182054
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.5,
+      "seconds": 320.508
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 174,157 / 174,157 elements",
+          "percent": 80
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.1,
+      "seconds": 321.511
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native BIM properties and hierarchy",
+          "percent": 85
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.7,
+      "seconds": 322.528
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Receiving native BIM properties and hierarchy",
+          "percent": 88.41787567225323
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 5.1,
+      "seconds": 323.538
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Receiving native BIM properties and hierarchy",
+          "percent": 92.64953126647151
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 1.8,
+      "seconds": 324.541
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Identifying native model source",
+          "percent": 97
+        },
+        "native": {
+          "done": true,
+          "stats": {
+            "total_meshes": 1233844,
+            "total_vertices": 135465094,
+            "total_triangles": 115547639,
+            "parse_time_ms": 315,
+            "entity_scan_time_ms": 284,
+            "lookup_time_ms": 1,
+            "preprocess_time_ms": 14,
+            "geometry_time_ms": 311818,
+            "total_time_ms": 312136,
+            "from_cache": false,
+            "total_csg_failures": 1923,
+            "products_with_failures": 795,
+            "degenerate_triangles_dropped": 10198,
+            "point_cache_hits": 0,
+            "point_cache_misses": 0,
+            "faceted_brep_time_ms": 0,
+            "geometry_diagnostics": {
+              "schemaVersion": 3,
+              "totalCsgFailures": 1923,
+              "productsWithFailures": 795,
+              "hostsWithOpenings": 5075,
+              "classification": {
+                "rectangular": 0,
+                "diagonal": 1563,
+                "nonRectangular": 23229,
+                "total": 24792
+              },
+              "failuresByReason": [
+                {
+                  "reason": "KernelError",
+                  "count": 1923
+                }
+              ],
+              "silentNoOps": 0,
+              "rectFast": {
+                "fired": 0,
+                "openingsCut": 0,
+                "deferHostNotBox": 14,
+                "deferNotThrough": 0,
+                "deferOffFace": 0,
+                "deferNearEdge": 0,
+                "deferNoOpenings": 0,
+                "deferTooManyOpenings": 0
+              },
+              "worstHosts": [
+                {
+                  "productId": 448868,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      663.5694,
+                      379.81363,
+                      12.310276
+                    ],
+                    "max": [
+                      664.9383,
+                      380.44513,
+                      14.839207
+                    ]
+                  },
+                  "triangleCount": 4520
+                },
+                {
+                  "productId": 460997,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      660.6649,
+                      386.18262,
+                      12.310276
+                    ],
+                    "max": [
+                      662.0339,
+                      386.81412,
+                      14.769207
+                    ]
+                  },
+                  "triangleCount": 4541
+                },
+                {
+                  "productId": 463012,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      659.93884,
+                      387.77487,
+                      12.310276
+                    ],
+                    "max": [
+                      661.30774,
+                      388.40637,
+                      14.73425
+                    ]
+                  },
+                  "triangleCount": 4166
+                },
+                {
+                  "productId": 464047,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      661.39105,
+                      384.59036,
+                      12.310276
+                    ],
+                    "max": [
+                      662.76,
+                      385.22186,
+                      14.80425
+                    ]
+                  },
+                  "triangleCount": 4081
+                },
+                {
+                  "productId": 465039,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      662.84326,
+                      381.4058,
+                      12.310276
+                    ],
+                    "max": [
+                      664.2123,
+                      382.03735,
+                      14.874208
+                    ]
+                  },
+                  "triangleCount": 4358
+                },
+                {
+                  "productId": 472872,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      687.03656,
+                      382.82178,
+                      12.232547
+                    ],
+                    "max": [
+                      688.4055,
+                      383.45328,
+                      14.58658
+                    ]
+                  },
+                  "triangleCount": 4753
+                },
+                {
+                  "productId": 809305,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      103.42284,
+                      132.0639,
+                      12.989003
+                    ],
+                    "max": [
+                      104.79178,
+                      132.69539,
+                      15.447934
+                    ]
+                  },
+                  "triangleCount": 4237
+                },
+                {
+                  "productId": 809515,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      101.97061,
+                      135.24841,
+                      12.989003
+                    ],
+                    "max": [
+                      103.33955,
+                      135.8799,
+                      15.377934
+                    ]
+                  },
+                  "triangleCount": 4547
+                },
+                {
+                  "productId": 813394,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      123.88398,
+                      129.85452,
+                      13.077504
+                    ],
+                    "max": [
+                      125.25292,
+                      130.48601,
+                      15.536435
+                    ]
+                  },
+                  "triangleCount": 3734
+                },
+                {
+                  "productId": 814836,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      120.25342,
+                      137.81577,
+                      13.077504
+                    ],
+                    "max": [
+                      121.62236,
+                      138.44725,
+                      15.571479
+                    ]
+                  },
+                  "triangleCount": 4107
+                },
+                {
+                  "productId": 814961,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      119.527306,
+                      139.40802,
+                      13.077505
+                    ],
+                    "max": [
+                      120.89625,
+                      140.0395,
+                      15.536436
+                    ]
+                  },
+                  "triangleCount": 4302
+                },
+                {
+                  "productId": 817569,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      240.73293,
+                      198.52809,
+                      13.751305
+                    ],
+                    "max": [
+                      242.10187,
+                      199.15958,
+                      16.140236
+                    ]
+                  },
+                  "triangleCount": 3906
+                },
+                {
+                  "productId": 818684,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      249.44627,
+                      179.4211,
+                      13.751305
+                    ],
+                    "max": [
+                      250.81522,
+                      180.05258,
+                      16.070236
+                    ]
+                  },
+                  "triangleCount": 4199
+                },
+                {
+                  "productId": 823736,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      262.08572,
+                      196.72533,
+                      13.844707
+                    ],
+                    "max": [
+                      263.45468,
+                      197.35681,
+                      16.373638
+                    ]
+                  },
+                  "triangleCount": 3929
+                },
+                {
+                  "productId": 824437,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      265.7163,
+                      188.76408,
+                      13.844707
+                    ],
+                    "max": [
+                      267.08524,
+                      189.39557,
+                      16.198645
+                    ]
+                  },
+                  "triangleCount": 4286
+                },
+                {
+                  "productId": 825013,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      257.72906,
+                      206.27882,
+                      13.844707
+                    ],
+                    "max": [
+                      259.098,
+                      206.91031,
+                      16.233639
+                    ]
+                  },
+                  "triangleCount": 4429
+                }
+              ],
+              "oversizedRefDrops": 0,
+              "totalUnsupportedItems": 0,
+              "unsupportedItemsByType": []
+            }
+          },
+          "diagnostics": {
+            "schemaVersion": 3,
+            "totalCsgFailures": 1923,
+            "productsWithFailures": 795,
+            "hostsWithOpenings": 5075,
+            "classification": {
+              "rectangular": 0,
+              "diagonal": 1563,
+              "nonRectangular": 23229,
+              "total": 24792
+            },
+            "failuresByReason": [
+              {
+                "reason": "KernelError",
+                "count": 1923
+              }
+            ],
+            "silentNoOps": 0,
+            "rectFast": {
+              "fired": 0,
+              "openingsCut": 0,
+              "deferHostNotBox": 14,
+              "deferNotThrough": 0,
+              "deferOffFace": 0,
+              "deferNearEdge": 0,
+              "deferNoOpenings": 0,
+              "deferTooManyOpenings": 0
+            },
+            "worstHosts": [
+              {
+                "productId": 448868,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    663.5694,
+                    379.81363,
+                    12.310276
+                  ],
+                  "max": [
+                    664.9383,
+                    380.44513,
+                    14.839207
+                  ]
+                },
+                "triangleCount": 4520
+              },
+              {
+                "productId": 460997,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    660.6649,
+                    386.18262,
+                    12.310276
+                  ],
+                  "max": [
+                    662.0339,
+                    386.81412,
+                    14.769207
+                  ]
+                },
+                "triangleCount": 4541
+              },
+              {
+                "productId": 463012,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    659.93884,
+                    387.77487,
+                    12.310276
+                  ],
+                  "max": [
+                    661.30774,
+                    388.40637,
+                    14.73425
+                  ]
+                },
+                "triangleCount": 4166
+              },
+              {
+                "productId": 464047,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    661.39105,
+                    384.59036,
+                    12.310276
+                  ],
+                  "max": [
+                    662.76,
+                    385.22186,
+                    14.80425
+                  ]
+                },
+                "triangleCount": 4081
+              },
+              {
+                "productId": 465039,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    662.84326,
+                    381.4058,
+                    12.310276
+                  ],
+                  "max": [
+                    664.2123,
+                    382.03735,
+                    14.874208
+                  ]
+                },
+                "triangleCount": 4358
+              },
+              {
+                "productId": 472872,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    687.03656,
+                    382.82178,
+                    12.232547
+                  ],
+                  "max": [
+                    688.4055,
+                    383.45328,
+                    14.58658
+                  ]
+                },
+                "triangleCount": 4753
+              },
+              {
+                "productId": 809305,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    103.42284,
+                    132.0639,
+                    12.989003
+                  ],
+                  "max": [
+                    104.79178,
+                    132.69539,
+                    15.447934
+                  ]
+                },
+                "triangleCount": 4237
+              },
+              {
+                "productId": 809515,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    101.97061,
+                    135.24841,
+                    12.989003
+                  ],
+                  "max": [
+                    103.33955,
+                    135.8799,
+                    15.377934
+                  ]
+                },
+                "triangleCount": 4547
+              },
+              {
+                "productId": 813394,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    123.88398,
+                    129.85452,
+                    13.077504
+                  ],
+                  "max": [
+                    125.25292,
+                    130.48601,
+                    15.536435
+                  ]
+                },
+                "triangleCount": 3734
+              },
+              {
+                "productId": 814836,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    120.25342,
+                    137.81577,
+                    13.077504
+                  ],
+                  "max": [
+                    121.62236,
+                    138.44725,
+                    15.571479
+                  ]
+                },
+                "triangleCount": 4107
+              },
+              {
+                "productId": 814961,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    119.527306,
+                    139.40802,
+                    13.077505
+                  ],
+                  "max": [
+                    120.89625,
+                    140.0395,
+                    15.536436
+                  ]
+                },
+                "triangleCount": 4302
+              },
+              {
+                "productId": 817569,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    240.73293,
+                    198.52809,
+                    13.751305
+                  ],
+                  "max": [
+                    242.10187,
+                    199.15958,
+                    16.140236
+                  ]
+                },
+                "triangleCount": 3906
+              },
+              {
+                "productId": 818684,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    249.44627,
+                    179.4211,
+                    13.751305
+                  ],
+                  "max": [
+                    250.81522,
+                    180.05258,
+                    16.070236
+                  ]
+                },
+                "triangleCount": 4199
+              },
+              {
+                "productId": 823736,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    262.08572,
+                    196.72533,
+                    13.844707
+                  ],
+                  "max": [
+                    263.45468,
+                    197.35681,
+                    16.373638
+                  ]
+                },
+                "triangleCount": 3929
+              },
+              {
+                "productId": 824437,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    265.7163,
+                    188.76408,
+                    13.844707
+                  ],
+                  "max": [
+                    267.08524,
+                    189.39557,
+                    16.198645
+                  ]
+                },
+                "triangleCount": 4286
+              },
+              {
+                "productId": 825013,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    257.72906,
+                    206.27882,
+                    13.844707
+                  ],
+                  "max": [
+                    259.098,
+                    206.91031,
+                    16.233639
+                  ]
+                },
+                "triangleCount": 4429
+              }
+            ],
+            "oversizedRefDrops": 0,
+            "totalUnsupportedItems": 0,
+            "unsupportedItemsByType": []
+          }
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc"
+          }
+        ]
+      },
+      "requestMs": 4.1,
+      "seconds": 325.559
+    },
+    {
+      "state": {
+        "loading": false,
+        "loadError": null,
+        "progress": {
+          "phase": "Complete",
+          "percent": 100
+        },
+        "native": {
+          "done": true,
+          "stats": {
+            "total_meshes": 1233844,
+            "total_vertices": 135465094,
+            "total_triangles": 115547639,
+            "parse_time_ms": 315,
+            "entity_scan_time_ms": 284,
+            "lookup_time_ms": 1,
+            "preprocess_time_ms": 14,
+            "geometry_time_ms": 311818,
+            "total_time_ms": 312136,
+            "from_cache": false,
+            "total_csg_failures": 1923,
+            "products_with_failures": 795,
+            "degenerate_triangles_dropped": 10198,
+            "point_cache_hits": 0,
+            "point_cache_misses": 0,
+            "faceted_brep_time_ms": 0,
+            "geometry_diagnostics": {
+              "schemaVersion": 3,
+              "totalCsgFailures": 1923,
+              "productsWithFailures": 795,
+              "hostsWithOpenings": 5075,
+              "classification": {
+                "rectangular": 0,
+                "diagonal": 1563,
+                "nonRectangular": 23229,
+                "total": 24792
+              },
+              "failuresByReason": [
+                {
+                  "reason": "KernelError",
+                  "count": 1923
+                }
+              ],
+              "silentNoOps": 0,
+              "rectFast": {
+                "fired": 0,
+                "openingsCut": 0,
+                "deferHostNotBox": 14,
+                "deferNotThrough": 0,
+                "deferOffFace": 0,
+                "deferNearEdge": 0,
+                "deferNoOpenings": 0,
+                "deferTooManyOpenings": 0
+              },
+              "worstHosts": [
+                {
+                  "productId": 448868,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      663.5694,
+                      379.81363,
+                      12.310276
+                    ],
+                    "max": [
+                      664.9383,
+                      380.44513,
+                      14.839207
+                    ]
+                  },
+                  "triangleCount": 4520
+                },
+                {
+                  "productId": 460997,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      660.6649,
+                      386.18262,
+                      12.310276
+                    ],
+                    "max": [
+                      662.0339,
+                      386.81412,
+                      14.769207
+                    ]
+                  },
+                  "triangleCount": 4541
+                },
+                {
+                  "productId": 463012,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      659.93884,
+                      387.77487,
+                      12.310276
+                    ],
+                    "max": [
+                      661.30774,
+                      388.40637,
+                      14.73425
+                    ]
+                  },
+                  "triangleCount": 4166
+                },
+                {
+                  "productId": 464047,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      661.39105,
+                      384.59036,
+                      12.310276
+                    ],
+                    "max": [
+                      662.76,
+                      385.22186,
+                      14.80425
+                    ]
+                  },
+                  "triangleCount": 4081
+                },
+                {
+                  "productId": 465039,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      662.84326,
+                      381.4058,
+                      12.310276
+                    ],
+                    "max": [
+                      664.2123,
+                      382.03735,
+                      14.874208
+                    ]
+                  },
+                  "triangleCount": 4358
+                },
+                {
+                  "productId": 472872,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      687.03656,
+                      382.82178,
+                      12.232547
+                    ],
+                    "max": [
+                      688.4055,
+                      383.45328,
+                      14.58658
+                    ]
+                  },
+                  "triangleCount": 4753
+                },
+                {
+                  "productId": 809305,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      103.42284,
+                      132.0639,
+                      12.989003
+                    ],
+                    "max": [
+                      104.79178,
+                      132.69539,
+                      15.447934
+                    ]
+                  },
+                  "triangleCount": 4237
+                },
+                {
+                  "productId": 809515,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      101.97061,
+                      135.24841,
+                      12.989003
+                    ],
+                    "max": [
+                      103.33955,
+                      135.8799,
+                      15.377934
+                    ]
+                  },
+                  "triangleCount": 4547
+                },
+                {
+                  "productId": 813394,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      123.88398,
+                      129.85452,
+                      13.077504
+                    ],
+                    "max": [
+                      125.25292,
+                      130.48601,
+                      15.536435
+                    ]
+                  },
+                  "triangleCount": 3734
+                },
+                {
+                  "productId": 814836,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      120.25342,
+                      137.81577,
+                      13.077504
+                    ],
+                    "max": [
+                      121.62236,
+                      138.44725,
+                      15.571479
+                    ]
+                  },
+                  "triangleCount": 4107
+                },
+                {
+                  "productId": 814961,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      119.527306,
+                      139.40802,
+                      13.077505
+                    ],
+                    "max": [
+                      120.89625,
+                      140.0395,
+                      15.536436
+                    ]
+                  },
+                  "triangleCount": 4302
+                },
+                {
+                  "productId": 817569,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      240.73293,
+                      198.52809,
+                      13.751305
+                    ],
+                    "max": [
+                      242.10187,
+                      199.15958,
+                      16.140236
+                    ]
+                  },
+                  "triangleCount": 3906
+                },
+                {
+                  "productId": 818684,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      249.44627,
+                      179.4211,
+                      13.751305
+                    ],
+                    "max": [
+                      250.81522,
+                      180.05258,
+                      16.070236
+                    ]
+                  },
+                  "triangleCount": 4199
+                },
+                {
+                  "productId": 823736,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      262.08572,
+                      196.72533,
+                      13.844707
+                    ],
+                    "max": [
+                      263.45468,
+                      197.35681,
+                      16.373638
+                    ]
+                  },
+                  "triangleCount": 3929
+                },
+                {
+                  "productId": 824437,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      265.7163,
+                      188.76408,
+                      13.844707
+                    ],
+                    "max": [
+                      267.08524,
+                      189.39557,
+                      16.198645
+                    ]
+                  },
+                  "triangleCount": 4286
+                },
+                {
+                  "productId": 825013,
+                  "ifcType": "IfcPlate",
+                  "openings": 9,
+                  "csgFailures": 9,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      257.72906,
+                      206.27882,
+                      13.844707
+                    ],
+                    "max": [
+                      259.098,
+                      206.91031,
+                      16.233639
+                    ]
+                  },
+                  "triangleCount": 4429
+                }
+              ],
+              "oversizedRefDrops": 0,
+              "totalUnsupportedItems": 0,
+              "unsupportedItemsByType": []
+            }
+          },
+          "diagnostics": {
+            "schemaVersion": 3,
+            "totalCsgFailures": 1923,
+            "productsWithFailures": 795,
+            "hostsWithOpenings": 5075,
+            "classification": {
+              "rectangular": 0,
+              "diagonal": 1563,
+              "nonRectangular": 23229,
+              "total": 24792
+            },
+            "failuresByReason": [
+              {
+                "reason": "KernelError",
+                "count": 1923
+              }
+            ],
+            "silentNoOps": 0,
+            "rectFast": {
+              "fired": 0,
+              "openingsCut": 0,
+              "deferHostNotBox": 14,
+              "deferNotThrough": 0,
+              "deferOffFace": 0,
+              "deferNearEdge": 0,
+              "deferNoOpenings": 0,
+              "deferTooManyOpenings": 0
+            },
+            "worstHosts": [
+              {
+                "productId": 448868,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    663.5694,
+                    379.81363,
+                    12.310276
+                  ],
+                  "max": [
+                    664.9383,
+                    380.44513,
+                    14.839207
+                  ]
+                },
+                "triangleCount": 4520
+              },
+              {
+                "productId": 460997,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    660.6649,
+                    386.18262,
+                    12.310276
+                  ],
+                  "max": [
+                    662.0339,
+                    386.81412,
+                    14.769207
+                  ]
+                },
+                "triangleCount": 4541
+              },
+              {
+                "productId": 463012,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    659.93884,
+                    387.77487,
+                    12.310276
+                  ],
+                  "max": [
+                    661.30774,
+                    388.40637,
+                    14.73425
+                  ]
+                },
+                "triangleCount": 4166
+              },
+              {
+                "productId": 464047,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    661.39105,
+                    384.59036,
+                    12.310276
+                  ],
+                  "max": [
+                    662.76,
+                    385.22186,
+                    14.80425
+                  ]
+                },
+                "triangleCount": 4081
+              },
+              {
+                "productId": 465039,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    662.84326,
+                    381.4058,
+                    12.310276
+                  ],
+                  "max": [
+                    664.2123,
+                    382.03735,
+                    14.874208
+                  ]
+                },
+                "triangleCount": 4358
+              },
+              {
+                "productId": 472872,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    687.03656,
+                    382.82178,
+                    12.232547
+                  ],
+                  "max": [
+                    688.4055,
+                    383.45328,
+                    14.58658
+                  ]
+                },
+                "triangleCount": 4753
+              },
+              {
+                "productId": 809305,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    103.42284,
+                    132.0639,
+                    12.989003
+                  ],
+                  "max": [
+                    104.79178,
+                    132.69539,
+                    15.447934
+                  ]
+                },
+                "triangleCount": 4237
+              },
+              {
+                "productId": 809515,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    101.97061,
+                    135.24841,
+                    12.989003
+                  ],
+                  "max": [
+                    103.33955,
+                    135.8799,
+                    15.377934
+                  ]
+                },
+                "triangleCount": 4547
+              },
+              {
+                "productId": 813394,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    123.88398,
+                    129.85452,
+                    13.077504
+                  ],
+                  "max": [
+                    125.25292,
+                    130.48601,
+                    15.536435
+                  ]
+                },
+                "triangleCount": 3734
+              },
+              {
+                "productId": 814836,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    120.25342,
+                    137.81577,
+                    13.077504
+                  ],
+                  "max": [
+                    121.62236,
+                    138.44725,
+                    15.571479
+                  ]
+                },
+                "triangleCount": 4107
+              },
+              {
+                "productId": 814961,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    119.527306,
+                    139.40802,
+                    13.077505
+                  ],
+                  "max": [
+                    120.89625,
+                    140.0395,
+                    15.536436
+                  ]
+                },
+                "triangleCount": 4302
+              },
+              {
+                "productId": 817569,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    240.73293,
+                    198.52809,
+                    13.751305
+                  ],
+                  "max": [
+                    242.10187,
+                    199.15958,
+                    16.140236
+                  ]
+                },
+                "triangleCount": 3906
+              },
+              {
+                "productId": 818684,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    249.44627,
+                    179.4211,
+                    13.751305
+                  ],
+                  "max": [
+                    250.81522,
+                    180.05258,
+                    16.070236
+                  ]
+                },
+                "triangleCount": 4199
+              },
+              {
+                "productId": 823736,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    262.08572,
+                    196.72533,
+                    13.844707
+                  ],
+                  "max": [
+                    263.45468,
+                    197.35681,
+                    16.373638
+                  ]
+                },
+                "triangleCount": 3929
+              },
+              {
+                "productId": 824437,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    265.7163,
+                    188.76408,
+                    13.844707
+                  ],
+                  "max": [
+                    267.08524,
+                    189.39557,
+                    16.198645
+                  ]
+                },
+                "triangleCount": 4286
+              },
+              {
+                "productId": 825013,
+                "ifcType": "IfcPlate",
+                "openings": 9,
+                "csgFailures": 9,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    257.72906,
+                    206.27882,
+                    13.844707
+                  ],
+                  "max": [
+                    259.098,
+                    206.91031,
+                    16.233639
+                  ]
+                },
+                "triangleCount": 4429
+              }
+            ],
+            "oversizedRefDrops": 0,
+            "totalUnsupportedItems": 0,
+            "unsupportedItemsByType": []
+          }
+        },
+        "models": [
+          {
+            "name": "Nhip chinh.ifc",
+            "path": "native",
+            "meshes": 857930,
+            "entities": 231608
+          }
+        ]
+      },
+      "requestMs": 1968.2,
+      "seconds": 328.54
+    }
+  ],
+  "errors": [],
+  "console": [],
+  "tests": [
+    "original IFC reaches Ready using the native backend",
+    "Reference feature #322462 absent; all optional Body feature meshes are transparent and hidden",
+    "real wheel, pointer orbit and visible Home control respond on the full bridge"
+  ],
+  "exeSha256": "88ccf396b4cecc55158a24fd5811fdf28c0bab6bd929d357b4026c8a0690def2",
+  "modelSha256": "110b48aeb00b183667fe5f973685100f6dbbc9375b34c10f899ca5a75b8e3085",
+  "pid": 4608,
+  "backend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "loadSeconds": 325.873,
+  "meshEvidence": {
+    "coordinateInfo": {
+      "originShift": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "shiftedBounds": {
+        "min": {
+          "x": -54.917144775390625,
+          "y": -5,
+          "z": -428.1815185546875
+        },
+        "max": {
+          "x": 701.2176513671875,
+          "y": 74.88772583007812,
+          "z": 0.000009126262739300728
+        }
+      },
+      "originalBounds": {
+        "min": {
+          "x": 563182.1394152346,
+          "y": -5,
+          "z": -1100788.8688685647
+        },
+        "max": {
+          "x": 563938.2742113771,
+          "y": 74.88772583007812,
+          "z": -1100360.6873408838
+        }
+      },
+      "hasLargeCoordinates": false,
+      "lengthUnitScale": 0.001,
+      "buildingRotation": 0.42785655784873866,
+      "wasmRtcFrame": {
+        "x": 563237.05656001,
+        "y": 1100360.68735001,
+        "z": 0,
+        "needsShift": true
+      },
+      "wasmRtcOffset": {
+        "x": 563237.05656001,
+        "y": 1100360.68735001,
+        "z": 0
+      }
+    },
+    "idOffset": 0,
+    "openingsVisible": false,
+    "featureMeshes": 24792,
+    "opaqueFeatures": 0,
+    "meshes": [
+      {
+        "id": 434,
+        "triangles": 100
+      },
+      {
+        "id": 820,
+        "triangles": 92
+      },
+      {
+        "id": 2361,
+        "triangles": 584
+      },
+      {
+        "id": 2444,
+        "triangles": 2544
+      },
+      {
+        "id": 64951,
+        "triangles": 2560
+      },
+      {
+        "id": 150461,
+        "triangles": 2024
+      },
+      {
+        "id": 152785,
+        "triangles": 2024
+      },
+      {
+        "id": 266636,
+        "triangles": 104
+      },
+      {
+        "id": 298390,
+        "triangles": 2576
+      },
+      {
+        "id": 303995,
+        "triangles": 2576
+      },
+      {
+        "id": 304217,
+        "triangles": 2576
+      },
+      {
+        "id": 322443,
+        "triangles": 104
+      },
+      {
+        "id": 344051,
+        "triangles": 128
+      }
+    ]
+  },
+  "failure": "AssertionError [ERR_ASSERTION]: full-model geometry must have no residual CSG failures\n\n1923 !== 0\n\n    at file:///F:/Steel/VBA/IFC-Lite-Core104/research/nhip-fix-20261024/accept-packaged.mjs:150:10",
+  "screenshotError": "Error: page.screenshot: Target page, context or browser has been closed\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n",
+  "cleanExit": false,
+  "finished": "2026-10-24T17:47:58.521Z"
+}

@@ -1,0 +1,18 @@
+{
+  "nativeRawCandidate": {
+    "vertices": 3870,
+    "triangles": 2596,
+    "volume": 0.03447626649053915,
+    "area": 7.131240915540037
+  },
+  "oracle": {
+    "vertices": 1312,
+    "triangles": 2624,
+    "volume": 0.03447345885863243,
+    "area": 7.1226866129247774
+  },
+  "maxBoundsDeltaMm": 6.065238267183304e-05,
+  "sampledMaxDistanceMm": 41.26296357126176,
+  "relativeVolumeErrorPercent": 0.008144328998825843,
+  "note": "research-only bounded4ULP outwardretry rawgeometry, BEFORE ordinarycanonicalhygiene whichopens24edges; not shipped"
+}

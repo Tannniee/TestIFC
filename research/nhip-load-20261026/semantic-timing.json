@@ -1,0 +1,10 @@
+{
+  "importMs": 56.625,
+  "prepareMs": 734.7250000014901,
+  "receiveMs": 1127.8650000020862,
+  "totalMs": 1919.2150000035763,
+  "bytes": 115967275,
+  "received": 115967275,
+  "packets": 56,
+  "scope": "Standalone immutable snapshot + rooted semantic serialization + raw bounded IPC; excludes frontend column/map decoding and geometry. Existing model/viewer state is untouched."
+}

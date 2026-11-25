@@ -1,0 +1,78 @@
+[
+  {
+    "input": "branch-r2-remaining-body.json",
+    "id": 2444,
+    "native": {
+      "vertices": 3736,
+      "triangles": 2544,
+      "volume": 0.07046347323681472,
+      "area": 9.201140003839981
+    },
+    "oracle": {
+      "vertices": 1296,
+      "triangles": 2592,
+      "volume": 0.07045904881485814,
+      "area": 9.200594628274429
+    },
+    "sampledMaxSurfaceDistanceMm": 0.5314512625131749,
+    "maxBoundsDeltaMm": 0.00147172249853611,
+    "relativeVolumeErrorPercent": 0.0062794233402291575
+  },
+  {
+    "input": "branch-r2-remaining-body.json",
+    "id": 298390,
+    "native": {
+      "vertices": 2576,
+      "triangles": 2576,
+      "volume": 0.03447627683450271,
+      "area": 7.1232435812415416
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345885863243,
+      "area": 7.1226866129247774
+    },
+    "sampledMaxSurfaceDistanceMm": 0.5314618639550088,
+    "maxBoundsDeltaMm": 8.230563253164291e-05,
+    "relativeVolumeErrorPercent": 0.008174334585451535
+  },
+  {
+    "input": "branch-r2-remaining-body.json",
+    "id": 303995,
+    "native": {
+      "vertices": 2576,
+      "triangles": 2576,
+      "volume": 0.03447627680075903,
+      "area": 7.123243575048154
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345886207911,
+      "area": 7.122686612990366
+    },
+    "sampledMaxSurfaceDistanceMm": 0.5314617337542015,
+    "maxBoundsDeltaMm": 8.218921720981598e-05,
+    "relativeVolumeErrorPercent": 0.008174226703489955
+  },
+  {
+    "input": "branch-r2-remaining-body.json",
+    "id": 304217,
+    "native": {
+      "vertices": 2576,
+      "triangles": 2576,
+      "volume": 0.034476276811806546,
+      "area": 7.1232435777172345
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345885901898,
+      "area": 7.1226866126488675
+    },
+    "sampledMaxSurfaceDistanceMm": 0.5314769532033864,
+    "maxBoundsDeltaMm": 8.230563253164291e-05,
+    "relativeVolumeErrorPercent": 0.008174267627424531
+  }
+]

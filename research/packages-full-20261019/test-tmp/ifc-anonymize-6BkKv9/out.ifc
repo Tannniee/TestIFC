@@ -1,0 +1,13 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('','Re-exported by ifc-lite, 4 modifications'),'2;1');
+FILE_NAME('anonymized.ifc','2026-10-19T03:25:17',(''),(''),'ifc-lite','ifc-lite','');
+FILE_SCHEMA(('IFC4'));
+ENDSEC;
+DATA;
+#1=IFCPROJECT('0pplg_EW52TeBzu5hTShgb',$,'IfcProject-1',$,$,$,$,$,$);
+#11=IFCOPENINGELEMENT('2a68tONP9Ae9v6ZU3$AJOA',$,'IfcOpeningElement-1',$,$,$,$,$);
+#12=IFCWINDOW('24snNI$$j5OfONNRqgJuu8',$,'IfcWindow-1',$,$,$,$,'IfcWindow-1',1.,1.);
+#21=IFCRELFILLSELEMENT('0wQLto0LH7t8Wgq9e0t8_H',$,$,$,#11,#12);
+ENDSEC;
+END-ISO-10303-21;

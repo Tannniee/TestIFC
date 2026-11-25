@@ -1,0 +1,764 @@
+{
+  "packages": [
+    {
+      "path": "packages/ai",
+      "version": "0.2.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/ai"
+    },
+    {
+      "path": "packages/bcf",
+      "version": "5.0.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/bcf"
+    },
+    {
+      "path": "packages/bcf-api",
+      "version": "0.3.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/bcf-api"
+    },
+    {
+      "path": "packages/cache",
+      "version": "3.7.2",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/cache"
+    },
+    {
+      "path": "packages/charts",
+      "version": "0.9.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/charts"
+    },
+    {
+      "path": "packages/clash",
+      "version": "2.4.4",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/clash"
+    },
+    {
+      "path": "packages/cli",
+      "version": "0.41.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "start": "node dist/index.js",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/cli"
+    },
+    {
+      "path": "packages/codegen",
+      "version": "1.18.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc && pnpm exec tsc -p tsconfig.generated.json",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run",
+        "generate": "node dist/cli.js",
+        "generate:ifc4": "node dist/cli.js schemas/IFC4_ADD2_TC1.exp -o generated/ifc4",
+        "generate:ifc4x3": "node dist/cli.js schemas/IFC4X3.exp -o generated/ifc4x3",
+        "generate:ifc2x3": "node dist/cli.js schemas/IFC2X3_TC1.exp -o generated/ifc2x3"
+      },
+      "name": "@ifc-lite/codegen"
+    },
+    {
+      "path": "packages/collab",
+      "version": "0.10.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/collab"
+    },
+    {
+      "path": "packages/collab-server",
+      "version": "0.9.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "start": "node ./dist/bin.js",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/collab-server"
+    },
+    {
+      "path": "packages/create",
+      "version": "5.1.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/create"
+    },
+    {
+      "path": "packages/create-ifc-lite",
+      "version": "1.15.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "create-ifc-lite"
+    },
+    {
+      "path": "packages/data",
+      "version": "6.2.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run",
+        "generate:epsg-index": "tsx ../../scripts/generate-epsg-index.ts",
+        "augment:epsg-proj4": "tsx ../../scripts/augment-epsg-proj4.ts",
+        "verify:epsg": "tsx scripts/verify-epsg-roundtrip.ts",
+        "generate:ifc-schema": "tsx scripts/generate-ifc-schema.ts && tsx scripts/emit-entity-names.ts"
+      },
+      "name": "@ifc-lite/data"
+    },
+    {
+      "path": "packages/diff",
+      "version": "0.10.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/diff"
+    },
+    {
+      "path": "packages/documents-api",
+      "version": "0.2.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/documents-api"
+    },
+    {
+      "path": "packages/drawing-2d",
+      "version": "4.2.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/drawing-2d"
+    },
+    {
+      "path": "packages/embed-protocol",
+      "version": "1.15.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/embed-protocol"
+    },
+    {
+      "path": "packages/embed-sdk",
+      "version": "1.15.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/embed-sdk"
+    },
+    {
+      "path": "packages/encoding",
+      "version": "2.3.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/encoding"
+    },
+    {
+      "path": "packages/export",
+      "version": "4.11.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/export"
+    },
+    {
+      "path": "packages/extensions",
+      "version": "0.11.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/extensions"
+    },
+    {
+      "path": "packages/flow",
+      "version": "0.7.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/flow"
+    },
+    {
+      "path": "packages/flow-nodes",
+      "version": "0.10.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/flow-nodes"
+    },
+    {
+      "path": "packages/geometry",
+      "version": "7.8.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc && node ../../scripts/rewrite-worker-urls.mjs dist && node ../../scripts/verify-dist-worker-urls.mjs dist --scripts-only",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/geometry"
+    },
+    {
+      "path": "packages/ids",
+      "version": "3.3.6",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/ids"
+    },
+    {
+      "path": "packages/ids-agent",
+      "version": "0.2.6",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/ids-agent"
+    },
+    {
+      "path": "packages/ids-authoring",
+      "version": "0.2.6",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/ids-authoring"
+    },
+    {
+      "path": "packages/ifcx",
+      "version": "4.4.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc && node ./scripts/verify-dist-hello-wall.mjs",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "tsx --test src/*.test.ts"
+      },
+      "name": "@ifc-lite/ifcx"
+    },
+    {
+      "path": "packages/lens",
+      "version": "2.2.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/lens"
+    },
+    {
+      "path": "packages/lists",
+      "version": "3.1.7",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/lists"
+    },
+    {
+      "path": "packages/load-trace",
+      "version": "0.3.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/load-trace"
+    },
+    {
+      "path": "packages/mcp",
+      "version": "0.27.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "start": "node dist/cli.js",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/mcp"
+    },
+    {
+      "path": "packages/merge",
+      "version": "0.4.7",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run",
+        "bench": "node --max-old-space-size=8192 scripts/bench-three-way.mjs"
+      },
+      "name": "@ifc-lite/merge"
+    },
+    {
+      "path": "packages/mutations",
+      "version": "3.2.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/mutations"
+    },
+    {
+      "path": "packages/oauth-pkce",
+      "version": "0.3.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/oauth-pkce"
+    },
+    {
+      "path": "packages/opencde-foundation",
+      "version": "0.3.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/opencde-foundation"
+    },
+    {
+      "path": "packages/parser",
+      "version": "9.5.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc && node ../../scripts/rewrite-worker-urls.mjs dist && node ../../scripts/verify-dist-worker-urls.mjs dist",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/parser"
+    },
+    {
+      "path": "packages/plugin-api",
+      "version": "0.5.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/plugin-api"
+    },
+    {
+      "path": "packages/pointcloud",
+      "version": "0.12.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc && node ../../scripts/rewrite-worker-urls.mjs dist && node ../../scripts/verify-dist-worker-urls.mjs dist --scripts-only && node scripts/build-worker-bundle.mjs",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/pointcloud"
+    },
+    {
+      "path": "packages/provenance",
+      "version": "0.2.0",
+      "private": true,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/provenance"
+    },
+    {
+      "path": "packages/query",
+      "version": "2.5.2",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/query"
+    },
+    {
+      "path": "packages/regex-guard",
+      "version": "0.3.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/regex-guard"
+    },
+    {
+      "path": "packages/renderer",
+      "version": "6.4.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "tsx --test src/*.test.ts"
+      },
+      "name": "@ifc-lite/renderer"
+    },
+    {
+      "path": "packages/report-contract",
+      "version": "0.1.0",
+      "private": true,
+      "scripts": {
+        "build": "tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/report-contract"
+    },
+    {
+      "path": "packages/rules",
+      "version": "0.7.7",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/rules"
+    },
+    {
+      "path": "packages/sandbox",
+      "version": "2.12.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/sandbox"
+    },
+    {
+      "path": "packages/sdk",
+      "version": "9.5.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/sdk"
+    },
+    {
+      "path": "packages/semantic",
+      "version": "0.2.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/semantic"
+    },
+    {
+      "path": "packages/server-bin",
+      "version": "2.0.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run",
+        "start": "node dist/cli.js",
+        "postinstall": "node -e \"import('./dist/postinstall.js').catch(() => {})\" || true"
+      },
+      "name": "@ifc-lite/server-bin"
+    },
+    {
+      "path": "packages/server-client",
+      "version": "4.0.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/server-client"
+    },
+    {
+      "path": "packages/solar",
+      "version": "1.15.5",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/solar"
+    },
+    {
+      "path": "packages/source-autodesk",
+      "version": "0.2.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/source-autodesk"
+    },
+    {
+      "path": "packages/source-dalux",
+      "version": "0.4.1",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/source-dalux"
+    },
+    {
+      "path": "packages/source-dropbox",
+      "version": "0.4.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/source-dropbox"
+    },
+    {
+      "path": "packages/source-fixture",
+      "version": "0.3.1",
+      "private": true,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/source-fixture"
+    },
+    {
+      "path": "packages/source-msgraph",
+      "version": "0.4.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/source-msgraph"
+    },
+    {
+      "path": "packages/spatial",
+      "version": "1.15.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/spatial"
+    },
+    {
+      "path": "packages/timing-ladder",
+      "version": "0.1.0",
+      "private": true,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/timing-ladder"
+    },
+    {
+      "path": "packages/viewer",
+      "version": "0.2.26",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "tsx --test test/*.test.ts"
+      },
+      "name": "@ifc-lite/viewer-core"
+    },
+    {
+      "path": "packages/wasm",
+      "version": "10.4.0",
+      "private": false,
+      "scripts": {
+        "build": "node ../../scripts/run-build-wasm.mjs",
+        "test": "node --test test/*.test.mjs"
+      },
+      "name": "@ifc-lite/wasm"
+    },
+    {
+      "path": "packages/wasm-lifecycle",
+      "version": "0.2.0",
+      "private": false,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/wasm-lifecycle"
+    },
+    {
+      "path": "packages/world-frame-fixtures",
+      "version": "0.1.4",
+      "private": true,
+      "scripts": {
+        "build": "pnpm exec tsc",
+        "typecheck": "node ../../scripts/typecheck-tests.mjs",
+        "dev": "pnpm exec tsc --watch",
+        "test": "vitest run"
+      },
+      "name": "@ifc-lite/world-frame-fixtures"
+    }
+  ],
+  "workspace_packages": 62,
+  "published_packages": 57,
+  "workspace_edges": 210,
+  "missing_workspace_dependencies": [],
+  "source_pin": "61d209288c1b117d405628ead302d0ee700bd2a0",
+  "package_source_changes_since_upgrade": []
+}

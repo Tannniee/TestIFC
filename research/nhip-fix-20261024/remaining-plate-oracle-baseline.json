@@ -1,0 +1,40 @@
+[
+  {
+    "input": "remaining-plate-full.json",
+    "id": 150461,
+    "native": {
+      "vertices": 14045,
+      "triangles": 6090,
+      "volume": 0.04818503247554451,
+      "area": 6.264779089248265
+    },
+    "oracle": {
+      "vertices": 1032,
+      "triangles": 2064,
+      "volume": 0.048092865849623974,
+      "area": 6.263830167392414
+    },
+    "sampledMaxSurfaceDistanceMm": 41.67213449383844,
+    "maxBoundsDeltaMm": 0.1449385890737176,
+    "relativeVolumeErrorPercent": 0.1916430312319513
+  },
+  {
+    "input": "remaining-plate-full.json",
+    "id": 152785,
+    "native": {
+      "vertices": 11298,
+      "triangles": 7938,
+      "volume": 0.042225689556947645,
+      "area": 6.248294486359175
+    },
+    "oracle": {
+      "vertices": 1032,
+      "triangles": 2064,
+      "volume": 0.04809286582889081,
+      "area": 6.263830165892515
+    },
+    "sampledMaxSurfaceDistanceMm": 41.20748415095783,
+    "maxBoundsDeltaMm": 0.025097280740737915,
+    "relativeVolumeErrorPercent": 12.199681118646453
+  }
+]

@@ -1,0 +1,382 @@
+{
+  "source_pin": "61d209288c1b117d405628ead302d0ee700bd2a0",
+  "packages": [
+    {
+      "name": "@ifc-lite/ai",
+      "before": null,
+      "after": "0.2.0",
+      "web_20261019": "0.2.0"
+    },
+    {
+      "name": "@ifc-lite/bcf",
+      "before": "5.0.0",
+      "after": "5.0.1",
+      "web_20261019": "5.0.1"
+    },
+    {
+      "name": "@ifc-lite/bcf-api",
+      "before": "0.2.4",
+      "after": "0.3.0",
+      "web_20261019": "0.3.0"
+    },
+    {
+      "name": "@ifc-lite/cache",
+      "before": "3.7.0",
+      "after": "3.7.2",
+      "web_20261019": "3.7.2"
+    },
+    {
+      "name": "@ifc-lite/charts",
+      "before": "0.8.0",
+      "after": "0.9.0",
+      "web_20261019": "0.9.0"
+    },
+    {
+      "name": "@ifc-lite/clash",
+      "before": "2.4.4",
+      "after": "2.4.4",
+      "web_20261019": "2.4.4"
+    },
+    {
+      "name": "@ifc-lite/cli",
+      "before": "0.38.2",
+      "after": "0.41.0",
+      "web_20261019": "0.41.0"
+    },
+    {
+      "name": "@ifc-lite/codegen",
+      "before": "1.18.1",
+      "after": "1.18.1",
+      "web_20261019": "1.18.1"
+    },
+    {
+      "name": "@ifc-lite/collab",
+      "before": "0.10.0",
+      "after": "0.10.0",
+      "web_20261019": "0.10.0"
+    },
+    {
+      "name": "@ifc-lite/collab-server",
+      "before": "0.8.1",
+      "after": "0.9.0",
+      "web_20261019": "0.9.0"
+    },
+    {
+      "name": "@ifc-lite/create",
+      "before": "4.0.0",
+      "after": "5.1.0",
+      "web_20261019": "5.1.0"
+    },
+    {
+      "name": "@ifc-lite/data",
+      "before": "6.2.0",
+      "after": "6.2.0",
+      "web_20261019": "6.2.0"
+    },
+    {
+      "name": "@ifc-lite/diff",
+      "before": "0.10.0",
+      "after": "0.10.0",
+      "web_20261019": "0.10.0"
+    },
+    {
+      "name": "@ifc-lite/documents-api",
+      "before": "0.2.0",
+      "after": "0.2.1",
+      "web_20261019": "0.2.1"
+    },
+    {
+      "name": "@ifc-lite/drawing-2d",
+      "before": "4.1.0",
+      "after": "4.2.0",
+      "web_20261019": "4.2.0"
+    },
+    {
+      "name": "@ifc-lite/embed-protocol",
+      "before": "1.15.0",
+      "after": "1.15.0",
+      "web_20261019": "1.15.0"
+    },
+    {
+      "name": "@ifc-lite/embed-sdk",
+      "before": "1.15.0",
+      "after": "1.15.1",
+      "web_20261019": "1.15.1"
+    },
+    {
+      "name": "@ifc-lite/encoding",
+      "before": "2.3.0",
+      "after": "2.3.0",
+      "web_20261019": "2.3.0"
+    },
+    {
+      "name": "@ifc-lite/export",
+      "before": "4.11.0",
+      "after": "4.11.0",
+      "web_20261019": "4.11.0"
+    },
+    {
+      "name": "@ifc-lite/extensions",
+      "before": "0.10.1",
+      "after": "0.11.0",
+      "web_20261019": "0.11.0"
+    },
+    {
+      "name": "@ifc-lite/flow",
+      "before": "0.5.0",
+      "after": "0.7.0",
+      "web_20261019": "0.7.0"
+    },
+    {
+      "name": "@ifc-lite/flow-nodes",
+      "before": "0.6.0",
+      "after": "0.10.0",
+      "web_20261019": "0.10.0"
+    },
+    {
+      "name": "@ifc-lite/geometry",
+      "before": "7.8.1",
+      "after": "7.8.1",
+      "web_20261019": "7.8.1"
+    },
+    {
+      "name": "@ifc-lite/ids",
+      "before": "3.2.0",
+      "after": "3.3.6",
+      "web_20261019": "3.3.6"
+    },
+    {
+      "name": "@ifc-lite/ids-agent",
+      "before": null,
+      "after": "0.2.6",
+      "web_20261019": "0.2.6"
+    },
+    {
+      "name": "@ifc-lite/ids-authoring",
+      "before": null,
+      "after": "0.2.6",
+      "web_20261019": "0.2.6"
+    },
+    {
+      "name": "@ifc-lite/ifcx",
+      "before": "4.4.0",
+      "after": "4.4.0",
+      "web_20261019": "4.4.0"
+    },
+    {
+      "name": "@ifc-lite/lens",
+      "before": "2.1.0",
+      "after": "2.2.0",
+      "web_20261019": "2.2.0"
+    },
+    {
+      "name": "@ifc-lite/lists",
+      "before": "3.0.1",
+      "after": "3.1.7",
+      "web_20261019": "3.1.7"
+    },
+    {
+      "name": "@ifc-lite/load-trace",
+      "before": "0.3.0",
+      "after": "0.3.0",
+      "web_20261019": "0.3.0"
+    },
+    {
+      "name": "@ifc-lite/mcp",
+      "before": "0.23.0",
+      "after": "0.27.0",
+      "web_20261019": "0.27.0"
+    },
+    {
+      "name": "@ifc-lite/merge",
+      "before": "0.4.7",
+      "after": "0.4.7",
+      "web_20261019": "0.4.7"
+    },
+    {
+      "name": "@ifc-lite/mutations",
+      "before": "3.2.0",
+      "after": "3.2.0",
+      "web_20261019": "3.2.0"
+    },
+    {
+      "name": "@ifc-lite/oauth-pkce",
+      "before": "0.2.0",
+      "after": "0.3.0",
+      "web_20261019": "0.3.0"
+    },
+    {
+      "name": "@ifc-lite/opencde-foundation",
+      "before": "0.2.0",
+      "after": "0.3.0",
+      "web_20261019": "0.3.0"
+    },
+    {
+      "name": "@ifc-lite/parser",
+      "before": "9.5.1",
+      "after": "9.5.1",
+      "web_20261019": "9.5.1"
+    },
+    {
+      "name": "@ifc-lite/plugin-api",
+      "before": "0.4.0",
+      "after": "0.5.0",
+      "web_20261019": "0.5.0"
+    },
+    {
+      "name": "@ifc-lite/pointcloud",
+      "before": "0.12.0",
+      "after": "0.12.0",
+      "web_20261019": "0.12.0"
+    },
+    {
+      "name": "@ifc-lite/provenance",
+      "before": "0.2.0",
+      "after": "0.2.0",
+      "web_20261019": "0.2.0"
+    },
+    {
+      "name": "@ifc-lite/query",
+      "before": "2.5.2",
+      "after": "2.5.2",
+      "web_20261019": "2.5.2"
+    },
+    {
+      "name": "@ifc-lite/regex-guard",
+      "before": "0.3.0",
+      "after": "0.3.0",
+      "web_20261019": "0.3.0"
+    },
+    {
+      "name": "@ifc-lite/renderer",
+      "before": "6.4.0",
+      "after": "6.4.0",
+      "web_20261019": "6.4.0"
+    },
+    {
+      "name": "@ifc-lite/report-contract",
+      "before": null,
+      "after": "0.1.0",
+      "web_20261019": "0.1.0"
+    },
+    {
+      "name": "@ifc-lite/rules",
+      "before": "0.6.0",
+      "after": "0.7.7",
+      "web_20261019": "0.7.7"
+    },
+    {
+      "name": "@ifc-lite/sandbox",
+      "before": "2.10.0",
+      "after": "2.12.0",
+      "web_20261019": "2.12.0"
+    },
+    {
+      "name": "@ifc-lite/sdk",
+      "before": "9.0.0",
+      "after": "9.5.0",
+      "web_20261019": "9.5.0"
+    },
+    {
+      "name": "@ifc-lite/semantic",
+      "before": null,
+      "after": "0.2.1",
+      "web_20261019": "0.2.1"
+    },
+    {
+      "name": "@ifc-lite/server-bin",
+      "before": "2.0.0",
+      "after": "2.0.1",
+      "web_20261019": "2.0.1"
+    },
+    {
+      "name": "@ifc-lite/server-client",
+      "before": "4.0.0",
+      "after": "4.0.1",
+      "web_20261019": "4.0.1"
+    },
+    {
+      "name": "@ifc-lite/solar",
+      "before": "1.15.5",
+      "after": "1.15.5",
+      "web_20261019": "1.15.5"
+    },
+    {
+      "name": "@ifc-lite/source-autodesk",
+      "before": null,
+      "after": "0.2.1",
+      "web_20261019": "0.2.1"
+    },
+    {
+      "name": "@ifc-lite/source-dalux",
+      "before": "0.4.0",
+      "after": "0.4.1",
+      "web_20261019": "0.4.1"
+    },
+    {
+      "name": "@ifc-lite/source-dropbox",
+      "before": "0.3.0",
+      "after": "0.4.0",
+      "web_20261019": "0.4.0"
+    },
+    {
+      "name": "@ifc-lite/source-fixture",
+      "before": "0.3.0",
+      "after": "0.3.1",
+      "web_20261019": "0.3.1"
+    },
+    {
+      "name": "@ifc-lite/source-msgraph",
+      "before": "0.3.0",
+      "after": "0.4.0",
+      "web_20261019": "0.4.0"
+    },
+    {
+      "name": "@ifc-lite/spatial",
+      "before": "1.15.0",
+      "after": "1.15.0",
+      "web_20261019": "1.15.0"
+    },
+    {
+      "name": "@ifc-lite/timing-ladder",
+      "before": "0.1.0",
+      "after": "0.1.0",
+      "web_20261019": "0.1.0"
+    },
+    {
+      "name": "@ifc-lite/viewer-core",
+      "before": "0.2.25",
+      "after": "0.2.26",
+      "web_20261019": "0.2.26"
+    },
+    {
+      "name": "@ifc-lite/wasm",
+      "before": "10.4.0",
+      "after": "10.4.0",
+      "web_20261019": "10.4.0"
+    },
+    {
+      "name": "@ifc-lite/wasm-lifecycle",
+      "before": "0.2.0",
+      "after": "0.2.0",
+      "web_20261019": "0.2.0"
+    },
+    {
+      "name": "@ifc-lite/world-frame-fixtures",
+      "before": "0.1.4",
+      "after": "0.1.4",
+      "web_20261019": "0.1.4"
+    },
+    {
+      "name": "create-ifc-lite",
+      "before": "1.15.0",
+      "after": "1.15.1",
+      "web_20261019": "1.15.1"
+    }
+  ],
+  "count": 62,
+  "version_mismatches": [],
+  "custom_viewer": "4.0.0",
+  "native_core": "10.4.0",
+  "rust_engine": "20.4.0"
+}

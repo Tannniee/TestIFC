@@ -1,0 +1,20 @@
+[
+  {
+    "split": false,
+    "shapelyVolume": 0.0865346006504318,
+    "analyticVolume": 0.08653460065043178,
+    "difference": 1.3877787807814457e-17,
+    "components": 1,
+    "valid": true,
+    "allInputsValid": true
+  },
+  {
+    "split": true,
+    "shapelyVolume": 0.08253460065043178,
+    "analyticVolume": 0.08253460065043179,
+    "difference": -1.3877787807814457e-17,
+    "components": 2,
+    "valid": true,
+    "allInputsValid": true
+  }
+]

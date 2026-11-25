@@ -1,0 +1,18 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-nhip-fps-20261026-r6\\IFC-Lite.exe",
+  "model": "F:/Working/IFC Temp/Nhip chinh.ifc",
+  "port": 50173,
+  "profile": "F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\nhip-fps-20261026\\candidate-owned-temp\\ifclite-svd-fps-n9gPkr",
+  "pid": 12928,
+  "started": "2026-10-26T12:43:43.759Z",
+  "sha256": "39f4496d873d4ff894b338a4fccde9c0fc93ba1d89672252bea8f2894eac9b2f",
+  "environment": {
+    "native": true,
+    "dpr": 1.5,
+    "width": 1440,
+    "height": 960,
+    "visibility": "visible",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+    "fastView": false
+  }
+}

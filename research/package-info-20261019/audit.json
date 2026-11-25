@@ -1,0 +1,580 @@
+{
+  "checked_date_local": "2026-10-19",
+  "web_url": "https://www.ifclite.com/",
+  "web_info_build_date": "Oct 18, 2026",
+  "web_viewer_version": "5.1.5",
+  "desktop_viewer_version": "4.0.0",
+  "original_upgrade_pin": "61d209288c1b117d405628ead302d0ee700bd2a0",
+  "current_production_head": "68a29e79e4f22acfce61d3e235015876bbffee92",
+  "local_packages": 56,
+  "pinned_production_packages": 62,
+  "live_web_info_packages": 62,
+  "same_version_count": 25,
+  "different_version_count": 31,
+  "missing_locally_count": 6,
+  "local_only_count": 0,
+  "web_versions_differing_from_original_pin": [],
+  "delivered_asset_info_candidates": [
+    {
+      "file": "assets/main-BcFQ-a24.js",
+      "packages": {
+        "@ifc-lite/bcf": "5.0.0",
+        "@ifc-lite/bcf-api": "0.2.4",
+        "@ifc-lite/cache": "3.7.0",
+        "@ifc-lite/charts": "0.8.0",
+        "@ifc-lite/clash": "2.4.4",
+        "@ifc-lite/cli": "0.38.2",
+        "@ifc-lite/codegen": "1.18.1",
+        "@ifc-lite/collab": "0.10.0",
+        "@ifc-lite/collab-server": "0.8.1",
+        "@ifc-lite/create": "4.0.0",
+        "@ifc-lite/data": "6.2.0",
+        "@ifc-lite/diff": "0.10.0",
+        "@ifc-lite/documents-api": "0.2.0",
+        "@ifc-lite/drawing-2d": "4.1.0",
+        "@ifc-lite/embed-protocol": "1.15.0",
+        "@ifc-lite/embed-sdk": "1.15.0",
+        "@ifc-lite/encoding": "2.3.0",
+        "@ifc-lite/export": "4.11.0",
+        "@ifc-lite/extensions": "0.10.1",
+        "@ifc-lite/flow": "0.5.0",
+        "@ifc-lite/flow-nodes": "0.6.0",
+        "@ifc-lite/geometry": "7.8.1",
+        "@ifc-lite/ids": "3.2.0",
+        "@ifc-lite/ifcx": "4.4.0",
+        "@ifc-lite/lens": "2.1.0",
+        "@ifc-lite/lists": "3.0.1",
+        "@ifc-lite/load-trace": "0.3.0",
+        "@ifc-lite/mcp": "0.23.0",
+        "@ifc-lite/merge": "0.4.7",
+        "@ifc-lite/mutations": "3.2.0",
+        "@ifc-lite/oauth-pkce": "0.2.0",
+        "@ifc-lite/opencde-foundation": "0.2.0",
+        "@ifc-lite/parser": "9.5.1",
+        "@ifc-lite/plugin-api": "0.4.0",
+        "@ifc-lite/pointcloud": "0.12.0",
+        "@ifc-lite/provenance": "0.2.0",
+        "@ifc-lite/query": "2.5.2",
+        "@ifc-lite/regex-guard": "0.3.0",
+        "@ifc-lite/renderer": "6.4.0",
+        "@ifc-lite/rules": "0.6.0",
+        "@ifc-lite/sandbox": "2.10.0",
+        "@ifc-lite/sdk": "9.0.0",
+        "@ifc-lite/server-bin": "2.0.0",
+        "@ifc-lite/server-client": "4.0.0",
+        "@ifc-lite/solar": "1.15.5",
+        "@ifc-lite/source-dalux": "0.4.0",
+        "@ifc-lite/source-dropbox": "0.3.0",
+        "@ifc-lite/source-fixture": "0.3.0",
+        "@ifc-lite/source-msgraph": "0.3.0",
+        "@ifc-lite/spatial": "1.15.0",
+        "@ifc-lite/timing-ladder": "0.1.0",
+        "@ifc-lite/viewer-core": "0.2.25",
+        "@ifc-lite/wasm": "10.4.0",
+        "@ifc-lite/wasm-lifecycle": "0.2.0",
+        "@ifc-lite/world-frame-fixtures": "0.1.4",
+        "create-ifc-lite": "1.15.0"
+      },
+      "sha256": "6a92726a946a5769e8461ebc35e40f1febdaf956096bea9a06ad491a549ebdc8",
+      "matches_delivered_asset_hash": true
+    }
+  ],
+  "packages": [
+    {
+      "name": "@ifc-lite/ai",
+      "local": null,
+      "production_pin_17Oct": "0.2.0",
+      "web_info_19Oct": "0.2.0",
+      "status": "missing_locally",
+      "description": "Provider-independent AI request core: transport contract, typed outcomes, root budgets, usage receipts and bounded JSON output parsing"
+    },
+    {
+      "name": "@ifc-lite/bcf",
+      "local": "5.0.0",
+      "production_pin_17Oct": "5.0.1",
+      "web_info_19Oct": "5.0.1",
+      "status": "different_version",
+      "description": "BIM Collaboration Format (BCF) support for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/bcf-api",
+      "local": "0.2.4",
+      "production_pin_17Oct": "0.3.0",
+      "web_info_19Oct": "0.3.0",
+      "status": "different_version",
+      "description": "BCF API (OpenCDE) REST client for connecting to BCF servers"
+    },
+    {
+      "name": "@ifc-lite/cache",
+      "local": "3.7.0",
+      "production_pin_17Oct": "3.7.2",
+      "web_info_19Oct": "3.7.2",
+      "status": "different_version",
+      "description": "Binary cache format for IFC-Lite - fast model loading"
+    },
+    {
+      "name": "@ifc-lite/charts",
+      "local": "0.8.0",
+      "production_pin_17Oct": "0.9.0",
+      "web_info_19Oct": "0.9.0",
+      "status": "different_version",
+      "description": "Headless chart data binding for IFC-Lite: aggregate model rows into buckets that keep their element ids, build ECharts options, render SVG"
+    },
+    {
+      "name": "@ifc-lite/clash",
+      "local": "2.4.4",
+      "production_pin_17Oct": "2.4.4",
+      "web_info_19Oct": "2.4.4",
+      "status": "same_version",
+      "description": "Clash detection for IFC-Lite — representation-agnostic core engine + source adapters"
+    },
+    {
+      "name": "@ifc-lite/cli",
+      "local": "0.38.2",
+      "production_pin_17Oct": "0.41.0",
+      "web_info_19Oct": "0.41.0",
+      "status": "different_version",
+      "description": "CLI toolkit for IFC files — query, validate, export, create, and script BIM data"
+    },
+    {
+      "name": "@ifc-lite/codegen",
+      "local": "1.18.1",
+      "production_pin_17Oct": "1.18.1",
+      "web_info_19Oct": "1.18.1",
+      "status": "same_version",
+      "description": "TypeScript code generator from IFC EXPRESS schemas"
+    },
+    {
+      "name": "@ifc-lite/collab",
+      "local": "0.10.0",
+      "production_pin_17Oct": "0.10.0",
+      "web_info_19Oct": "0.10.0",
+      "status": "same_version",
+      "description": "Real-time collaborative BIM via CRDT on IFCX"
+    },
+    {
+      "name": "@ifc-lite/collab-server",
+      "local": "0.8.1",
+      "production_pin_17Oct": "0.9.0",
+      "web_info_19Oct": "0.9.0",
+      "status": "different_version",
+      "description": "Reference websocket sync server for @ifc-lite/collab"
+    },
+    {
+      "name": "@ifc-lite/create",
+      "local": "4.0.0",
+      "production_pin_17Oct": "5.1.0",
+      "web_info_19Oct": "5.1.0",
+      "status": "different_version",
+      "description": "IFC creation from scratch — walls, slabs, beams, columns, stairs, roofs with geometry, properties and quantities"
+    },
+    {
+      "name": "@ifc-lite/data",
+      "local": "6.2.0",
+      "production_pin_17Oct": "6.2.0",
+      "web_info_19Oct": "6.2.0",
+      "status": "same_version",
+      "description": "Columnar data structures for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/diff",
+      "local": "0.10.0",
+      "production_pin_17Oct": "0.10.0",
+      "web_info_19Oct": "0.10.0",
+      "status": "same_version",
+      "description": "Headless model-diff engine for IFC-Lite — classifies entities as added/modified/deleted/unchanged across two revisions, with separable data vs geometry scope."
+    },
+    {
+      "name": "@ifc-lite/documents-api",
+      "local": "0.2.0",
+      "production_pin_17Oct": "0.2.1",
+      "web_info_19Oct": "0.2.1",
+      "status": "different_version",
+      "description": "OpenCDE Documents API 1.0 client: select, download, query and upload documents against a buildingSMART Documents API server"
+    },
+    {
+      "name": "@ifc-lite/drawing-2d",
+      "local": "4.1.0",
+      "production_pin_17Oct": "4.2.0",
+      "web_info_19Oct": "4.2.0",
+      "status": "different_version",
+      "description": "2D architectural drawing generation from IFC models - section cuts, floor plans, and elevations"
+    },
+    {
+      "name": "@ifc-lite/embed-protocol",
+      "local": "1.15.0",
+      "production_pin_17Oct": "1.15.0",
+      "web_info_19Oct": "1.15.0",
+      "status": "same_version",
+      "description": "Shared postMessage protocol types for ifc-lite embed viewer and SDK"
+    },
+    {
+      "name": "@ifc-lite/embed-sdk",
+      "local": "1.15.0",
+      "production_pin_17Oct": "1.15.1",
+      "web_info_19Oct": "1.15.1",
+      "status": "different_version",
+      "description": "SDK for embedding the IFC-Lite 3D viewer in any web page via iframe"
+    },
+    {
+      "name": "@ifc-lite/encoding",
+      "local": "2.3.0",
+      "production_pin_17Oct": "2.3.0",
+      "web_info_19Oct": "2.3.0",
+      "status": "same_version",
+      "description": "IFC string encoding/decoding and property value parsing for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/export",
+      "local": "4.11.0",
+      "production_pin_17Oct": "4.11.0",
+      "web_info_19Oct": "4.11.0",
+      "status": "same_version",
+      "description": "Export formats for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/extensions",
+      "local": "0.10.1",
+      "production_pin_17Oct": "0.11.0",
+      "web_info_19Oct": "0.11.0",
+      "status": "different_version",
+      "description": "Extension manifest, capability grammar, and slot registry for ifc-lite user customization"
+    },
+    {
+      "name": "@ifc-lite/flow",
+      "local": "0.5.0",
+      "production_pin_17Oct": "0.7.0",
+      "web_info_19Oct": "0.7.0",
+      "status": "different_version",
+      "description": "Keyed-data graph runtime for BIM workflows: typed ports, item/list/group lifting, memoised evaluation, and element tracking for re-runnable graphs"
+    },
+    {
+      "name": "@ifc-lite/flow-nodes",
+      "local": "0.6.0",
+      "production_pin_17Oct": "0.10.0",
+      "web_info_19Oct": "0.10.0",
+      "status": "different_version",
+      "description": "Standard node library for @ifc-lite/flow over the ifc-lite SDK: model reads and writes, tables, viewer, and a sandboxed Script node"
+    },
+    {
+      "name": "@ifc-lite/geometry",
+      "local": "7.8.1",
+      "production_pin_17Oct": "7.8.1",
+      "web_info_19Oct": "7.8.1",
+      "status": "same_version",
+      "description": "Geometry processing bridge for IFC-Lite - exact-arithmetic CSG, streamed across workers"
+    },
+    {
+      "name": "@ifc-lite/ids",
+      "local": "3.2.0",
+      "production_pin_17Oct": "3.3.6",
+      "web_info_19Oct": "3.3.6",
+      "status": "different_version",
+      "description": "IDS (Information Delivery Specification) support for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/ids-agent",
+      "local": null,
+      "production_pin_17Oct": "0.2.6",
+      "web_info_19Oct": "0.2.6",
+      "status": "missing_locally",
+      "description": "Headless IDS authoring agent: a tool-calling loop over the IDS Studio op vocabulary, grounded by the gate, producing reviewable proposals"
+    },
+    {
+      "name": "@ifc-lite/ids-authoring",
+      "local": null,
+      "production_pin_17Oct": "0.2.6",
+      "web_info_19Oct": "0.2.6",
+      "status": "missing_locally",
+      "description": "Headless IDS authoring core: Studio document with stable node ids, typed invertible operations, a grounding gate against the IFC schema tables, history, sidecar and re-identification"
+    },
+    {
+      "name": "@ifc-lite/ifcx",
+      "local": "4.4.0",
+      "production_pin_17Oct": "4.4.0",
+      "web_info_19Oct": "4.4.0",
+      "status": "same_version",
+      "description": "IFC5 (IFCX) parser for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/lens",
+      "local": "2.1.0",
+      "production_pin_17Oct": "2.2.0",
+      "web_info_19Oct": "2.2.0",
+      "status": "different_version",
+      "description": "Rule-based 3D filtering and colorization for IFC models"
+    },
+    {
+      "name": "@ifc-lite/lists",
+      "local": "3.0.1",
+      "production_pin_17Oct": "3.1.7",
+      "web_info_19Oct": "3.1.7",
+      "status": "different_version",
+      "description": "Configurable property tables and schedules from IFC data for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/load-trace",
+      "local": "0.3.0",
+      "production_pin_17Oct": "0.3.0",
+      "web_info_19Oct": "0.3.0",
+      "status": "same_version",
+      "description": "Dependency-free load-trace spans: performance.measure plus a per-load, cross-thread span tree with worker clock alignment and Chrome-trace export"
+    },
+    {
+      "name": "@ifc-lite/mcp",
+      "local": "0.23.0",
+      "production_pin_17Oct": "0.27.0",
+      "web_info_19Oct": "0.27.0",
+      "status": "different_version",
+      "description": "Model Context Protocol server for ifc-lite — agent-native BIM via MCP (stdio + Streamable HTTP)"
+    },
+    {
+      "name": "@ifc-lite/merge",
+      "local": "0.4.7",
+      "production_pin_17Oct": "0.4.7",
+      "web_info_19Oct": "0.4.7",
+      "status": "same_version",
+      "description": "Three-way merge engine for IFCX layers — MergePlan with auto-merged ops and explicit conflict records, merge-layer emission, rebase, and revert."
+    },
+    {
+      "name": "@ifc-lite/mutations",
+      "local": "3.2.0",
+      "production_pin_17Oct": "3.2.0",
+      "web_info_19Oct": "3.2.0",
+      "status": "same_version",
+      "description": "Mutation tracking and property editing for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/oauth-pkce",
+      "local": "0.2.0",
+      "production_pin_17Oct": "0.3.0",
+      "web_info_19Oct": "0.3.0",
+      "status": "different_version",
+      "description": "Browser OAuth 2.0 Authorization Code + PKCE flow, shared by ifc-lite's file-source providers"
+    },
+    {
+      "name": "@ifc-lite/opencde-foundation",
+      "local": "0.2.0",
+      "production_pin_17Oct": "0.3.0",
+      "web_info_19Oct": "0.3.0",
+      "status": "different_version",
+      "description": "buildingSMART OpenCDE Foundation API client: version discovery, auth discovery, OAuth2 flows and the shared HTTP client used by every OpenCDE service client"
+    },
+    {
+      "name": "@ifc-lite/parser",
+      "local": "9.5.1",
+      "production_pin_17Oct": "9.5.1",
+      "web_info_19Oct": "9.5.1",
+      "status": "same_version",
+      "description": "IFC/STEP parser for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/plugin-api",
+      "local": "0.4.0",
+      "production_pin_17Oct": "0.5.0",
+      "web_info_19Oct": "0.5.0",
+      "status": "different_version",
+      "description": "Dependency-free type surface for ifc-lite file-source plugins"
+    },
+    {
+      "name": "@ifc-lite/pointcloud",
+      "local": "0.12.0",
+      "production_pin_17Oct": "0.12.0",
+      "web_info_19Oct": "0.12.0",
+      "status": "same_version",
+      "description": "Point cloud decoders and types for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/provenance",
+      "local": "0.2.0",
+      "production_pin_17Oct": "0.2.0",
+      "web_info_19Oct": "0.2.0",
+      "status": "same_version",
+      "description": "Canonical node-hash specification and certificate library for proof-carrying model changes."
+    },
+    {
+      "name": "@ifc-lite/query",
+      "local": "2.5.2",
+      "production_pin_17Oct": "2.5.2",
+      "web_info_19Oct": "2.5.2",
+      "status": "same_version",
+      "description": "Query system for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/regex-guard",
+      "local": "0.3.0",
+      "production_pin_17Oct": "0.3.0",
+      "web_info_19Oct": "0.3.0",
+      "status": "same_version",
+      "description": "A shared, dependency-free guard against catastrophic-backtracking (ReDoS) regex patterns compiled from untrusted input"
+    },
+    {
+      "name": "@ifc-lite/renderer",
+      "local": "6.4.0",
+      "production_pin_17Oct": "6.4.0",
+      "web_info_19Oct": "6.4.0",
+      "status": "same_version",
+      "description": "WebGPU renderer for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/report-contract",
+      "local": null,
+      "production_pin_17Oct": "0.1.0",
+      "web_info_19Oct": "0.1.0",
+      "status": "missing_locally",
+      "description": "Shared reviewed error report protocol"
+    },
+    {
+      "name": "@ifc-lite/rules",
+      "local": "0.6.0",
+      "production_pin_17Oct": "0.7.7",
+      "web_info_19Oct": "0.7.7",
+      "status": "different_version",
+      "description": "Filter-rule vocabulary, evaluator and .rules.json information-validation engine for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/sandbox",
+      "local": "2.10.0",
+      "production_pin_17Oct": "2.12.0",
+      "web_info_19Oct": "2.12.0",
+      "status": "different_version",
+      "description": "QuickJS-in-WASM sandboxed script execution for ifc-lite"
+    },
+    {
+      "name": "@ifc-lite/sdk",
+      "local": "9.0.0",
+      "production_pin_17Oct": "9.5.0",
+      "web_info_19Oct": "9.5.0",
+      "status": "different_version",
+      "description": "Scripting SDK for ifc-lite — the bim.* API for BIM automation"
+    },
+    {
+      "name": "@ifc-lite/semantic",
+      "local": null,
+      "production_pin_17Oct": "0.2.1",
+      "web_info_19Oct": "0.2.1",
+      "status": "missing_locally",
+      "description": "Portable semantic datasets, profiles, validation and IFC identity resolution"
+    },
+    {
+      "name": "@ifc-lite/server-bin",
+      "local": "2.0.0",
+      "production_pin_17Oct": "2.0.1",
+      "web_info_19Oct": "2.0.1",
+      "status": "different_version",
+      "description": "Pre-built IFC-Lite server binary - run without Docker or Rust"
+    },
+    {
+      "name": "@ifc-lite/server-client",
+      "local": "4.0.0",
+      "production_pin_17Oct": "4.0.1",
+      "web_info_19Oct": "4.0.1",
+      "status": "different_version",
+      "description": "TypeScript client SDK for IFC-Lite Server"
+    },
+    {
+      "name": "@ifc-lite/solar",
+      "local": "1.15.5",
+      "production_pin_17Oct": "1.15.5",
+      "web_info_19Oct": "1.15.5",
+      "status": "same_version",
+      "description": "Solar position, sunrise/sunset and 3D sun-path geometry for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/source-autodesk",
+      "local": null,
+      "production_pin_17Oct": "0.2.1",
+      "web_info_19Oct": "0.2.1",
+      "status": "missing_locally",
+      "description": "Autodesk Forma and Data Exchange cloud-source provider for ifc-lite"
+    },
+    {
+      "name": "@ifc-lite/source-dalux",
+      "local": "0.4.0",
+      "production_pin_17Oct": "0.4.1",
+      "web_info_19Oct": "0.4.1",
+      "status": "different_version",
+      "description": "Dalux Build (Box) file-source provider for ifc-lite"
+    },
+    {
+      "name": "@ifc-lite/source-dropbox",
+      "local": "0.3.0",
+      "production_pin_17Oct": "0.4.0",
+      "web_info_19Oct": "0.4.0",
+      "status": "different_version",
+      "description": "Dropbox file-source provider for ifc-lite"
+    },
+    {
+      "name": "@ifc-lite/source-fixture",
+      "local": "0.3.0",
+      "production_pin_17Oct": "0.3.1",
+      "web_info_19Oct": "0.3.1",
+      "status": "different_version",
+      "description": "In-memory FileSourceProvider fixture and conformance test kit for ifc-lite file-source plugins"
+    },
+    {
+      "name": "@ifc-lite/source-msgraph",
+      "local": "0.3.0",
+      "production_pin_17Oct": "0.4.0",
+      "web_info_19Oct": "0.4.0",
+      "status": "different_version",
+      "description": "Microsoft Graph file-source provider for the signed-in user's own OneDrive"
+    },
+    {
+      "name": "@ifc-lite/spatial",
+      "local": "1.15.0",
+      "production_pin_17Oct": "1.15.0",
+      "web_info_19Oct": "1.15.0",
+      "status": "same_version",
+      "description": "Spatial indexing for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/timing-ladder",
+      "local": "0.1.0",
+      "production_pin_17Oct": "0.1.0",
+      "web_info_19Oct": "0.1.0",
+      "status": "same_version",
+      "description": "The shared doubling-size timing ladder used to pin that a decision stays linear on hostile input, measured in CPU time so contention on the runner cannot fake a failure"
+    },
+    {
+      "name": "@ifc-lite/viewer-core",
+      "local": "0.2.25",
+      "production_pin_17Oct": "0.2.26",
+      "web_info_19Oct": "0.2.26",
+      "status": "different_version",
+      "description": "Interactive 3D viewer for IFC models — WebGL 2 browser viewer with REST API"
+    },
+    {
+      "name": "@ifc-lite/wasm",
+      "local": "10.4.0",
+      "production_pin_17Oct": "10.4.0",
+      "web_info_19Oct": "10.4.0",
+      "status": "same_version",
+      "description": "WebAssembly bindings for IFC-Lite"
+    },
+    {
+      "name": "@ifc-lite/wasm-lifecycle",
+      "local": "0.2.0",
+      "production_pin_17Oct": "0.2.0",
+      "web_info_19Oct": "0.2.0",
+      "status": "same_version",
+      "description": "Shared WASM engine load-retry classification and cross-realm panic-forwarding, used by @ifc-lite/geometry and @ifc-lite/parser"
+    },
+    {
+      "name": "@ifc-lite/world-frame-fixtures",
+      "local": "0.1.4",
+      "production_pin_17Oct": "0.1.4",
+      "web_info_19Oct": "0.1.4",
+      "status": "same_version",
+      "description": "World-frame test fixture corpus: per-element RTC origins, far-from-origin coordinates, and the normal-projected f32 noise bound they demand"
+    },
+    {
+      "name": "create-ifc-lite",
+      "local": "1.15.0",
+      "production_pin_17Oct": "1.15.1",
+      "web_info_19Oct": "1.15.1",
+      "status": "different_version",
+      "description": "Create IFC-Lite projects with one command"
+    }
+  ]
+}

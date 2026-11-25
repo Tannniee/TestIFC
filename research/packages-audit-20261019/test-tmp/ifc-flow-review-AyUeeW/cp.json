@@ -1,0 +1,166 @@
+{
+  "revision": 1,
+  "checkpoint": {
+    "version": 1,
+    "id": "24546580-38a0-4ce8-bcb4-034ad6e22117",
+    "graphId": "example-ai-wall-roles",
+    "graphName": "AI wall roles (reviewed)",
+    "graphDigest": "2b5602104716287682bb9ab0c5f1f813d1b560e0ace9b7d6eeca2e8ec34c388f",
+    "sourceDigest": "sha256:a2e088d6c7a07ea7d3498ed494ae4070e9989a5ceac9eb6e2d69184a81e78e41",
+    "reviewNodes": [
+      "roles"
+    ],
+    "proposalDigest": "baba26ebe18fd6bc7e1f3949b396b81ba561c269032f3a1c51ad22d857374a64",
+    "outputs": {
+      "walls": {
+        "entities": {
+          "kind": "list",
+          "items": [
+            {
+              "globalId": "1AQAupaRP1txwK1AGiN61V",
+              "modelId": "default",
+              "expressId": 262
+            },
+            {
+              "globalId": "3wdauVJT5Fx9drrREiDqA$",
+              "modelId": "default",
+              "expressId": 291
+            },
+            {
+              "globalId": "0OfZwWc8j9QP5uX8xPTxDH",
+              "modelId": "default",
+              "expressId": 315
+            },
+            {
+              "globalId": "1uS5vfZPn9R8PlAaVd73on",
+              "modelId": "default",
+              "expressId": 353
+            }
+          ]
+        }
+      },
+      "table": {
+        "table": {
+          "kind": "item",
+          "value": {
+            "columns": [
+              {
+                "name": "GlobalId",
+                "type": "identifier"
+              },
+              {
+                "name": "Name",
+                "type": "label"
+              },
+              {
+                "name": "Pset_WallCommon.IsExternal",
+                "type": "boolean",
+                "binding": {
+                  "pset": "Pset_WallCommon",
+                  "prop": "IsExternal"
+                }
+              }
+            ],
+            "rows": [
+              {
+                "GlobalId": "1AQAupaRP1txwK1AGiN61V",
+                "Name": "house - outer wall - house right front",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "3wdauVJT5Fx9drrREiDqA$",
+                "Name": "house - outer wall - house right back",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "0OfZwWc8j9QP5uX8xPTxDH",
+                "Name": "house - outer wall - house left",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "1uS5vfZPn9R8PlAaVd73on",
+                "Name": "plumbing wall",
+                "Pset_WallCommon.IsExternal": false
+              }
+            ],
+            "key": "GlobalId"
+          }
+        }
+      },
+      "roles": {
+        "table": {
+          "kind": "item",
+          "value": {
+            "key": "key",
+            "columns": [
+              {
+                "name": "key",
+                "type": "identifier"
+              },
+              {
+                "name": "label",
+                "type": "label"
+              },
+              {
+                "name": "evidence",
+                "type": "text"
+              },
+              {
+                "name": "outcome",
+                "type": "enum"
+              }
+            ],
+            "rows": [
+              {
+                "key": "1AQAupaRP1txwK1AGiN61V",
+                "label": "Facade",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              },
+              {
+                "key": "3wdauVJT5Fx9drrREiDqA$",
+                "label": "Facade",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              },
+              {
+                "key": "0OfZwWc8j9QP5uX8xPTxDH",
+                "label": null,
+                "evidence": "",
+                "outcome": "not-sent"
+              },
+              {
+                "key": "1uS5vfZPn9R8PlAaVd73on",
+                "label": null,
+                "evidence": "",
+                "outcome": "not-sent"
+              }
+            ]
+          }
+        },
+        "coverage": {
+          "kind": "item",
+          "value": {
+            "model": "stand-in/model",
+            "categoriesVersion": "wall-roles-1",
+            "rows": 4,
+            "requests": 2,
+            "classified": 2,
+            "unknown": 0,
+            "failed": 0,
+            "notSent": 2
+          }
+        }
+      }
+    },
+    "budget": {
+      "maxRequests": 2,
+      "maxOutputTokens": 24000,
+      "requests": 2,
+      "outputTokens": 80
+    },
+    "state": "prepared",
+    "createdAt": 1792401326151,
+    "updatedAt": 1792401326151
+  }
+}

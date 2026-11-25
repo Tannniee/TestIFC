@@ -1,0 +1,18 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-nhip-geometry-20261026-r5\\IFC-Lite.exe",
+  "model": "F:/Working/IFC Temp/Nhip chinh.ifc",
+  "port": 64921,
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-svd-fps-7d30hn",
+  "pid": 25044,
+  "started": "2026-10-26T11:56:37.779Z",
+  "sha256": "551b949fcec353ea5d08877e1c538793857ab005d5467986b02ab3cff86442a7",
+  "environment": {
+    "native": true,
+    "dpr": 1.5,
+    "width": 1440,
+    "height": 960,
+    "visibility": "visible",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+    "fastView": false
+  }
+}

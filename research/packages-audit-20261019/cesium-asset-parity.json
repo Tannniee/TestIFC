@@ -1,0 +1,11 @@
+{
+  "source": "F:\\Steel\\VBA\\IFC-Lite-Core104\\apps\\viewer\\node_modules\\cesium\\Build\\Cesium",
+  "destination": "F:\\Steel\\VBA\\IFC-Lite-Core104\\apps\\viewer\\dist\\cesium",
+  "file_counts": {
+    "Workers": 110,
+    "ThirdParty": 7,
+    "Assets": 205,
+    "Widgets": 67
+  },
+  "mismatches": []
+}

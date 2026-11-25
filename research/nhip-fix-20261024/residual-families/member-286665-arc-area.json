@@ -1,0 +1,49 @@
+{
+  "exactArcAreaM2": 5.501212666648601,
+  "reproducedNativePolygonAreaM2": 5.500533428423491,
+  "occProfilePolygonAreaM2": 5.500854104994387,
+  "occProfileVertices": 52,
+  "arcs": [
+    {
+      "radiusM": 0.19999998715840114,
+      "sweepRadians": 1.5708031052338622,
+      "nativeSegments": 9,
+      "nativeChordDeviationM": 0.0007610668970193532,
+      "nativeAreaDeficitM2": 0.00015925659500262056
+    },
+    {
+      "radiusM": 0.1999999871533602,
+      "sweepRadians": 1.5707964552612936,
+      "nativeSegments": 9,
+      "nativeChordDeviationM": 0.0007610604571720473,
+      "nativeAreaDeficitM2": 0.00015925457442547364
+    },
+    {
+      "radiusM": 0.19999998715336884,
+      "sweepRadians": 1.570796455261216,
+      "nativeSegments": 9,
+      "nativeChordDeviationM": 0.0007610604571719914,
+      "nativeAreaDeficitM2": 0.00015925457442546515
+    },
+    {
+      "radiusM": 0.19999998715810816,
+      "sweepRadians": 1.570789805235084,
+      "nativeSegments": 8,
+      "nativeChordDeviationM": 0.0009630466134324129,
+      "nativeAreaDeficitM2": 0.00020147248125603853
+    }
+  ],
+  "hostAxisCosine": 0.999999999948493,
+  "analyticStockVolumeM3": 0.18183346921216,
+  "exactFirstCutMaterialVolumeM3": 0.09381406654124877,
+  "nativePolygonFirstCutMaterialVolumeM3": 0.0938249343528511,
+  "occPolygonFirstCutMaterialVolumeM3": 0.0938198035277165,
+  "nativeMinusOccPolygonVolumeM3": 5.130825134594326e-06,
+  "nativeMinusExactVolumeM3": 1.086781160231553e-05,
+  "occMinusExactVolumeM3": 5.736986467721204e-06,
+  "actualNativeCutterTriangles": 152,
+  "actualNativeCutterVolumeM3": 0.16501602144894237,
+  "actualNativeProfilePolygonAreaM2": 5.500534048298079,
+  "actualNativeMinusOccMaterialVolumeM3": 5.120907141184157e-06,
+  "actualNativeMinusExactMaterialVolumeM3": 1.0857893608905363e-05
+}

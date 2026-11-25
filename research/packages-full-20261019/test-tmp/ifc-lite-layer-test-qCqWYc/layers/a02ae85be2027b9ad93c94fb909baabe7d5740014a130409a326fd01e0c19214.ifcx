@@ -1,0 +1,38 @@
+{
+  "header": {
+    "id": "blake3:a02ae85be2027b9ad93c94fb909baabe7d5740014a130409a326fd01e0c19214",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "bob"
+      },
+      "intent": "First edit",
+      "created": "2026-10-19T03:18:18.950Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:c76bdf6a4e808338aaca6f0dbe5912b80688719a56f97c7b530671571d8cee96"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI90"
+      }
+    }
+  ]
+}

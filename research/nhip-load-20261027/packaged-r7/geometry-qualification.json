@@ -1,0 +1,88 @@
+{
+  "error": null,
+  "loading": false,
+  "loadPath": "native",
+  "modelName": "Nhip chinh.ifc",
+  "coordinateInfo": {
+    "originShift": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "shiftedBounds": {
+      "min": {
+        "x": -54.917145136860206,
+        "y": -5,
+        "z": -428.1815185546875
+      },
+      "max": {
+        "x": 701.2176513671875,
+        "y": 74.88772583007812,
+        "z": 0.000009126262739300728
+      }
+    },
+    "originalBounds": {
+      "min": {
+        "x": 563182.1394148731,
+        "y": -5,
+        "z": -1100788.8688685647
+      },
+      "max": {
+        "x": 563938.2742113771,
+        "y": 74.88772583007812,
+        "z": -1100360.6873408838
+      }
+    },
+    "hasLargeCoordinates": false,
+    "lengthUnitScale": 0.001,
+    "buildingRotation": 0.42785655784873866,
+    "wasmRtcFrame": {
+      "x": 563237.05656001,
+      "y": 1100360.68735001,
+      "z": 0,
+      "needsShift": true
+    },
+    "wasmRtcOffset": {
+      "x": 563237.05656001,
+      "y": 1100360.68735001,
+      "z": 0
+    }
+  },
+  "idOffset": 0,
+  "diagnostics": null,
+  "renderer": {
+    "calls": 3070,
+    "skips": 0,
+    "errors": 0,
+    "lastError": "",
+    "batches": 1384,
+    "meshes": 0,
+    "contextOk": true,
+    "gpuErrors": 0,
+    "lastGpuError": "",
+    "camPos": "1178.6,749.6,641.4",
+    "camTgt": "322.6,36.3,-214.7",
+    "bounds": "-55..701 -5..76 -428..0"
+  },
+  "frame": {
+    "drawCalls": 1674,
+    "batchesDrawn": 1378,
+    "batchesFrustumCulled": 0,
+    "batchesContributionCulled": 6,
+    "batchesNotResident": 0,
+    "batchesAtLod1": 1130,
+    "instancedDrawn": 296,
+    "instancedFrustumCulled": 0,
+    "instancedContributionCulled": 6652,
+    "timestamp": 419779.42999999225
+  },
+  "gpuBudget": 2147483648,
+  "hostBudget": 3221225472,
+  "pendingRestores": false,
+  "meshCount": 857930,
+  "visibility": {
+    "document": "visible",
+    "focus": true
+  },
+  "geometryDifferences": []
+}

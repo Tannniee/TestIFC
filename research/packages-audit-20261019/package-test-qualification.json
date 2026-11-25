@@ -1,0 +1,641 @@
+{
+  "initial_sweep": {
+    "summary": ".turbo/runs/3KuKkEDSBib3sBKF5lm0GcEIDdh.json",
+    "successful_tasks": 61,
+    "total_tasks": 62,
+    "tool_version": "10.8.1",
+    "packages": {
+      "@ifc-lite/codegen": {
+        "passed": 143,
+        "failed": 0,
+        "skipped": 1
+      },
+      "@ifc-lite/source-msgraph": {
+        "passed": 73,
+        "failed": 0,
+        "skipped": 5
+      },
+      "@ifc-lite/embed-sdk": {
+        "passed": 74,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/source-dropbox": {
+        "passed": 80,
+        "failed": 0,
+        "skipped": 2
+      },
+      "@ifc-lite/semantic": {
+        "passed": 84,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/spatial": {
+        "passed": 72,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/rules": {
+        "passed": 476,
+        "failed": 0,
+        "skipped": 1
+      },
+      "@ifc-lite/create": {
+        "passed": 1597,
+        "failed": 0,
+        "skipped": 14
+      },
+      "@ifc-lite/embed-protocol": {
+        "passed": 22,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/solar": {
+        "passed": 43,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/mcp": {
+        "passed": 735,
+        "failed": 0,
+        "skipped": 5
+      },
+      "@ifc-lite/oauth-pkce": {
+        "passed": 89,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/export": {
+        "passed": 1767,
+        "failed": 0,
+        "skipped": 52
+      },
+      "@ifc-lite/sandbox": {
+        "passed": 280,
+        "failed": 0,
+        "skipped": 1
+      },
+      "@ifc-lite/source-dalux": {
+        "passed": 170,
+        "failed": 0,
+        "skipped": 12
+      },
+      "@ifc-lite/plugin-api": {
+        "passed": 66,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/viewer-core": {
+        "passed": 259,
+        "failed": 0,
+        "skipped": 0
+      },
+      "create-ifc-lite": {
+        "passed": 129,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/collab-server": {
+        "passed": 276,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/charts": {
+        "passed": 74,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/source-fixture": {
+        "passed": 198,
+        "failed": 0,
+        "skipped": 7
+      },
+      "@ifc-lite/timing-ladder": {
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/ifcx": {
+        "passed": 208,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/ids-authoring": {
+        "passed": 473,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/cli": {
+        "passed": 1471,
+        "failed": 0,
+        "skipped": 16
+      },
+      "@ifc-lite/parser": {
+        "passed": 2056,
+        "failed": 0,
+        "skipped": 8
+      },
+      "@ifc-lite/data": {
+        "passed": 379,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/drawing-2d": {
+        "passed": 561,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/world-frame-fixtures": {
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/lists": {
+        "passed": 267,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/server-client": {
+        "passed": 130,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/extensions": {
+        "passed": 885,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/wasm-lifecycle": {
+        "passed": 23,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/pointcloud": {
+        "passed": 341,
+        "failed": 0,
+        "skipped": 2
+      },
+      "@ifc-lite/regex-guard": {
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/flow-nodes": {
+        "passed": 248,
+        "failed": 0,
+        "skipped": 16
+      },
+      "@ifc-lite/ids": {
+        "passed": 1480,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/source-autodesk": {
+        "passed": 24,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/query": {
+        "passed": 324,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/ids-agent": {
+        "passed": 72,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/sdk": {
+        "passed": 444,
+        "failed": 0,
+        "skipped": 6
+      },
+      "@ifc-lite/documents-api": {
+        "passed": 21,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/bcf-api": {
+        "passed": 80,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/lens": {
+        "passed": 78,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/renderer": {
+        "passed": 2207,
+        "failed": 0,
+        "skipped": 2
+      },
+      "@ifc-lite/provenance": {
+        "passed": 269,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/load-trace": {
+        "passed": 32,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/server-bin": {
+        "passed": 77,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/report-contract": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/collab": {
+        "passed": 304,
+        "failed": 0,
+        "skipped": 2
+      },
+      "@ifc-lite/mutations": {
+        "passed": 369,
+        "failed": 1,
+        "skipped": 0
+      },
+      "@ifc-lite/clash": {
+        "passed": 561,
+        "failed": 0,
+        "skipped": 1
+      },
+      "@ifc-lite/ai": {
+        "passed": 72,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/geometry": {
+        "passed": 649,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/flow": {
+        "passed": 137,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/wasm": {
+        "passed": 14,
+        "failed": 0,
+        "skipped": 7
+      },
+      "@ifc-lite/bcf": {
+        "passed": 510,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/encoding": {
+        "passed": 126,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/opencde-foundation": {
+        "passed": 32,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/cache": {
+        "passed": 244,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/diff": {
+        "passed": 391,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/merge": {
+        "passed": 110,
+        "failed": 0,
+        "skipped": 4
+      }
+    }
+  },
+  "qualified_complete_suites": {
+    "coverage": "61 full suites from the initial sweep plus complete mutations370-case retake; not a single all-green62-task run",
+    "packages": {
+      "@ifc-lite/codegen": {
+        "passed": 143,
+        "failed": 0,
+        "skipped": 1
+      },
+      "@ifc-lite/source-msgraph": {
+        "passed": 73,
+        "failed": 0,
+        "skipped": 5
+      },
+      "@ifc-lite/embed-sdk": {
+        "passed": 74,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/source-dropbox": {
+        "passed": 80,
+        "failed": 0,
+        "skipped": 2
+      },
+      "@ifc-lite/semantic": {
+        "passed": 84,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/spatial": {
+        "passed": 72,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/rules": {
+        "passed": 476,
+        "failed": 0,
+        "skipped": 1
+      },
+      "@ifc-lite/create": {
+        "passed": 1599,
+        "failed": 0,
+        "skipped": 14,
+        "retake": "create-canonical-final.log",
+        "summary": ".turbo/runs/3KuOpu6hcURqO4JNcNV4uwsSjVS.json"
+      },
+      "@ifc-lite/embed-protocol": {
+        "passed": 22,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/solar": {
+        "passed": 43,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/mcp": {
+        "passed": 735,
+        "failed": 0,
+        "skipped": 5
+      },
+      "@ifc-lite/oauth-pkce": {
+        "passed": 89,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/export": {
+        "passed": 1767,
+        "failed": 0,
+        "skipped": 52
+      },
+      "@ifc-lite/sandbox": {
+        "passed": 280,
+        "failed": 0,
+        "skipped": 1
+      },
+      "@ifc-lite/source-dalux": {
+        "passed": 170,
+        "failed": 0,
+        "skipped": 12
+      },
+      "@ifc-lite/plugin-api": {
+        "passed": 66,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/viewer-core": {
+        "passed": 259,
+        "failed": 0,
+        "skipped": 0
+      },
+      "create-ifc-lite": {
+        "passed": 129,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/collab-server": {
+        "passed": 276,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/charts": {
+        "passed": 74,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/source-fixture": {
+        "passed": 198,
+        "failed": 0,
+        "skipped": 7
+      },
+      "@ifc-lite/timing-ladder": {
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/ifcx": {
+        "passed": 208,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/ids-authoring": {
+        "passed": 473,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/cli": {
+        "passed": 1471,
+        "failed": 0,
+        "skipped": 16
+      },
+      "@ifc-lite/parser": {
+        "passed": 2056,
+        "failed": 0,
+        "skipped": 8
+      },
+      "@ifc-lite/data": {
+        "passed": 379,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/drawing-2d": {
+        "passed": 561,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/world-frame-fixtures": {
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/lists": {
+        "passed": 267,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/server-client": {
+        "passed": 130,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/extensions": {
+        "passed": 885,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/wasm-lifecycle": {
+        "passed": 23,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/pointcloud": {
+        "passed": 341,
+        "failed": 0,
+        "skipped": 2
+      },
+      "@ifc-lite/regex-guard": {
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/flow-nodes": {
+        "passed": 248,
+        "failed": 0,
+        "skipped": 16
+      },
+      "@ifc-lite/ids": {
+        "passed": 1480,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/source-autodesk": {
+        "passed": 24,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/query": {
+        "passed": 324,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/ids-agent": {
+        "passed": 72,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/sdk": {
+        "passed": 444,
+        "failed": 0,
+        "skipped": 6
+      },
+      "@ifc-lite/documents-api": {
+        "passed": 21,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/bcf-api": {
+        "passed": 80,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/lens": {
+        "passed": 78,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/renderer": {
+        "passed": 2207,
+        "failed": 0,
+        "skipped": 2
+      },
+      "@ifc-lite/provenance": {
+        "passed": 269,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/load-trace": {
+        "passed": 32,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/server-bin": {
+        "passed": 77,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/report-contract": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/collab": {
+        "passed": 304,
+        "failed": 0,
+        "skipped": 2
+      },
+      "@ifc-lite/mutations": {
+        "passed": 370,
+        "failed": 0,
+        "skipped": 0,
+        "retake": "mutations-final.log"
+      },
+      "@ifc-lite/clash": {
+        "passed": 561,
+        "failed": 0,
+        "skipped": 1
+      },
+      "@ifc-lite/ai": {
+        "passed": 72,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/geometry": {
+        "passed": 649,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/flow": {
+        "passed": 137,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/wasm": {
+        "passed": 14,
+        "failed": 0,
+        "skipped": 7
+      },
+      "@ifc-lite/bcf": {
+        "passed": 510,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/encoding": {
+        "passed": 126,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/opencde-foundation": {
+        "passed": 32,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/cache": {
+        "passed": 244,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/diff": {
+        "passed": 391,
+        "failed": 0,
+        "skipped": 0
+      },
+      "@ifc-lite/merge": {
+        "passed": 110,
+        "failed": 0,
+        "skipped": 4
+      }
+    },
+    "passed": 22410,
+    "failed": 0,
+    "conditional_skips": 164
+  }
+}

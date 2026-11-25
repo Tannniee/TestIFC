@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-20T02:39:10.133Z",
+  "mode": "inspect",
+  "repo": "Tannniee/TestIFC",
+  "default_branch": "main",
+  "admin": true,
+  "before": {
+    "enabled": false,
+    "sha_pinning_required": false
+  },
+  "permissions": {
+    "enabled": false,
+    "sha_pinning_required": false
+  },
+  "rulesets": [],
+  "totalRuns": 3,
+  "runs": [
+    {
+      "id": 33705676795,
+      "head_sha": "c4ce6d88e3a969cfbb02c263a10e6b8641d3ad47",
+      "status": "completed",
+      "conclusion": "success",
+      "event": "push",
+      "created_at": "2026-09-03T01:56:38Z"
+    },
+    {
+      "id": 33644188901,
+      "head_sha": "0aa9684e6dec9d3e3196a9fbc626f0b4457fcf36",
+      "status": "completed",
+      "conclusion": "success",
+      "event": "push",
+      "created_at": "2026-09-02T14:45:59Z"
+    },
+    {
+      "id": 33534863567,
+      "head_sha": "609291ca680a0221c092a41fe3b55e6552561908",
+      "status": "completed",
+      "conclusion": "success",
+      "event": "push",
+      "created_at": "2026-09-01T16:57:02Z"
+    }
+  ]
+}

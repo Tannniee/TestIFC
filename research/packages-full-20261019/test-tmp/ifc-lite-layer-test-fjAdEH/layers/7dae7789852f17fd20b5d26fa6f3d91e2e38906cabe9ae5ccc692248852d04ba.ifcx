@@ -1,0 +1,38 @@
+{
+  "header": {
+    "id": "blake3:7dae7789852f17fd20b5d26fa6f3d91e2e38906cabe9ae5ccc692248852d04ba",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "agent",
+        "principal": "bob"
+      },
+      "intent": "Bump fire rating",
+      "created": "2026-10-19T03:35:33.023Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:1019d716e06d293993fb20cd11e494bd7d6dcb5b33486ad5f6ab078aacf32dc4"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI120"
+      }
+    }
+  ]
+}

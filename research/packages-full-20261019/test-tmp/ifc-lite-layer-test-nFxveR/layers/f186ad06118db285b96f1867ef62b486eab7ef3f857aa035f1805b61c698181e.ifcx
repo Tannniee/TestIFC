@@ -1,0 +1,36 @@
+{
+  "header": {
+    "id": "blake3:f186ad06118db285b96f1867ef62b486eab7ef3f857aa035f1805b61c698181e",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "bob"
+      },
+      "intent": "second",
+      "created": "2026-10-19T03:20:19.814Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:f3e6d301841f994ef7a5fc113b48e7d5ca8b39dadccf00d6aa1c5816d7ad83e9"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {}
+    }
+  ]
+}

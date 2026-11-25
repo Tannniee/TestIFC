@@ -1,0 +1,50 @@
+[
+  {
+    "count": 0,
+    "lastId": null,
+    "volume": 0.03424331696859635,
+    "triangles": 124
+  },
+  {
+    "count": 1,
+    "lastId": 490765,
+    "volume": 0.025197672539435955,
+    "triangles": 336
+  },
+  {
+    "count": 2,
+    "lastId": 490771,
+    "volume": 0.02502746828742408,
+    "triangles": 412
+  },
+  {
+    "count": 3,
+    "lastId": 490775,
+    "volume": 0.02485726345833346,
+    "triangles": 484
+  },
+  {
+    "count": 4,
+    "lastId": 490779,
+    "volume": 0.024687013161317817,
+    "triangles": 558
+  },
+  {
+    "count": 5,
+    "lastId": 490783,
+    "volume": 0.024516808345915755,
+    "triangles": 630
+  },
+  {
+    "count": 6,
+    "lastId": 490787,
+    "volume": 0.02446302325756115,
+    "triangles": 704
+  },
+  {
+    "count": 7,
+    "lastId": 490791,
+    "volume": 0.024292965421886997,
+    "triangles": 776
+  }
+]

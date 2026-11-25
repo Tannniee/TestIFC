@@ -1,0 +1,1 @@
+{"format":"ifc-lite/lineage","version":1,"base":{"hash":"sha256:a"},"head":{"hash":"sha256:b"},"entries":[{"base":["w"],"head":["p0","p1"],"relation":"split","reason":"split:verified","shares":[0.7,0.3]},{"base":["r"],"head":["R"],"relation":"replaced","reason":"successor:footprint"}],"deleted":["x"]}

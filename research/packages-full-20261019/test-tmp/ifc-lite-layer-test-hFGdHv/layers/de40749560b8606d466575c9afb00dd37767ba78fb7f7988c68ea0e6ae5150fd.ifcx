@@ -1,0 +1,41 @@
+{
+  "header": {
+    "id": "blake3:de40749560b8606d466575c9afb00dd37767ba78fb7f7988c68ea0e6ae5150fd",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "agent",
+        "principal": "agent-1"
+      },
+      "intent": "Edit fire rating (and sneak in acoustics)",
+      "created": "2026-10-19T03:18:19.039Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:2c556557aed8ad0520428faaf5a3a8b64d044e1a40eb6d3f01b8b8432effa196"
+      },
+      "parents": [],
+      "scope_claim": [
+        "model.mutate:Pset_FireSafety*@IfcWall"
+      ],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI90",
+        "bsi::ifc::v5a::Pset_Acoustics::SoundRating": 42
+      }
+    }
+  ]
+}

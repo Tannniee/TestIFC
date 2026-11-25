@@ -1,0 +1,12 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('','',(''),(''),'','','');
+FILE_SCHEMA(('IFC4'));
+ENDSEC;
+DATA;
+#1=IFCOWNERHISTORY($,$,$,$,$,$,$,0);
+#2=IFCNOTAREALIFCTYPE('bogus');
+#10=IFCWALLSTANDARDCASE('wall-guid',#1,'Wall A',$,$,$,$,$);
+ENDSEC;
+END-ISO-10303-21;

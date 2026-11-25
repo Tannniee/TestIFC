@@ -1,0 +1,46 @@
+{
+  "header": {
+    "id": "blake3:ef2f8a3f7f69995775de71ffaaa06589b6fb1a05bf84a63aa66b7323880d4baa",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "alice"
+      },
+      "intent": "No local evidence",
+      "created": "2026-10-19T03:35:21.888Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:77111fa50ee703ae76284b47da695833f0cea0f087a9e5d985f53fbd2d2196d7"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [
+        {
+          "tool": "@ifc-lite/ids",
+          "spec": "s.ids",
+          "specDigest": "blake3:2b3319ecc63d2915acbbeab2df70dd2d06a239f4f7b46ffc6265740cdae85f11",
+          "result": "pass",
+          "report": "blake3:01f563c3c1db4d6cdff3b4600c68b02285784c88d7f8ee0b2e6ffc58b7c4c39a"
+        }
+      ],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI90"
+      }
+    }
+  ]
+}

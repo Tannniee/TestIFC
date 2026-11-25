@@ -1,0 +1,1 @@
+{"version":1,"name":"project named","rules":[{"id":"project-named","name":"Project must have a Name","applicability":{"groups":[{"rules":[{"kind":"ifcType","values":["IfcProject"],"op":"in"}],"combinator":"AND"}],"authoredAs":"chips"},"requirement":{"kind":"element","block":{"groups":[{"rules":[{"kind":"name","op":"ne","value":""}],"combinator":"AND"}],"authoredAs":"chips"}}}]}

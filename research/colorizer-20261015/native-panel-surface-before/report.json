@@ -1,0 +1,75 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-interactions-20261016-r2\\IFC-Lite.exe",
+  "model": "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-colorizer-ux-DHbnGY",
+  "assertions": [
+    {
+      "name": "quiet startup: no hierarchy, collapsed ribbon/sidebar, no welcome or privacy toast",
+      "evidence": {
+        "leftCollapsed": true,
+        "ribbonCollapsed": true,
+        "sidebarMode": "collapsed"
+      }
+    },
+    {
+      "name": "shared surface backgrounds",
+      "evidence": [
+        {
+          "id": "sources",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "zones",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "layers",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "loadReport",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "changes",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "cost",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "measurements",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "extensions",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "environment",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "pointclouds",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "model",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "changeSets",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "placement",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "ok": true
+}

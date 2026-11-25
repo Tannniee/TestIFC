@@ -1,0 +1,525 @@
+{
+  "wasmSha256": "73ee49f08ec3416f9ad3b3f0fe6096a8d94c5eef9bdca8a17afc100e600677e5",
+  "meshes": [
+    {
+      "id": 434,
+      "triangles": 100,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 1.5457985189390326
+    },
+    {
+      "id": 820,
+      "triangles": 92,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 1.2111552085720996
+    },
+    {
+      "id": 2361,
+      "triangles": 372,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.07249085437030851
+    },
+    {
+      "id": 2444,
+      "triangles": 2544,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.0704634875564385
+    },
+    {
+      "id": 10217,
+      "triangles": 3548,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.057175394514650923
+    },
+    {
+      "id": 15785,
+      "triangles": 3502,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.05717542730908892
+    },
+    {
+      "id": 64951,
+      "triangles": 2560,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.08933986167580117
+    },
+    {
+      "id": 89056,
+      "triangles": 3502,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.05717542730908892
+    },
+    {
+      "id": 150461,
+      "triangles": 2024,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.048099263622123474
+    },
+    {
+      "id": 152785,
+      "triangles": 2024,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.04809926351585906
+    },
+    {
+      "id": 178623,
+      "triangles": 3502,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.05717542619888475
+    },
+    {
+      "id": 178955,
+      "triangles": 70,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 609.9921723790718
+    },
+    {
+      "id": 198892,
+      "triangles": 3502,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.05717542321818122
+    },
+    {
+      "id": 248619,
+      "triangles": 3502,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.05717542620115539
+    },
+    {
+      "id": 257768,
+      "triangles": 436,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 245.50742070063805
+    },
+    {
+      "id": 258582,
+      "triangles": 436,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 245.5074220564576
+    },
+    {
+      "id": 258648,
+      "triangles": 436,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 245.5074222787979
+    },
+    {
+      "id": 266636,
+      "triangles": 104,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 2.623091728790263
+    },
+    {
+      "id": 281338,
+      "triangles": 3774,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.09226879359464042
+    },
+    {
+      "id": 286665,
+      "triangles": 4250,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.09051778875706092
+    },
+    {
+      "id": 286744,
+      "triangles": 4234,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.09091995667066516
+    },
+    {
+      "id": 286882,
+      "triangles": 4292,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.09163081631239905
+    },
+    {
+      "id": 286961,
+      "triangles": 4102,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.09198922147067266
+    },
+    {
+      "id": 287038,
+      "triangles": 3790,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.0922690579975961
+    },
+    {
+      "id": 292599,
+      "triangles": 3776,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.0905182194196461
+    },
+    {
+      "id": 298390,
+      "triangles": 2576,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.03447627586434522
+    },
+    {
+      "id": 303995,
+      "triangles": 2576,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.03447627585074988
+    },
+    {
+      "id": 304217,
+      "triangles": 2576,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.03447627584943685
+    },
+    {
+      "id": 322443,
+      "triangles": 104,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 2.6230906811173695
+    },
+    {
+      "id": 344051,
+      "triangles": 128,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 2.7621413398938355
+    },
+    {
+      "id": 448868,
+      "triangles": 2924,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.022491359714634413
+    },
+    {
+      "id": 460997,
+      "triangles": 2938,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02207124490591593
+    },
+    {
+      "id": 464047,
+      "triangles": 2926,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02228151506410471
+    },
+    {
+      "id": 471627,
+      "triangles": 1758,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021974203340369005
+    },
+    {
+      "id": 472872,
+      "triangles": 1780,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021541031793749735
+    },
+    {
+      "id": 473024,
+      "triangles": 1756,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021757813570554573
+    },
+    {
+      "id": 473164,
+      "triangles": 1744,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.022190541793664097
+    },
+    {
+      "id": 473277,
+      "triangles": 1736,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02240659213669531
+    },
+    {
+      "id": 473532,
+      "triangles": 1950,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.022695348010012665
+    },
+    {
+      "id": 473789,
+      "triangles": 1756,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021758622885013314
+    },
+    {
+      "id": 473865,
+      "triangles": 1758,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021975010616044417
+    },
+    {
+      "id": 490757,
+      "triangles": 1320,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.024179179334918758
+    },
+    {
+      "id": 566424,
+      "triangles": 172,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.014651509050287526
+    },
+    {
+      "id": 615144,
+      "triangles": 228,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.01465776757011219
+    },
+    {
+      "id": 618305,
+      "triangles": 166,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.014624060675698235
+    },
+    {
+      "id": 647471,
+      "triangles": 228,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.014657760750601953
+    },
+    {
+      "id": 665548,
+      "triangles": 228,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.014657767570500363
+    },
+    {
+      "id": 679523,
+      "triangles": 174,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.014641394412069858
+    },
+    {
+      "id": 704523,
+      "triangles": 228,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.014657765874376586
+    },
+    {
+      "id": 714937,
+      "triangles": 120,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.014621149706648559
+    },
+    {
+      "id": 725690,
+      "triangles": 172,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.014651517064935443
+    },
+    {
+      "id": 809515,
+      "triangles": 2956,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02165136682113984
+    },
+    {
+      "id": 817569,
+      "triangles": 2956,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02165136682113984
+    },
+    {
+      "id": 818684,
+      "triangles": 2940,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021231239817213532
+    },
+    {
+      "id": 824437,
+      "triangles": 1756,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021435332584493805
+    },
+    {
+      "id": 825013,
+      "triangles": 2956,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02165136682113984
+    },
+    {
+      "id": 830064,
+      "triangles": 1756,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02143533432341894
+    },
+    {
+      "id": 831471,
+      "triangles": 2790,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02143533094804441
+    },
+    {
+      "id": 831549,
+      "triangles": 2940,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021231244805046068
+    },
+    {
+      "id": 836117,
+      "triangles": 2954,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021651366797862292
+    },
+    {
+      "id": 836248,
+      "triangles": 1756,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021435334323358635
+    },
+    {
+      "id": 837397,
+      "triangles": 2940,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.021231244823329873
+    },
+    {
+      "id": 842718,
+      "triangles": 2790,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02143533094804441
+    },
+    {
+      "id": 845196,
+      "triangles": 2926,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.022281515127204013
+    },
+    {
+      "id": 845414,
+      "triangles": 2942,
+      "badEdges": 0,
+      "directedMismatch": 0,
+      "collapsedTriangles": 0,
+      "volumeM3": 0.02165135685088559
+    }
+  ]
+}

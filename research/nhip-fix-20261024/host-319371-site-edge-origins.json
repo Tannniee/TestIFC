@@ -1,0 +1,57 @@
+[
+  {
+    "name": "edgeA",
+    "offsetM": [
+      -1.04915189743042,
+      -1.0190891027450562,
+      1.2800003290176392
+    ],
+    "collapsed": 58,
+    "splits": 0,
+    "badAfterExact": 0
+  },
+  {
+    "name": "edgeB",
+    "offsetM": [
+      -0.5876240134239197,
+      -1.1529558897018433,
+      1.0124714374542236
+    ],
+    "collapsed": 42,
+    "splits": 0,
+    "badAfterExact": 0
+  },
+  {
+    "name": "edgeMid",
+    "offsetM": [
+      -0.8183879554271698,
+      -1.0860224962234497,
+      1.1462358832359314
+    ],
+    "collapsed": 40,
+    "splits": 0,
+    "badAfterExact": 0
+  },
+  {
+    "name": "edgeXY",
+    "offsetM": [
+      -1.04915189743042,
+      -1.0190891027450562,
+      0.0
+    ],
+    "collapsed": 18,
+    "splits": 0,
+    "badAfterExact": 0
+  },
+  {
+    "name": "oneThird",
+    "offsetM": [
+      3.9736429850260414e-08,
+      3.9736429850260414e-08,
+      3.9736429850260414e-08
+    ],
+    "collapsed": 10,
+    "splits": 0,
+    "badAfterExact": 0
+  }
+]

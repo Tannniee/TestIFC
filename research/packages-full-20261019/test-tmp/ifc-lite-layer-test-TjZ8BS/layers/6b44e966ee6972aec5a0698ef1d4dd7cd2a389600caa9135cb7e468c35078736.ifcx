@@ -1,0 +1,46 @@
+{
+  "header": {
+    "id": "blake3:6b44e966ee6972aec5a0698ef1d4dd7cd2a389600caa9135cb7e468c35078736",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "alice"
+      },
+      "intent": "Bump fire rating",
+      "created": "2026-10-19T03:18:17.958Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:17f2917dbdddc6fcde2830e60bb6ff52ae0d27703acff948c7902d08be3bd5b2"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [
+        {
+          "tool": "@ifc-lite/ids",
+          "spec": "fire-safety.ids",
+          "specDigest": "blake3:2b3319ecc63d2915acbbeab2df70dd2d06a239f4f7b46ffc6265740cdae85f11",
+          "result": "pass",
+          "report": "blake3:01f563c3c1db4d6cdff3b4600c68b02285784c88d7f8ee0b2e6ffc58b7c4c39a"
+        }
+      ],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI90"
+      }
+    }
+  ]
+}

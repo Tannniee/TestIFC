@@ -1,0 +1,19 @@
+{
+  "format": "ifc-lite/identity-map",
+  "version": 1,
+  "base": {
+    "hash": "sha256:6ebbe9e9b3cee4d96aa8cb3dc344920b359ae689755b76a0a348f73589f46684",
+    "path": "F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\packages-full-20261019\\test-tmp\\ifclite-identity-sQsDwb\\v1.ifc"
+  },
+  "head": {
+    "hash": "sha256:ecb249313aaa8ce404545762b987a23248a8e575257d00cc57fe1bcad764bd2c",
+    "path": "F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\packages-full-20261019\\test-tmp\\ifclite-identity-sQsDwb\\v2.ifc"
+  },
+  "entries": [
+    {
+      "base": "OLDT000000000000000000",
+      "here": "NEWT000000000000000000",
+      "reason": "content-match:renamed"
+    }
+  ]
+}

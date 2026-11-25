@@ -1,0 +1,806 @@
+{
+  "base": "e79f27342beb01a6f30d9b63c44795ecd118f4de",
+  "target": "61d209288c1b117d405628ead302d0ee700bd2a0",
+  "starting_head": "c95361aa572694ecdd6f1e75c50e38b09d4bd593",
+  "already_integrated_core_packages": [
+    "@ifc-lite/codegen",
+    "@ifc-lite/data",
+    "@ifc-lite/encoding",
+    "@ifc-lite/export",
+    "@ifc-lite/geometry",
+    "@ifc-lite/ifcx",
+    "@ifc-lite/load-trace",
+    "@ifc-lite/mutations",
+    "@ifc-lite/parser",
+    "@ifc-lite/pointcloud",
+    "@ifc-lite/regex-guard",
+    "@ifc-lite/renderer",
+    "@ifc-lite/spatial",
+    "@ifc-lite/wasm",
+    "@ifc-lite/wasm-lifecycle"
+  ],
+  "target_packages": [],
+  "changes": [
+    {
+      "path": "apps/viewer/src/components/viewer/flow/FlowPanel.player-publish.test.tsx",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "2568e94496e9892070ca248eae2e1528a25be4ef7892607fb3ce0fe69a30e05b"
+    },
+    {
+      "path": "apps/viewer/src/components/viewer/flow/FlowPanel.tsx",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "b2f900e7c61a7e728e81f5e40b9add0b50b7e4456f14db26f7f557c93f4c5f1d"
+    },
+    {
+      "path": "apps/viewer/src/components/viewer/flow/FlowPublishButton.tsx",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "76f237c8ffcad1491cc216109d38f91c3eed525b13cb8e2f7923573ae96af47a"
+    },
+    {
+      "path": "apps/viewer/src/components/viewer/flow/FlowReviewCheckpoint.test.tsx",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "da3f80a7f53f31d189a42d3ba56f9b93711d9dfabeb4af3a68305b4ec8070cbf"
+    },
+    {
+      "path": "apps/viewer/src/components/viewer/flow/FlowReviewCheckpoint.tsx",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "93ad9f70c69c6ca183b3a840745da605c589e3d066ae50ee309cb505fa7c7385"
+    },
+    {
+      "path": "apps/viewer/src/components/viewer/flow/FlowValuePreview.tsx",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "8c62459a9228fd2ee8899eb4cc145492e00697fb53a149d045d69dfd35636d86"
+    },
+    {
+      "path": "apps/viewer/src/components/viewer/flow/useFlowRunner.session.test.tsx",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "a63f5e301d1a8eddadff68d79e3c24a8ad3f5d3899a51ca130bf34e35fd3fa4d"
+    },
+    {
+      "path": "apps/viewer/src/components/viewer/flow/useFlowRunner.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "04fef5d034370b07d30f6d5bcd34d1c158e9bffcb271c9e32bbada1934b3881f"
+    },
+    {
+      "path": "apps/viewer/src/hooks/ids/idsBcfExport.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "36977a712dfd7079268c49896c76846a5e1494f2c6674bf40a91d1b1977fcfea"
+    },
+    {
+      "path": "apps/viewer/src/hooks/ids/idsCorrectableRequirements.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "412dfec90959b41c21e5e8471736bda0507c7b97aaa6ca95b424233e90349cae"
+    },
+    {
+      "path": "apps/viewer/src/hooks/ids/idsCorrectionScale.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "2af1a5f67bdcd7af7cc17b5cfac3eb144dc31909fa35b01b0768e22ce164fadf"
+    },
+    {
+      "path": "apps/viewer/src/hooks/ids/idsWorkerClient.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "fc96232c671308d6d3ab8a6b7dfd1239a55ae0ed4195676944211e067586da24"
+    },
+    {
+      "path": "apps/viewer/src/hooks/ids/loadIdsContent.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "2b1427ae2886801c54a2a93309d4f839d80fde9d04157cf0512ba832ccbc9693"
+    },
+    {
+      "path": "apps/viewer/src/i18n/catalogues/flow-panel.en.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "b3ed8d80ab2f8705ebbc8529884503bf3b34b09869190bf59c127da10d1596a4"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/ai-host.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "184c7cb83308b9ff4b23e0f97a3d60454b84dc6badef7109c78f799e75824ae5"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/ai-propose.integration.test.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "bc28aab1da64f4d6e31517c14995910d8c06182ae68e2c449e69901d5c1f2cf7"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/artifact-lifetime.test.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "c311a7c1ed24e79f5b90808e919a6573e8ff7febb8eac03b93c4ce696c756cd8"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/automation-host.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "9256dfb4685dba2399a86c626d228a3a6dcb93cf6aed5126d10c382287879282"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/check-host.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "de5bde0f0cc3edd3cedbd3ff0a5a0967b463d43b8d62ad816e79d9bdf6e60622"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/checkpoint-store.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "e8a580c08f35f481733115f48834cd9cf2ab4de736ee362864f09fcec38d5d5f"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/coordination-walkthrough.test.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "95d1dabccd308995b6e0afb95b4fed197239f012a78e0dcd5c945c06c9dec1b3"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/examples.test.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "5f817f801fdbb5d131968a43a9bf220a561848f46fef984cc59ad702165c9fc7"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/examples.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "e9aedf3b5c5bc445883d2249b4c239b248fbae7641ffdc56e4dd630737ba4dcf"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/examples/09-coordination-walls.rules.json",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "66b7fbbac54346bec71ac56c68e11d5b881c504d8a2de2c0bc4fe7907e8af5f8"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/examples/10-ai-wall-roles.flow.json",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "32763ad695c916db90a13a54a3798f2c6ce6fb3b4ddaed43908fdc11f000baff"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/param-kinds.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "75ed35421b56186c948b77551fa588a0bbccbaf51520f96cdefdb90deb0f0fa2"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/portable-review-native.test.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "482a207dee0688607ca0c1990d747a2d96ee1c27b0b8f37dd25ddf21a68f8858"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/preflight.test.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "7846aa72aeffaa251dcd1f7d84d592af51e27f35122714c85cc8605d42fabb6c"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/preflight.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "03ab023b0036a66475f29535b7a317a06b9ae0631d9782abfb6eafe0b849161d"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/publish-provenance.test.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "cf6534adb5415e1c0bd8e50aad1b40b1057b82fb695b76a6b64aae5d864d7b81"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/publish-provenance.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "9b940d9a9515cc5a94e77444b081ef408ab4730f31b3f49b723c31c33cc2f374"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/report-provenance.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "b9ecd99c3240463d7cdd5d4940438ac62885af8b0b6ee3bf0cbb80e483a8f15e"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/report-retention.test.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "7f5b1a7f807b850516925a40289da805e1368f6c9209e91e7e5bc2bf3430357d"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/report-retention.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "b36682aaa68643070697929c1c61457c267dae377077cd769ec44bf50f35f7ca"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/review-acceptance.test.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "6133bd771890dfd229bdae18c32551b45ce7039ce7c0ed442f66a50efdcbdd96"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/review-session.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "49a7a55d15b39245fc9152457d180f8e1e837195c7d20e9054edb9c3a8eee20d"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/run-session.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "4557a06f9d94a709ec5f8d1254f32c0dcc77d5ced66978e9d540d20a39cd1b69"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/runner.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "0e854d5dc470b56e038883283cac29c83d22a790490ee4f026c31b5a4d087e5b"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/session-workflow.test.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "1d87d258a3a00b547e490a13dd3b1b992f19c8b7e0f61bf6d16d43872c7ae652"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/startup-preference.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "316d481e440a25bdc661d06a88890f0c8f0bd558c23b9792f1910978dddcfb43"
+    },
+    {
+      "path": "apps/viewer/src/lib/flow/upstream.ts",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "392fca3c334e141df00d52ba2ae280adf0d06ac8af32c5bed9f6c3a536f7d9d3"
+    },
+    {
+      "path": "apps/viewer/src/store/slices/flowSlice.test.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "d5f192cbffc1d837c828f57fcb55544a77c44aa0cdbd0a68f742139c110182de"
+    },
+    {
+      "path": "apps/viewer/src/store/slices/flowSlice.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "8c044db39b770e1fc3b0fc6e6d15595588bb48c7038b45c903a9676bdaee1a48"
+    },
+    {
+      "path": "apps/viewer/src/workers/idsValidation.worker.ts",
+      "strategy": "upstream",
+      "action": "modify",
+      "sha256": "63fc959e74b0bcf925390c00321f2add5d72f1ec03f52fb9830acf74d7064e6b"
+    },
+    {
+      "path": "docs/architecture/ids-studio/01-context/02-ids-llm-service-teardown.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "d9272aa43f285395d2c3ccf74097b377b558c35c533b8e28ae1ec5e8027b6b40"
+    },
+    {
+      "path": "docs/architecture/ids-studio/01-context/03-ifc-lite-asset-inventory.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "a6fc93ac5a2172e9a86ea82ad48c013129c39aa3b6ebf57d2dfb4c5c4b298f43"
+    },
+    {
+      "path": "docs/architecture/ids-studio/01-context/04-ids-flow-harvest.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "0b94d3aaa2fa723eeede27339b7482760118bfddec0060ea9deceec9a4adec94"
+    },
+    {
+      "path": "docs/architecture/ids-studio/02-product/01-vision-principles-personas.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "670f80692fd95941f1eb68c97d6710a31b29dbf4ae9828a57a0c66382951f2e6"
+    },
+    {
+      "path": "docs/architecture/ids-studio/02-product/02-requirements.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "1dd4e0e1c69b2998d1fceaf2690776607b326f68db08e0292d91cf625bd71f82"
+    },
+    {
+      "path": "docs/architecture/ids-studio/02-product/03-ux-spec.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "7f7b9fb4e3cf0d9a2df5df4e7ae6629657d032a35eda7451adb724ff6479099f"
+    },
+    {
+      "path": "docs/architecture/ids-studio/03-architecture/01-overview.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "81353b2dce250159dc947ed59f1be5e6f12e24a884e70b838cb98d3cdfd0a141"
+    },
+    {
+      "path": "docs/architecture/ids-studio/03-architecture/02-document-model-and-ops.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "991140488a8dc365547a2d7b28b19383140c55a1e3ebde55b1928572ca65cac6"
+    },
+    {
+      "path": "docs/architecture/ids-studio/03-architecture/03-diagnostics-audit-lint.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "2072e5389bd77d4bb229f7a4f71fadbcdb7d01cf43dfce9ebaba7a5c1ac0edb3"
+    },
+    {
+      "path": "docs/architecture/ids-studio/03-architecture/04-model-loop.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "e2ea0a72ba28704f445fa90076a97974136f5ed3821c304d3fd1b50fcdce2614"
+    },
+    {
+      "path": "docs/architecture/ids-studio/03-architecture/05-bsdd.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "fc6ddb41ec67a1b190e86708d5b91d16cf27bb161492740040bd883dc414eb86"
+    },
+    {
+      "path": "docs/architecture/ids-studio/03-architecture/06-ai-agent.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "e954737078850af825276036d9ef822bbd661cdd71705c82ad4d1c0ea9977f44"
+    },
+    {
+      "path": "docs/architecture/ids-studio/03-architecture/07-interop-versioning-collab.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "18b1fb5285a15771563cfebd2c34dea3974f5ce6e5a6de7d827ea7954cb59e25"
+    },
+    {
+      "path": "docs/architecture/ids-studio/03-architecture/08-cli-mcp-sdk.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "555b6805796c860b45190bc52fae9a827935ce2fc9cf9bfb27478c3d5a92d387"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-001-canonical-document.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "4820ae42a127fc26a70c87e3745e01df13250f13b17fc0310235b6c6bc7febba"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-002-typed-operations.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "4c9b01afa2fbdea0d67498623ec95af163c1f6e0882088fbf9bcae933ef368d7"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-003-grounding-gate.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "42ac3da74eba5fbf270f247ad30bc7486ed5b2f457f1fa4de4a870ebf9cc8f51"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-004-headless-packages.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "2fba526c9809dc6eb3a31318966d17618faf5218df706c0c5aa0112dc121638a"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-005-writer-in-ids.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "979f0a881bb57b4217fd5b678b80e72139a8811c8029d2e91ab667d88d2efae3"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-006-audit-vs-lint.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "dde8b569420eb3785f3eda05faec1e8091d04d6af9842b9e9998a92f6e4c93a9"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-007-no-canvas.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "062388684da3ecb20deb21b49f8e0ea76ad7f596b806b12656e3b6d6425c603a"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-008-agent-tool-loop.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "f4dce070e66adff97275a5bbad171b34a4f838137412396ce24c201029d5f984"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-009-model-policy.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "c58433432591dba1db8c48bdc6469526b39aed984269a396b5e2599d2d4c0870"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-010-model-loop-worker.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "cd5a00b584a51dbc953fc619d838ddf181bd942e8f9145f96877784540dfae9b"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-011-standard-output.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "34db455d311521f42db25eab1a2df448b1e762a7e9fff66a1e97e2799c2b5d2d"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-012-spreadsheet-mapping.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "b565c69c13b92e2e348d089758623d14f68e0a14d80377362d44270764321e83"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-013-ids-test-suites.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "2450a48a7808005ab8a013aa49a29ba1499acb89c43021b5740e16cf33e0715a"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/ADR-014-public-private-split.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "0e87bb604d424f13ec3613349de968e6324d781d1a211939c448cd4454787bb3"
+    },
+    {
+      "path": "docs/architecture/ids-studio/04-decisions/README.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "37eee596351fc130329f9fdf06a43b79a23ea54c4b2c9d3fa14031fcb4ee5dbd"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/01-roadmap.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "ee725907a3f83e7d80afb3763ca2ef1335f8fb6c7023952fe1f3be3e6ffbd558"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/02-test-and-eval-strategy.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "eabb355e97108663a9e48f889c7e69120a7b518875e233cc325b211e17084e50"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/03-backlog.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "be23df0ccaabc45565ab321826adc83874f5288edda6ee61823e2525be845024"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/04-metrics-okrs.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "bd5295811cbc452ac390e83fd99cbc46e55111f63547d34d2fe13865b8612701"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/05-raid.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "9fa81d9a506cd2ce985b8e3abf394d4aabb36f9bb97e08733262d75574a258c2"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-01-engine-completeness.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "bfbc4d39dc3bc5dca2be86ce0f6d7df187bc6ae0af7a36fcecc521f98d5f7e13"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-02-authoring-core.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "b7459daa695f48bb4a3b2dd50da0a5980cc8c2294b4bb49095cc9ac1f71682de"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-03-studio-ui.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "f0a700275b1677afff8b556bf69cb1d06d6ed26d5fc64a334f01c80068671f51"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-04-lint.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "7ade55f927b258a1d6457db6c05d972ed01217297dbadf431d75f9cd2fb45602"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-05-model-loop.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "9d72c72546048b9f1dc86fb03d1413e5819bebb36822cf255e41163caeebde60"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-06-bsdd.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "b3d565a30c11ec786bc032de8dae2aadbc9443f5e108277c1df680755085aef6"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-07-agent.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "be1b56389a63a827d65dfac5d8cccdbe152b1fb757f23a93ba909d40ab5e58a0"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-08-eval.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "2252687d2743a451e3debd006d11a9d7063b8cd52913de2f1bffc3fa4925ebe5"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-09-ingestion-documents.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "8cd90dfd7da39396b51567f2b075198b2f60517161430408c360958c084f32fe"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-10-trust-teamwork.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "866ca05b9bf804f10be44ed72489168e564a41b29f1f213ffeda25c80f59e0e6"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-11-headless.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "c185d2e2edbecd4d14c26c9b2bf4e51507e3a82e043373a6f81986c29b9e125d"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/P-12-standards-leadership.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "c285fee69bcb39859597ecea3b749b1028599742e0782d887945a201515fee7b"
+    },
+    {
+      "path": "docs/architecture/ids-studio/05-delivery/pitches/README.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "920a5cd04d9bfe7668da757ec43cac230efb475e6913c85abe9eebcfd0ff1810"
+    },
+    {
+      "path": "docs/architecture/ids-studio/HANDOVER.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "6dae2798ee6a3d43f0f780dd680c4783bace0a89118bcd86fb0ecbf7dc0ecafa"
+    },
+    {
+      "path": "docs/architecture/ids-studio/README.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "cfdbe518cbe2f893f156c905e85226d45485f1be5a84201a1c29b931b504623b"
+    },
+    {
+      "path": "docs/architecture/ids-studio/RECOVERY.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "ef57505ec6342913a0826c5a1c16409d656c6fe49e566a269b4c22b93a18203c"
+    },
+    {
+      "path": "docs/architecture/ids-studio/STATUS.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "a8f33cf88adae5aa80b3b8195166ad4e909b00bea998c1c987ca9936716b3c2c"
+    },
+    {
+      "path": "docs/architecture/ids-studio/appendix/A-ids-cheat-sheet-and-gotchas.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "280be2f41044b46da047b81a4347709caa90349d41ba16b6174568679bdc3c7f"
+    },
+    {
+      "path": "docs/architecture/ids-studio/appendix/B-glossary.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "979157caa055f83fe93065603eb68cec772a762c0797b5376625fe3f56509b54"
+    },
+    {
+      "path": "docs/architecture/ids-studio/appendix/C-sources.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "4a3f587e68aa486845ba80b0b079c63392c16cbf0dc59c81769c6170108b091c"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/01-tolerance-418.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "d825d621cb533ea21b312459f9682809a9f379d13f1d8354bd1f09154beb9edb"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/02-empty-values-403.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "240d0a55a71bdb85e81c1554e686af4ad6efdd252a55d891dcb802f18a2454c7"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/03-prohibited-with-value-206-420.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "c05d7e53c8ddb8e89b691e7df25d84950f9cfe4ec13778f7b0cde9b0b1e77989"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/04-partof-nested-facets-379-380.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "2eb4ae67bfd9793e8bf9c67b9fe52a283b0a03df8c7a8df37385a6955d36a27e"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/05-specification-identifier-339.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "94bb85cd3c1ec4020c0f1c4d224afa8ae2533d97a2a3cca0eb71d84664c8ba6f"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/README.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "912c04cd848965b8a38f34838cdbb23aebdee52a1d6a9f813da051d6744680d0"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/ids11-partof/fail-a_nested_facet_must_match_the_related_element.ids",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "b839706d00ea2ed5723fdc42b10d99e1d070e3348d3e0e5b68f0d0bddb67d78a"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/ids11-partof/fail-a_nested_facet_must_match_the_related_element.ifc",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "0cf69acd4525a2397e1b0fb6cd097a89ecd62840e29bc7ddab1bb22c1896e598"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/ids11-partof/pass-a_nested_facet_selects_the_related_element.ids",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "b839706d00ea2ed5723fdc42b10d99e1d070e3348d3e0e5b68f0d0bddb67d78a"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/ids11-partof/pass-a_nested_facet_selects_the_related_element.ifc",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "34e6f19e356037e552bbdda4af2aec20ac1b309b28411c9c6bd1f4e50d9ce8d6"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/property/invalid-a_prohibited_property_cannot_constrain_a_value.ids",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "b44a72fd505c0047dbfa74c17471bf54efa421499dd1dd62a2d66573d99f193a"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/property/invalid-a_prohibited_property_cannot_constrain_a_value.ifc",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "77643aaf212ea143345d6583b80879f2d8956797ce3e821c72620f817504d4d0"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/property/pass-an_empty_string_is_absent_for_a_prohibited_property.ids",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "912b4b8400b9c24db741abddda4ceef621813b0327cab12b29ced967ef310443"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/property/pass-an_empty_string_is_absent_for_a_prohibited_property.ifc",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "88114870fe142f5788231933e5ab6e57b97ed0a196ceb7ac0e539a8114646733"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/property/pass-an_empty_string_is_absent_for_an_optional_property.ids",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "0653fb28c1f6f1b1cfa72a7b693d8805a2b93372fbdb1a93a165f52de6830d19"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/property/pass-an_empty_string_is_absent_for_an_optional_property.ifc",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "88114870fe142f5788231933e5ab6e57b97ed0a196ceb7ac0e539a8114646733"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/tolerance/fail-comparison_tolerance_for_floating_point_million_upper_bound.ids",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "499e13e95cd33417c5455c4f951976f4e3d78f0d1783fa6cac781b1bcf137d86"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/tolerance/fail-comparison_tolerance_for_floating_point_million_upper_bound.ifc",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "4b8fc16ced74541cef93a1e7e669ca75eaec71f88ebe09a69f324940a1042dd4"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/tolerance/pass-comparison_tolerance_for_floating_point_million_upper_bound.ids",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "b5de0597db1cb4fa5c0cb472040dcfe9f5d7abfb952b04055f9374fc1af106cb"
+    },
+    {
+      "path": "docs/architecture/ids-studio/upstream/proposed-corpus-cases/tolerance/pass-comparison_tolerance_for_floating_point_million_upper_bound.ifc",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "45685d7e3015bf2576fa9166e2f8dc6e5e7b94a5559ab6d086ac7ba52b54c825"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-01.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "0ce1e897f8128112afd8ed8d3b625517d9fd2f2ff624f572337aaf4308e96572"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-02.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "b8e0852fa777166277acae122ffe7a21d548aeb4c86ffb55ca35a882e4419d9c"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-03.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "0e56c459235f22f2e3035b69c76057f0e52b1a14b041c581ae00a6c784805bf9"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-04.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "7bf3add5cb772f35393e9ba0bf79ba70cef0683d763818c16cacc43523cc7d03"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-05.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "880f22ef2e6c7d9fdcb6eaad31700afc33a5b24c0ac467512f6194fbb74f1568"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-06.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "4d9acafac4ab4b79ac97e6dcc702d81b2b9f186d0cb9015b7aacb72c04ca60cb"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-07.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "f952ef7cec97c9a0b89435daaee0671b6390696db214e70278d9e3ec940d5f5d"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-08.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "ed91cc5787eb177f8cc018303187b04a2d9384a9726d40f03c3556362d0c0a43"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-09.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "87b673c4f5ca37bd43c8cff5d3eab2a052908ed44609a82204c58dea031a685f"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-10.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "fbbaf4e7ad61c4de6c47dce86a261d39479a0c5fd9ebdddeeec1231740399a15"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-11.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "420eb5420fcfbf0804663faa919580a9867422778e3b3aa8b2bfa15f75ba4a12"
+    },
+    {
+      "path": "docs/architecture/ids-studio/worklog/P-12.md",
+      "strategy": "upstream",
+      "action": "add",
+      "sha256": "2c1f6d3d7f8ed494fb9b56d5a8f16a1c6fd83485a8230674d3d51d7af20dada6"
+    }
+  ],
+  "conflicts": []
+}

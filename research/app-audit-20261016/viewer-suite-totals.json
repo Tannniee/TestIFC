@@ -1,0 +1,120 @@
+{
+  "shards": [
+    {
+      "shard": 0,
+      "tests": 1185,
+      "pass": 1185,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    {
+      "shard": 1,
+      "tests": 1240,
+      "pass": 1238,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 2,
+      "todo": 0
+    },
+    {
+      "shard": 2,
+      "tests": 1082,
+      "pass": 1077,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 5,
+      "todo": 0
+    },
+    {
+      "shard": 3,
+      "tests": 1584,
+      "pass": 1583,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 1,
+      "todo": 0
+    },
+    {
+      "shard": 4,
+      "tests": 1241,
+      "pass": 1238,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 3,
+      "todo": 0
+    },
+    {
+      "shard": 5,
+      "tests": 1238,
+      "pass": 1237,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 1,
+      "todo": 0
+    },
+    {
+      "shard": 6,
+      "tests": 1020,
+      "pass": 1017,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 3,
+      "todo": 0
+    },
+    {
+      "shard": 7,
+      "tests": 1180,
+      "pass": 1178,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 2,
+      "todo": 0
+    },
+    {
+      "shard": 8,
+      "tests": 935,
+      "pass": 929,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 6,
+      "todo": 0
+    },
+    {
+      "shard": 9,
+      "tests": 1067,
+      "pass": 1060,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 7,
+      "todo": 0
+    },
+    {
+      "shard": 10,
+      "tests": 944,
+      "pass": 940,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 4,
+      "todo": 0
+    },
+    {
+      "shard": 11,
+      "tests": 1101,
+      "pass": 1098,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 3,
+      "todo": 0
+    }
+  ],
+  "totals": {
+    "tests": 13817,
+    "pass": 13780,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 37,
+    "todo": 0
+  }
+}

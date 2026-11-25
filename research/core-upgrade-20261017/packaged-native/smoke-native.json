@@ -1,0 +1,50 @@
+{
+  "executable": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017\\IFC-Lite.exe",
+  "tests": [
+    {
+      "name": "native preview default engine without URL override"
+    },
+    {
+      "name": "local IFC import",
+      "models": [
+        {
+          "name": "building-architecture.ifc",
+          "meshes": 14,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "TestIFC Top sweep creates canonical Box, restores source orientation, six diamond handles"
+    },
+    {
+      "name": "IFC Y uses negative world Z with exchanged limits; inverted numeric input rejected"
+    },
+    {
+      "name": "Actual face drag changes clipping; Escape restores all bounds and releases capture"
+    },
+    {
+      "name": "Top-view elevation face can be dragged even when its axis projects to a point"
+    }
+  ],
+  "errors": [],
+  "diagnostics": [],
+  "nativeBackend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.3.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "runtime": {
+    "url": "http://tauri.localhost/",
+    "secureContext": true,
+    "crossOriginIsolated": true,
+    "webgpu": true,
+    "adapter": {},
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "passed": false,
+  "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    fov: 0.7853981633974483,\n    orthoSize: 11.421121148325039,\n    position: {\n      x: 4.4500002861023,\n      y: 24.15595142580693,\n+     z: -4.433939917804185\n-     z: -4.433939917804175\n    },\n    projectionMode: 'orthographic',\n    target: {\n      x: 4.4500002861023,\n      y: 2.550653874874115,\n...\n    up: {\n+     x: -0,\n+     y: 0.009999833334166208,\n+     z: -0.9999500004166654\n-     x: 0,\n-     y: 1,\n-     z: 0\n    }\n  }\n\n    at testTestIfcSectionBox (file:///F:/Steel/VBA/IFC-Lite-Core104/desktop/testifc-section-box-smoke.mjs:99:10)\n    at async file:///F:/Steel/VBA/IFC-Lite-Core104/desktop/smoke-webview2.mjs:113:5"
+}

@@ -1,0 +1,987 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017-r2\\IFC-Lite.exe",
+  "model": "F:\\Working\\IFC Temp\\SVD TRONG DONG-22.09.2026 (8H).ifc",
+  "bytes": 883278635,
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-core104-large-NbJXvI",
+  "hostPid": 6548,
+  "errors": [],
+  "progress": [
+    {
+      "milliseconds": 1230,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 2321,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 4237,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 5372,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 6452,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 7547,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 8692,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 9771,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 10839,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 11916,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 13042,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 14113,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 15242,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 16366,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 17499,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 18622,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 19748,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 20867,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 21995,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 23274,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 24805,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 26433,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 27438,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 28443,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 29457,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 30461,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 31468,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 32473,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 33477,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 34499,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 35504,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 36510,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 37516,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 38530,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 39538,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 40545,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 41553,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 42557,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 43559,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 44562,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 45565,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 46572,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 47579,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 48582,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 49587,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 50592,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 51598,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 52602,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 53606,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 54613,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 55619,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 56626,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 57629,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 58637,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 59645,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 60656,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 61663,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 62671,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 63680,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 64691,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 65705,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 66716,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 67730,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 68734,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 69743,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 70749,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 71752,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 72767,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 73785,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 74798,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 75809,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 76819,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 77827,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 78836,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 79847,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 80857,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 81865,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 82873,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 83883,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 84892,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 85902,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 86911,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 87922,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 88931,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 89938,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 90952,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 91967,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 92980,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 94005,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 95023,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 96040,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 97050,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 98060,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 99068,
+      "loading": true,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079"
+        }
+      ]
+    },
+    {
+      "milliseconds": 104648,
+      "loading": false,
+      "models": [
+        {
+          "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079",
+          "path": "native",
+          "meshes": 163867,
+          "vertices": 304642800,
+          "triangles": 183466717,
+          "sourceBytes": 0
+        }
+      ]
+    }
+  ],
+  "backend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "loaded": {
+    "milliseconds": 104648,
+    "loading": false,
+    "models": [
+      {
+        "id": "b705ce85-cea7-46b8-8e2c-b5f33081a079",
+        "path": "native",
+        "meshes": 163867,
+        "vertices": 304642800,
+        "triangles": 183466717,
+        "sourceBytes": 0
+      }
+    ]
+  },
+  "selection": {
+    "modelId": "b705ce85-cea7-46b8-8e2c-b5f33081a079",
+    "expressId": 8871707
+  },
+  "gestures": {
+    "before": {
+      "position": {
+        "x": 469.2756654837452,
+        "y": 476.3906251671184,
+        "z": 470.9139101126514
+      },
+      "target": {
+        "x": -0.82025146484375,
+        "y": 84.64402770996094,
+        "z": 0.8179931640625
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "orbit": {
+      "position": {
+        "x": 271.39692087158295,
+        "y": 565.9112546200058,
+        "z": 539.0794596189855
+      },
+      "target": {
+        "x": -0.82025146484375,
+        "y": 84.64402770996094,
+        "z": 0.8179931640625
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "pan": {
+      "position": {
+        "x": 256.2623331654338,
+        "y": 571.638832431082,
+        "z": 541.6107445069049
+      },
+      "target": {
+        "x": -15.904071553940113,
+        "y": 90.35016598331045,
+        "z": 3.3427753932075572
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "zoom": {
+      "position": {
+        "x": 257.7212927012638,
+        "y": 571.0211470230539,
+        "z": 541.4253446857932
+      },
+      "target": {
+        "x": -14.445112018110072,
+        "y": 89.73248057528234,
+        "z": 3.1573755720959036
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 206.12521215729885
+    }
+  },
+  "cleared": true,
+  "ok": true,
+  "closeRequested": true,
+  "closeResponse": {
+    "status": 0,
+    "stdout": "True\r\n",
+    "stderr": ""
+  },
+  "exitedAfterClose": true
+}

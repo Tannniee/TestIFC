@@ -1,0 +1,22 @@
+{
+  "nativeCandidate": {
+    "vertices": 3864,
+    "triangles": 2576,
+    "volume": 0.03447627601993725,
+    "area": 7.123243401181674
+  },
+  "oracle": {
+    "vertices": 1312,
+    "triangles": 2624,
+    "volume": 0.03447345885863243,
+    "area": 7.1226866129247774
+  },
+  "maxBoundsDeltaMm": 6.065238267183304e-05,
+  "sampledMaxDistanceMm": 0.5314584814075634,
+  "relativeVolumeErrorPercent": 0.008171971708375308,
+  "exactBadEdgeMultiplicities": {},
+  "collapsedTriangles": 0,
+  "directedImbalanceEdges": 0,
+  "minimumTriangleAltitudeUm": 1399.2614437679717,
+  "note": "research-only outwardkernelgrid retry, strictclosureafterrotationandordinaryhygiene; not shipped"
+}

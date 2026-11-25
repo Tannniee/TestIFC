@@ -1,0 +1,52 @@
+{
+  "header": {
+    "id": "blake3:82f8e537ce518e1db612671044456870a702acc70139073898a3905f1e7abff6",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "carol",
+    "timestamp": "2026-10-19T03:18:19.003Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "carol"
+      },
+      "intent": "Merge blake3:40f937058ce110db910eee18f7ccf06325a1f40a6cbbae5e62b06d995e27078c into main",
+      "created": "2026-10-19T03:18:19.003Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:cea4136c8972dcbad9e87809f35755c9d33242b61510b7785741b22e32fd33be"
+      },
+      "parents": [
+        "blake3:cea4136c8972dcbad9e87809f35755c9d33242b61510b7785741b22e32fd33be"
+      ],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": {
+        "candidate": "blake3:40f937058ce110db910eee18f7ccf06325a1f40a6cbbae5e62b06d995e27078c",
+        "into": "main",
+        "resolutions": [],
+        "waived_checks": [
+          {
+            "spec": "fire-safety.ids",
+            "reason": "not applicable",
+            "waivedBy": "carol"
+          }
+        ],
+        "resolver": "carol"
+      },
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI90"
+      }
+    }
+  ]
+}

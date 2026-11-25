@@ -1,0 +1,213 @@
+{
+  "revision": 4,
+  "checkpoint": {
+    "version": 1,
+    "id": "23082175-4e7f-45d2-bef1-858c8ef5e766",
+    "graphId": "example-ai-wall-roles",
+    "graphName": "AI wall roles (reviewed)",
+    "graphDigest": "d8634347bbd1a5bb6e2c2f4d16a3ecdfe0076497f7da8849ab516eaa1a0cec23",
+    "sourceDigest": "sha256:9b0e7c5f5e8f83fa6b05545a2fd5c0035b15836907ee9e29ae10a179704bc70c",
+    "reviewNodes": [
+      "roles"
+    ],
+    "proposalDigest": "fcb2cbf791f20cfdfb5ed5fc53b3b2649e5fcd361bcbd5a39f6b5a1c425bbfad",
+    "outputs": {
+      "walls": {
+        "entities": {
+          "kind": "list",
+          "items": [
+            {
+              "globalId": "1AQAupaRP1txwK1AGiN61V",
+              "modelId": "default",
+              "expressId": 262
+            },
+            {
+              "globalId": "3wdauVJT5Fx9drrREiDqA$",
+              "modelId": "default",
+              "expressId": 291
+            },
+            {
+              "globalId": "0OfZwWc8j9QP5uX8xPTxDH",
+              "modelId": "default",
+              "expressId": 315
+            },
+            {
+              "globalId": "1uS5vfZPn9R8PlAaVd73on",
+              "modelId": "default",
+              "expressId": 353
+            }
+          ]
+        }
+      },
+      "yes": {
+        "value": {
+          "kind": "item",
+          "value": "yes"
+        }
+      },
+      "mark": {
+        "entity": {
+          "kind": "list",
+          "items": [
+            {
+              "globalId": "1AQAupaRP1txwK1AGiN61V",
+              "modelId": "default",
+              "expressId": 262
+            },
+            {
+              "globalId": "3wdauVJT5Fx9drrREiDqA$",
+              "modelId": "default",
+              "expressId": 291
+            },
+            {
+              "globalId": "0OfZwWc8j9QP5uX8xPTxDH",
+              "modelId": "default",
+              "expressId": 315
+            },
+            {
+              "globalId": "1uS5vfZPn9R8PlAaVd73on",
+              "modelId": "default",
+              "expressId": 353
+            }
+          ]
+        }
+      },
+      "table": {
+        "table": {
+          "kind": "item",
+          "value": {
+            "columns": [
+              {
+                "name": "GlobalId",
+                "type": "identifier"
+              },
+              {
+                "name": "Name",
+                "type": "label"
+              },
+              {
+                "name": "Pset_WallCommon.IsExternal",
+                "type": "boolean",
+                "binding": {
+                  "pset": "Pset_WallCommon",
+                  "prop": "IsExternal"
+                }
+              }
+            ],
+            "rows": [
+              {
+                "GlobalId": "1AQAupaRP1txwK1AGiN61V",
+                "Name": "house - outer wall - house right front",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "3wdauVJT5Fx9drrREiDqA$",
+                "Name": "house - outer wall - house right back",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "0OfZwWc8j9QP5uX8xPTxDH",
+                "Name": "house - outer wall - house left",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "1uS5vfZPn9R8PlAaVd73on",
+                "Name": "plumbing wall",
+                "Pset_WallCommon.IsExternal": false
+              }
+            ],
+            "key": "GlobalId"
+          }
+        }
+      },
+      "roles": {
+        "table": {
+          "kind": "item",
+          "value": {
+            "key": "key",
+            "columns": [
+              {
+                "name": "key",
+                "type": "identifier"
+              },
+              {
+                "name": "label",
+                "type": "label"
+              },
+              {
+                "name": "evidence",
+                "type": "text"
+              },
+              {
+                "name": "outcome",
+                "type": "enum"
+              }
+            ],
+            "rows": [
+              {
+                "key": "1AQAupaRP1txwK1AGiN61V",
+                "label": "Facade",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              },
+              {
+                "key": "3wdauVJT5Fx9drrREiDqA$",
+                "label": "Facade",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              },
+              {
+                "key": "0OfZwWc8j9QP5uX8xPTxDH",
+                "label": "Facade",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              },
+              {
+                "key": "1uS5vfZPn9R8PlAaVd73on",
+                "label": "Partition",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              }
+            ]
+          }
+        },
+        "coverage": {
+          "kind": "item",
+          "value": {
+            "model": "stand-in/model",
+            "categoriesVersion": "wall-roles-1",
+            "rows": 4,
+            "requests": 1,
+            "classified": 4,
+            "unknown": 0,
+            "failed": 0,
+            "notSent": 0
+          }
+        }
+      }
+    },
+    "budget": {
+      "maxRequests": 12,
+      "maxOutputTokens": 24000,
+      "requests": 1,
+      "outputTokens": 40
+    },
+    "state": "completed",
+    "createdAt": 1792380316357,
+    "updatedAt": 1792380316825,
+    "review": {
+      "decision": "approved",
+      "proposalDigest": "fcb2cbf791f20cfdfb5ed5fc53b3b2649e5fcd361bcbd5a39f6b5a1c425bbfad",
+      "at": 1792380316570
+    },
+    "claim": {
+      "owner": "cli:6800:9bc27c74-ff89-4a1d-943f-0951825c9800",
+      "leaseUntil": 1792380916773,
+      "at": 1792380316773
+    },
+    "outcome": {
+      "ok": true,
+      "at": 1792380316825
+    }
+  }
+}

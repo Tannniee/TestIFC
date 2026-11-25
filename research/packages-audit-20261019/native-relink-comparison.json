@@ -1,0 +1,82 @@
+{
+  "delivered_sha256": "ede20104a6152a308bdb50fed44f870d1ac5d0539e623e150abb311325b89545",
+  "relink_sha256": "3a56dbb870613c436982bdf9e88b71c3de02cbba41e0c4addfb51f45fb82181c",
+  "bytes": [
+    45005824,
+    45004288
+  ],
+  "differing_bytes": 39691667,
+  "delivered": {
+    "coff_timestamp": 1792460476,
+    "sections": {
+      ".text": {
+        "offset": 1024,
+        "size": 12716032,
+        "sha256": "cc3969187f8d3762e6252318c09949d85b2e75d15e26ac199f720c7634647491"
+      },
+      ".rdata": {
+        "offset": 12717056,
+        "size": 31665664,
+        "sha256": "660118d79a4926140f04ac3a483ccba4425f344feb972adfdb7b598cceb3d564"
+      },
+      ".data": {
+        "offset": 44382720,
+        "size": 4608,
+        "sha256": "218ffae6c94e814b5702dcf94393e6db9737b0cef1eba223d6f55937d6dcab93"
+      },
+      ".pdata": {
+        "offset": 44387328,
+        "size": 512512,
+        "sha256": "9598c1958640f9eed47c24bbd217b26f7588ca23b968ee393692d725adca7722"
+      },
+      ".rsrc": {
+        "offset": 44899840,
+        "size": 2048,
+        "sha256": "c29c34e0ce9ca0b3d49fe67719de700eb1d92d3f9844f0a26ae71d2fb930c355"
+      },
+      ".reloc": {
+        "offset": 44901888,
+        "size": 103936,
+        "sha256": "f96d4f16ae26992846ac80d40c25c4bc3dd0e67da6342cd3f7390a8c83f209c4"
+      }
+    }
+  },
+  "relink": {
+    "coff_timestamp": 1792460962,
+    "sections": {
+      ".text": {
+        "offset": 1024,
+        "size": 12715008,
+        "sha256": "bbc033eeb22860b6691ffa579294ac9bfd308e5881810d2431d83d7445134431"
+      },
+      ".rdata": {
+        "offset": 12716032,
+        "size": 31665152,
+        "sha256": "7d23308f8ab27761cd90d6f9584eb3ae6f61bf60c7181c79e982c8855f8bf710"
+      },
+      ".data": {
+        "offset": 44381184,
+        "size": 4608,
+        "sha256": "b954f2089e033883f959bc2ac3843aa261ddbee0ba9d492b9802b81c8ec6c32a"
+      },
+      ".pdata": {
+        "offset": 44385792,
+        "size": 512512,
+        "sha256": "a566e61f3f94f7be92de2ebb0275ff8f5c449de97edee623b1ee896eeddc76c3"
+      },
+      ".rsrc": {
+        "offset": 44898304,
+        "size": 2048,
+        "sha256": "c29c34e0ce9ca0b3d49fe67719de700eb1d92d3f9844f0a26ae71d2fb930c355"
+      },
+      ".reloc": {
+        "offset": 44900352,
+        "size": 103936,
+        "sha256": "cd0ad16dc1c7a632a101c3fb5746bbc5dccc389d587643ee1cfdbe3cd48af091"
+      }
+    }
+  },
+  "identical_sections": [
+    ".rsrc"
+  ]
+}

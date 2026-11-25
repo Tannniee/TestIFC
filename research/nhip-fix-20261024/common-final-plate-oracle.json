@@ -1,0 +1,40 @@
+[
+  {
+    "input": "branch-common-final-remaining-plate.json",
+    "id": 150461,
+    "native": {
+      "vertices": 2024,
+      "triangles": 2024,
+      "volume": 0.04809925366520481,
+      "area": 6.264616006693135
+    },
+    "oracle": {
+      "vertices": 1032,
+      "triangles": 2064,
+      "volume": 0.048092865849623974,
+      "area": 6.263830167392414
+    },
+    "sampledMaxSurfaceDistanceMm": 0.8527805773954993,
+    "maxBoundsDeltaMm": 6.0679994362544676e-05,
+    "relativeVolumeErrorPercent": 0.013282251884944616
+  },
+  {
+    "input": "branch-common-final-remaining-plate.json",
+    "id": 152785,
+    "native": {
+      "vertices": 2024,
+      "triangles": 2024,
+      "volume": 0.04809926208539295,
+      "area": 6.264616112537414
+    },
+    "oracle": {
+      "vertices": 1032,
+      "triangles": 2064,
+      "volume": 0.04809286582889081,
+      "area": 6.263830165892515
+    },
+    "sampledMaxSurfaceDistanceMm": 0.8527726281243898,
+    "maxBoundsDeltaMm": 6.852970102499967e-05,
+    "relativeVolumeErrorPercent": 0.0132998031868217
+  }
+]

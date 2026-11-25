@@ -1,0 +1,13 @@
+{
+  "refs": {
+    "main": {
+      "layers": [],
+      "policy": {
+        "requiredChecks": [
+          "ids:fire-rating",
+          "ids:clearance"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"flowVersion":1,"id":"s","name":"s","capabilities":["secret.read:IFC_LITE_TEST_TOKEN_5167"],"inputs":[],"outputs":[{"nodeId":"req","port":"status","label":"status"}],"nodes":[{"id":"req","type":"http.request","params":{"url":"https://api.example.invalid/","headers":{"Authorization":"Bearer {{secret:IFC_LITE_TEST_TOKEN_5167}}"}}}],"edges":[]}

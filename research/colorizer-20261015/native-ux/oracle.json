@@ -1,0 +1,61 @@
+{
+  "oracle": "IfcOpenShell 0.8.5",
+  "output": "F:\\Steel\\VBA\\IFC-Lite\\research\\colorizer-20261015\\native-ux\\ui-gray-red.ifc",
+  "red": 1968,
+  "gray": 12541,
+  "body_items": 14509,
+  "non_presentation_records_unchanged": 184677,
+  "geometry_samples": [
+    {
+      "expressId": 101023,
+      "triangles": 292
+    },
+    {
+      "expressId": 101050,
+      "triangles": 292
+    },
+    {
+      "expressId": 101062,
+      "triangles": 292
+    },
+    {
+      "expressId": 101074,
+      "triangles": 292
+    },
+    {
+      "expressId": 101086,
+      "triangles": 292
+    },
+    {
+      "expressId": 101098,
+      "triangles": 292
+    },
+    {
+      "expressId": 58,
+      "triangles": 12
+    },
+    {
+      "expressId": 103,
+      "triangles": 44
+    },
+    {
+      "expressId": 142,
+      "triangles": 44
+    },
+    {
+      "expressId": 156,
+      "triangles": 44
+    },
+    {
+      "expressId": 169,
+      "triangles": 44
+    },
+    {
+      "expressId": 182,
+      "triangles": 44
+    }
+  ],
+  "source_sha256": "df595b8d150b09dabbc48e21f6efd1b26a0f35ab07636a02d0b51896b94894a2",
+  "output_sha256": "a166ee0fc766cc0f8c7134356b86cffa8137604fab0d23cbde61d92e8b63af8b",
+  "bytes": 11874073
+}

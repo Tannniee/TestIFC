@@ -1,0 +1,10 @@
+[
+  {
+    "rule": "IfcWall",
+    "matched": 1,
+    "total": 1,
+    "entities": [
+      1222
+    ]
+  }
+]

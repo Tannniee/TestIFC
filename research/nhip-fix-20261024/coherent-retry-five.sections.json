@@ -1,0 +1,15 @@
+{
+  "id": 490757,
+  "reference": "101 independent planar material differences; remove sub-Precision material films using opening radius Precision/2; no 3D CSG oracle",
+  "nativeVolume": 0.024165578683620386,
+  "referenceVolume": 0.02417671346922483,
+  "relativeVolumeErrorPercent": 0.0460558281365219,
+  "sampledMaxSurfaceDistanceMm": 0.7631845639657144,
+  "directedSampleCounts": [
+    15628,
+    1732
+  ],
+  "OCCBooleanVolume": 0.024292965421886997,
+  "OCCMissedCut": 490787,
+  "samplesOnSubPrecisionFilms": 16
+}

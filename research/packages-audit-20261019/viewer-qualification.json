@@ -1,0 +1,7 @@
+{
+  "passed": 855,
+  "failed": 0,
+  "conditional_skips": 1,
+  "log": "viewer-resumed.log",
+  "scope": "expanded custom desktop plus native/wall-axis/workplane integration; external rvt01 calibration fixture absent"
+}

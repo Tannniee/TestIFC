@@ -1,0 +1,12 @@
+{
+  "refs": {
+    "main": {
+      "layers": [
+        "blake3:8ab34035d084b8f5b42058389c571c7d2b817d770d5e1c12878b9b535401c4c4",
+        "blake3:bda4965959d158d09ee701012b9a9d3604d9df429bd6b541a56dca2d0339f982",
+        "blake3:8d7f67ce8bdf158d623c0de774e7e3079c77a13c427825b1637056e1e2886f7f",
+        "blake3:fddf286bf6e6e02001f2ecfb2ae30a8211738d880a3423713720f76d1ea22df3"
+      ]
+    }
+  }
+}

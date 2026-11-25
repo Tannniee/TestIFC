@@ -1,0 +1,496 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-packages-audit-20261020-r3\\IFC-Lite.exe",
+  "model": "F:\\Steel\\VBA\\IFC-Lite-Core104\\tests\\models\\ara3d\\ISSUE_129_N1540_17_EXE_MOD_448200_02_09_11SMC_IGC_V17.ifc",
+  "started": "2026-10-24T17:21:02.225Z",
+  "states": [
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 16 / 1,332 elements",
+          "percent": 20.72072072072072
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "ISSUE_129_N1540_17_EXE_MOD_448200_02_09_11SMC_IGC_V17.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.7,
+      "seconds": 18.457
+    },
+    {
+      "state": {
+        "loading": true,
+        "loadError": null,
+        "progress": {
+          "phase": "Native Rust geometry · 16 / 1,332 elements",
+          "percent": 20.72072072072072
+        },
+        "native": {
+          "done": false
+        },
+        "models": [
+          {
+            "name": "ISSUE_129_N1540_17_EXE_MOD_448200_02_09_11SMC_IGC_V17.ifc"
+          }
+        ]
+      },
+      "requestMs": 2.1,
+      "seconds": 19.462
+    },
+    {
+      "state": {
+        "loading": false,
+        "loadError": null,
+        "progress": {
+          "phase": "Complete",
+          "percent": 100
+        },
+        "native": {
+          "done": true,
+          "stats": {
+            "total_meshes": 1402,
+            "total_vertices": 219999,
+            "total_triangles": 136807,
+            "parse_time_ms": 32,
+            "entity_scan_time_ms": 28,
+            "lookup_time_ms": 0,
+            "preprocess_time_ms": 1,
+            "geometry_time_ms": 1692,
+            "total_time_ms": 1725,
+            "from_cache": false,
+            "total_csg_failures": 41,
+            "products_with_failures": 6,
+            "degenerate_triangles_dropped": 6,
+            "point_cache_hits": 223092,
+            "point_cache_misses": 27872,
+            "faceted_brep_time_ms": 0,
+            "geometry_diagnostics": {
+              "schemaVersion": 3,
+              "totalCsgFailures": 41,
+              "productsWithFailures": 6,
+              "hostsWithOpenings": 73,
+              "classification": {
+                "rectangular": 2,
+                "diagonal": 339,
+                "nonRectangular": 20,
+                "total": 361
+              },
+              "failuresByReason": [
+                {
+                  "reason": "PolygonalBoundedHalfSpaceFallback",
+                  "count": 30
+                },
+                {
+                  "reason": "KernelError",
+                  "count": 10
+                },
+                {
+                  "reason": "NoBoundsOverlap",
+                  "count": 1
+                }
+              ],
+              "silentNoOps": 0,
+              "rectFast": {
+                "fired": 25,
+                "openingsCut": 36,
+                "deferHostNotBox": 9,
+                "deferNotThrough": 0,
+                "deferOffFace": 0,
+                "deferNearEdge": 0,
+                "deferNoOpenings": 0,
+                "deferTooManyOpenings": 0
+              },
+              "worstHosts": [
+                {
+                  "productId": 9094,
+                  "ifcType": "IfcSlab",
+                  "openings": 24,
+                  "csgFailures": 4,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      -20.08335,
+                      -14.608132,
+                      5.2
+                    ],
+                    "max": [
+                      20.083263,
+                      14.608168,
+                      9.7
+                    ]
+                  },
+                  "triangleCount": 842
+                },
+                {
+                  "productId": 8756,
+                  "ifcType": "IfcWallStandardCase",
+                  "openings": 1,
+                  "csgFailures": 1,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      14.072703,
+                      -2.8344808,
+                      5.2
+                    ],
+                    "max": [
+                      17.511984,
+                      4.7146416,
+                      9.2
+                    ]
+                  },
+                  "triangleCount": 51
+                },
+                {
+                  "productId": 61300,
+                  "ifcType": "IfcWallStandardCase",
+                  "openings": 1,
+                  "csgFailures": 1,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      -0.35549378,
+                      -21.31007,
+                      -2.5
+                    ],
+                    "max": [
+                      9.203715,
+                      -7.9146104,
+                      0.70000005
+                    ]
+                  },
+                  "triangleCount": 3956
+                },
+                {
+                  "productId": 295370,
+                  "ifcType": "IfcSlab",
+                  "openings": 9,
+                  "csgFailures": 1,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      -15.856375,
+                      -23.858398,
+                      -2.5
+                    ],
+                    "max": [
+                      7.232079,
+                      27.144684,
+                      -1.35
+                    ]
+                  },
+                  "triangleCount": 575
+                },
+                {
+                  "productId": 296868,
+                  "ifcType": "IfcSlab",
+                  "openings": 9,
+                  "csgFailures": 1,
+                  "firstFailureLabel": "KernelError",
+                  "bbox": {
+                    "min": [
+                      -7.2320786,
+                      -27.144684,
+                      -2.5
+                    ],
+                    "max": [
+                      15.856374,
+                      23.8584,
+                      -1.35
+                    ]
+                  },
+                  "triangleCount": 582
+                },
+                {
+                  "productId": 337691,
+                  "ifcType": "IfcWallStandardCase",
+                  "openings": 1,
+                  "csgFailures": 1,
+                  "firstFailureLabel": "NoBoundsOverlap",
+                  "bbox": {
+                    "min": [
+                      23.35984,
+                      -14.259136,
+                      46.6
+                    ],
+                    "max": [
+                      33.468803,
+                      8.634621,
+                      52.7
+                    ]
+                  },
+                  "triangleCount": 36
+                }
+              ],
+              "oversizedRefDrops": 0,
+              "totalUnsupportedItems": 0,
+              "unsupportedItemsByType": []
+            }
+          },
+          "diagnostics": {
+            "schemaVersion": 3,
+            "totalCsgFailures": 41,
+            "productsWithFailures": 6,
+            "hostsWithOpenings": 73,
+            "classification": {
+              "rectangular": 2,
+              "diagonal": 339,
+              "nonRectangular": 20,
+              "total": 361
+            },
+            "failuresByReason": [
+              {
+                "reason": "PolygonalBoundedHalfSpaceFallback",
+                "count": 30
+              },
+              {
+                "reason": "KernelError",
+                "count": 10
+              },
+              {
+                "reason": "NoBoundsOverlap",
+                "count": 1
+              }
+            ],
+            "silentNoOps": 0,
+            "rectFast": {
+              "fired": 25,
+              "openingsCut": 36,
+              "deferHostNotBox": 9,
+              "deferNotThrough": 0,
+              "deferOffFace": 0,
+              "deferNearEdge": 0,
+              "deferNoOpenings": 0,
+              "deferTooManyOpenings": 0
+            },
+            "worstHosts": [
+              {
+                "productId": 9094,
+                "ifcType": "IfcSlab",
+                "openings": 24,
+                "csgFailures": 4,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    -20.08335,
+                    -14.608132,
+                    5.2
+                  ],
+                  "max": [
+                    20.083263,
+                    14.608168,
+                    9.7
+                  ]
+                },
+                "triangleCount": 842
+              },
+              {
+                "productId": 8756,
+                "ifcType": "IfcWallStandardCase",
+                "openings": 1,
+                "csgFailures": 1,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    14.072703,
+                    -2.8344808,
+                    5.2
+                  ],
+                  "max": [
+                    17.511984,
+                    4.7146416,
+                    9.2
+                  ]
+                },
+                "triangleCount": 51
+              },
+              {
+                "productId": 61300,
+                "ifcType": "IfcWallStandardCase",
+                "openings": 1,
+                "csgFailures": 1,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    -0.35549378,
+                    -21.31007,
+                    -2.5
+                  ],
+                  "max": [
+                    9.203715,
+                    -7.9146104,
+                    0.70000005
+                  ]
+                },
+                "triangleCount": 3956
+              },
+              {
+                "productId": 295370,
+                "ifcType": "IfcSlab",
+                "openings": 9,
+                "csgFailures": 1,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    -15.856375,
+                    -23.858398,
+                    -2.5
+                  ],
+                  "max": [
+                    7.232079,
+                    27.144684,
+                    -1.35
+                  ]
+                },
+                "triangleCount": 575
+              },
+              {
+                "productId": 296868,
+                "ifcType": "IfcSlab",
+                "openings": 9,
+                "csgFailures": 1,
+                "firstFailureLabel": "KernelError",
+                "bbox": {
+                  "min": [
+                    -7.2320786,
+                    -27.144684,
+                    -2.5
+                  ],
+                  "max": [
+                    15.856374,
+                    23.8584,
+                    -1.35
+                  ]
+                },
+                "triangleCount": 582
+              },
+              {
+                "productId": 337691,
+                "ifcType": "IfcWallStandardCase",
+                "openings": 1,
+                "csgFailures": 1,
+                "firstFailureLabel": "NoBoundsOverlap",
+                "bbox": {
+                  "min": [
+                    23.35984,
+                    -14.259136,
+                    46.6
+                  ],
+                  "max": [
+                    33.468803,
+                    8.634621,
+                    52.7
+                  ]
+                },
+                "triangleCount": 36
+              }
+            ],
+            "oversizedRefDrops": 0,
+            "totalUnsupportedItems": 0,
+            "unsupportedItemsByType": []
+          }
+        },
+        "models": [
+          {
+            "name": "ISSUE_129_N1540_17_EXE_MOD_448200_02_09_11SMC_IGC_V17.ifc",
+            "path": "native",
+            "meshes": 1402,
+            "entities": 21927
+          }
+        ]
+      },
+      "requestMs": 2.8,
+      "seconds": 20.474
+    }
+  ],
+  "errors": [],
+  "console": [],
+  "tests": [
+    "original IFC reaches Ready using the native backend",
+    "Reference feature #322462 absent; all optional Body feature meshes are transparent and hidden",
+    "real wheel, pointer orbit and visible Home control respond on the full bridge"
+  ],
+  "exeSha256": "ede20104a6152a308bdb50fed44f870d1ac5d0539e623e150abb311325b89545",
+  "modelSha256": "ffdfa9a91ac6a6c301d7da0d7861dfbc3958ceb55098c143a560468702642131",
+  "pid": 24216,
+  "backend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "loadSeconds": 3.106,
+  "meshEvidence": {
+    "coordinateInfo": {
+      "originShift": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "shiftedBounds": {
+        "min": {
+          "x": -40.97206497192383,
+          "y": -5.900000095367432,
+          "z": -55.683509826660156
+        },
+        "max": {
+          "x": 33.46880388259888,
+          "y": 58.20000076293945,
+          "z": 55.6834716796875
+        }
+      },
+      "originalBounds": {
+        "min": {
+          "x": 1661226.265335028,
+          "y": -20.000000095368634,
+          "z": -8178696.196709816
+        },
+        "max": {
+          "x": 1661300.7062038826,
+          "y": 44.10000076293825,
+          "z": -8178584.82972831
+        }
+      },
+      "hasLargeCoordinates": false,
+      "lengthUnitScale": 1,
+      "buildingRotation": 1.168832558601732,
+      "wasmRtcFrame": {
+        "x": 1661267.2374,
+        "y": 8178640.51319999,
+        "z": -14.1000000000012,
+        "needsShift": true
+      },
+      "wasmRtcOffset": {
+        "x": 1661267.2374,
+        "y": 8178640.51319999,
+        "z": -14.1000000000012
+      }
+    },
+    "idOffset": 0,
+    "openingsVisible": false,
+    "featureMeshes": 361,
+    "opaqueFeatures": 0,
+    "meshes": [
+      {
+        "id": 12381,
+        "triangles": 7565
+      },
+      {
+        "id": 32810,
+        "triangles": 3207
+      }
+    ]
+  },
+  "failure": "AssertionError [ERR_ASSERTION]: full-model geometry must have no residual CSG failures\n\n41 !== 0\n\n    at file:///F:/Steel/VBA/IFC-Lite-Core104/research/nhip-fix-20261024/capture-issue129-baseline.mjs:149:10",
+  "closeRequest": "Error: page.evaluate: Command plugin:window|close not allowed by ACL",
+  "cleanExit": false,
+  "finished": "2026-10-24T17:21:36.903Z"
+}

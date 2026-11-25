@@ -1,0 +1,16 @@
+{
+  "refs": {
+    "main": {
+      "layers": [
+        "blake3:06299cdac189e2ae47958def7c8557c4f6754edf76cfbc02b600e7ddfd7b24b1",
+        "blake3:6acd5918f621135f5cb4a4c52ad6a80b2039d071b29795245686a1a811834057",
+        "blake3:d276b9820aff7b6bc1b3f4ba825eba95a5d4ffd089df31bbf02c8bb82ab6e902"
+      ],
+      "policy": {
+        "requiredChecks": [
+          "fire-safety.ids"
+        ]
+      }
+    }
+  }
+}

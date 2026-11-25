@@ -1,0 +1,12 @@
+[package]
+name = "symbolic-candidate-probe"
+version = "0.0.0"
+edition = "2021"
+publish = false
+[workspace]
+[dependencies]
+ifc-lite-processing = { path = "../../../rust/processing" }
+serde_json = "1"
+[[bin]]
+name = "symbolic-candidate-probe"
+path = "../windows-baseline-probe/src/main.rs"

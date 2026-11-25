@@ -1,0 +1,38 @@
+{
+  "header": {
+    "id": "blake3:7e08edfadec27f14d979b193b43ada5701f990ad296c83e80c68a17efeb17f6e",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "erin"
+      },
+      "intent": "Import other model",
+      "created": "2026-10-19T03:20:18.021Z",
+      "base": null,
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "slab-1",
+      "attributes": {
+        "bsi::ifc::class": {
+          "code": "IfcSlab",
+          "uri": "u"
+        }
+      }
+    }
+  ]
+}

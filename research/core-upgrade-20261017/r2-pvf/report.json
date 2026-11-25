@@ -1,0 +1,102 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017-r2\\IFC-Lite.exe",
+  "model": "F:\\Working\\IFC Temp\\IFC_PVF.ifc",
+  "bytes": 1411171948,
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-core104-large-rEhCec",
+  "hostPid": 38488,
+  "errors": [],
+  "progress": [
+    {
+      "milliseconds": 1232,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    },
+    {
+      "milliseconds": 2334,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    },
+    {
+      "milliseconds": 3426,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    },
+    {
+      "milliseconds": 4509,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    },
+    {
+      "milliseconds": 6094,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    },
+    {
+      "milliseconds": 7235,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    },
+    {
+      "milliseconds": 8325,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    },
+    {
+      "milliseconds": 11534,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    },
+    {
+      "milliseconds": 40711,
+      "loading": true,
+      "models": [
+        {
+          "id": "42c418ed-da93-4f0d-bf6d-f2514ab68312"
+        }
+      ]
+    }
+  ],
+  "backend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "ok": false,
+  "failure": "page.evaluate: Target page, context or browser has been closed\n    at F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\core-upgrade-20261017\\large-model.mjs:59:30",
+  "exitedAfterClose": false
+}

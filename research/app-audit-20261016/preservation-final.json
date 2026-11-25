@@ -1,0 +1,16 @@
+{
+  "model": {
+    "path": "F:\\Steel\\VBA\\IFC COLO\\hangarvd_f10_ tan base_f01_colored.ifc",
+    "sha256": "df595b8d150b09dabbc48e21f6efd1b26a0f35ab07636a02d0b51896b94894a2"
+  },
+  "old_executables": {
+    "desktop/release/10.3.0-native-panel-motion-20261016-r2/IFC-Lite.exe": "4f749a1f810c29b0213bedc9a2b9ad5a556c6edc03896d84faf654eeb5afc0ef",
+    "desktop/release/10.3.0-native-interactions-20261016-r2/IFC-Lite.exe": "8e2ad2fd94f507eddd75249e1a36e59ecc3516193cfd53aa975eb768c9eed848"
+  },
+  "new_executable": {
+    "path": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.3.0-native-quality-audit-20261017\\IFC-Lite.exe",
+    "sha256": "1b9a8879c4ff556324cf3aaa459b58d2fcd8f1d03fda22579bd861e98fbc1d4b",
+    "bytes": 44248064,
+    "binary_modified_utc": "2026-10-16T19:00:02.566016+00:00"
+  }
+}

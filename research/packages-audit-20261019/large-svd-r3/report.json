@@ -1,0 +1,1718 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-packages-audit-20261020-r3\\IFC-Lite.exe",
+  "model": "F:\\Working\\IFC Temp\\SVD TRONG DONG-22.09.2026 (8H).ifc",
+  "bytes": 883278635,
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-core104-large-7B9muL",
+  "hostPid": 48548,
+  "errors": [],
+  "progress": [
+    {
+      "milliseconds": 1306,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 0
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 2325,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 1
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 4488,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 1
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 5868,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 1
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 7054,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 2
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 8178,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 2
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 10296,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 3
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 11417,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 4
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 12765,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 4
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 13887,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 4
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 15025,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 5
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 16152,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 5
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 17341,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 6
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 18449,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 6
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 19565,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 7
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 20714,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 7
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 21857,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 8
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 23001,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 8
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 24132,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 9
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 25304,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 9
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 26410,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 10
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 27550,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 10
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 28712,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 11
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 29863,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 11
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 31127,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 12
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 32327,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 12
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 35745,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 13
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 42834,
+      "loading": true,
+      "progress": {
+        "phase": "Reading IFC in native backend",
+        "percent": 14
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 44203,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 65,552 / 774,145 elements",
+        "percent": 25.08059859587028
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 45218,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 65,552 / 774,145 elements",
+        "percent": 25.08059859587028
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 46226,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 65,552 / 774,145 elements",
+        "percent": 25.08059859587028
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 47260,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 131,088 / 774,145 elements",
+        "percent": 30.159957113977356
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 48268,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 131,088 / 774,145 elements",
+        "percent": 30.159957113977356
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 49273,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 196,624 / 774,145 elements",
+        "percent": 35.23931563208443
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 50283,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 196,624 / 774,145 elements",
+        "percent": 35.23931563208443
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 51290,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 196,624 / 774,145 elements",
+        "percent": 35.23931563208443
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 52334,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 262,160 / 774,145 elements",
+        "percent": 40.3186741501915
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 53347,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 262,160 / 774,145 elements",
+        "percent": 40.3186741501915
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 54355,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 262,160 / 774,145 elements",
+        "percent": 40.3186741501915
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 55374,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 327,696 / 774,145 elements",
+        "percent": 45.39803266829857
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 56380,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 327,696 / 774,145 elements",
+        "percent": 45.39803266829857
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 57384,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 393,232 / 774,145 elements",
+        "percent": 50.47739118640565
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 58393,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 393,232 / 774,145 elements",
+        "percent": 50.47739118640565
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 59397,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 393,232 / 774,145 elements",
+        "percent": 50.47739118640565
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 60417,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 458,768 / 774,145 elements",
+        "percent": 55.55674970451272
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 61420,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 524,304 / 774,145 elements",
+        "percent": 60.6361082226198
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 62426,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 524,304 / 774,145 elements",
+        "percent": 60.6361082226198
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 63433,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 524,304 / 774,145 elements",
+        "percent": 60.6361082226198
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 64438,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 589,840 / 774,145 elements",
+        "percent": 65.71546674072687
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 65449,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 589,840 / 774,145 elements",
+        "percent": 65.71546674072687
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 66452,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 589,840 / 774,145 elements",
+        "percent": 65.71546674072687
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 67457,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 589,840 / 774,145 elements",
+        "percent": 65.71546674072687
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 68459,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 589,840 / 774,145 elements",
+        "percent": 65.71546674072687
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 69473,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 655,376 / 774,145 elements",
+        "percent": 70.79482525883394
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 70480,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 655,376 / 774,145 elements",
+        "percent": 70.79482525883394
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 71483,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 655,376 / 774,145 elements",
+        "percent": 70.79482525883394
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 72486,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 720,912 / 774,145 elements",
+        "percent": 75.87418377694101
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 73510,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 720,912 / 774,145 elements",
+        "percent": 75.87418377694101
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 74515,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 720,912 / 774,145 elements",
+        "percent": 75.87418377694101
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 75517,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 720,912 / 774,145 elements",
+        "percent": 75.87418377694101
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 76535,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 774,145 / 774,145 elements",
+        "percent": 80
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 77565,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 774,145 / 774,145 elements",
+        "percent": 80
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 78568,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 774,145 / 774,145 elements",
+        "percent": 80
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 79576,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 774,145 / 774,145 elements",
+        "percent": 80
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 80582,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 774,145 / 774,145 elements",
+        "percent": 80
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 81588,
+      "loading": true,
+      "progress": {
+        "phase": "Native Rust geometry · 774,145 / 774,145 elements",
+        "percent": 80
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 82603,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 83612,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 84623,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 85634,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 86643,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 87648,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 88662,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 89674,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 90684,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 91694,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 92705,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 93720,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 94728,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 95740,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 96748,
+      "loading": true,
+      "progress": {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 97764,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 85.10039370937457
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 98780,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 85.43922247851378
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 99788,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 85.76550203398116
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 100798,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 86.09178158944854
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 101809,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 86.45570878593139
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 102826,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 86.78198834139877
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 103835,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 87.10826789686615
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 104844,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 87.42199823866171
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 105866,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 87.73572858045728
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 106872,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 88.036909708581
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 107912,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 88.35064005037657
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 108920,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 88.6518211785003
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 109932,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 88.95300230662404
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 110946,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 89.26673264841959
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 111964,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 89.61811063123062
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 112994,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 89.95693940036982
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 114003,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 90.29576816950903
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 115015,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 90.65969536599188
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 116023,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 90.99852413513108
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 117028,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 91.34990211794211
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 118042,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 91.6887308870813
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 119046,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 92.00246122887687
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 120052,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 92.32874078434425
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 121064,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 92.60482348512434
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 122081,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 92.96875068160719
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 123096,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 93.3703255191055
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 124103,
+      "loading": true,
+      "progress": {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 93.73425271558835
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 125119,
+      "loading": true,
+      "progress": {
+        "phase": "Preparing native scene",
+        "percent": 95
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 126136,
+      "loading": true,
+      "progress": {
+        "phase": "Building native BIM indexes",
+        "percent": 96
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 127156,
+      "loading": true,
+      "progress": {
+        "phase": "Building native BIM indexes",
+        "percent": 96
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 128170,
+      "loading": true,
+      "progress": {
+        "phase": "Building native BIM indexes",
+        "percent": 96
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 129185,
+      "loading": true,
+      "progress": {
+        "phase": "Building native BIM indexes",
+        "percent": 96
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 130212,
+      "loading": true,
+      "progress": {
+        "phase": "Building native BIM indexes",
+        "percent": 96
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 131228,
+      "loading": true,
+      "progress": {
+        "phase": "Identifying native model source",
+        "percent": 97
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 132236,
+      "loading": true,
+      "progress": {
+        "phase": "Identifying native model source",
+        "percent": 97
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 133244,
+      "loading": true,
+      "progress": {
+        "phase": "Identifying native model source",
+        "percent": 97
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 134252,
+      "loading": true,
+      "progress": {
+        "phase": "Identifying native model source",
+        "percent": 97
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 135256,
+      "loading": true,
+      "progress": {
+        "phase": "Identifying native model source",
+        "percent": 97
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37"
+        }
+      ]
+    },
+    {
+      "milliseconds": 142955,
+      "loading": false,
+      "progress": {
+        "phase": "Complete",
+        "percent": 100
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37",
+          "path": "native",
+          "meshes": 163867,
+          "vertices": 304642800,
+          "triangles": 183466717,
+          "sourceBytes": 0
+        }
+      ]
+    }
+  ],
+  "backend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "loaded": {
+    "milliseconds": 142955,
+    "loading": false,
+    "progress": {
+      "phase": "Complete",
+      "percent": 100
+    },
+    "models": [
+      {
+        "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37",
+        "path": "native",
+        "meshes": 163867,
+        "vertices": 304642800,
+        "triangles": 183466717,
+        "sourceBytes": 0
+      }
+    ]
+  },
+  "countComparison": {
+    "meshes": {
+      "previous": 163867,
+      "actual": 163867,
+      "identical": true
+    },
+    "vertices": {
+      "previous": 304642800,
+      "actual": 304642800,
+      "identical": true
+    },
+    "triangles": {
+      "previous": 183466717,
+      "actual": 183466717,
+      "identical": true
+    }
+  },
+  "selection": {
+    "modelId": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37",
+    "expressId": 8871707
+  },
+  "gestures": {
+    "before": {
+      "position": {
+        "x": 469.2756654837452,
+        "y": 476.3906251671184,
+        "z": 470.9139101126514
+      },
+      "target": {
+        "x": -0.82025146484375,
+        "y": 84.64402770996094,
+        "z": 0.8179931640625
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "orbit": {
+      "position": {
+        "x": 271.29612993212487,
+        "y": 565.9538189271616,
+        "z": 539.092364406651
+      },
+      "target": {
+        "x": -0.82025146484375,
+        "y": 84.64402770996094,
+        "z": 0.8179931640625
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "pan": {
+      "position": {
+        "x": 256.2101263070557,
+        "y": 571.6605143593674,
+        "z": 541.6160965435616
+      },
+      "target": {
+        "x": -15.906255089913,
+        "y": 90.35072314216677,
+        "z": 3.3417253009731183
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "zoom": {
+      "position": {
+        "x": 257.66254304375667,
+        "y": 571.045330424638,
+        "z": 541.4319296190657
+      },
+      "target": {
+        "x": -14.45383835321203,
+        "y": 89.73553920743738,
+        "z": 3.157558376477274
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 206.12521215729885
+    }
+  },
+  "cleared": true,
+  "ok": true,
+  "closeRequested": true,
+  "closeResponse": {
+    "status": 0,
+    "stdout": "True\r\n",
+    "stderr": ""
+  },
+  "hostExit": {
+    "code": 0,
+    "signal": null,
+    "at": "2026-10-20T01:53:42.354Z"
+  },
+  "exitedAfterClose": true
+}

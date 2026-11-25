@@ -1,0 +1,7 @@
+{
+  visibility: 'visible',
+  focus: false,
+  location: 'http://tauri.localhost/',
+  is_visible: true,
+  is_minimized: false
+}

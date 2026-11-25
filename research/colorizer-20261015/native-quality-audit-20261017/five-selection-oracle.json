@@ -1,0 +1,57 @@
+{
+  "oracle": "IfcOpenShell 0.8.5",
+  "output": "F:\\Steel\\VBA\\IFC-Lite\\research\\colorizer-20261015\\native-quality-audit-20261017\\ui-five-selected.ifc",
+  "red": 5,
+  "gray": 14504,
+  "body_items": 14509,
+  "non_presentation_records_unchanged": 184677,
+  "geometry_samples": [
+    {
+      "expressId": 58,
+      "triangles": 12
+    },
+    {
+      "expressId": 81179,
+      "triangles": 32
+    },
+    {
+      "expressId": 142617,
+      "triangles": 44
+    },
+    {
+      "expressId": 145921,
+      "triangles": 44
+    },
+    {
+      "expressId": 176798,
+      "triangles": 332
+    },
+    {
+      "expressId": 103,
+      "triangles": 44
+    },
+    {
+      "expressId": 142,
+      "triangles": 44
+    },
+    {
+      "expressId": 156,
+      "triangles": 44
+    },
+    {
+      "expressId": 169,
+      "triangles": 44
+    },
+    {
+      "expressId": 182,
+      "triangles": 44
+    },
+    {
+      "expressId": 195,
+      "triangles": 44
+    }
+  ],
+  "source_sha256": "df595b8d150b09dabbc48e21f6efd1b26a0f35ab07636a02d0b51896b94894a2",
+  "output_sha256": "ef53cd6a5965f2b7f61485c89bccca418601d751813e630978640ddb1cf4e3df",
+  "bytes": 11874073
+}

@@ -1,0 +1,1633 @@
+{
+  "session": {
+    "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-nhip-load-20261027-r7\\IFC-Lite.exe",
+    "sha256": "0a957e98ca82f23a56192313d9179dd6d4f9d71cd81c27fce0d87456dd76dff8",
+    "pid": 10488,
+    "port": 51725
+  },
+  "method": "RPC intervals and native load progress; overlaps are retained, not additive phase times",
+  "load": {
+    "active": false,
+    "started": "2026-10-27T04:53:51.437Z",
+    "start": 1186.8649999946356,
+    "file": {
+      "name": "Nhip chinh.ifc",
+      "size": 129987273,
+      "lastModified": 1792809669124
+    },
+    "calls": [],
+    "commandTotals": {},
+    "phases": [
+      {
+        "phase": "Reading IFC in native backend",
+        "percent": 0,
+        "indeterminate": false,
+        "at": 1295.4599999934435
+      },
+      {
+        "phase": "Reading IFC in native backend",
+        "percent": 4,
+        "indeterminate": false,
+        "at": 2299.920000001788
+      },
+      {
+        "phase": "Reading IFC in native backend",
+        "percent": 11,
+        "indeterminate": false,
+        "at": 3329.0849999934435
+      },
+      {
+        "phase": "Native Rust indexing",
+        "percent": 15,
+        "indeterminate": true,
+        "at": 3855.704999998212
+      },
+      {
+        "phase": "Native Rust geometry · 0 meshes",
+        "percent": 20,
+        "indeterminate": true,
+        "at": 3861.9099999964237
+      },
+      {
+        "phase": "Native Rust geometry · 16 / 174,157 elements",
+        "percent": 20.005512267666532,
+        "indeterminate": false,
+        "at": 4128.754999995232
+      },
+      {
+        "phase": "Native Rust geometry · 16 / 174,157 elements",
+        "percent": 20.005512267666532,
+        "indeterminate": false,
+        "at": 5134.015000000596
+      },
+      {
+        "phase": "Native Rust geometry · 16 / 174,157 elements",
+        "percent": 20.005512267666532,
+        "indeterminate": false,
+        "at": 6141.204999998212
+      },
+      {
+        "phase": "Native Rust geometry · 4,112 / 174,157 elements",
+        "percent": 21.416652790298407,
+        "indeterminate": false,
+        "at": 6807.310000002384
+      },
+      {
+        "phase": "Native Rust geometry · 4,112 / 174,157 elements",
+        "percent": 21.416652790298407,
+        "indeterminate": false,
+        "at": 7809.590000003576
+      },
+      {
+        "phase": "Native Rust geometry · 4,112 / 174,157 elements",
+        "percent": 21.416652790298407,
+        "indeterminate": false,
+        "at": 8811.22499999404
+      },
+      {
+        "phase": "Native Rust geometry · 8,208 / 174,157 elements",
+        "percent": 22.827793312930286,
+        "indeterminate": false,
+        "at": 9748.054999992251
+      },
+      {
+        "phase": "Native Rust geometry · 12,304 / 174,157 elements",
+        "percent": 24.238933835562165,
+        "indeterminate": false,
+        "at": 10375.70000000298
+      },
+      {
+        "phase": "Native Rust geometry · 12,304 / 174,157 elements",
+        "percent": 24.238933835562165,
+        "indeterminate": false,
+        "at": 11377.234999999404
+      },
+      {
+        "phase": "Native Rust geometry · 16,400 / 174,157 elements",
+        "percent": 25.650074358194043,
+        "indeterminate": false,
+        "at": 11678.530000001192
+      },
+      {
+        "phase": "Native Rust geometry · 16,400 / 174,157 elements",
+        "percent": 25.650074358194043,
+        "indeterminate": false,
+        "at": 12683.17499999702
+      },
+      {
+        "phase": "Native Rust geometry · 16,400 / 174,157 elements",
+        "percent": 25.650074358194043,
+        "indeterminate": false,
+        "at": 13687.810000002384
+      },
+      {
+        "phase": "Native Rust geometry · 20,496 / 174,157 elements",
+        "percent": 27.061214880825922,
+        "indeterminate": false,
+        "at": 14623.09999999404
+      },
+      {
+        "phase": "Native Rust geometry · 20,496 / 174,157 elements",
+        "percent": 27.061214880825922,
+        "indeterminate": false,
+        "at": 15627.664999991655
+      },
+      {
+        "phase": "Native Rust geometry · 20,496 / 174,157 elements",
+        "percent": 27.061214880825922,
+        "indeterminate": false,
+        "at": 16631.87999999523
+      },
+      {
+        "phase": "Native Rust geometry · 24,592 / 174,157 elements",
+        "percent": 28.472355403457797,
+        "indeterminate": false,
+        "at": 17509.74500000477
+      },
+      {
+        "phase": "Native Rust geometry · 28,688 / 174,157 elements",
+        "percent": 29.88349592608968,
+        "indeterminate": false,
+        "at": 18119.05499999225
+      },
+      {
+        "phase": "Native Rust geometry · 28,688 / 174,157 elements",
+        "percent": 29.88349592608968,
+        "indeterminate": false,
+        "at": 19124.25499999523
+      },
+      {
+        "phase": "Native Rust geometry · 28,688 / 174,157 elements",
+        "percent": 29.88349592608968,
+        "indeterminate": false,
+        "at": 20131.019999995828
+      },
+      {
+        "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+        "percent": 31.294636448721555,
+        "indeterminate": false,
+        "at": 20822.230000004172
+      },
+      {
+        "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+        "percent": 31.294636448721555,
+        "indeterminate": false,
+        "at": 21823.579999998212
+      },
+      {
+        "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+        "percent": 31.294636448721555,
+        "indeterminate": false,
+        "at": 22824.980000004172
+      },
+      {
+        "phase": "Native Rust geometry · 32,784 / 174,157 elements",
+        "percent": 31.294636448721555,
+        "indeterminate": false,
+        "at": 23826.420000001788
+      },
+      {
+        "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+        "percent": 32.70577697135343,
+        "indeterminate": false,
+        "at": 24362.539999991655
+      },
+      {
+        "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+        "percent": 32.70577697135343,
+        "indeterminate": false,
+        "at": 25442.5
+      },
+      {
+        "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+        "percent": 32.70577697135343,
+        "indeterminate": false,
+        "at": 26669.045000001788
+      },
+      {
+        "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+        "percent": 32.70577697135343,
+        "indeterminate": false,
+        "at": 27673.219999998808
+      },
+      {
+        "phase": "Native Rust geometry · 36,880 / 174,157 elements",
+        "percent": 32.70577697135343,
+        "indeterminate": false,
+        "at": 28676.189999997616
+      },
+      {
+        "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+        "percent": 34.11691749398531,
+        "indeterminate": false,
+        "at": 29133.590000003576
+      },
+      {
+        "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+        "percent": 34.11691749398531,
+        "indeterminate": false,
+        "at": 30149.59999999404
+      },
+      {
+        "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+        "percent": 34.11691749398531,
+        "indeterminate": false,
+        "at": 31361.489999994636
+      },
+      {
+        "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+        "percent": 34.11691749398531,
+        "indeterminate": false,
+        "at": 32363.114999994636
+      },
+      {
+        "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+        "percent": 34.11691749398531,
+        "indeterminate": false,
+        "at": 33363.34999999404
+      },
+      {
+        "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+        "percent": 34.11691749398531,
+        "indeterminate": false,
+        "at": 34368.715000003576
+      },
+      {
+        "phase": "Native Rust geometry · 40,976 / 174,157 elements",
+        "percent": 34.11691749398531,
+        "indeterminate": false,
+        "at": 35376.635000005364
+      },
+      {
+        "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+        "percent": 35.52805801661719,
+        "indeterminate": false,
+        "at": 35837.08499999344
+      },
+      {
+        "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+        "percent": 35.52805801661719,
+        "indeterminate": false,
+        "at": 36979.5
+      },
+      {
+        "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+        "percent": 35.52805801661719,
+        "indeterminate": false,
+        "at": 38096.52500000596
+      },
+      {
+        "phase": "Native Rust geometry · 45,072 / 174,157 elements",
+        "percent": 35.52805801661719,
+        "indeterminate": false,
+        "at": 39103.37000000477
+      },
+      {
+        "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+        "percent": 36.93919853924906,
+        "indeterminate": false,
+        "at": 39507.65500000119
+      },
+      {
+        "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+        "percent": 36.93919853924906,
+        "indeterminate": false,
+        "at": 40766.17999999225
+      },
+      {
+        "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+        "percent": 36.93919853924906,
+        "indeterminate": false,
+        "at": 41983.340000003576
+      },
+      {
+        "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+        "percent": 36.93919853924906,
+        "indeterminate": false,
+        "at": 42983.340000003576
+      },
+      {
+        "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+        "percent": 36.93919853924906,
+        "indeterminate": false,
+        "at": 43986.70499999821
+      },
+      {
+        "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+        "percent": 36.93919853924906,
+        "indeterminate": false,
+        "at": 44990.95999999344
+      },
+      {
+        "phase": "Native Rust geometry · 49,168 / 174,157 elements",
+        "percent": 36.93919853924906,
+        "indeterminate": false,
+        "at": 45991.47499999404
+      },
+      {
+        "phase": "Native Rust geometry · 53,264 / 174,157 elements",
+        "percent": 38.350339061880945,
+        "indeterminate": false,
+        "at": 46619.164999991655
+      },
+      {
+        "phase": "Native Rust geometry · 53,264 / 174,157 elements",
+        "percent": 38.350339061880945,
+        "indeterminate": false,
+        "at": 47622.215000003576
+      },
+      {
+        "phase": "Native Rust geometry · 57,360 / 174,157 elements",
+        "percent": 39.76147958451283,
+        "indeterminate": false,
+        "at": 48031.515000000596
+      },
+      {
+        "phase": "Native Rust geometry · 57,360 / 174,157 elements",
+        "percent": 39.76147958451283,
+        "indeterminate": false,
+        "at": 49033.340000003576
+      },
+      {
+        "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+        "percent": 41.1726201071447,
+        "indeterminate": false,
+        "at": 49269.09499999881
+      },
+      {
+        "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+        "percent": 41.1726201071447,
+        "indeterminate": false,
+        "at": 50274.78000000119
+      },
+      {
+        "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+        "percent": 41.1726201071447,
+        "indeterminate": false,
+        "at": 51283.489999994636
+      },
+      {
+        "phase": "Native Rust geometry · 61,456 / 174,157 elements",
+        "percent": 41.1726201071447,
+        "indeterminate": false,
+        "at": 52291.375
+      },
+      {
+        "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+        "percent": 42.58376062977658,
+        "indeterminate": false,
+        "at": 52732.74500000477
+      },
+      {
+        "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+        "percent": 42.58376062977658,
+        "indeterminate": false,
+        "at": 53866.340000003576
+      },
+      {
+        "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+        "percent": 42.58376062977658,
+        "indeterminate": false,
+        "at": 54868.664999991655
+      },
+      {
+        "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+        "percent": 42.58376062977658,
+        "indeterminate": false,
+        "at": 55869.48000000417
+      },
+      {
+        "phase": "Native Rust geometry · 65,552 / 174,157 elements",
+        "percent": 42.58376062977658,
+        "indeterminate": false,
+        "at": 56873.96999999881
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 57681.664999991655
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 58891.765000000596
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 59894.659999996424
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 60902.62000000477
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 61911.765000000596
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 62921.159999996424
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 63922.05499999225
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 64924.015000000596
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 65926.27500000596
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 66929.92999999225
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 67934.42499999702
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 68937.27500000596
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 69944.61499999464
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 70951.20999999344
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 71954.31000000238
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 72957.94499999285
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 73963.93500000238
+      },
+      {
+        "phase": "Native Rust geometry · 69,648 / 174,157 elements",
+        "percent": 43.99490115240846,
+        "indeterminate": false,
+        "at": 74971.59499999881
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 75172.89499999583
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 76173.83499999344
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 77174.49500000477
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 78177.12999999523
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 79185.14499999583
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 80187.12000000477
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 81194.62000000477
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 82194.75
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 83202.23999999464
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 84207.7349999994
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 85213.86499999464
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 86223.30499999225
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 87231.82999999821
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 88233.42999999225
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 89244.53999999166
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 90253.45999999344
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 91256.26999999583
+      },
+      {
+        "phase": "Native Rust geometry · 73,744 / 174,157 elements",
+        "percent": 45.40604167504034,
+        "indeterminate": false,
+        "at": 92262.1400000006
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 92804.17999999225
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 93804.41499999166
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 94805.07500000298
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 95806.30499999225
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 96814.90000000596
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 97821.81000000238
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 98827.53499999642
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 99833.99500000477
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 100842.7349999994
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 101851.96500000358
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 102852.45000000298
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 103862.01999999583
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 104864.92000000179
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 105874.97499999404
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 106884.43999999762
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 107893.3900000006
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 108896.59000000358
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 109903.57500000298
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 110908.95499999821
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 111911.1099999994
+      },
+      {
+        "phase": "Native Rust geometry · 77,840 / 174,157 elements",
+        "percent": 46.81718219767222,
+        "indeterminate": false,
+        "at": 112911.40000000596
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 113766.63500000536
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 114775.23000000417
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 115783.76999999583
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 116784.40999999642
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 117791.66499999166
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 118793.09000000358
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 119794.40000000596
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 120794.73000000417
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 121801.53000000119
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 122805.14499999583
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 123812.54999999702
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 124822.31499999762
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 125824
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 126833.54999999702
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 127834.94499999285
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 128842.67499999702
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 129851.79500000179
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 130852.27500000596
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 131853.85500000417
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 132856.4549999982
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 133864.88500000536
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 134871.69499999285
+      },
+      {
+        "phase": "Native Rust geometry · 81,936 / 174,157 elements",
+        "percent": 48.22832272030409,
+        "indeterminate": false,
+        "at": 135879.14499999583
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 136159.87000000477
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 137163.68999999762
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 138172.01000000536
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 139173.8449999988
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 140181.1550000012
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 141186.30499999225
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 142194.04999999702
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 143204.4849999994
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 144214.06000000238
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 145221.9200000018
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 146223.84000000358
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 147233.59000000358
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 148242.48999999464
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 149252.20999999344
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 150256.0949999988
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 151265.2199999988
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 152273.8299999982
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 153275.04999999702
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 154281.74500000477
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 155283.0450000018
+      },
+      {
+        "phase": "Native Rust geometry · 86,032 / 174,157 elements",
+        "percent": 49.639463242935975,
+        "indeterminate": false,
+        "at": 156285.38500000536
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 156429.3599999994
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 157432.7199999988
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 158434.76000000536
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 159441.93999999762
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 160445.81499999762
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 161446.45000000298
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 162454.42499999702
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 163459.98000000417
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 164464.00499999523
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 165465.68500000238
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 166474.1700000018
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 167474.67499999702
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 168482.95999999344
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 169485.75499999523
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 170493.34000000358
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 171493.37999999523
+      },
+      {
+        "phase": "Native Rust geometry · 90,128 / 174,157 elements",
+        "percent": 51.05060376556786,
+        "indeterminate": false,
+        "at": 172497.26999999583
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 172896.2800000012
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 173902.70999999344
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 174905.4200000018
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 175912.18500000238
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 176917.71500000358
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 177923.58499999344
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 178924.92499999702
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 179933.96500000358
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 180943.61499999464
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 181945.18999999762
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 182953.73000000417
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 183963.7650000006
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 184963.98000000417
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 185971.8900000006
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 186973.84000000358
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 187981.53999999166
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 188985.07500000298
+      },
+      {
+        "phase": "Native Rust geometry · 94,224 / 174,157 elements",
+        "percent": 52.461744288199725,
+        "indeterminate": false,
+        "at": 189989.70999999344
+      },
+      {
+        "phase": "Native Rust geometry · 98,320 / 174,157 elements",
+        "percent": 53.8728848108316,
+        "indeterminate": false,
+        "at": 190730.92499999702
+      },
+      {
+        "phase": "Native Rust geometry · 102,416 / 174,157 elements",
+        "percent": 55.28402533346348,
+        "indeterminate": false,
+        "at": 191494.375
+      },
+      {
+        "phase": "Native Rust geometry · 102,416 / 174,157 elements",
+        "percent": 55.28402533346348,
+        "indeterminate": false,
+        "at": 192674.28999999166
+      },
+      {
+        "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+        "percent": 56.69516585609536,
+        "indeterminate": false,
+        "at": 192766.96500000358
+      },
+      {
+        "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+        "percent": 56.69516585609536,
+        "indeterminate": false,
+        "at": 193914.44499999285
+      },
+      {
+        "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+        "percent": 56.69516585609536,
+        "indeterminate": false,
+        "at": 194914.9549999982
+      },
+      {
+        "phase": "Native Rust geometry · 106,512 / 174,157 elements",
+        "percent": 56.69516585609536,
+        "indeterminate": false,
+        "at": 195919.63500000536
+      },
+      {
+        "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+        "percent": 58.10630637872724,
+        "indeterminate": false,
+        "at": 196051.5450000018
+      },
+      {
+        "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+        "percent": 58.10630637872724,
+        "indeterminate": false,
+        "at": 197241.30499999225
+      },
+      {
+        "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+        "percent": 58.10630637872724,
+        "indeterminate": false,
+        "at": 198247.57500000298
+      },
+      {
+        "phase": "Native Rust geometry · 110,608 / 174,157 elements",
+        "percent": 58.10630637872724,
+        "indeterminate": false,
+        "at": 199249.28499999642
+      },
+      {
+        "phase": "Native Rust geometry · 114,704 / 174,157 elements",
+        "percent": 59.517446901359115,
+        "indeterminate": false,
+        "at": 199779.61499999464
+      },
+      {
+        "phase": "Native Rust geometry · 114,704 / 174,157 elements",
+        "percent": 59.517446901359115,
+        "indeterminate": false,
+        "at": 200948.41499999166
+      },
+      {
+        "phase": "Native Rust geometry · 118,800 / 174,157 elements",
+        "percent": 60.928587423991,
+        "indeterminate": false,
+        "at": 201765.7049999982
+      },
+      {
+        "phase": "Native Rust geometry · 118,800 / 174,157 elements",
+        "percent": 60.928587423991,
+        "indeterminate": false,
+        "at": 202915.84999999404
+      },
+      {
+        "phase": "Native Rust geometry · 122,896 / 174,157 elements",
+        "percent": 62.33972794662287,
+        "indeterminate": false,
+        "at": 203241.40999999642
+      },
+      {
+        "phase": "Native Rust geometry · 122,896 / 174,157 elements",
+        "percent": 62.33972794662287,
+        "indeterminate": false,
+        "at": 204372.53499999642
+      },
+      {
+        "phase": "Native Rust geometry · 126,992 / 174,157 elements",
+        "percent": 63.750868469254755,
+        "indeterminate": false,
+        "at": 204702.375
+      },
+      {
+        "phase": "Native Rust geometry · 126,992 / 174,157 elements",
+        "percent": 63.750868469254755,
+        "indeterminate": false,
+        "at": 205814.93500000238
+      },
+      {
+        "phase": "Native Rust geometry · 131,088 / 174,157 elements",
+        "percent": 65.16200899188664,
+        "indeterminate": false,
+        "at": 206179.43500000238
+      },
+      {
+        "phase": "Native Rust geometry · 131,088 / 174,157 elements",
+        "percent": 65.16200899188664,
+        "indeterminate": false,
+        "at": 207192.7199999988
+      },
+      {
+        "phase": "Native Rust geometry · 131,088 / 174,157 elements",
+        "percent": 65.16200899188664,
+        "indeterminate": false,
+        "at": 208193.58499999344
+      },
+      {
+        "phase": "Native Rust geometry · 135,184 / 174,157 elements",
+        "percent": 66.5731495145185,
+        "indeterminate": false,
+        "at": 208991.62000000477
+      },
+      {
+        "phase": "Native Rust geometry · 139,280 / 174,157 elements",
+        "percent": 67.98429003715039,
+        "indeterminate": false,
+        "at": 209943.7950000018
+      },
+      {
+        "phase": "Native Rust geometry · 139,280 / 174,157 elements",
+        "percent": 67.98429003715039,
+        "indeterminate": false,
+        "at": 211105.0450000018
+      },
+      {
+        "phase": "Native Rust geometry · 143,376 / 174,157 elements",
+        "percent": 69.39543055978226,
+        "indeterminate": false,
+        "at": 211406.5300000012
+      },
+      {
+        "phase": "Native Rust geometry · 143,376 / 174,157 elements",
+        "percent": 69.39543055978226,
+        "indeterminate": false,
+        "at": 212512.25
+      },
+      {
+        "phase": "Native Rust geometry · 147,472 / 174,157 elements",
+        "percent": 70.80657108241414,
+        "indeterminate": false,
+        "at": 212831.4200000018
+      },
+      {
+        "phase": "Native Rust geometry · 147,472 / 174,157 elements",
+        "percent": 70.80657108241414,
+        "indeterminate": false,
+        "at": 213954.17499999702
+      },
+      {
+        "phase": "Native Rust geometry · 151,568 / 174,157 elements",
+        "percent": 72.21771160504602,
+        "indeterminate": false,
+        "at": 214265.4549999982
+      },
+      {
+        "phase": "Native Rust geometry · 151,568 / 174,157 elements",
+        "percent": 72.21771160504602,
+        "indeterminate": false,
+        "at": 215422.8599999994
+      },
+      {
+        "phase": "Native Rust geometry · 155,664 / 174,157 elements",
+        "percent": 73.6288521276779,
+        "indeterminate": false,
+        "at": 215733.9050000012
+      },
+      {
+        "phase": "Native Rust geometry · 155,664 / 174,157 elements",
+        "percent": 73.6288521276779,
+        "indeterminate": false,
+        "at": 216901.68500000238
+      },
+      {
+        "phase": "Native Rust geometry · 159,760 / 174,157 elements",
+        "percent": 75.03999265030978,
+        "indeterminate": false,
+        "at": 217208.92499999702
+      },
+      {
+        "phase": "Native Rust geometry · 159,760 / 174,157 elements",
+        "percent": 75.03999265030978,
+        "indeterminate": false,
+        "at": 218325.84000000358
+      },
+      {
+        "phase": "Native Rust geometry · 163,856 / 174,157 elements",
+        "percent": 76.45113317294167,
+        "indeterminate": false,
+        "at": 218612.23999999464
+      },
+      {
+        "phase": "Native Rust geometry · 163,856 / 174,157 elements",
+        "percent": 76.45113317294167,
+        "indeterminate": false,
+        "at": 219723.47499999404
+      },
+      {
+        "phase": "Native Rust geometry · 167,952 / 174,157 elements",
+        "percent": 77.86227369557353,
+        "indeterminate": false,
+        "at": 219880.0949999988
+      },
+      {
+        "phase": "Native Rust geometry · 167,952 / 174,157 elements",
+        "percent": 77.86227369557353,
+        "indeterminate": false,
+        "at": 221043.48999999464
+      },
+      {
+        "phase": "Native Rust geometry · 172,048 / 174,157 elements",
+        "percent": 79.2734142182054,
+        "indeterminate": false,
+        "at": 221401.35500000417
+      },
+      {
+        "phase": "Native Rust geometry · 172,048 / 174,157 elements",
+        "percent": 79.2734142182054,
+        "indeterminate": false,
+        "at": 222545.35500000417
+      },
+      {
+        "phase": "Native Rust geometry · 174,157 / 174,157 elements",
+        "percent": 80,
+        "indeterminate": false,
+        "at": 222814.77500000596
+      },
+      {
+        "phase": "Native BIM properties and hierarchy",
+        "percent": 85,
+        "indeterminate": false,
+        "at": 223534.70000000298
+      },
+      {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 85.16275598439302,
+        "indeterminate": false,
+        "at": 224357.86499999464
+      },
+      {
+        "phase": "Receiving native BIM properties and hierarchy",
+        "percent": 91.34748339132743,
+        "indeterminate": false,
+        "at": 225380.87999999523
+      },
+      {
+        "phase": "Preparing native scene",
+        "percent": 95,
+        "indeterminate": false,
+        "at": 225795.73999999464
+      }
+    ],
+    "droppedCallRows": 0,
+    "visibility": {
+      "start": "visible",
+      "hiddenObserved": false,
+      "end": "visible"
+    },
+    "result": {
+      "stats": {
+        "total_meshes": 1233844,
+        "total_vertices": 134867054,
+        "total_triangles": 116699839,
+        "parse_time_ms": 225,
+        "entity_scan_time_ms": 202,
+        "lookup_time_ms": 1,
+        "preprocess_time_ms": 11,
+        "geometry_time_ms": 218846,
+        "total_time_ms": 219073,
+        "from_cache": false,
+        "total_csg_failures": 0,
+        "products_with_failures": 0,
+        "degenerate_triangles_dropped": 10285,
+        "point_cache_hits": 0,
+        "point_cache_misses": 0,
+        "faceted_brep_time_ms": 0,
+        "geometry_diagnostics": {
+          "schemaVersion": 3,
+          "totalCsgFailures": 0,
+          "productsWithFailures": 0,
+          "hostsWithOpenings": 5075,
+          "classification": {
+            "rectangular": 0,
+            "diagonal": 0,
+            "nonRectangular": 24792,
+            "total": 24792
+          },
+          "failuresByReason": [],
+          "silentNoOps": 0,
+          "rectFast": {
+            "fired": 0,
+            "openingsCut": 0,
+            "deferHostNotBox": 0,
+            "deferNotThrough": 0,
+            "deferOffFace": 0,
+            "deferNearEdge": 0,
+            "deferNoOpenings": 0,
+            "deferTooManyOpenings": 0
+          },
+          "worstHosts": [],
+          "oversizedRefDrops": 0,
+          "totalUnsupportedItems": 0,
+          "unsupportedItemsByType": []
+        }
+      },
+      "diagnostics": {
+        "schemaVersion": 3,
+        "totalCsgFailures": 0,
+        "productsWithFailures": 0,
+        "hostsWithOpenings": 5075,
+        "classification": {
+          "rectangular": 0,
+          "diagonal": 0,
+          "nonRectangular": 24792,
+          "total": 24792
+        },
+        "failuresByReason": [],
+        "silentNoOps": 0,
+        "rectFast": {
+          "fired": 0,
+          "openingsCut": 0,
+          "deferHostNotBox": 0,
+          "deferNotThrough": 0,
+          "deferOffFace": 0,
+          "deferNearEdge": 0,
+          "deferNoOpenings": 0,
+          "deferTooManyOpenings": 0
+        },
+        "worstHosts": [],
+        "oversizedRefDrops": 0,
+        "totalUnsupportedItems": 0,
+        "unsupportedItemsByType": []
+      },
+      "flatMeshes": 857930,
+      "shards": 318,
+      "shardBytes": 46254808,
+      "instanceBounds": 36410,
+      "coordinateInfo": {
+        "originShift": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "shiftedBounds": {
+          "min": {
+            "x": -54.917145136860206,
+            "y": -5,
+            "z": -428.1815185546875
+          },
+          "max": {
+            "x": 701.2176513671875,
+            "y": 74.88772583007812,
+            "z": 0.000009126262739300728
+          }
+        },
+        "originalBounds": {
+          "min": {
+            "x": 563182.1394148731,
+            "y": -5,
+            "z": -1100788.8688685647
+          },
+          "max": {
+            "x": 563938.2742113771,
+            "y": 74.88772583007812,
+            "z": -1100360.6873408838
+          }
+        },
+        "hasLargeCoordinates": false,
+        "lengthUnitScale": 0.001,
+        "buildingRotation": 0.42785655784873866,
+        "wasmRtcFrame": {
+          "x": 563237.05656001,
+          "y": 1100360.68735001,
+          "z": 0,
+          "needsShift": true
+        },
+        "wasmRtcOffset": {
+          "x": 563237.05656001,
+          "y": 1100360.68735001,
+          "z": 0
+        }
+      },
+      "entities": 231608
+    },
+    "end": 225828.86499999464,
+    "elapsedMs": 224642
+  }
+}

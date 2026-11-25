@@ -1,0 +1,42 @@
+{
+  "elapsedMs": 439562,
+  "loading": false,
+  "progress": {
+    "phase": "Complete",
+    "percent": 100
+  },
+  "streaming": false,
+  "stats": {
+    "frame": {
+      "drawCalls": 2555,
+      "batchesDrawn": 2253,
+      "batchesFrustumCulled": 0,
+      "batchesContributionCulled": 116,
+      "batchesNotResident": 0,
+      "batchesAtLod1": 0,
+      "instancedDrawn": 302,
+      "instancedFrustumCulled": 0,
+      "instancedContributionCulled": 6646,
+      "timestamp": 441204.9750000015
+    },
+    "gpu": {
+      "batches": 339702052,
+      "meshes": 0,
+      "textured": 0,
+      "instanced": 57893232,
+      "total": 397595284
+    },
+    "cpuBytes": 523579644
+  },
+  "models": [
+    {
+      "id": "c7421322-0f22-45f1-be44-1b8e133ec11a",
+      "loadPath": "native",
+      "entities": 231608,
+      "meshes": 857930,
+      "triangles": 116699839,
+      "vertices": 134867054,
+      "instances": 36410
+    }
+  ]
+}

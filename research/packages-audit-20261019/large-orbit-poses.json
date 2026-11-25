@@ -1,0 +1,12 @@
+{
+  "large-svd-r3": {
+    "fixed_target": true,
+    "direction_cosine": 0.9564479511592675,
+    "angle_degrees": 16.9719156717384
+  },
+  "large-pvf-r3": {
+    "fixed_target": true,
+    "direction_cosine": 0.956516278488354,
+    "angle_degrees": 16.9584989850577
+  }
+}

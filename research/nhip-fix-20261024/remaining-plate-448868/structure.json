@@ -1,0 +1,346 @@
+[
+  {
+    "host": {
+      "id": 448868,
+      "type": "IfcPlate",
+      "name": "DAMNGANGCHINH",
+      "placement": "#448859=IfcLocalPlacement(#448854,#448858)",
+      "reps": [
+        {
+          "id": 448864,
+          "identifier": "Body",
+          "type": "SolidModel",
+          "items": [
+            "#448863=IfcExtrudedAreaSolid(#448862,#99805,#59,10.)"
+          ]
+        },
+        {
+          "id": 448866,
+          "identifier": "CoG",
+          "type": "Point",
+          "items": [
+            "#448865=IfcCartesianPoint((750.10797000000002,1263.39796,-1.0000000000000001E-05))"
+          ]
+        }
+      ]
+    },
+    "cuts": [
+      {
+        "id": 448884,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#448880=IfcLocalPlacement(#448859,#448879)",
+        "reps": [
+          {
+            "id": 448882,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 448893,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#448889=IfcLocalPlacement(#448859,#448888)",
+        "reps": [
+          {
+            "id": 448891,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448890=IfcExtrudedAreaSolid(#64982,#92498,#59,70.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 448901,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#448898=IfcLocalPlacement(#448859,#448897)",
+        "reps": [
+          {
+            "id": 448899,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 448907,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#448904=IfcLocalPlacement(#448859,#448903)",
+        "reps": [
+          {
+            "id": 448905,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 448913,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#448910=IfcLocalPlacement(#448859,#448909)",
+        "reps": [
+          {
+            "id": 448911,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 448919,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#448916=IfcLocalPlacement(#448859,#448915)",
+        "reps": [
+          {
+            "id": 448917,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 448925,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#448922=IfcLocalPlacement(#448859,#448921)",
+        "reps": [
+          {
+            "id": 448923,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 448933,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#448930=IfcLocalPlacement(#448859,#448929)",
+        "reps": [
+          {
+            "id": 448931,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448890=IfcExtrudedAreaSolid(#64982,#92498,#59,70.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 448948,
+        "type": "IfcVoidingFeature",
+        "name": "SLAB",
+        "placement": "#448936=IfcLocalPlacement(#448859,#448935)",
+        "reps": [
+          {
+            "id": 448946,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448945=IfcExtrudedAreaSolid(#448939,#448941,#59,250.)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "host": {
+      "id": 460997,
+      "type": "IfcPlate",
+      "name": "DAMNGANGCHINH",
+      "placement": "#460988=IfcLocalPlacement(#448854,#460987)",
+      "reps": [
+        {
+          "id": 460993,
+          "identifier": "Body",
+          "type": "SolidModel",
+          "items": [
+            "#460992=IfcExtrudedAreaSolid(#460991,#99805,#59,10.)"
+          ]
+        },
+        {
+          "id": 460995,
+          "identifier": "CoG",
+          "type": "Point",
+          "items": [
+            "#460994=IfcCartesianPoint((750.11004000000003,1229.58375,2.0000000000000002E-05))"
+          ]
+        }
+      ]
+    },
+    "cuts": [
+      {
+        "id": 461011,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#461008=IfcLocalPlacement(#460988,#461007)",
+        "reps": [
+          {
+            "id": 461009,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 461017,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#461014=IfcLocalPlacement(#460988,#461013)",
+        "reps": [
+          {
+            "id": 461015,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448890=IfcExtrudedAreaSolid(#64982,#92498,#59,70.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 461023,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#461020=IfcLocalPlacement(#460988,#461019)",
+        "reps": [
+          {
+            "id": 461021,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 461029,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#461026=IfcLocalPlacement(#460988,#461025)",
+        "reps": [
+          {
+            "id": 461027,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 461035,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#461032=IfcLocalPlacement(#460988,#461031)",
+        "reps": [
+          {
+            "id": 461033,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 461041,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#461038=IfcLocalPlacement(#460988,#461037)",
+        "reps": [
+          {
+            "id": 461039,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 461047,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#461044=IfcLocalPlacement(#460988,#461043)",
+        "reps": [
+          {
+            "id": 461045,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448881=IfcExtrudedAreaSolid(#64982,#92498,#59,230.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 461053,
+        "type": "IfcVoidingFeature",
+        "name": "274",
+        "placement": "#461050=IfcLocalPlacement(#460988,#461049)",
+        "reps": [
+          {
+            "id": 461051,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#448890=IfcExtrudedAreaSolid(#64982,#92498,#59,70.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 461063,
+        "type": "IfcVoidingFeature",
+        "name": "SLAB",
+        "placement": "#461056=IfcLocalPlacement(#460988,#461055)",
+        "reps": [
+          {
+            "id": 461061,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#461060=IfcExtrudedAreaSolid(#461059,#448941,#59,250.)"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

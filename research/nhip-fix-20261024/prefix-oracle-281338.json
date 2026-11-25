@@ -1,0 +1,62 @@
+[
+  {
+    "count": 0,
+    "lastId": null,
+    "volume": 0.1884212663513282,
+    "triangles": 12
+  },
+  {
+    "count": 1,
+    "lastId": 281362,
+    "volume": 0.09564362765092593,
+    "triangles": 224
+  },
+  {
+    "count": 2,
+    "lastId": 281371,
+    "volume": 0.09463682675943315,
+    "triangles": 944
+  },
+  {
+    "count": 3,
+    "lastId": 281378,
+    "volume": 0.09363002572621981,
+    "triangles": 1664
+  },
+  {
+    "count": 4,
+    "lastId": 281384,
+    "volume": 0.09302594540087628,
+    "triangles": 2096
+  },
+  {
+    "count": 5,
+    "lastId": 281390,
+    "volume": 0.09232650986184758,
+    "triangles": 2536
+  },
+  {
+    "count": 6,
+    "lastId": 281396,
+    "volume": 0.09231150860634078,
+    "triangles": 2552
+  },
+  {
+    "count": 7,
+    "lastId": 281404,
+    "volume": 0.09229701826921106,
+    "triangles": 2576
+  },
+  {
+    "count": 8,
+    "lastId": 281410,
+    "volume": 0.09227995474611421,
+    "triangles": 2596
+  },
+  {
+    "count": 9,
+    "lastId": 281416,
+    "volume": 0.09226341295335559,
+    "triangles": 2620
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "header": {
+    "id": "blake3:783a0ecd5d2ec9c41685afcc4e776bf389f2bed7a3cb542106e1ea0318a58c54",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "erin"
+      },
+      "intent": "Edit the other model",
+      "created": "2026-10-19T03:35:25.117Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:a91d820bd7c05fb184c87d9a6ce91f161962ba481f9dc780b227c97a0780e7c5"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "slab-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_Common::Status": "NEW"
+      }
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+{
+  "scope": "Existing Python Colorizer + independent IfcOpenShell geometry/material readback; no IFC Lite UI or renderer validation",
+  "ifcopenshell": "0.8.5",
+  "source": "F:\\Steel\\VBA\\IFC COLO\\hangarvd_f10_ tan base_f01_colored.ifc",
+  "source_sha256": "df595b8d150b09dabbc48e21f6efd1b26a0f35ab07636a02d0b51896b94894a2",
+  "schema": "IFC4",
+  "initial_colors": 75,
+  "groups": 75,
+  "selected_group": "PIPE-267.4X8",
+  "gray_export": {
+    "selected_members": 14509,
+    "styled_members": 14509,
+    "styled_items": 29018,
+    "selected_groups": 75,
+    "total_members": 14509,
+    "errors": [],
+    "output": "F:\\Steel\\VBA\\IFC-Lite\\research\\colorizer-20261015\\01-all-gray.ifc"
+  },
+  "gray_readback": {
+    "members": 14509,
+    "items": 29018,
+    "red": 0,
+    "gray": 14509
+  },
+  "final_export": {
+    "selected_members": 1968,
+    "styled_members": 1968,
+    "styled_items": 3936,
+    "selected_groups": 1,
+    "total_members": 14509,
+    "errors": [],
+    "output": "F:\\Steel\\VBA\\IFC-Lite\\research\\colorizer-20261015\\02-gray-red.ifc"
+  },
+  "final_readback": {
+    "members": 14509,
+    "items": 29018,
+    "red": 1968,
+    "gray": 12541
+  },
+  "non_presentation_records_unchanged": 184677,
+  "world_geometry_and_render_material_samples": [
+    {
+      "expressId": 101023,
+      "vertices": 146,
+      "triangles": 292,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "expressId": 101050,
+      "vertices": 146,
+      "triangles": 292,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "expressId": 101062,
+      "vertices": 146,
+      "triangles": 292,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "expressId": 101074,
+      "vertices": 146,
+      "triangles": 292,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "expressId": 101086,
+      "vertices": 146,
+      "triangles": 292,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "expressId": 101098,
+      "vertices": 146,
+      "triangles": 292,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "expressId": 58,
+      "vertices": 8,
+      "triangles": 12,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ]
+    },
+    {
+      "expressId": 103,
+      "vertices": 24,
+      "triangles": 44,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ]
+    },
+    {
+      "expressId": 142,
+      "vertices": 24,
+      "triangles": 44,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ]
+    },
+    {
+      "expressId": 156,
+      "vertices": 24,
+      "triangles": 44,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ]
+    },
+    {
+      "expressId": 169,
+      "vertices": 24,
+      "triangles": 44,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ]
+    },
+    {
+      "expressId": 182,
+      "vertices": 24,
+      "triangles": 44,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ]
+    }
+  ],
+  "schema_probe": {
+    "IFC2X3": {
+      "shading_attributes": [
+        "SurfaceColour"
+      ],
+      "two_argument_shading_accepted": false,
+      "error": "entity instance of type 'IFC2X3.IfcSurfaceStyleShading' has only 1 attributes but 2 attributes were provided."
+    },
+    "IFC4": {
+      "shading_attributes": [
+        "SurfaceColour",
+        "Transparency"
+      ],
+      "two_argument_shading_accepted": true,
+      "error": null
+    }
+  },
+  "source_unchanged": true,
+  "outputs": [
+    {
+      "path": "F:\\Steel\\VBA\\IFC-Lite\\research\\colorizer-20261015\\01-all-gray.ifc",
+      "bytes": 12087859,
+      "sha256": "88b7e9525aef97aa294aa55cfc14acbe6f942a01ec2238a00e795f14c733e8ae"
+    },
+    {
+      "path": "F:\\Steel\\VBA\\IFC-Lite\\research\\colorizer-20261015\\02-gray-red.ifc",
+      "bytes": 12088062,
+      "sha256": "113f5024ce88b76489213f61903133531196b79b3ada3ed6a794c8c563572502"
+    }
+  ],
+  "elapsed_seconds_not_a_performance_benchmark": 16.935
+}

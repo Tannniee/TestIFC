@@ -1,0 +1,1 @@
+{"flowVersion":1,"id":"s","name":"s","capabilities":["model.read"],"inputs":[],"outputs":[{"nodeId":"sc","port":"result","label":"n"}],"nodes":[{"id":"n","type":"core.number","params":{"value":2}},{"id":"sc","type":"script.run","params":{"code":"bim.query.byType('IfcWall').length * inputs.a"}}],"edges":[{"from":["n","value"],"to":["sc","a"]}]}

@@ -1,0 +1,135 @@
+[
+  {
+    "input": "residual-world.json",
+    "id": 298390,
+    "native": {
+      "vertices": 10414,
+      "triangles": 4916,
+      "volume": 0.027594986292585933,
+      "area": 7.126858210955796
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345885863243,
+      "area": 7.1226866129247774
+    },
+    "sampledMaxSurfaceDistanceMm": 43.12859305408624,
+    "maxBoundsDeltaMm": 0.035306671634316444,
+    "relativeVolumeErrorPercent": 19.952951614903217
+  },
+  {
+    "input": "residual-world.json",
+    "id": 303995,
+    "native": {
+      "vertices": 11344,
+      "triangles": 8182,
+      "volume": 0.02853385972022099,
+      "area": 7.120456267998881
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345886207911,
+      "area": 7.122686612990366
+    },
+    "sampledMaxSurfaceDistanceMm": 43.240761081948264,
+    "maxBoundsDeltaMm": 0.021594692952930927,
+    "relativeVolumeErrorPercent": 17.229484182661153
+  },
+  {
+    "input": "residual-local.json",
+    "id": 298390,
+    "native": {
+      "vertices": 9246,
+      "triangles": 7277,
+      "volume": 0.03450974851587616,
+      "area": 7.123418262795077
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345885863243,
+      "area": 7.1226866129247774
+    },
+    "sampledMaxSurfaceDistanceMm": 0.7465079596866315,
+    "maxBoundsDeltaMm": 0.004431232810020447,
+    "relativeVolumeErrorPercent": 0.1052683961668856
+  },
+  {
+    "input": "residual-local.json",
+    "id": 303995,
+    "native": {
+      "vertices": 5817,
+      "triangles": 5500,
+      "volume": 0.03450959236249832,
+      "area": 7.123426534178946
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345886207911,
+      "area": 7.122686612990366
+    },
+    "sampledMaxSurfaceDistanceMm": 0.7634069382086687,
+    "maxBoundsDeltaMm": 0.004442641511559486,
+    "relativeVolumeErrorPercent": 0.10481541920053937
+  },
+  {
+    "input": "branch-remaining-body-full.json",
+    "id": 298390,
+    "native": {
+      "vertices": 10414,
+      "triangles": 4916,
+      "volume": 0.027594986292585933,
+      "area": 7.126858210955796
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345885863243,
+      "area": 7.1226866129247774
+    },
+    "sampledMaxSurfaceDistanceMm": 43.12859305408624,
+    "maxBoundsDeltaMm": 0.035306671634316444,
+    "relativeVolumeErrorPercent": 19.952951614903217
+  },
+  {
+    "input": "branch-remaining-body-full.json",
+    "id": 303995,
+    "native": {
+      "vertices": 11344,
+      "triangles": 8182,
+      "volume": 0.02853385972022099,
+      "area": 7.120456267998881
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345886207911,
+      "area": 7.122686612990366
+    },
+    "sampledMaxSurfaceDistanceMm": 43.240761081948264,
+    "maxBoundsDeltaMm": 0.021594692952930927,
+    "relativeVolumeErrorPercent": 17.229484182661153
+  },
+  {
+    "input": "branch-remaining-body-full.json",
+    "id": 304217,
+    "native": {
+      "vertices": 12504,
+      "triangles": 7650,
+      "volume": 0.029974436803459723,
+      "area": 7.24520013604163
+    },
+    "oracle": {
+      "vertices": 1312,
+      "triangles": 2624,
+      "volume": 0.03447345885901898,
+      "area": 7.1226866126488675
+    },
+    "sampledMaxSurfaceDistanceMm": 43.27027826193417,
+    "maxBoundsDeltaMm": 2.084236708469689,
+    "relativeVolumeErrorPercent": 13.050683640299177
+  }
+]

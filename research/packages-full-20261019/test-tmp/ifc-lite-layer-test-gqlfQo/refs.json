@@ -1,0 +1,12 @@
+{
+  "refs": {
+    "main": {
+      "layers": [
+        "blake3:22ffec93707b9b3e512ad4b13bf18b3b28f73aea02526a8feadf5aca76598ee3"
+      ],
+      "policy": {
+        "requireHumanApproval": true
+      }
+    }
+  }
+}

@@ -1,0 +1,133 @@
+[
+  {
+    "shard": "viewer-shard-0",
+    "tests": 1185,
+    "pass": 1185,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "failed_files": []
+  },
+  {
+    "shard": "viewer-shard-1",
+    "tests": 1239,
+    "pass": 1228,
+    "fail": 9,
+    "cancelled": 0,
+    "skipped": 2,
+    "failed_files": [
+      "src\\components\\viewer\\useMouseControls.fly.test.tsx"
+    ]
+  },
+  {
+    "shard": "viewer-shard-10",
+    "tests": 944,
+    "pass": 937,
+    "fail": 3,
+    "cancelled": 0,
+    "skipped": 4,
+    "failed_files": [
+      "src\\components\\viewer\\zone-apportionment-ribbon.test.tsx",
+      "src\\lib\\using-declaration-build.test.ts"
+    ]
+  },
+  {
+    "shard": "viewer-shard-11",
+    "tests": 1101,
+    "pass": 1096,
+    "fail": 2,
+    "cancelled": 0,
+    "skipped": 3,
+    "failed_files": [
+      "src\\components\\viewer\\toolbar\\cloud-sources-entrypoints.test.tsx",
+      "src\\test\\contrast\\extract-classname-template-literal.test.ts"
+    ]
+  },
+  {
+    "shard": "viewer-shard-2",
+    "tests": 1082,
+    "pass": 1069,
+    "fail": 8,
+    "cancelled": 0,
+    "skipped": 5,
+    "failed_files": [
+      "src\\components\\viewer\\toolbar\\detached-panel-latch.test.tsx",
+      "src\\test\\contrast\\semantic-surface-contrast.test.ts"
+    ]
+  },
+  {
+    "shard": "viewer-shard-3",
+    "tests": 1584,
+    "pass": 1581,
+    "fail": 2,
+    "cancelled": 0,
+    "skipped": 1,
+    "failed_files": [
+      "src\\components\\viewer\\useTouchControls.one-pipeline.test.tsx"
+    ]
+  },
+  {
+    "shard": "viewer-shard-4",
+    "tests": 1241,
+    "pass": 1229,
+    "fail": 9,
+    "cancelled": 0,
+    "skipped": 3,
+    "failed_files": [
+      "src\\components\\viewer\\useModelRotationSync.test.ts",
+      "src\\components\\viewer\\useMouseControls.clash-pivot.test.tsx",
+      "src\\store\\teardown-registry.test.ts"
+    ]
+  },
+  {
+    "shard": "viewer-shard-5",
+    "tests": 1238,
+    "pass": 1236,
+    "fail": 1,
+    "cancelled": 0,
+    "skipped": 1,
+    "failed_files": [
+      "src\\components\\viewer\\toolbar\\appearance-entrypoints.test.tsx"
+    ]
+  },
+  {
+    "shard": "viewer-shard-6",
+    "tests": 1020,
+    "pass": 1017,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 3,
+    "failed_files": []
+  },
+  {
+    "shard": "viewer-shard-7",
+    "tests": 1180,
+    "pass": 1177,
+    "fail": 1,
+    "cancelled": 0,
+    "skipped": 2,
+    "failed_files": [
+      "src\\components\\viewer\\tools\\measure-ribbon.test.tsx"
+    ]
+  },
+  {
+    "shard": "viewer-shard-8",
+    "tests": 935,
+    "pass": 929,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 6,
+    "failed_files": []
+  },
+  {
+    "shard": "viewer-shard-9",
+    "tests": 1067,
+    "pass": 1059,
+    "fail": 1,
+    "cancelled": 0,
+    "skipped": 7,
+    "failed_files": [
+      "src\\components\\viewer\\ribbon\\tabs\\ViewTab.environment-panel.test.tsx"
+    ]
+  }
+]

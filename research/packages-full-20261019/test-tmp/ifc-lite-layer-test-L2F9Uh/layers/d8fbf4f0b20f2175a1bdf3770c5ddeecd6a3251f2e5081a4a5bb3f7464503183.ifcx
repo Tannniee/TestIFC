@@ -1,0 +1,38 @@
+{
+  "header": {
+    "id": "blake3:d8fbf4f0b20f2175a1bdf3770c5ddeecd6a3251f2e5081a4a5bb3f7464503183",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "bob"
+      },
+      "intent": "Delete wall-1",
+      "created": "2026-10-19T03:35:32.884Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:ea733877d1812f443abf47e72048b1d7228afba46a69a362aeeacc9466f059bb"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "ifclite::deleted": true
+      }
+    }
+  ]
+}

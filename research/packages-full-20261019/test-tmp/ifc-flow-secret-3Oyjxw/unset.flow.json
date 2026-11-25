@@ -1,0 +1,1 @@
+{"flowVersion":1,"id":"s","name":"s","capabilities":["secret.read:DEFINITELY_NOT_SET_5167"],"inputs":[],"outputs":[],"nodes":[{"id":"req","type":"http.request","params":{"url":"https://api.example.invalid/{{secret:DEFINITELY_NOT_SET_5167}}"}}],"edges":[]}

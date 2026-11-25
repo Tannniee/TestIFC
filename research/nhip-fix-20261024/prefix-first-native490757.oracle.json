@@ -1,0 +1,11 @@
+[
+  {
+    "id": 490757,
+    "triangles": 320,
+    "sampledMaxSurfaceDistanceMm": 0.5314453953995819,
+    "volumeErrorPercent": 0.01054455664733903,
+    "volume": 0.025200329522290687,
+    "oracleVolume": 0.025197672539435955,
+    "unpairedDirectedEdges": 0
+  }
+]

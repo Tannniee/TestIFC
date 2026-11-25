@@ -1,0 +1,1309 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017-r2\\IFC-Lite.exe",
+  "model": "F:\\Working\\IFC Temp\\IFC_PVF.ifc",
+  "bytes": 1411171948,
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-core104-large-yICUxd",
+  "hostPid": 35648,
+  "errors": [
+    "AbortError: signal is aborted without reason\n    at r.clearFlatBuffers (http://tauri.localhost/assets/src-CZTWE4xM.js:16323:33)\n    at r.clearFlatGeometry (http://tauri.localhost/assets/src-CZTWE4xM.js:16310:158)\n    at r.clear (http://tauri.localhost/assets/src-CZTWE4xM.js:16307:87)\n    at Hp.teardown (http://tauri.localhost/assets/src-CZTWE4xM.js:22490:57)\n    at Hp.destroy (http://tauri.localhost/assets/src-CZTWE4xM.js:22487:72)\n    at http://tauri.localhost/assets/main-BcFQ-a24.js:53394:137\n    at bl (http://tauri.localhost/assets/main-BcFQ-a24.js:5226:37)\n    at Yu (http://tauri.localhost/assets/main-BcFQ-a24.js:6475:25)\n    at Ku (http://tauri.localhost/assets/main-BcFQ-a24.js:6416:29)\n    at qu (http://tauri.localhost/assets/main-BcFQ-a24.js:6440:21)"
+  ],
+  "progress": [
+    {
+      "milliseconds": 1231,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 3077,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 4195,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 5284,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 6354,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 7437,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 8517,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 9600,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 10679,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 11754,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 12843,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 13927,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 15062,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 16144,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 17224,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 18301,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 19374,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 20468,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 21538,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 22624,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 23693,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 24784,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 25846,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 26933,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 28022,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 29098,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 30196,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 31270,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 32350,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 33427,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 34499,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 35583,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 36674,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 37747,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 42276,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 43356,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 44360,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 45370,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 46382,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 47391,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 48395,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 49402,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 50406,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 51407,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 52412,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 53432,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 54435,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 55445,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 56447,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 57454,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 58467,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 59474,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 60489,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 61492,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 62495,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 63496,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 64499,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 65504,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 66506,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 67510,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 68542,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 69546,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 70551,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 71555,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 72557,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 73564,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 74570,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 75581,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 76584,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 77590,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 78595,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 79597,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 80598,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 81600,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 82607,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 83611,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 84624,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 85635,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 86646,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 87655,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 88662,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 89671,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 90681,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 91688,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 92694,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 93704,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 94711,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 95724,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 96732,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 97740,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 98754,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 99758,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 100772,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 101785,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 102798,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 103803,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 104812,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 105827,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 106837,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 107841,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 108853,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 109864,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 110878,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 111883,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 112891,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 113896,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 114906,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 115913,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 116918,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 117932,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 118937,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 119946,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 120950,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 121961,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 122970,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 123978,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 125287,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 126299,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 127308,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 128321,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 129327,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 130344,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 131370,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 132387,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 133401,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 134408,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 135417,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 136429,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 137441,
+      "loading": true,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe"
+        }
+      ]
+    },
+    {
+      "milliseconds": 144073,
+      "loading": false,
+      "models": [
+        {
+          "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe",
+          "path": "native",
+          "meshes": 160673,
+          "vertices": 245093805,
+          "triangles": 148025417,
+          "sourceBytes": 0
+        }
+      ]
+    }
+  ],
+  "backend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "loaded": {
+    "milliseconds": 144073,
+    "loading": false,
+    "models": [
+      {
+        "id": "eaea5915-340a-485d-aaa7-2e5f93ec85fe",
+        "path": "native",
+        "meshes": 160673,
+        "vertices": 245093805,
+        "triangles": 148025417,
+        "sourceBytes": 0
+      }
+    ]
+  },
+  "selection": {
+    "modelId": "eaea5915-340a-485d-aaa7-2e5f93ec85fe",
+    "expressId": 17488235
+  },
+  "gestures": {
+    "before": {
+      "position": {
+        "x": 556.5589018744519,
+        "y": 409.82511323221945,
+        "z": 320.8335791510632
+      },
+      "target": {
+        "x": 113.78026103973389,
+        "y": 40.84291253662104,
+        "z": -121.94506168365479
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 206.13764169753478
+    },
+    "orbit": {
+      "position": {
+        "x": 370.1116296456855,
+        "y": 494.0950904393158,
+        "z": 385.0035169472692
+      },
+      "target": {
+        "x": 113.78016185760498,
+        "y": 40.84291253662104,
+        "z": -121.91418647766113
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 206.11341108212326
+    },
+    "pan": {
+      "position": {
+        "x": 355.71727635408143,
+        "y": 499.54291914266463,
+        "z": 387.40907183382683
+      },
+      "target": {
+        "x": 99.44870892351565,
+        "y": 46.26417843502854,
+        "z": -119.51668285527832
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 206.11341108212326
+    },
+    "zoom": {
+      "position": {
+        "x": 357.09760171460545,
+        "y": 498.95829769867555,
+        "z": 387.2340214837771
+      },
+      "target": {
+        "x": 100.82903428403972,
+        "y": 45.679556991039505,
+        "z": -119.69173320532805
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 195.8077405280171
+    }
+  },
+  "cleared": true,
+  "ok": true,
+  "closeRequested": true,
+  "closeResponse": {
+    "status": 0,
+    "stdout": "True\r\n",
+    "stderr": ""
+  },
+  "hostExit": {
+    "code": 0,
+    "signal": null,
+    "at": "2026-10-17T02:08:16.663Z"
+  },
+  "exitedAfterClose": true
+}

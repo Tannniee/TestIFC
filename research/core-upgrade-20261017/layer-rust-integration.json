@@ -1,0 +1,1522 @@
+[
+  {
+    "path": "Cargo.lock",
+    "status": "upstream"
+  },
+  {
+    "path": "Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/Dockerfile",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/OPERATIONS.md",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/admission.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/admission_guard.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/admission_resize_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/admission_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/error.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/error_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/in_flight.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/main.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/parity_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/route_golden_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/cache.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/admission_7676_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cache_hit_sizing_7676_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cache_keys.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cache_keys_symbolic_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cache_keys_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cache_policy_7676_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cache_read.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cache_read_7676_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cached_replay.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cached_replay_batches_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/cached_replay_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/fetch.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/json.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/json_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/parquet.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/parquet_optimized.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/parquet_optimized_replay.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/parquet_stream.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/parquet_stream_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/stream_progress.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/stream_progress_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/upload.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/upload_7676_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/routes/parse/worker_thread_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/services/cache.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/services/cache_entry.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/services/cache_entry_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/classifications.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/documents.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/material_usages.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/materials.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/metadata.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/mod.rs",
+    "status": "conflict"
+  },
+  {
+    "path": "apps/server/src/services/data_model/properties.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/quantities.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/relationships.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/services/data_model/types.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "apps/server/src/services/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/services/streaming.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/src/types/response.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/tests/golden/route-data-model.json",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/tests/golden/route-metadata.json",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/tests/golden/route-parquet-optimized.json",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/tests/golden/route-parquet-stream.json",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/tests/golden/route-parquet.json",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/tests/golden/route-parse.json",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/tests/golden/route-stream.json",
+    "status": "upstream"
+  },
+  {
+    "path": "apps/server/tests/golden/route-symbolic.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust-major-offset.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/AGENTS.md",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/clash/src/bvh.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/clash/src/bvh_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/clash/tests/fixtures/bvh_order_parity.txt",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/cloud-import/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/cloud-import/README.md",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/cloud-import/src/lib.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/cloud-import/src/main.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/cloud-import/src/meshes.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/cloud-import/src/tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/header.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/header_scan.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/lexical.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/malformed_records.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/record_strings.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/scanner.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/scanner_attributes.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/scanner_header.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/scanner_record_end.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/scanner_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/parser/tokenizer.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/schema_gen.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/schema_gen_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/src/step_encoding.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/tests/fixtures/ifc_string_vectors.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/tests/fixtures/property_definition_refs_vectors.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/tests/fixtures/step-page-directive.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/tests/fixtures/step-stray-apostrophe.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/tests/issue_7589_page_operand_decoders.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/core/tests/property_definition_refs_parity.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/csg-thread-bench/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/examples/merge_ifc.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/csv.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/dfjson/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/dfjson/plates.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/dfjson/stories.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/dfjson/tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/json.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/kmz.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/landxml_terrain.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/landxml_terrain_georef.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/landxml_terrain_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/landxml_terrain_tin.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/lib.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "rust/export/src/merged/line_edit.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/merged/line_edit_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/merged/spatial.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/model.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/model_inherit_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/model_props.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/model_types.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/quantity_analysis_relations.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/rebar_schedule.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/rebar_schedule_build.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/rebar_schedule_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/rooms.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/schema_detect.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/schema_pad.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/schema_pad_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_api.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_cow.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_ids.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_index.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/attrs.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/created.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/extract.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/extract_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/generate.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/georef.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/lines.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/lines_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/pass.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/readers.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/readers_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/refilter.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/refilter_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/retype.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/source.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_log/write.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_context_metadata.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_rigid.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_rigid_contexts.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_rigid_fixture_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_rigid_ownership.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_rigid_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_scaled_alignment_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_scaled_type_geometry_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_transform.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_transform_preflight.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_transform_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_map_transform_writer.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_record_frame.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_record_frame_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_roundtrip_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_slot.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_slot_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_text.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/step_text_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/usd/tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/src/xml_text.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/export_golden.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/fixtures/step_log_parity_vectors.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/fixtures/step_record_frame_vectors.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/collada.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/csv.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/dfjson.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/glb-from-meshes.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/glb.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/hbjson.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/ifcx.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/json.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/jsonld.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/kmz.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/landxml-terrain.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/merged-step.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/obj.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/parquet-bos.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/step-log.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/step.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/golden/usd.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/issue_7681_pset_data_export.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/step_log_parity.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/step_log_refusals.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/step_writer_refusals.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/export/tests/support/golden.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/ffi/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/ffi/src/lib.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/ffi/src/tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/cdt.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/contour_grid_guard.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/csg/consolidate.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/csg/consolidate/conform.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/csg/consolidate/conform/emit.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/csg/consolidate/conform/open_edges.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/csg/consolidate/ring_ops.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/csg/consolidate/ring_ops_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/float_order.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/float_order_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/geom2d.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/kernel/budget.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/kernel/fixed_int/magnitude_mul_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/kernel/fixed_int/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/kernel/fixed_int/mul.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/kernel/retriangulate.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/lib.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/opening_perf_trace.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/processors/advanced_face/conics.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/processors/advanced_face/revolution.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/processors/advanced_face/surfaces.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/processors/sectioned.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/processors/sectioned_positions.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/progress.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/content_hash.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/content_hash_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/rtc_offset.rs",
+    "status": "merged-local-and-upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/transforms/linear.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/transforms/linear_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/voids/flap_clip_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/voids/geom.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/voids/malformed_opening_repair.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/voids/prism_cut.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/router/voids/prism_cut/finish.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/fit.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/grid.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/morph.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/morph_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/options.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/scan_outline_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/simplify.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/snap.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/square.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/support.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/synth_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/topology.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/scan_outline/trace.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/simplify/cavities.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/space_dcel/arrangement.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/space_dcel/geom2d.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/space_dcel/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/space_dcel/non_finite_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/terrain_cdt.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/union_find.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/src/zone_split_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/tests/fixtures/issue_7292_sloped_coplanar_difference.ifc",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/tests/ifc4x3_sectioned_linear_positions.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/tests/issue_068_void_ordering_probe.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/tests/issue_7584_viadotto_course_profile.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/tests/issue_7674_nan_sort_sites.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/geometry/tests/manifests/watertightness_census.tsv",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/fuzz/.gitignore",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/fuzz/Cargo.lock",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/fuzz/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/fuzz/corpus/parse_landxml/seed_all_families_text_references",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/fuzz/corpus/parse_landxml/seed_misc_markup",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/fuzz/corpus/parse_landxml/seed_tin_metric",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/fuzz/fuzz_targets/parse_landxml.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/alignment/parser.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/model.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/parser.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/parser/text.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/pipe_parser.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/pipe_parser/driver.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/plan/parser.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/plan/parser/driver.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/stream.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/src/xml.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/fixtures/storm-pipe-network.xml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/fuzz/exercise.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/fuzz_regressions.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/golden/alignment-render.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/golden/alignments.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/golden/document.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/golden/pipe-networks.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/ingest.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/landxml_golden.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/stream.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/stream_text_references_7680.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/landxml/tests/text_references_7680.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/examples/instructions_driver.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/examples/opening_work_probe.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/examples/perf_probe.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/appearance/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/appearance/transfer_math.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/appearance/transfer_points.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/element.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/geometry_pool.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/geometry_pool_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/lib.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/parallel_scan_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/point_pca.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/processor/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/processor/phase_marks.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/processor/properties.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/processor/properties_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/cylinders.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/frame.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/levels.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/options.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/proposals_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/report.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/score.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/slabs.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_proposals/walls.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/columns.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/cylinder.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/cylinder_fit.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/cylinder_fit_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/cylinder_guards.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/cylinder_guards_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/cylinder_merge.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/extent.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/grow.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/normals.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/options.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/plane_report.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/prism.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/prism_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/refit.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/refit_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/report.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/ring.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/ring_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/voxel.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/src/scan_segmentation/voxel_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/golden/symbolic-data.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/scan_cylinder_acceptance.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/scan_matrix/columns.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/scan_matrix/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/scan_proposals.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/scan_segmentation_columns.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/scan_segmentation_cylinders.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/scan_segmentation_planes.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/scan_synthetic/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/processing/tests/symbolic_golden.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/Cargo.lock",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/src/analytic_definitions.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/src/entity_data.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/src/lib.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/src/quantity_analysis.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/src/rebar_schedule.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/src/swept_disk_checks.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/tests/golden/geometry-data-json.json",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/python/tests/test_golden.py",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/Cargo.toml",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/export_landxml.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/gpu_meshes/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/gpu_meshes/prepass.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/gpu_meshes/prepass_discovery.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/gpu_meshes/prepass_owned_columns.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/gpu_meshes/prepass_owned_columns_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/gpu_meshes/prepass_sharded.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/gpu_meshes/source_fingerprint_prepass.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/mod.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/parsing.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/scan_outline.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/scan_proposals.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/scan_segmentation.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/space_plate_input.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/api/space_plate_tests.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/lib.rs",
+    "status": "upstream"
+  },
+  {
+    "path": "rust/wasm-bindings/src/progress_hook.rs",
+    "status": "upstream"
+  }
+]

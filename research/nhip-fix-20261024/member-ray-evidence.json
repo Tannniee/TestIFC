@@ -1,0 +1,63 @@
+{
+  "oracleVolume": 0.09226341299570982,
+  "differences": [
+    {
+      "point": [
+        -1.46,
+        -3.98
+      ],
+      "oracle": [
+        -0.00800002,
+        -0.00787288
+      ],
+      "centered-frame-five.json": [],
+      "source-complete-five-hosts.json": [],
+      "normalized": [
+        -0.00799561,
+        0.00799561
+      ]
+    },
+    {
+      "point": [
+        -1.46,
+        -0.02
+      ],
+      "oracle": [
+        -0.00799995,
+        -0.00786988
+      ],
+      "centered-frame-five.json": [],
+      "source-complete-five-hosts.json": [],
+      "normalized": [
+        -0.00799561,
+        0.00799561
+      ]
+    },
+    {
+      "point": [
+        1.46,
+        -3.98
+      ],
+      "oracle": [],
+      "centered-frame-five.json": [],
+      "source-complete-five-hosts.json": [],
+      "normalized": [
+        -0.00799561,
+        0.00799561
+      ]
+    },
+    {
+      "point": [
+        1.46,
+        -0.02
+      ],
+      "oracle": [],
+      "centered-frame-five.json": [],
+      "source-complete-five-hosts.json": [],
+      "normalized": [
+        -0.00799561,
+        0.00799561
+      ]
+    }
+  ]
+}

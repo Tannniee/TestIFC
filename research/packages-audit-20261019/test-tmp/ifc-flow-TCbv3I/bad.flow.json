@@ -1,0 +1,1 @@
+{"flowVersion":1,"id":"x","name":"x","nodes":[{"id":"a","type":"core.number","lacing":"sideways"}],"edges":[{"from":["ghost","v"],"to":["a","x"]}],"inputs":[],"outputs":[],"capabilities":[]}

@@ -1,0 +1,282 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017-r2\\IFC-Lite.exe",
+  "model": "F:\\Steel\\VBA\\IFC COLO\\hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-quality-audit-CWZVBu",
+  "hostPid": 47404,
+  "cases": [
+    {
+      "name": "all side panels render with no loaded model",
+      "ok": true,
+      "evidence": [
+        {
+          "id": "properties",
+          "text": "PROPERTIES\n\nNO SELECTION\n\nSelect an element to view details"
+        },
+        {
+          "id": "collab",
+          "text": "Work on this model together\n\nCreate a session to edit live with others: shared cursors, presence, an"
+        },
+        {
+          "id": "sources",
+          "text": "Cloud Sources\nDalux Box\nBrowse\n\nAdd the required settings to browse\n\nDropbox\nSign in\nBrowse\n\nAdd the"
+        },
+        {
+          "id": "zones",
+          "text": "Location zones\nSet\nGenerate from storeys\n\nNo zone sets yet. Create one above, or generate one from t"
+        },
+        {
+          "id": "placement",
+          "text": "Placement\nLocal\nGeoreference\n\nNO MODELS SELECTED\n\nChoose the models to move, then start repositionin"
+        },
+        {
+          "id": "compare",
+          "text": "Compare models\nSaved comparisons\nSave comparison\nSaved comparison\nChoose a saved comparison (0)\n\nTWO"
+        },
+        {
+          "id": "bcf",
+          "text": "BCF Topics\nAll statuses\n\nNO TOPICS\n\nCreate first topic\n\nAuthor\n\nuser@example.com\n\nSet email\n\nSet you"
+        },
+        {
+          "id": "validation",
+          "text": "Data validation\nSaved reports (0)\nIDS validation\n\nCheck the model against a buildingSMART IDS requir"
+        },
+        {
+          "id": "lens",
+          "text": "LENS\nBY IFC CLASS\nIFC Class\nSTRUCTURAL\n4 rules\nBUILDING ENVELOPE\n5 rules\nOPENINGS & CIRCULATION\n5 ru"
+        },
+        {
+          "id": "clash",
+          "text": "Clash detection\nHard\nClearance\ntol\nDetect all clashes\nFind duplicates\nDiscipline matrix\nMEP vs Struc"
+        },
+        {
+          "id": "layers",
+          "text": "Layers: version your model like code\n\nAn IFC5 model composes from immutable layers. Inspect who chan"
+        },
+        {
+          "id": "loadReport",
+          "text": "Load report\nNo models loaded."
+        },
+        {
+          "id": "changes",
+          "text": "Changes\n0 edits\n\nNo recorded edit operations.\n\nExport modified IFC…\nChanges only (JSON delta)"
+        },
+        {
+          "id": "cost",
+          "text": "Cost\nExport CSV\nNo models loaded.\nSelect a cost item to inspect it."
+        },
+        {
+          "id": "measurements",
+          "text": "Measurements\nList\nPoint\nQty\nSource\nNo measurements\nStart measuring"
+        },
+        {
+          "id": "extensions",
+          "text": "Extensions\nDEFAULT\nImport\nInstalled\nIdeas\nRepair\nAudit\nNo extensions installed\nExtensions are sandbo"
+        },
+        {
+          "id": "appearance",
+          "text": "Appearance\n\nImages and PDF pages across the surfaces you choose.\n\nApply to IFC\nPlace as reference\nCr"
+        },
+        {
+          "id": "environment",
+          "text": "Environment\nENVIRONMENT\nDefault (no sky)\nDay\nOvercast\nEvening\nNight\nEXPOSURE\n1.00×\nLIGHT HARDNESS\n1."
+        },
+        {
+          "id": "pointclouds",
+          "text": "Point Cloud\nLoad a point cloud to use its display and deviation controls."
+        },
+        {
+          "id": "model",
+          "text": "Model inspector\n\nLoad or start a model first"
+        },
+        {
+          "id": "changeSets",
+          "text": "Change sets\n0 sets\nNew\nImport\n\nNo change sets yet. Your first edit starts one called \"Unsaved change"
+        },
+        {
+          "id": "colorizer",
+          "text": "Colorizer\n\nOpen an IFC file to start colouring.\n\nPaint whole model gray\nGroup by\nSection\nIFC class\nM"
+        }
+      ]
+    },
+    {
+      "name": "all side panels toggle without opening Properties or moving the camera",
+      "ok": true,
+      "evidence": [
+        "properties",
+        "collab",
+        "sources",
+        "zones",
+        "placement",
+        "compare",
+        "bcf",
+        "validation",
+        "lens",
+        "clash",
+        "layers",
+        "loadReport",
+        "changes",
+        "cost",
+        "measurements",
+        "extensions",
+        "appearance",
+        "environment",
+        "pointclouds",
+        "model",
+        "changeSets",
+        "colorizer"
+      ]
+    },
+    {
+      "name": "bottom panels render, switch and close on the fixed 3D surface",
+      "ok": true,
+      "evidence": [
+        "script",
+        "gantt",
+        "lists",
+        "charts",
+        "flow",
+        "document",
+        "drawing",
+        "presentation"
+      ]
+    },
+    {
+      "name": "rapid side switches settle on the last requested panel",
+      "ok": true,
+      "evidence": {
+        "id": "clash",
+        "mode": "expanded"
+      }
+    },
+    {
+      "name": "Measurements List releases its latch and closes only its split half",
+      "ok": true
+    },
+    {
+      "name": "docking Drawing beside the scene keeps the same live 3D canvas",
+      "ok": true
+    },
+    {
+      "name": "real mouse gestures reach the 3D canvas after dock transitions",
+      "ok": true
+    },
+    {
+      "name": "opaque panel pixels remain fixed over camera motion in every theme",
+      "ok": true,
+      "evidence": [
+        {
+          "theme": "light",
+          "width": 297,
+          "height": 178,
+          "identicalPng": true
+        },
+        {
+          "theme": "dark",
+          "width": 297,
+          "height": 178,
+          "identicalPng": true
+        },
+        {
+          "theme": "colorful",
+          "width": 297,
+          "height": 178,
+          "identicalPng": true
+        }
+      ]
+    },
+    {
+      "name": "Colorizer draft survives switching to Properties and returning",
+      "ok": true,
+      "evidence": {
+        "before": 14509,
+        "whileHidden": 14509,
+        "after": 14509
+      }
+    },
+    {
+      "name": "Colorizer draft survives a dock split and rejoin",
+      "ok": true,
+      "evidence": {
+        "products": 14509
+      }
+    },
+    {
+      "name": "Colorizer select-group checkboxes and 3D selection stay consistent",
+      "ok": true,
+      "evidence": {
+        "selected": 1968
+      }
+    },
+    {
+      "name": "adding and removing a federated model preserves the existing source draft",
+      "ok": true,
+      "evidence": {
+        "paintedProducts": 14509,
+        "selectedProducts": 1968,
+        "resolvedOwner": "edf66447-e378-49f9-8717-5ea6e619ee5b"
+      }
+    },
+    {
+      "name": "Save as completes with the same draft when switching away during export",
+      "ok": true,
+      "evidence": {
+        "bytes": 11873913,
+        "suggestedFilename": "hangarvd_f10_ tan base_f01_colored_colored.ifc",
+        "busyWhenLeaving": "true"
+      }
+    },
+    {
+      "name": "closing all models clears preview and pending source sessions",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "console": [],
+  "registry": {
+    "sides": [
+      "properties",
+      "collab",
+      "sources",
+      "zones",
+      "placement",
+      "compare",
+      "bcf",
+      "validation",
+      "lens",
+      "clash",
+      "layers",
+      "loadReport",
+      "changes",
+      "cost",
+      "measurements",
+      "extensions",
+      "appearance",
+      "environment",
+      "pointclouds",
+      "model",
+      "changeSets",
+      "colorizer"
+    ],
+    "bottom": [
+      "script",
+      "gantt",
+      "lists",
+      "charts",
+      "flow",
+      "document",
+      "drawing",
+      "presentation"
+    ]
+  },
+  "loaded": {
+    "id": "edf66447-e378-49f9-8717-5ea6e619ee5b",
+    "vertices": 1917264,
+    "triangles": 1681800
+  },
+  "draftLifetime": {
+    "before": 14509,
+    "whileHidden": 14509,
+    "after": 14509
+  },
+  "ok": true
+}

@@ -1,0 +1,46 @@
+{
+  "header": {
+    "id": "blake3:d059f5911c257991c02645320c3ff2134c885473c465c570f5f84f5ba29dca43",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "tanng",
+    "timestamp": "2026-10-19T03:20:18.040Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "tanng"
+      },
+      "intent": "Merge blake3:5f8ea6810c6963e756c01abb652c7cf96fe336267d26cc0eb9e67ad34af0d8de into main",
+      "created": "2026-10-19T03:20:18.040Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:8128c747f1d76e7ea0573d2c5e4938abd8aef069284b8dca7587f1306988ca42"
+      },
+      "parents": [
+        "blake3:8128c747f1d76e7ea0573d2c5e4938abd8aef069284b8dca7587f1306988ca42"
+      ],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": {
+        "candidate": "blake3:5f8ea6810c6963e756c01abb652c7cf96fe336267d26cc0eb9e67ad34af0d8de",
+        "into": "main",
+        "resolutions": [],
+        "waived_checks": [],
+        "resolver": "tanng"
+      },
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "slab-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_Common::Status": "NEW"
+      }
+    }
+  ]
+}

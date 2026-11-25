@@ -1,0 +1,53 @@
+{
+  "totalCsgFailures": 0,
+  "rows": [
+    {
+      "id": 2444,
+      "triangles": 2544,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalance": 0,
+      "r2GeometryPayloadIdentical": true
+    },
+    {
+      "id": 150461,
+      "triangles": 2024,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalance": 0,
+      "r2GeometryPayloadIdentical": null
+    },
+    {
+      "id": 152785,
+      "triangles": 2024,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalance": 0,
+      "r2GeometryPayloadIdentical": null
+    },
+    {
+      "id": 298390,
+      "triangles": 2576,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalance": 0,
+      "r2GeometryPayloadIdentical": true
+    },
+    {
+      "id": 303995,
+      "triangles": 2576,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalance": 0,
+      "r2GeometryPayloadIdentical": true
+    },
+    {
+      "id": 304217,
+      "triangles": 2576,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalance": 0,
+      "r2GeometryPayloadIdentical": true
+    }
+  ]
+}

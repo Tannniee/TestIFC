@@ -1,0 +1,75 @@
+{
+  "revision": 1,
+  "checkpoint": {
+    "version": 1,
+    "id": "c3d31f8c-9adc-45b9-af5b-ab8c8bf459e8",
+    "graphId": "recorded-grouped-proposal",
+    "graphName": "Grouped proposal",
+    "graphDigest": "6ab41c7026e4b92c5e4b4df1edb112052625540302a0022629ac4ae04d3a48c9",
+    "sourceDigest": "recorded-source",
+    "reviewNodes": [
+      "proposal"
+    ],
+    "proposalDigest": "4d546568cf8cf30da90235b326e281952ea202a1b05be1b9e87bd50e9df06367",
+    "outputs": {
+      "proposal": {
+        "table": {
+          "kind": "group",
+          "branches": [
+            [
+              "branch-A",
+              [
+                {
+                  "key": "key",
+                  "columns": [
+                    {
+                      "name": "key",
+                      "type": "identifier"
+                    },
+                    {
+                      "name": "label",
+                      "type": "label"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "key": "source-key",
+                      "label": "Recorded review value"
+                    }
+                  ]
+                }
+              ]
+            ],
+            [
+              "branch-B",
+              [
+                {
+                  "key": "key",
+                  "columns": [
+                    {
+                      "name": "key",
+                      "type": "identifier"
+                    },
+                    {
+                      "name": "label",
+                      "type": "label"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "key": "different-source-key",
+                      "label": "Distinct branch B value"
+                    }
+                  ]
+                }
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    "state": "prepared",
+    "createdAt": 1792380318259,
+    "updatedAt": 1792380318259
+  }
+}

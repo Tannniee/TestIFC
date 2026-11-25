@@ -1,0 +1,38 @@
+[
+  {
+    "theme": "default",
+    "size": [
+      446,
+      374
+    ],
+    "pixels": 166804,
+    "changed_pixels": 0
+  },
+  {
+    "theme": "light",
+    "size": [
+      446,
+      374
+    ],
+    "pixels": 166804,
+    "changed_pixels": 0
+  },
+  {
+    "theme": "dark",
+    "size": [
+      446,
+      374
+    ],
+    "pixels": 166804,
+    "changed_pixels": 0
+  },
+  {
+    "theme": "colorful",
+    "size": [
+      446,
+      374
+    ],
+    "pixels": 166804,
+    "changed_pixels": 0
+  }
+]

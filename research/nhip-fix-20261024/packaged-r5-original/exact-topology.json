@@ -1,0 +1,471 @@
+[
+  {
+    "id": 434,
+    "triangles": 100,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 820,
+    "triangles": 92,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 2361,
+    "triangles": 1256,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 2444,
+    "triangles": 2976,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 10217,
+    "triangles": 4690,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 15785,
+    "triangles": 4792,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 64951,
+    "triangles": 2560,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 89056,
+    "triangles": 4792,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 150461,
+    "triangles": 2576,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 152785,
+    "triangles": 2576,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 178623,
+    "triangles": 4792,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 178955,
+    "triangles": 70,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 198892,
+    "triangles": 4792,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 248619,
+    "triangles": 4792,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 257768,
+    "triangles": 436,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 258582,
+    "triangles": 436,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 258648,
+    "triangles": 436,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 266636,
+    "triangles": 104,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 281338,
+    "triangles": 4452,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 286665,
+    "triangles": 5058,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 286744,
+    "triangles": 5046,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 286882,
+    "triangles": 5432,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 286961,
+    "triangles": 5190,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 287038,
+    "triangles": 4446,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 292599,
+    "triangles": 4438,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 298390,
+    "triangles": 3008,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 303995,
+    "triangles": 3008,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 304217,
+    "triangles": 3008,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 319371,
+    "triangles": 4278,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 322443,
+    "triangles": 104,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 344051,
+    "triangles": 128,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 448868,
+    "triangles": 4434,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 460997,
+    "triangles": 4458,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 464047,
+    "triangles": 4450,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 471627,
+    "triangles": 2514,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 472872,
+    "triangles": 2564,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 473024,
+    "triangles": 2524,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 473164,
+    "triangles": 2484,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 473277,
+    "triangles": 2464,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 473532,
+    "triangles": 2654,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 473789,
+    "triangles": 2524,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 473865,
+    "triangles": 2514,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 490757,
+    "triangles": 2136,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 566424,
+    "triangles": 212,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 615144,
+    "triangles": 308,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 618305,
+    "triangles": 206,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 625141,
+    "triangles": 1078,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 647471,
+    "triangles": 308,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 665548,
+    "triangles": 308,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 679523,
+    "triangles": 210,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 704523,
+    "triangles": 308,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 714937,
+    "triangles": 120,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 725690,
+    "triangles": 212,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 809515,
+    "triangles": 4408,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 817569,
+    "triangles": 4408,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 818684,
+    "triangles": 4376,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 824437,
+    "triangles": 4010,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 825013,
+    "triangles": 4408,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 830064,
+    "triangles": 4016,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 831471,
+    "triangles": 4148,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 831549,
+    "triangles": 4376,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 836117,
+    "triangles": 4406,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 836248,
+    "triangles": 4016,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 837397,
+    "triangles": 4376,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 842718,
+    "triangles": 4148,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 845196,
+    "triangles": 4450,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 845414,
+    "triangles": 4394,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  }
+]

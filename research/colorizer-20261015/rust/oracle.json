@@ -1,0 +1,156 @@
+{
+  "engine": "Rust ifc-lite-export Colorizer; independently read by IfcOpenShell 0.8.5",
+  "groups": 75,
+  "gray_objects": 14509,
+  "final_red": 1968,
+  "final_gray": 12541,
+  "surface_items_verified": 14509,
+  "non_presentation_records_unchanged": 184677,
+  "geometry_samples": [
+    {
+      "expressId": 101023,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "triangles": 292
+    },
+    {
+      "expressId": 101050,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "triangles": 292
+    },
+    {
+      "expressId": 101062,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "triangles": 292
+    },
+    {
+      "expressId": 101074,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "triangles": 292
+    },
+    {
+      "expressId": 101086,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "triangles": 292
+    },
+    {
+      "expressId": 101098,
+      "materials": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "triangles": 292
+    },
+    {
+      "expressId": 58,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ],
+      "triangles": 12
+    },
+    {
+      "expressId": 103,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ],
+      "triangles": 44
+    },
+    {
+      "expressId": 142,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ],
+      "triangles": 44
+    },
+    {
+      "expressId": 156,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ],
+      "triangles": 44
+    },
+    {
+      "expressId": 169,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ],
+      "triangles": 44
+    },
+    {
+      "expressId": 182,
+      "materials": [
+        [
+          0.5019607843137255,
+          0.5019607843137255,
+          0.5019607843137255
+        ]
+      ],
+      "triangles": 44
+    }
+  ],
+  "source_sha256": "df595b8d150b09dabbc48e21f6efd1b26a0f35ab07636a02d0b51896b94894a2",
+  "outputs": [
+    {
+      "file": "01-all-gray.ifc",
+      "sha256": "7da0e389ae44ee6492a1bc1e4d7614d796ed4295b6a5eb539b34a29c20712165",
+      "bytes": 11873913
+    },
+    {
+      "file": "02-gray-red.ifc",
+      "sha256": "2e28d11db75ea2eddf68cacef8718556a330a5002bcd03dc2789da7d94b2ce1c",
+      "bytes": 11874119
+    }
+  ]
+}

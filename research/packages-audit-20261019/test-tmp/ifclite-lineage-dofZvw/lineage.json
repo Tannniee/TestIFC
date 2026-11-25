@@ -1,0 +1,15 @@
+{
+  "format": "ifc-lite/lineage",
+  "version": 2,
+  "base": {
+    "hash": "sha256:33512a208b484b84902b9d7a11e140a694cdab208439ef93fe07181847fb3937",
+    "path": "F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\packages-audit-20261019\\test-tmp\\ifclite-lineage-dofZvw\\v1.ifc"
+  },
+  "head": {
+    "hash": "sha256:b2985db40b66f27334647520c6293d196afdecb365a99648b7e87bea5cd4d498",
+    "path": "F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\packages-audit-20261019\\test-tmp\\ifclite-lineage-dofZvw\\v2.ifc"
+  },
+  "entries": [],
+  "deleted": [],
+  "keyProperty": "Tag"
+}

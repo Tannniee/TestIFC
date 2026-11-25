@@ -1,0 +1,42 @@
+{
+  "header": {
+    "id": "blake3:c8a0a1cfb38320249585f8d4e96de1e8741ffe882919792967452dde980bb9ae",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "agent-1",
+    "timestamp": "2026-10-19T03:18:19.931Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "agent",
+        "principal": "agent-1"
+      },
+      "intent": "Bump fire rating (rebased)",
+      "created": "2026-10-19T03:18:19.931Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:f88cf1fe27f75d9a147e4d24e34f133f5db1a29bb1a29ceadf8475b8d11289bd"
+      },
+      "parents": [
+        "blake3:98601d28080ca0806db9f77055b980f5317caa9a97eff2a1f0ed56c2ed0eebc1"
+      ],
+      "scope_claim": [
+        "model.mutate:Pset_FireSafety*@IfcWall"
+      ],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI90"
+      }
+    }
+  ]
+}

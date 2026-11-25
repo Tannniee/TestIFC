@@ -1,0 +1,1 @@
+{"flowVersion":1,"id":"s","name":"s","capabilities":["secret.read:IFC_LITE_TEST_ECHO_5446","network.fetch:api.example.com"],"inputs":[],"outputs":[{"nodeId":"req","port":"body","label":"body"}],"nodes":[{"id":"req","type":"http.request","params":{"url":"https://api.example.com/echo","headers":{"Authorization":"Bearer {{secret:IFC_LITE_TEST_ECHO_5446}}"}}}],"edges":[]}

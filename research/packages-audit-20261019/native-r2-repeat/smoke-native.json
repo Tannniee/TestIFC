@@ -1,0 +1,548 @@
+{
+  "executable": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-packages-audit-20261019-r2\\IFC-Lite.exe",
+  "tests": [
+    {
+      "name": "local IFC import",
+      "models": [
+        {
+          "name": "building-architecture.ifc",
+          "meshes": 14,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "TestIFC Top sweep creates canonical Box, restores source orientation, six diamond handles"
+    },
+    {
+      "name": "IFC Y uses negative world Z with exchanged limits; inverted numeric input rejected"
+    },
+    {
+      "name": "Actual face drag changes clipping; Escape restores all bounds and releases capture"
+    },
+    {
+      "name": "Top-view elevation face can be dragged even when its axis projects to a point"
+    },
+    {
+      "name": "Draw again + Escape restores the exact previous camera and section state"
+    },
+    {
+      "name": "Explicit blur interruption cancels a draft and restores clipping and camera"
+    },
+    {
+      "name": "Outline and handle visibility are independent of active clipping"
+    },
+    {
+      "name": "Reset Bounds uses placed model bounds; Fit View preserves bounds and orientation"
+    },
+    {
+      "name": "Actual WebGPU cut toggle changes canvas pixels without changing bounds or camera"
+    },
+    {
+      "name": "Close/reopen preserves native cut; Front exits Box and keeps native plane controls"
+    },
+    {
+      "name": "ViewCube retains fixed dimensions, 26 surfaces and six quick views",
+      "layout": {
+        "cluster": [
+          204,
+          234
+        ],
+        "stage": [
+          158,
+          158
+        ],
+        "quickViews": 6,
+        "surfaces": 26
+      }
+    },
+    {
+      "name": "Properties activity icon closes and reopens, including rapid clicks"
+    },
+    {
+      "name": "real wheel TestIFC ratio, no inertia, reversibility"
+    },
+    {
+      "name": "actual pointer orbit damping and stable pivot"
+    },
+    {
+      "name": "real screen pan retains all pointer movement and damping tail"
+    },
+    {
+      "name": "selection preserves the view and real orbit retains the stable TestIFC target"
+    },
+    {
+      "name": "actual viewport click selects an IFC component without reframing the stationary view"
+    },
+    {
+      "name": "Multi quick tool performs GPU rectangle selection",
+      "count": 11
+    },
+    {
+      "name": "Measure quick tool completes an actual snapped drag on IFC geometry",
+      "measurement": {
+        "id": "m-1792403152761-1",
+        "start": {
+          "x": 5.099999904632568,
+          "y": 5.275735855102539,
+          "z": -5.847747848047343,
+          "screenX": 701.421476963162,
+          "screenY": 420.206938384993
+        },
+        "end": {
+          "x": 5.099999904632568,
+          "y": 5.699999809265137,
+          "z": -5.8617483249941,
+          "screenX": 701.421476963162,
+          "screenY": 419.83026244034767
+        },
+        "distance": 0.42449489532433654
+      }
+    },
+    {
+      "name": "Measure quick tool and mode buttons use canonical IFC-Lite measurement state"
+    },
+    {
+      "name": "quick tool active styling in dark theme",
+      "style": {
+        "background": "rgb(31, 35, 53)",
+        "color": "rgb(169, 177, 214)",
+        "border": "rgb(122, 162, 247)"
+      }
+    },
+    {
+      "name": "six native Y-up camera views",
+      "directions": [
+        [
+          "left",
+          [
+            -1,
+            0,
+            0
+          ]
+        ],
+        [
+          "right",
+          [
+            1,
+            0,
+            0
+          ]
+        ],
+        [
+          "top",
+          [
+            0,
+            1,
+            0
+          ]
+        ],
+        [
+          "bottom",
+          [
+            0,
+            -1,
+            0
+          ]
+        ],
+        [
+          "front",
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        [
+          "back",
+          [
+            0,
+            0,
+            -1
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "keyboard preset and camera roll sync"
+    },
+    {
+      "name": "cube pointer drag orbits the model"
+    },
+    {
+      "name": "pointer corner and edge clicks move the native camera"
+    },
+    {
+      "name": "two-model import completes and clears loading overlay",
+      "models": [
+        {
+          "name": "building-architecture.ifc",
+          "meshes": 14,
+          "visible": true
+        },
+        {
+          "name": "building-architecture-rev-b.ifc",
+          "meshes": 14,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "native IFC source stays outside WebView2; BIM tables and federation",
+      "wasmInstantiations": 0,
+      "models": [
+        {
+          "loadPath": "native",
+          "sourceBytes": 0,
+          "entityCount": 127,
+          "propertySets": [
+            {
+              "name": "Pset_SlabCommon",
+              "globalId": "",
+              "properties": [
+                {
+                  "name": "Status",
+                  "type": 0,
+                  "value": "UNSET",
+                  "dataType": "IFCLABEL",
+                  "values": [
+                    "UNSET"
+                  ]
+                },
+                {
+                  "name": "IsExternal",
+                  "type": 3,
+                  "value": true,
+                  "dataType": "IFCBOOLEAN"
+                },
+                {
+                  "name": "LoadBearing",
+                  "type": 3,
+                  "value": false,
+                  "dataType": "IFCBOOLEAN"
+                },
+                {
+                  "name": "FireRating",
+                  "type": 0,
+                  "value": "REI30",
+                  "dataType": "IFCLABEL"
+                },
+                {
+                  "name": "AcousticRating",
+                  "type": 0,
+                  "value": "29dB Rw",
+                  "dataType": "IFCLABEL"
+                }
+              ]
+            }
+          ],
+          "hierarchy": true,
+          "bounds": {
+            "min": {
+              "x": -29.642534255981445,
+              "y": -1.2999999523162842,
+              "z": -9.300000190734863
+            },
+            "max": {
+              "x": 8.90000057220459,
+              "y": 5.700000286102295,
+              "z": 14.985715866088867
+            }
+          }
+        },
+        {
+          "loadPath": "native",
+          "sourceBytes": 0,
+          "entityCount": 127,
+          "propertySets": [
+            {
+              "name": "Pset_SlabCommon",
+              "globalId": "",
+              "properties": [
+                {
+                  "name": "Status",
+                  "type": 0,
+                  "value": "UNSET",
+                  "dataType": "IFCLABEL",
+                  "values": [
+                    "UNSET"
+                  ]
+                },
+                {
+                  "name": "IsExternal",
+                  "type": 3,
+                  "value": true,
+                  "dataType": "IFCBOOLEAN"
+                },
+                {
+                  "name": "LoadBearing",
+                  "type": 3,
+                  "value": false,
+                  "dataType": "IFCBOOLEAN"
+                },
+                {
+                  "name": "FireRating",
+                  "type": 0,
+                  "value": "REI30",
+                  "dataType": "IFCLABEL"
+                },
+                {
+                  "name": "AcousticRating",
+                  "type": 0,
+                  "value": "29dB Rw",
+                  "dataType": "IFCLABEL"
+                }
+              ]
+            }
+          ],
+          "hierarchy": true,
+          "bounds": {
+            "min": {
+              "x": -29.642534255981445,
+              "y": -1.2999999523162842,
+              "z": -9.300000190734863
+            },
+            "max": {
+              "x": 9.100000381469727,
+              "y": 5.700000286102295,
+              "z": 14.985715866088867
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "native Properties component displays selected slab Pset without source bytes"
+    },
+    {
+      "name": "two-model Box sweep commits active clipping through real pointer input",
+      "size": "23.32 × 7.00 × 17.26 m"
+    }
+  ],
+  "errors": [],
+  "diagnostics": [
+    "warning: [Viewport] frameSelection: No selection or geometry",
+    "warning: [Viewport] frameSelection: No selection or geometry"
+  ],
+  "nativeBackend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "runtime": {
+    "url": "http://tauri.localhost/?engine=native",
+    "secureContext": true,
+    "crossOriginIsolated": true,
+    "webgpu": true,
+    "adapter": {},
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "visibleWarnings": [
+    "Could not align \"building-architecture-rev-b.ifc\" with the federation anchor — EPSG:32760 → EPSG:32760 reprojection failed. The model is shown in its own local frame and may appear at the wrong real-world position."
+  ],
+  "federationReferences": [
+    {
+      "name": "building-architecture.ifc",
+      "georeferencing": {
+        "hasGeoreference": true,
+        "transformMatrix": [
+          0.4999999999999999,
+          0.8660254037844387,
+          0,
+          0,
+          -0.8660254037844387,
+          0.4999999999999999,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          729013348.8297004,
+          9063992684.697363,
+          1300.0000000000011,
+          1
+        ],
+        "source": "mapConversion",
+        "mapConversion": {
+          "id": 0,
+          "sourceCRS": 0,
+          "targetCRS": 0,
+          "eastings": 729013348.8297004,
+          "northings": 9063992684.697363,
+          "orthogonalHeight": 1300.0000000000011,
+          "xAxisAbscissa": 0.4999999999999999,
+          "xAxisOrdinate": 0.8660254037844387,
+          "scale": 1,
+          "factorX": 1,
+          "factorY": 1,
+          "factorZ": 1
+        },
+        "projectedCRS": {
+          "id": 0,
+          "name": "EPSG:32760",
+          "description": "EPSG:32760 - WGS 84 / UTM zone 60S",
+          "geodeticDatum": "WGS 84",
+          "mapUnit": "MILLIMETRE",
+          "mapUnitScale": 0.001
+        }
+      },
+      "coordinateInfo": {
+        "originShift": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "shiftedBounds": {
+          "min": {
+            "x": -29.642534255981445,
+            "y": -1.2999999523162842,
+            "z": -9.300000190734863
+          },
+          "max": {
+            "x": 8.90000057220459,
+            "y": 5.700000286102295,
+            "z": 14.985715866088867
+          }
+        },
+        "originalBounds": {
+          "min": {
+            "x": -29.642534255981445,
+            "y": -1.2999999523162842,
+            "z": -9.300000190734863
+          },
+          "max": {
+            "x": 8.90000057220459,
+            "y": 5.700000286102295,
+            "z": 14.985715866088867
+          }
+        },
+        "hasLargeCoordinates": false,
+        "lengthUnitScale": 0.001,
+        "buildingRotation": 0,
+        "wasmRtcFrame": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "needsShift": false
+        }
+      }
+    },
+    {
+      "name": "building-architecture-rev-b.ifc",
+      "georeferencing": {
+        "hasGeoreference": true,
+        "transformMatrix": [
+          0.4999999999999999,
+          0.8660254037844387,
+          0,
+          0,
+          -0.8660254037844387,
+          0.4999999999999999,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          729013348.8297004,
+          9063992684.697363,
+          1300.0000000000011,
+          1
+        ],
+        "source": "mapConversion",
+        "mapConversion": {
+          "id": 0,
+          "sourceCRS": 0,
+          "targetCRS": 0,
+          "eastings": 729013348.8297004,
+          "northings": 9063992684.697363,
+          "orthogonalHeight": 1300.0000000000011,
+          "xAxisAbscissa": 0.4999999999999999,
+          "xAxisOrdinate": 0.8660254037844387,
+          "scale": 1,
+          "factorX": 1,
+          "factorY": 1,
+          "factorZ": 1
+        },
+        "projectedCRS": {
+          "id": 0,
+          "name": "EPSG:32760",
+          "description": "EPSG:32760 - WGS 84 / UTM zone 60S",
+          "geodeticDatum": "WGS 84",
+          "mapUnit": "MILLIMETRE",
+          "mapUnitScale": 0.001
+        }
+      },
+      "coordinateInfo": {
+        "originShift": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "shiftedBounds": {
+          "min": {
+            "x": -29.642534255981445,
+            "y": -1.2999999523162842,
+            "z": -9.300000190734863
+          },
+          "max": {
+            "x": 9.100000381469727,
+            "y": 5.700000286102295,
+            "z": 14.985715866088867
+          }
+        },
+        "originalBounds": {
+          "min": {
+            "x": -29.642534255981445,
+            "y": -1.2999999523162842,
+            "z": -9.300000190734863
+          },
+          "max": {
+            "x": 9.100000381469727,
+            "y": 5.700000286102295,
+            "z": 14.985715866088867
+          }
+        },
+        "hasLargeCoordinates": false,
+        "lengthUnitScale": 0.001,
+        "buildingRotation": 0,
+        "wasmRtcFrame": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "needsShift": false
+        }
+      }
+    }
+  ],
+  "sectionBoxEvents": [
+    {
+      "type": "pointerdown",
+      "focused": true,
+      "enabled": false,
+      "phase": "drawing",
+      "x": 481.6000061035156,
+      "y": 308.29998779296875
+    },
+    {
+      "type": "pointerup",
+      "focused": true,
+      "enabled": false,
+      "phase": "drawing",
+      "x": 963.2000122070312,
+      "y": 664.7000122070312
+    },
+    {
+      "type": "lostpointercapture",
+      "focused": true,
+      "enabled": true,
+      "x": 963.2000122070312,
+      "y": 664.7000122070312
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,39 @@
+{
+  "note": "Exact stored-f32 positions; signed zero normalized by numeric tuple equality; no proximity welding. Final canonical MeshData output, after producer.",
+  "totalCsgFailures": 0,
+  "rows": [
+    {
+      "id": 2444,
+      "triangles": 2544,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalanceEdges": 0
+    },
+    {
+      "id": 298390,
+      "triangles": 2576,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalanceEdges": 0
+    },
+    {
+      "id": 303995,
+      "triangles": 2576,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalanceEdges": 0
+    },
+    {
+      "id": 304217,
+      "triangles": 2576,
+      "badEdgeMultiplicityHistogram": {},
+      "collapsedTriangles": 0,
+      "directedImbalanceEdges": 0
+    }
+  ],
+  "old2444ChangedFields": [
+    "indices",
+    "normals",
+    "positions"
+  ]
+}

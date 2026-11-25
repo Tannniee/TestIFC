@@ -1,0 +1,18 @@
+{
+  "refs": {
+    "main": {
+      "layers": [
+        "blake3:9e95eaee48cb78db69ccfab16517c2deb4dcec1d46aba04e9b178996415539ad",
+        "blake3:959f3dd85bba68c402acea2f5177f20c1348423438dbbc19b5c33378e5b0a13b"
+      ],
+      "policy": {
+        "requireHumanApproval": true
+      }
+    },
+    "option-b": {
+      "layers": [
+        "blake3:9e95eaee48cb78db69ccfab16517c2deb4dcec1d46aba04e9b178996415539ad"
+      ]
+    }
+  }
+}

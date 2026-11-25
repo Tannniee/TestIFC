@@ -1,0 +1,79 @@
+[
+  {
+    "id": 434,
+    "triangles": 100,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 820,
+    "triangles": 92,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 2361,
+    "triangles": 584,
+    "unpairedOrNonmanifoldEdges": 28,
+    "directedMismatch": 28,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 2444,
+    "triangles": 2544,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 64951,
+    "triangles": 2560,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 266636,
+    "triangles": 104,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 298390,
+    "triangles": 2576,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 303995,
+    "triangles": 2576,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 304217,
+    "triangles": 2576,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 322443,
+    "triangles": 104,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  },
+  {
+    "id": 344051,
+    "triangles": 128,
+    "unpairedOrNonmanifoldEdges": 0,
+    "directedMismatch": 0,
+    "collapsedTriangles": 0
+  }
+]

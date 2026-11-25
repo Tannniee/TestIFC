@@ -1,0 +1,50 @@
+{
+  "apps/viewer": {
+    "before": 190,
+    "after": 186
+  },
+  "apps/viewer-embed": {
+    "before": 192,
+    "after": 188
+  },
+  "packages/collab-server": {
+    "before": 3,
+    "after": 2
+  },
+  "packages/ids": {
+    "before": 9,
+    "after": 7
+  },
+  "packages/parser": {
+    "before": 113,
+    "after": 112
+  },
+  "packages/ai": {
+    "before": null,
+    "after": 0
+  },
+  "packages/ids-agent": {
+    "before": null,
+    "after": 0
+  },
+  "packages/ids-authoring": {
+    "before": null,
+    "after": 0
+  },
+  "packages/report-contract": {
+    "before": null,
+    "after": 0
+  },
+  "packages/semantic": {
+    "before": null,
+    "after": 0
+  },
+  "packages/source-autodesk": {
+    "before": null,
+    "after": 0
+  },
+  "packages/load-trace": {
+    "before": null,
+    "after": 0
+  }
+}

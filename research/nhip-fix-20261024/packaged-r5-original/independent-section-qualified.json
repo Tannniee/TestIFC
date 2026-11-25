@@ -1,0 +1,483 @@
+{
+  "method": "33 interior sections, OCC operands with 1 micrometre chord deflection, finite Shapely differences; 0.1 mm material opening explicitly reported separately from raw surface",
+  "rows": [
+    {
+      "id": 178955,
+      "bodyCutters": 4,
+      "sections": [
+        {
+          "z": -7.294500000038129,
+          "rawSymmetricDifferenceAreaM2": 6.210521076349523e-06,
+          "rawActualAreaM2": 26.41151024162898,
+          "rawReferenceAreaM2": 26.411504869941748,
+          "precisionMarginHausdorffMm": 0.0006752130157217096
+        },
+        {
+          "z": -6.838593750034818,
+          "rawSymmetricDifferenceAreaM2": 6.0655483066099835e-06,
+          "rawActualAreaM2": 29.462997008265262,
+          "rawReferenceAreaM2": 29.46299179470177,
+          "precisionMarginHausdorffMm": 0.0006576961220083888
+        },
+        {
+          "z": -6.382687500031507,
+          "rawSymmetricDifferenceAreaM2": 5.94420575508864e-06,
+          "rawActualAreaM2": 32.40426088905313,
+          "rawReferenceAreaM2": 32.40425580891117,
+          "precisionMarginHausdorffMm": 0.0006401432486313752
+        },
+        {
+          "z": -5.926781250028196,
+          "rawSymmetricDifferenceAreaM2": 5.853525430044876e-06,
+          "rawActualAreaM2": 35.23530188172772,
+          "rawReferenceAreaM2": 35.235296898805466,
+          "precisionMarginHausdorffMm": 0.0006226384048346745
+        },
+        {
+          "z": -5.4708750000248845,
+          "rawSymmetricDifferenceAreaM2": 5.800274188577323e-06,
+          "rawActualAreaM2": 37.95611999139439,
+          "rawReferenceAreaM2": 37.95611507328261,
+          "precisionMarginHausdorffMm": 0.0006070336340258109
+        },
+        {
+          "z": -5.014968750021573,
+          "rawSymmetricDifferenceAreaM2": 5.788179961741366e-06,
+          "rawActualAreaM2": 40.56671520793937,
+          "rawReferenceAreaM2": 40.56671033568631,
+          "precisionMarginHausdorffMm": 0.0005895422328094924
+        },
+        {
+          "z": -4.559062500018261,
+          "rawSymmetricDifferenceAreaM2": 5.8089255578480475e-06,
+          "rawActualAreaM2": 43.06708754539146,
+          "rawReferenceAreaM2": 43.06708268329548,
+          "precisionMarginHausdorffMm": 0.0005720942413134367
+        },
+        {
+          "z": -4.10315625001495,
+          "rawSymmetricDifferenceAreaM2": 5.852965646948258e-06,
+          "rawActualAreaM2": 45.45723699434521,
+          "rawReferenceAreaM2": 45.45723211134442,
+          "precisionMarginHausdorffMm": 0.0005796181001197949
+        },
+        {
+          "z": -3.647250000011639,
+          "rawSymmetricDifferenceAreaM2": 5.921386953108406e-06,
+          "rawActualAreaM2": 47.73716355959014,
+          "rawReferenceAreaM2": 47.73715862421217,
+          "precisionMarginHausdorffMm": 0.000600553544337425
+        },
+        {
+          "z": -3.1913437500083273,
+          "rawSymmetricDifferenceAreaM2": 6.107356585668296e-06,
+          "rawActualAreaM2": 49.906867334990174,
+          "rawReferenceAreaM2": 49.906862224486176,
+          "precisionMarginHausdorffMm": 0.0005988284328289373
+        },
+        {
+          "z": -2.735437500005016,
+          "rawSymmetricDifferenceAreaM2": 6.371521999530653e-06,
+          "rawActualAreaM2": 51.9663482830705,
+          "rawReferenceAreaM2": 51.96634290741986,
+          "precisionMarginHausdorffMm": 0.0006217714689782383
+        },
+        {
+          "z": -2.279531250001705,
+          "rawSymmetricDifferenceAreaM2": 6.460693020016706e-06,
+          "rawActualAreaM2": 53.91560614944289,
+          "rawReferenceAreaM2": 53.91560067621407,
+          "precisionMarginHausdorffMm": 0.0006644139123324067
+        },
+        {
+          "z": -1.823624999998394,
+          "rawSymmetricDifferenceAreaM2": 4.5388977617752745e-06,
+          "rawActualAreaM2": 52.89855439491813,
+          "rawReferenceAreaM2": 52.89855090032343,
+          "precisionMarginHausdorffMm": 0.0004389993216463281
+        },
+        {
+          "z": -1.367718749995083,
+          "rawSymmetricDifferenceAreaM2": 4.446097090901421e-06,
+          "rawActualAreaM2": 51.84011753769221,
+          "rawReferenceAreaM2": 51.84011412707138,
+          "precisionMarginHausdorffMm": 0.0004242924488664816
+        },
+        {
+          "z": -0.9118124999917709,
+          "rawSymmetricDifferenceAreaM2": 4.382059262538031e-06,
+          "rawActualAreaM2": 50.7502428320811,
+          "rawReferenceAreaM2": 50.750239478350174,
+          "precisionMarginHausdorffMm": 0.00040994060280779177
+        },
+        {
+          "z": -0.45590624998845986,
+          "rawSymmetricDifferenceAreaM2": 4.3534904853722735e-06,
+          "rawActualAreaM2": 49.62893027617926,
+          "rawReferenceAreaM2": 49.62892694697054,
+          "precisionMarginHausdorffMm": 0.00039445610201805547
+        },
+        {
+          "z": 1.4851231355805794e-11,
+          "rawSymmetricDifferenceAreaM2": 4.332221577019046e-06,
+          "rawActualAreaM2": 48.47617985472138,
+          "rawReferenceAreaM2": 48.476176540424674,
+          "precisionMarginHausdorffMm": 0.0003801027472670315
+        },
+        {
+          "z": 0.4559062500181632,
+          "rawSymmetricDifferenceAreaM2": 4.316104750842256e-06,
+          "rawActualAreaM2": 47.29199156298062,
+          "rawReferenceAreaM2": 47.291988256958476,
+          "precisionMarginHausdorffMm": 0.00037567134558713633
+        },
+        {
+          "z": 0.9118125000214743,
+          "rawSymmetricDifferenceAreaM2": 4.312740192118446e-06,
+          "rawActualAreaM2": 46.076365399562576,
+          "rawReferenceAreaM2": 46.07636209594962,
+          "precisionMarginHausdorffMm": 0.0003760949978115491
+        },
+        {
+          "z": 1.3677187500247854,
+          "rawSymmetricDifferenceAreaM2": 4.318057263872978e-06,
+          "rawActualAreaM2": 44.82930137461679,
+          "rawReferenceAreaM2": 44.82929805949348,
+          "precisionMarginHausdorffMm": 0.0003760274607245151
+        },
+        {
+          "z": 1.8236250000280965,
+          "rawSymmetricDifferenceAreaM2": 4.328796528164906e-06,
+          "rawActualAreaM2": 43.550799473735026,
+          "rawReferenceAreaM2": 43.55079614184298,
+          "precisionMarginHausdorffMm": 0.0003763871347928216
+        },
+        {
+          "z": 2.2795312500314093,
+          "rawSymmetricDifferenceAreaM2": 4.344908431084246e-06,
+          "rawActualAreaM2": 42.24085969549817,
+          "rawReferenceAreaM2": 42.240856344087995,
+          "precisionMarginHausdorffMm": 0.00037750797510227585
+        },
+        {
+          "z": 2.7354375000347204,
+          "rawSymmetricDifferenceAreaM2": 4.350196746485398e-06,
+          "rawActualAreaM2": 40.89948203376412,
+          "rawReferenceAreaM2": 40.899478670578816,
+          "precisionMarginHausdorffMm": 0.00037780145589749736
+        },
+        {
+          "z": 3.1913437500380315,
+          "rawSymmetricDifferenceAreaM2": 4.355504229991821e-06,
+          "rawActualAreaM2": 39.52666649416615,
+          "rawReferenceAreaM2": 39.52666312419514,
+          "precisionMarginHausdorffMm": 0.0003779389361469043
+        },
+        {
+          "z": 3.6472500000413426,
+          "rawSymmetricDifferenceAreaM2": 4.355737307561284e-06,
+          "rawActualAreaM2": 38.12241307612877,
+          "rawReferenceAreaM2": 38.12240969839476,
+          "precisionMarginHausdorffMm": 0.00037825114551637284
+        },
+        {
+          "z": 4.103156250044654,
+          "rawSymmetricDifferenceAreaM2": 4.355371956322093e-06,
+          "rawActualAreaM2": 36.68672177514202,
+          "rawReferenceAreaM2": 36.68671839546001,
+          "precisionMarginHausdorffMm": 0.00037966163279889997
+        },
+        {
+          "z": 4.559062500047965,
+          "rawSymmetricDifferenceAreaM2": 4.351285488286167e-06,
+          "rawActualAreaM2": 35.21959259166658,
+          "rawReferenceAreaM2": 35.2195892114785,
+          "precisionMarginHausdorffMm": 0.0003801507415523986
+        },
+        {
+          "z": 5.014968750051276,
+          "rawSymmetricDifferenceAreaM2": 4.348123823057761e-06,
+          "rawActualAreaM2": 33.72102552704751,
+          "rawReferenceAreaM2": 33.72102215156358,
+          "precisionMarginHausdorffMm": 0.00038038521399386127
+        },
+        {
+          "z": 5.470875000054587,
+          "rawSymmetricDifferenceAreaM2": 4.339391255232551e-06,
+          "rawActualAreaM2": 32.19102058630193,
+          "rawReferenceAreaM2": 32.19101721418958,
+          "precisionMarginHausdorffMm": 0.00038083303177671723
+        },
+        {
+          "z": 5.926781250057898,
+          "rawSymmetricDifferenceAreaM2": 4.328179600850819e-06,
+          "rawActualAreaM2": 30.629577761986525,
+          "rawReferenceAreaM2": 30.629574400635803,
+          "precisionMarginHausdorffMm": 0.0003813422142506795
+        },
+        {
+          "z": 6.382687500061211,
+          "rawSymmetricDifferenceAreaM2": 4.307442612500754e-06,
+          "rawActualAreaM2": 29.036697054455757,
+          "rawReferenceAreaM2": 29.036693706307787,
+          "precisionMarginHausdorffMm": 0.0003819030709450999
+        },
+        {
+          "z": 6.838593750064522,
+          "rawSymmetricDifferenceAreaM2": 4.283032671288827e-06,
+          "rawActualAreaM2": 27.41237846728896,
+          "rawReferenceAreaM2": 27.412375136823403,
+          "precisionMarginHausdorffMm": 0.0003825078498387313
+        },
+        {
+          "z": 7.294500000067833,
+          "rawSymmetricDifferenceAreaM2": 4.257381167448525e-06,
+          "rawActualAreaM2": 25.75662200419474,
+          "rawReferenceAreaM2": 25.75661869599202,
+          "precisionMarginHausdorffMm": 0.00038492302492528396
+        }
+      ],
+      "maxRawSymmetricDifferenceAreaM2": 6.460693020016706e-06,
+      "maxPrecisionMarginHausdorffMm": 0.0006752130157217096
+    },
+    {
+      "id": 198892,
+      "bodyCutters": 17,
+      "sections": [
+        {
+          "z": -0.007780793911736645,
+          "rawSymmetricDifferenceAreaM2": 4.030438436881568e-05,
+          "rawActualAreaM2": 3.5725917887208674,
+          "rawReferenceAreaM2": 3.572551759422949,
+          "precisionMarginHausdorffMm": 0.04762083940916635
+        },
+        {
+          "z": -0.007294493778371067,
+          "rawSymmetricDifferenceAreaM2": 4.0297927128452065e-05,
+          "rawActualAreaM2": 3.572591793346964,
+          "rawReferenceAreaM2": 3.572551760268201,
+          "precisionMarginHausdorffMm": 0.04762244888803619
+        },
+        {
+          "z": -0.00680819364500549,
+          "rawSymmetricDifferenceAreaM2": 4.029663423651269e-05,
+          "rawActualAreaM2": 3.5725917930551523,
+          "rawReferenceAreaM2": 3.572551759522322,
+          "precisionMarginHausdorffMm": 0.04762450072550652
+        },
+        {
+          "z": -0.006321893511639912,
+          "rawSymmetricDifferenceAreaM2": 4.028914377587931e-05,
+          "rawActualAreaM2": 3.5725917902178184,
+          "rawReferenceAreaM2": 3.572551759066933,
+          "precisionMarginHausdorffMm": 0.047625929209165904
+        },
+        {
+          "z": -0.005835593378274335,
+          "rawSymmetricDifferenceAreaM2": 4.027874335171411e-05,
+          "rawActualAreaM2": 3.572591782555744,
+          "rawReferenceAreaM2": 3.5725517599284125,
+          "precisionMarginHausdorffMm": 0.04762776321449268
+        },
+        {
+          "z": -0.005349293244908757,
+          "rawSymmetricDifferenceAreaM2": 4.027059845623935e-05,
+          "rawActualAreaM2": 3.5725917765252384,
+          "rawReferenceAreaM2": 3.5725517577875143,
+          "precisionMarginHausdorffMm": 0.04762936015427308
+        },
+        {
+          "z": -0.0048629931115431796,
+          "rawSymmetricDifferenceAreaM2": 4.026211952728662e-05,
+          "rawActualAreaM2": 3.5725917731401786,
+          "rawReferenceAreaM2": 3.5725517597053233,
+          "precisionMarginHausdorffMm": 0.04763136856172063
+        },
+        {
+          "z": -0.004376692978177602,
+          "rawSymmetricDifferenceAreaM2": 4.0255302268945774e-05,
+          "rawActualAreaM2": 3.572591770847917,
+          "rawReferenceAreaM2": 3.572551758008601,
+          "precisionMarginHausdorffMm": 0.04763315491182837
+        },
+        {
+          "z": -0.0038903928448120245,
+          "rawSymmetricDifferenceAreaM2": 4.025067504401783e-05,
+          "rawActualAreaM2": 3.5725917701936716,
+          "rawReferenceAreaM2": 3.5725517595044436,
+          "precisionMarginHausdorffMm": 0.047634791549496076
+        },
+        {
+          "z": -0.003404092711446447,
+          "rawSymmetricDifferenceAreaM2": 4.024715875152068e-05,
+          "rawActualAreaM2": 3.572591768659165,
+          "rawReferenceAreaM2": 3.5725517590762763,
+          "precisionMarginHausdorffMm": 0.04763576447125624
+        },
+        {
+          "z": -0.0029177925780808694,
+          "rawSymmetricDifferenceAreaM2": 4.024406614892805e-05,
+          "rawActualAreaM2": 3.5725917672923817,
+          "rawReferenceAreaM2": 3.5725517585250994,
+          "precisionMarginHausdorffMm": 0.04763744494974795
+        },
+        {
+          "z": -0.002431492444715292,
+          "rawSymmetricDifferenceAreaM2": 4.024267483891683e-05,
+          "rawActualAreaM2": 3.572591765564148,
+          "rawReferenceAreaM2": 3.5725517588184914,
+          "precisionMarginHausdorffMm": 0.04763907208971046
+        },
+        {
+          "z": -0.0019451923113497143,
+          "rawSymmetricDifferenceAreaM2": 4.023769168067102e-05,
+          "rawActualAreaM2": 3.572591764796133,
+          "rawReferenceAreaM2": 3.57255175876693,
+          "precisionMarginHausdorffMm": 0.04763662580339006
+        },
+        {
+          "z": -0.0014588921779841368,
+          "rawSymmetricDifferenceAreaM2": 4.0236367342811896e-05,
+          "rawActualAreaM2": 3.572591761284647,
+          "rawReferenceAreaM2": 3.572551759228933,
+          "precisionMarginHausdorffMm": 0.04763359975430671
+        },
+        {
+          "z": -0.0009725920446185593,
+          "rawSymmetricDifferenceAreaM2": 4.0233879628755054e-05,
+          "rawActualAreaM2": 3.572591759476844,
+          "rawReferenceAreaM2": 3.5725517579756616,
+          "precisionMarginHausdorffMm": 0.047630813905018804
+        },
+        {
+          "z": -0.00048629191125298173,
+          "rawSymmetricDifferenceAreaM2": 4.023131465237008e-05,
+          "rawActualAreaM2": 3.5725917571708945,
+          "rawReferenceAreaM2": 3.5725517584785447,
+          "precisionMarginHausdorffMm": 0.04762841272921122
+        },
+        {
+          "z": 8.222112594935549e-09,
+          "rawSymmetricDifferenceAreaM2": 4.0229668751750825e-05,
+          "rawActualAreaM2": 3.5725917564508114,
+          "rawReferenceAreaM2": 3.5725517580387782,
+          "precisionMarginHausdorffMm": 0.04762577010193631
+        },
+        {
+          "z": 0.0004863083554781742,
+          "rawSymmetricDifferenceAreaM2": 4.022830577837179e-05,
+          "rawActualAreaM2": 3.5725917557340185,
+          "rawReferenceAreaM2": 3.5725517581421418,
+          "precisionMarginHausdorffMm": 0.04762530636271857
+        },
+        {
+          "z": 0.0009726084888437517,
+          "rawSymmetricDifferenceAreaM2": 4.023013842957224e-05,
+          "rawActualAreaM2": 3.5725917553725886,
+          "rawReferenceAreaM2": 3.572551758612237,
+          "precisionMarginHausdorffMm": 0.047625059736471964
+        },
+        {
+          "z": 0.0014589086222093293,
+          "rawSymmetricDifferenceAreaM2": 4.023148330023658e-05,
+          "rawActualAreaM2": 3.5725917562581344,
+          "rawReferenceAreaM2": 3.5725517577600554,
+          "precisionMarginHausdorffMm": 0.047624440076079216
+        },
+        {
+          "z": 0.0019452087555749068,
+          "rawSymmetricDifferenceAreaM2": 4.023383627424861e-05,
+          "rawActualAreaM2": 3.572591757774238,
+          "rawReferenceAreaM2": 3.5725517587861466,
+          "precisionMarginHausdorffMm": 0.047623022592686894
+        },
+        {
+          "z": 0.0024315088889404844,
+          "rawSymmetricDifferenceAreaM2": 4.023742748135648e-05,
+          "rawActualAreaM2": 3.5725917605262856,
+          "rawReferenceAreaM2": 3.5725517574412486,
+          "precisionMarginHausdorffMm": 0.04762242507258516
+        },
+        {
+          "z": 0.002917809022306062,
+          "rawSymmetricDifferenceAreaM2": 4.0241433778381436e-05,
+          "rawActualAreaM2": 3.5725917631864728,
+          "rawReferenceAreaM2": 3.572551759188765,
+          "precisionMarginHausdorffMm": 0.04762219263170109
+        },
+        {
+          "z": 0.0034041091556716394,
+          "rawSymmetricDifferenceAreaM2": 4.024639526214781e-05,
+          "rawActualAreaM2": 3.572591767173902,
+          "rawReferenceAreaM2": 3.572551757183164,
+          "precisionMarginHausdorffMm": 0.04762144829398778
+        },
+        {
+          "z": 0.003890409289037217,
+          "rawSymmetricDifferenceAreaM2": 4.0253763399975635e-05,
+          "rawActualAreaM2": 3.572591771902171,
+          "rawReferenceAreaM2": 3.5725517570723633,
+          "precisionMarginHausdorffMm": 0.04762101172432081
+        },
+        {
+          "z": 0.0043767094224027945,
+          "rawSymmetricDifferenceAreaM2": 4.025848385633286e-05,
+          "rawActualAreaM2": 3.5725917765743254,
+          "rawReferenceAreaM2": 3.5725517583172297,
+          "precisionMarginHausdorffMm": 0.04762062533973151
+        },
+        {
+          "z": 0.004863009555768372,
+          "rawSymmetricDifferenceAreaM2": 4.026420606092738e-05,
+          "rawActualAreaM2": 3.5725917813979655,
+          "rawReferenceAreaM2": 3.572551757185713,
+          "precisionMarginHausdorffMm": 0.04761993727301696
+        },
+        {
+          "z": 0.00534930968913395,
+          "rawSymmetricDifferenceAreaM2": 4.0266033785960144e-05,
+          "rawActualAreaM2": 3.572591785019536,
+          "rawReferenceAreaM2": 3.572551759389386,
+          "precisionMarginHausdorffMm": 0.04761864653268375
+        },
+        {
+          "z": 0.005835609822499527,
+          "rawSymmetricDifferenceAreaM2": 4.027018933820719e-05,
+          "rawActualAreaM2": 3.572591788271511,
+          "rawReferenceAreaM2": 3.572551757452642,
+          "precisionMarginHausdorffMm": 0.047618475027615875
+        },
+        {
+          "z": 0.006321909955865105,
+          "rawSymmetricDifferenceAreaM2": 4.027446071696722e-05,
+          "rawActualAreaM2": 3.5725917913991534,
+          "rawReferenceAreaM2": 3.572551756189439,
+          "precisionMarginHausdorffMm": 0.04761761780988954
+        },
+        {
+          "z": 0.006808210089230682,
+          "rawSymmetricDifferenceAreaM2": 4.027660789021299e-05,
+          "rawActualAreaM2": 3.5725917930921223,
+          "rawReferenceAreaM2": 3.572551757984032,
+          "precisionMarginHausdorffMm": 0.04761718806183964
+        },
+        {
+          "z": 0.00729451022259626,
+          "rawSymmetricDifferenceAreaM2": 4.0284543890710636e-05,
+          "rawActualAreaM2": 3.572591795105859,
+          "rawReferenceAreaM2": 3.5725517565915395,
+          "precisionMarginHausdorffMm": 0.0476178515228229
+        },
+        {
+          "z": 0.007780810355961837,
+          "rawSymmetricDifferenceAreaM2": 4.029722685428283e-05,
+          "rawActualAreaM2": 3.5725917899855877,
+          "rawReferenceAreaM2": 3.572551757625177,
+          "precisionMarginHausdorffMm": 0.04761976388573186
+        }
+      ],
+      "maxRawSymmetricDifferenceAreaM2": 4.030438436881568e-05,
+      "maxPrecisionMarginHausdorffMm": 0.04763907208971046
+    }
+  ]
+}

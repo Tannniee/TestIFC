@@ -1,0 +1,176 @@
+{
+  "source": "13e402c42884c479fc22437c2e8f7a8c5dad53c5",
+  "parent": "bb823f5047360e04acaf4962cbca2ab9b0059006",
+  "tree": "b6377794d15ed64a9e241434efc378655f6a5124",
+  "commit": "375b5bfc3cacb3cffe4060deb919a02b44e34651",
+  "fileCount": 15562,
+  "uniqueBlobs": 15140,
+  "textBlobsScanned": 13851,
+  "activeWorkflows": 0,
+  "archivedWorkflows": 33,
+  "workflows": [
+    {
+      "from": ".github/workflows/base-freshness.yml",
+      "to": ".github/workflows-disabled/base-freshness.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/benchmark.yml",
+      "to": ".github/workflows-disabled/benchmark.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/ci-reporting-cancellation-observer.yml",
+      "to": ".github/workflows-disabled/ci-reporting-cancellation-observer.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/ci-reporting-outcome-probe.yml",
+      "to": ".github/workflows-disabled/ci-reporting-outcome-probe.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/ci-reporting-selfcheck.yml",
+      "to": ".github/workflows-disabled/ci-reporting-selfcheck.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/claude-review.yml",
+      "to": ".github/workflows-disabled/claude-review.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/deploy-nightly.yml",
+      "to": ".github/workflows-disabled/deploy-nightly.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/determinism.yml",
+      "to": ".github/workflows-disabled/determinism.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/dirty-pr-scan.yml",
+      "to": ".github/workflows-disabled/dirty-pr-scan.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/docker.yml",
+      "to": ".github/workflows-disabled/docker.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/docs.yml",
+      "to": ".github/workflows-disabled/docs.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/export-schema-conformance.yml",
+      "to": ".github/workflows-disabled/export-schema-conformance.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/fuzz.yml",
+      "to": ".github/workflows-disabled/fuzz.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/geometry-census-heavy.yml",
+      "to": ".github/workflows-disabled/geometry-census-heavy.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/ifcopenshell-parity.yml",
+      "to": ".github/workflows-disabled/ifcopenshell-parity.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/issue-queue.yml",
+      "to": ".github/workflows-disabled/issue-queue.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/label-authority.yml",
+      "to": ".github/workflows-disabled/label-authority.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/pr-agent-review.yml",
+      "to": ".github/workflows-disabled/pr-agent-review.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/pr-review-signal.yml",
+      "to": ".github/workflows-disabled/pr-review-signal.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/pr-risk-label.yml",
+      "to": ".github/workflows-disabled/pr-risk-label.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/python-wheels.yml",
+      "to": ".github/workflows-disabled/python-wheels.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/release-pr-freshness.yml",
+      "to": ".github/workflows-disabled/release-pr-freshness.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/release.yml",
+      "to": ".github/workflows-disabled/release.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/report-scheduled-failure.yml",
+      "to": ".github/workflows-disabled/report-scheduled-failure.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/revert-oracle-selfcheck.yml",
+      "to": ".github/workflows-disabled/revert-oracle-selfcheck.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/review-lane-canary.yml",
+      "to": ".github/workflows-disabled/review-lane-canary.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/rubric-eval.yml",
+      "to": ".github/workflows-disabled/rubric-eval.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/sdk-canary.yml",
+      "to": ".github/workflows-disabled/sdk-canary.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/server-binaries.yml",
+      "to": ".github/workflows-disabled/server-binaries.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/test-templates.yml",
+      "to": ".github/workflows-disabled/test-templates.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/test.yml",
+      "to": ".github/workflows-disabled/test.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/wide-arithmetic.yml",
+      "to": ".github/workflows-disabled/wide-arithmetic.yml.disabled"
+    },
+    {
+      "from": ".github/workflows/xmatch-fixture.yml",
+      "to": ".github/workflows-disabled/xmatch-fixture.yml.disabled"
+    }
+  ],
+  "removed": [
+    "BURKWIL_DX_B.ifc"
+  ],
+  "sanitized": [
+    "desktop/APP-QUALITY-AUDIT.md",
+    "desktop/ARCHITECTURE-NATIVE-VALIDATION.md",
+    "desktop/BLACK-OLED-VALIDATION.md",
+    "desktop/COLORIZER-UX-VALIDATION.md",
+    "desktop/COLORIZER-VALIDATION.md",
+    "desktop/HOME-FIT-VALIDATION.md",
+    "desktop/IFC2X3-PRODUCT-REPRESENTATION-VALIDATION.md",
+    "desktop/INTERACTION-UX-VALIDATION.md",
+    "desktop/MODEL-DROP-VALIDATION.md",
+    "desktop/NATIVE-BACKEND-RESEARCH.md",
+    "desktop/NATIVE-BACKEND-VALIDATION.md",
+    "desktop/NATIVE-RUST-DEEP-AUDIT.md",
+    "desktop/NATIVE-RUST-FOLLOWUP.md",
+    "desktop/NAVIGATION-RENDER-250MS.md",
+    "desktop/PACKAGES-AUDIT-10.4.0.md",
+    "desktop/PANEL-MOTION-VALIDATION.md",
+    "desktop/PVF-CRASH-VALIDATION.md",
+    "desktop/PVF-RESPONSIVENESS-VALIDATION.md",
+    "desktop/TESTIFC-NAVIGATION-VALIDATION.md",
+    "desktop/TESTIFC-SECTION-BOX-VALIDATION.md",
+    "desktop/VALIDATION.md",
+    "desktop/VIEWCUBE-VALIDATION.md"
+  ],
+  "forbiddenPaths": 0,
+  "potentialCredentials": 0,
+  "originalIndexUnchanged": true,
+  "buildsRun": false
+}

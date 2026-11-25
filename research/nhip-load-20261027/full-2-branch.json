@@ -1,0 +1,2312 @@
+{
+  "batches": [
+    {
+      "atSeconds": 0.2706191,
+      "callbackSeconds": 0.0001256,
+      "meshes": 13,
+      "processed": 16,
+      "total": 174157
+    },
+    {
+      "atSeconds": 2.6805381,
+      "callbackSeconds": 0.0878613,
+      "meshes": 2837,
+      "processed": 4112,
+      "total": 174157
+    },
+    {
+      "atSeconds": 5.4596824,
+      "callbackSeconds": 0.075049,
+      "meshes": 2729,
+      "processed": 8208,
+      "total": 174157
+    },
+    {
+      "atSeconds": 5.7923388,
+      "callbackSeconds": 0.0257497,
+      "meshes": 3992,
+      "processed": 12304,
+      "total": 174157
+    },
+    {
+      "atSeconds": 7.0957185,
+      "callbackSeconds": 0.0556778,
+      "meshes": 2955,
+      "processed": 16400,
+      "total": 174157
+    },
+    {
+      "atSeconds": 9.8161477,
+      "callbackSeconds": 0.0677781,
+      "meshes": 2863,
+      "processed": 20496,
+      "total": 174157
+    },
+    {
+      "atSeconds": 12.4177944,
+      "callbackSeconds": 0.0694959,
+      "meshes": 2696,
+      "processed": 24592,
+      "total": 174157
+    },
+    {
+      "atSeconds": 12.7657227,
+      "callbackSeconds": 0.0250352,
+      "meshes": 3980,
+      "processed": 28688,
+      "total": 174157
+    },
+    {
+      "atSeconds": 15.4316973,
+      "callbackSeconds": 0.0633184,
+      "meshes": 4096,
+      "processed": 32784,
+      "total": 174157
+    },
+    {
+      "atSeconds": 15.497803,
+      "callbackSeconds": 0.0137762,
+      "meshes": 2104,
+      "processed": 32784,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.4584779,
+      "callbackSeconds": 0.031512,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.4901532,
+      "callbackSeconds": 0.0295488,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.5198723,
+      "callbackSeconds": 0.0304809,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.5504936,
+      "callbackSeconds": 0.0278015,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.5784332,
+      "callbackSeconds": 0.0274689,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.6060579,
+      "callbackSeconds": 0.0296232,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.635858,
+      "callbackSeconds": 0.0280113,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.664108,
+      "callbackSeconds": 0.0379113,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.7021164,
+      "callbackSeconds": 0.0360062,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.7382165,
+      "callbackSeconds": 0.0420434,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.7803459,
+      "callbackSeconds": 0.0323633,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.8128836,
+      "callbackSeconds": 0.0298144,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.8428606,
+      "callbackSeconds": 0.0291841,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.872217,
+      "callbackSeconds": 0.0273162,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.8996542,
+      "callbackSeconds": 0.0312295,
+      "meshes": 4096,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 18.9310012,
+      "callbackSeconds": 0.0090237,
+      "meshes": 863,
+      "processed": 36880,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.019604,
+      "callbackSeconds": 0.0284082,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.0481794,
+      "callbackSeconds": 0.0298082,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.0781717,
+      "callbackSeconds": 0.0284217,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.1067517,
+      "callbackSeconds": 0.0269663,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.1338722,
+      "callbackSeconds": 0.0276228,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.1616599,
+      "callbackSeconds": 0.0327103,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.1944649,
+      "callbackSeconds": 0.0269707,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.2216181,
+      "callbackSeconds": 0.0308094,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.252573,
+      "callbackSeconds": 0.0276223,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.2803646,
+      "callbackSeconds": 0.0282763,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.3088033,
+      "callbackSeconds": 0.0292208,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.338194,
+      "callbackSeconds": 0.027659,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.3660217,
+      "callbackSeconds": 0.0289854,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.3951638,
+      "callbackSeconds": 0.0270365,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.4223628,
+      "callbackSeconds": 0.0277126,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.4502442,
+      "callbackSeconds": 0.0368243,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.4872413,
+      "callbackSeconds": 0.0333469,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.5207576,
+      "callbackSeconds": 0.0353443,
+      "meshes": 4096,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 21.5562435,
+      "callbackSeconds": 0.0054124,
+      "meshes": 855,
+      "processed": 40976,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.362062,
+      "callbackSeconds": 0.0360643,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.3982469,
+      "callbackSeconds": 0.0343582,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.4327041,
+      "callbackSeconds": 0.0357884,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.468675,
+      "callbackSeconds": 0.0359417,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.5047312,
+      "callbackSeconds": 0.0328137,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.5376605,
+      "callbackSeconds": 0.0349944,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.5727779,
+      "callbackSeconds": 0.0323231,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.6052162,
+      "callbackSeconds": 0.0356411,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.6409457,
+      "callbackSeconds": 0.0366023,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.6776677,
+      "callbackSeconds": 0.0384147,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.7161768,
+      "callbackSeconds": 0.0363318,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.7526051,
+      "callbackSeconds": 0.0351274,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.7878288,
+      "callbackSeconds": 0.0357748,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.823715,
+      "callbackSeconds": 0.0309003,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.8547916,
+      "callbackSeconds": 0.0285081,
+      "meshes": 4096,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 25.8834197,
+      "callbackSeconds": 0.0169688,
+      "meshes": 2381,
+      "processed": 45072,
+      "total": 174157
+    },
+    {
+      "atSeconds": 26.8978811,
+      "callbackSeconds": 0.0304889,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 26.9284759,
+      "callbackSeconds": 0.0278797,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 26.9564689,
+      "callbackSeconds": 0.0298695,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 26.9865014,
+      "callbackSeconds": 0.0277094,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.0143795,
+      "callbackSeconds": 0.0287606,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.0433264,
+      "callbackSeconds": 0.0276028,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.0711028,
+      "callbackSeconds": 0.0288538,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.1001156,
+      "callbackSeconds": 0.02863,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.1288856,
+      "callbackSeconds": 0.0274771,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.1564773,
+      "callbackSeconds": 0.0277661,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.1843724,
+      "callbackSeconds": 0.0329884,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.2174801,
+      "callbackSeconds": 0.028315,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.2459667,
+      "callbackSeconds": 0.0285827,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.2747329,
+      "callbackSeconds": 0.0270831,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.3019368,
+      "callbackSeconds": 0.0286347,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.3307393,
+      "callbackSeconds": 0.0272226,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.3581124,
+      "callbackSeconds": 0.0291561,
+      "meshes": 4096,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 27.3874326,
+      "callbackSeconds": 0.0278383,
+      "meshes": 3348,
+      "processed": 49168,
+      "total": 174157
+    },
+    {
+      "atSeconds": 31.5312781,
+      "callbackSeconds": 0.0550847,
+      "meshes": 2900,
+      "processed": 53264,
+      "total": 174157
+    },
+    {
+      "atSeconds": 33.0728803,
+      "callbackSeconds": 0.0510195,
+      "meshes": 2902,
+      "processed": 57360,
+      "total": 174157
+    },
+    {
+      "atSeconds": 34.243096800000004,
+      "callbackSeconds": 0.0514682,
+      "meshes": 2936,
+      "processed": 61456,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.2623755,
+      "callbackSeconds": 0.037696,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.3001711,
+      "callbackSeconds": 0.0413684,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.341637,
+      "callbackSeconds": 0.0371649,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.3789241,
+      "callbackSeconds": 0.0301959,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.4092153,
+      "callbackSeconds": 0.0297369,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.4390479,
+      "callbackSeconds": 0.0336037,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.4727711,
+      "callbackSeconds": 0.0311693,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.5040413,
+      "callbackSeconds": 0.0300464,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.5342111,
+      "callbackSeconds": 0.0316479,
+      "meshes": 4096,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 37.5659568,
+      "callbackSeconds": 0.0105454,
+      "meshes": 1687,
+      "processed": 65552,
+      "total": 174157
+    },
+    {
+      "atSeconds": 40.7610998,
+      "callbackSeconds": 0.0367293,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 40.7979451,
+      "callbackSeconds": 0.0440559,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 40.8420935,
+      "callbackSeconds": 0.0323688,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 40.874563,
+      "callbackSeconds": 0.0361261,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 40.9108658,
+      "callbackSeconds": 0.0286679,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 40.9397065,
+      "callbackSeconds": 0.0284397,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 40.9682486,
+      "callbackSeconds": 0.0308063,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 40.9992061,
+      "callbackSeconds": 0.0354269,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 41.0347645,
+      "callbackSeconds": 0.0286405,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 41.0635036,
+      "callbackSeconds": 0.0277971,
+      "meshes": 4096,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 41.0914506,
+      "callbackSeconds": 0.016281,
+      "meshes": 2374,
+      "processed": 69648,
+      "total": 174157
+    },
+    {
+      "atSeconds": 56.0935916,
+      "callbackSeconds": 0.0360749,
+      "meshes": 4096,
+      "processed": 73744,
+      "total": 174157
+    },
+    {
+      "atSeconds": 56.1298376,
+      "callbackSeconds": 0.0310518,
+      "meshes": 4096,
+      "processed": 73744,
+      "total": 174157
+    },
+    {
+      "atSeconds": 56.161039,
+      "callbackSeconds": 0.0327139,
+      "meshes": 4096,
+      "processed": 73744,
+      "total": 174157
+    },
+    {
+      "atSeconds": 56.1939241,
+      "callbackSeconds": 0.0260728,
+      "meshes": 3266,
+      "processed": 73744,
+      "total": 174157
+    },
+    {
+      "atSeconds": 71.9643845,
+      "callbackSeconds": 0.0364581,
+      "meshes": 4096,
+      "processed": 77840,
+      "total": 174157
+    },
+    {
+      "atSeconds": 72.0009467,
+      "callbackSeconds": 0.0378069,
+      "meshes": 4096,
+      "processed": 77840,
+      "total": 174157
+    },
+    {
+      "atSeconds": 72.0388576,
+      "callbackSeconds": 0.0349774,
+      "meshes": 4096,
+      "processed": 77840,
+      "total": 174157
+    },
+    {
+      "atSeconds": 72.0739378,
+      "callbackSeconds": 0.0358971,
+      "meshes": 4096,
+      "processed": 77840,
+      "total": 174157
+    },
+    {
+      "atSeconds": 72.1099442,
+      "callbackSeconds": 0.0036589,
+      "meshes": 374,
+      "processed": 77840,
+      "total": 174157
+    },
+    {
+      "atSeconds": 87.9861325,
+      "callbackSeconds": 0.0357263,
+      "meshes": 4096,
+      "processed": 81936,
+      "total": 174157
+    },
+    {
+      "atSeconds": 88.0219705,
+      "callbackSeconds": 0.0371557,
+      "meshes": 4096,
+      "processed": 81936,
+      "total": 174157
+    },
+    {
+      "atSeconds": 88.0592377,
+      "callbackSeconds": 0.0361203,
+      "meshes": 4096,
+      "processed": 81936,
+      "total": 174157
+    },
+    {
+      "atSeconds": 88.0955242,
+      "callbackSeconds": 0.0303653,
+      "meshes": 4096,
+      "processed": 81936,
+      "total": 174157
+    },
+    {
+      "atSeconds": 88.126037,
+      "callbackSeconds": 0.0023533,
+      "meshes": 124,
+      "processed": 81936,
+      "total": 174157
+    },
+    {
+      "atSeconds": 108.6643248,
+      "callbackSeconds": 0.0367858,
+      "meshes": 4096,
+      "processed": 86032,
+      "total": 174157
+    },
+    {
+      "atSeconds": 108.7012343,
+      "callbackSeconds": 0.0396203,
+      "meshes": 4096,
+      "processed": 86032,
+      "total": 174157
+    },
+    {
+      "atSeconds": 108.7410261,
+      "callbackSeconds": 0.032609,
+      "meshes": 4096,
+      "processed": 86032,
+      "total": 174157
+    },
+    {
+      "atSeconds": 108.7737992,
+      "callbackSeconds": 0.0319697,
+      "meshes": 4096,
+      "processed": 86032,
+      "total": 174157
+    },
+    {
+      "atSeconds": 108.8058643,
+      "callbackSeconds": 0.0065622,
+      "meshes": 685,
+      "processed": 86032,
+      "total": 174157
+    },
+    {
+      "atSeconds": 127.4159623,
+      "callbackSeconds": 0.0314476,
+      "meshes": 4096,
+      "processed": 90128,
+      "total": 174157
+    },
+    {
+      "atSeconds": 127.4475633,
+      "callbackSeconds": 0.0334374,
+      "meshes": 4096,
+      "processed": 90128,
+      "total": 174157
+    },
+    {
+      "atSeconds": 127.4811575,
+      "callbackSeconds": 0.0312068,
+      "meshes": 4096,
+      "processed": 90128,
+      "total": 174157
+    },
+    {
+      "atSeconds": 127.5125232,
+      "callbackSeconds": 0.0342425,
+      "meshes": 4096,
+      "processed": 90128,
+      "total": 174157
+    },
+    {
+      "atSeconds": 127.5468804,
+      "callbackSeconds": 0.0077573,
+      "meshes": 502,
+      "processed": 90128,
+      "total": 174157
+    },
+    {
+      "atSeconds": 142.5463974,
+      "callbackSeconds": 0.034504,
+      "meshes": 4096,
+      "processed": 94224,
+      "total": 174157
+    },
+    {
+      "atSeconds": 142.5810532,
+      "callbackSeconds": 0.0302974,
+      "meshes": 4096,
+      "processed": 94224,
+      "total": 174157
+    },
+    {
+      "atSeconds": 142.6115217,
+      "callbackSeconds": 0.0312518,
+      "meshes": 4096,
+      "processed": 94224,
+      "total": 174157
+    },
+    {
+      "atSeconds": 142.6429398,
+      "callbackSeconds": 0.0314112,
+      "meshes": 4096,
+      "processed": 94224,
+      "total": 174157
+    },
+    {
+      "atSeconds": 142.67447,
+      "callbackSeconds": 0.0088183,
+      "meshes": 1140,
+      "processed": 94224,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.1411023,
+      "callbackSeconds": 0.0404986,
+      "meshes": 4096,
+      "processed": 98320,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.181712,
+      "callbackSeconds": 0.0371591,
+      "meshes": 4096,
+      "processed": 98320,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.2189713,
+      "callbackSeconds": 0.0385838,
+      "meshes": 4096,
+      "processed": 98320,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.2598952,
+      "callbackSeconds": 0.0336763,
+      "meshes": 4096,
+      "processed": 98320,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.2937107,
+      "callbackSeconds": 0.0131218,
+      "meshes": 1672,
+      "processed": 98320,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.5225162,
+      "callbackSeconds": 0.0316787,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.5543433,
+      "callbackSeconds": 0.0272679,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.5817636,
+      "callbackSeconds": 0.0272187,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.6091203,
+      "callbackSeconds": 0.028635,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.6378966,
+      "callbackSeconds": 0.0279378,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.6660005,
+      "callbackSeconds": 0.0337482,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.6999143,
+      "callbackSeconds": 0.0283675,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.728438,
+      "callbackSeconds": 0.0305975,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.7591932,
+      "callbackSeconds": 0.0285539,
+      "meshes": 4096,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.7879034,
+      "callbackSeconds": 0.0198918,
+      "meshes": 3080,
+      "processed": 102416,
+      "total": 174157
+    },
+    {
+      "atSeconds": 158.9887409,
+      "callbackSeconds": 0.0317686,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.0206796,
+      "callbackSeconds": 0.0280635,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.048913,
+      "callbackSeconds": 0.0293468,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.0784235,
+      "callbackSeconds": 0.0291722,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.1077701,
+      "callbackSeconds": 0.0328931,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.1408491,
+      "callbackSeconds": 0.0368393,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.1778745,
+      "callbackSeconds": 0.0316079,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.2096358,
+      "callbackSeconds": 0.0306991,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.2404883,
+      "callbackSeconds": 0.0286781,
+      "meshes": 4096,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 159.2693144,
+      "callbackSeconds": 0.0267294,
+      "meshes": 3911,
+      "processed": 106512,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.0893562,
+      "callbackSeconds": 0.0263107,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.1158229,
+      "callbackSeconds": 0.0266968,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.1426198,
+      "callbackSeconds": 0.0265503,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.1693235,
+      "callbackSeconds": 0.0271561,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.1966007,
+      "callbackSeconds": 0.0416591,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.2384082,
+      "callbackSeconds": 0.027011,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.265582,
+      "callbackSeconds": 0.0355353,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.3012178,
+      "callbackSeconds": 0.0372059,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.3385753,
+      "callbackSeconds": 0.0279188,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.3666454,
+      "callbackSeconds": 0.030416,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.3972227,
+      "callbackSeconds": 0.0330784,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.430433,
+      "callbackSeconds": 0.0302519,
+      "meshes": 4096,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 161.4608011,
+      "callbackSeconds": 0.0032156,
+      "meshes": 310,
+      "processed": 110608,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.3620062,
+      "callbackSeconds": 0.0338051,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.3959687,
+      "callbackSeconds": 0.0419831,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.4380748,
+      "callbackSeconds": 0.029576,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.4678178,
+      "callbackSeconds": 0.0328324,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.5007441,
+      "callbackSeconds": 0.0270717,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.5279785,
+      "callbackSeconds": 0.0374596,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.5655856,
+      "callbackSeconds": 0.0275999,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.5933618,
+      "callbackSeconds": 0.026542,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.6200983,
+      "callbackSeconds": 0.0273499,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.6476401,
+      "callbackSeconds": 0.0294293,
+      "meshes": 4096,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.6772262,
+      "callbackSeconds": 0.0158685,
+      "meshes": 2398,
+      "processed": 114704,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.904823,
+      "callbackSeconds": 0.0309744,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.9359589,
+      "callbackSeconds": 0.027498,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.9636187,
+      "callbackSeconds": 0.0268031,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 163.9905981,
+      "callbackSeconds": 0.0287081,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.0194586,
+      "callbackSeconds": 0.0302518,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.0499249,
+      "callbackSeconds": 0.0309332,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.0810508,
+      "callbackSeconds": 0.0282469,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.109475,
+      "callbackSeconds": 0.0274095,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.1370322,
+      "callbackSeconds": 0.0275478,
+      "meshes": 4096,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.1648261,
+      "callbackSeconds": 0.0246207,
+      "meshes": 3457,
+      "processed": 118800,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.3567494,
+      "callbackSeconds": 0.0332817,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.3901574,
+      "callbackSeconds": 0.0277631,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.4180269,
+      "callbackSeconds": 0.0274801,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.4456247,
+      "callbackSeconds": 0.028671,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.4744004,
+      "callbackSeconds": 0.0322197,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.5067327,
+      "callbackSeconds": 0.0319782,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.5388129,
+      "callbackSeconds": 0.0329625,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.5719321,
+      "callbackSeconds": 0.0261943,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.5982867,
+      "callbackSeconds": 0.0280115,
+      "meshes": 4096,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.6264645,
+      "callbackSeconds": 0.0238322,
+      "meshes": 3495,
+      "processed": 122896,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.8109225,
+      "callbackSeconds": 0.0293588,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.840448,
+      "callbackSeconds": 0.0272732,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.8678369,
+      "callbackSeconds": 0.0278309,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.895784,
+      "callbackSeconds": 0.0321471,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.9280594,
+      "callbackSeconds": 0.031278,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.9594634,
+      "callbackSeconds": 0.0336546,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 164.9932394,
+      "callbackSeconds": 0.033236,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.0266257,
+      "callbackSeconds": 0.02773,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.0545125,
+      "callbackSeconds": 0.0288818,
+      "meshes": 4096,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.0835649,
+      "callbackSeconds": 0.016004,
+      "meshes": 2347,
+      "processed": 126992,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.2590158,
+      "callbackSeconds": 0.030793,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.2899864,
+      "callbackSeconds": 0.0322982,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.3224549,
+      "callbackSeconds": 0.0284044,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.3509895,
+      "callbackSeconds": 0.030655,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.3817674,
+      "callbackSeconds": 0.0332463,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.4151205,
+      "callbackSeconds": 0.0283349,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.4436133,
+      "callbackSeconds": 0.0283783,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.4721489,
+      "callbackSeconds": 0.0296629,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.5019297,
+      "callbackSeconds": 0.0322641,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.534302,
+      "callbackSeconds": 0.0303168,
+      "meshes": 4096,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 165.5647461,
+      "callbackSeconds": 0.0014157,
+      "meshes": 148,
+      "processed": 131088,
+      "total": 174157
+    },
+    {
+      "atSeconds": 166.8817978,
+      "callbackSeconds": 0.0255719,
+      "meshes": 4096,
+      "processed": 135184,
+      "total": 174157
+    },
+    {
+      "atSeconds": 166.9074903,
+      "callbackSeconds": 0.0239657,
+      "meshes": 4096,
+      "processed": 135184,
+      "total": 174157
+    },
+    {
+      "atSeconds": 166.9316025,
+      "callbackSeconds": 0.0249313,
+      "meshes": 4096,
+      "processed": 135184,
+      "total": 174157
+    },
+    {
+      "atSeconds": 166.9566795,
+      "callbackSeconds": 0.0278489,
+      "meshes": 4096,
+      "processed": 135184,
+      "total": 174157
+    },
+    {
+      "atSeconds": 166.984676,
+      "callbackSeconds": 0.0256979,
+      "meshes": 4096,
+      "processed": 135184,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.0105256,
+      "callbackSeconds": 0.0272094,
+      "meshes": 4096,
+      "processed": 135184,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.0378686,
+      "callbackSeconds": 0.0258445,
+      "meshes": 4028,
+      "processed": 135184,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.1989649,
+      "callbackSeconds": 0.0307613,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.2298984,
+      "callbackSeconds": 0.0278445,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.2578595,
+      "callbackSeconds": 0.025607,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.2835671,
+      "callbackSeconds": 0.0269799,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.3107242,
+      "callbackSeconds": 0.0266586,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.3375251,
+      "callbackSeconds": 0.0265411,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.3642336,
+      "callbackSeconds": 0.0268814,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.3912886,
+      "callbackSeconds": 0.0278358,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.4192233,
+      "callbackSeconds": 0.0278426,
+      "meshes": 4096,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.4472091,
+      "callbackSeconds": 0.0159336,
+      "meshes": 2360,
+      "processed": 139280,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.6005576,
+      "callbackSeconds": 0.0287674,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.6294213,
+      "callbackSeconds": 0.0270992,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.6566782,
+      "callbackSeconds": 0.0244638,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.6813081,
+      "callbackSeconds": 0.0284415,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.7098997,
+      "callbackSeconds": 0.0257791,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.7358353,
+      "callbackSeconds": 0.0266149,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.7625983,
+      "callbackSeconds": 0.0275445,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.7902618,
+      "callbackSeconds": 0.0271475,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.81756,
+      "callbackSeconds": 0.0280493,
+      "meshes": 4096,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 167.8457534,
+      "callbackSeconds": 0.0252548,
+      "meshes": 3911,
+      "processed": 143376,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.0397603,
+      "callbackSeconds": 0.0294855,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.0694157,
+      "callbackSeconds": 0.0273942,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.0969505,
+      "callbackSeconds": 0.0277343,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.124833,
+      "callbackSeconds": 0.0271541,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.1521651,
+      "callbackSeconds": 0.0269212,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.1792344,
+      "callbackSeconds": 0.0276032,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.206999,
+      "callbackSeconds": 0.0277754,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.2349461,
+      "callbackSeconds": 0.0257904,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.2609099,
+      "callbackSeconds": 0.0261542,
+      "meshes": 4096,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.2872039,
+      "callbackSeconds": 0.0246424,
+      "meshes": 3808,
+      "processed": 147472,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.4637441,
+      "callbackSeconds": 0.0316485,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.4955475,
+      "callbackSeconds": 0.0291644,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.5248503,
+      "callbackSeconds": 0.0282895,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.5532918,
+      "callbackSeconds": 0.0267241,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.580163,
+      "callbackSeconds": 0.0294409,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.6097795,
+      "callbackSeconds": 0.0264837,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.636362,
+      "callbackSeconds": 0.0281678,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.6646803,
+      "callbackSeconds": 0.0257537,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.6905867,
+      "callbackSeconds": 0.0277216,
+      "meshes": 4096,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.7184546,
+      "callbackSeconds": 0.0229955,
+      "meshes": 3496,
+      "processed": 151568,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.8788316,
+      "callbackSeconds": 0.0268644,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.9058415,
+      "callbackSeconds": 0.0275958,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.9335522,
+      "callbackSeconds": 0.0274999,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.9612011,
+      "callbackSeconds": 0.0270092,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 168.9883506,
+      "callbackSeconds": 0.0280137,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.0165066,
+      "callbackSeconds": 0.0258,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.0424044,
+      "callbackSeconds": 0.0260618,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.068618,
+      "callbackSeconds": 0.0264034,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.0951847,
+      "callbackSeconds": 0.0264919,
+      "meshes": 4096,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.1217756,
+      "callbackSeconds": 0.01941,
+      "meshes": 3080,
+      "processed": 155664,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.2881244,
+      "callbackSeconds": 0.0301285,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.3184036,
+      "callbackSeconds": 0.0268643,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.3454149,
+      "callbackSeconds": 0.0259617,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.3715399,
+      "callbackSeconds": 0.0265624,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.3982644,
+      "callbackSeconds": 0.0274843,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.425889,
+      "callbackSeconds": 0.0273071,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.4533751,
+      "callbackSeconds": 0.0269716,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.4805031,
+      "callbackSeconds": 0.0255124,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.5061497,
+      "callbackSeconds": 0.0263425,
+      "meshes": 4096,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.5326448,
+      "callbackSeconds": 0.0179471,
+      "meshes": 2676,
+      "processed": 159760,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.6728635,
+      "callbackSeconds": 0.0288007,
+      "meshes": 4096,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.7017969,
+      "callbackSeconds": 0.0279301,
+      "meshes": 4096,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.7298465,
+      "callbackSeconds": 0.0276211,
+      "meshes": 4096,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.7575743,
+      "callbackSeconds": 0.0271273,
+      "meshes": 4096,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.784876,
+      "callbackSeconds": 0.0293492,
+      "meshes": 4096,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.8143216,
+      "callbackSeconds": 0.0268957,
+      "meshes": 4096,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.8413663,
+      "callbackSeconds": 0.0267213,
+      "meshes": 4096,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.8681964,
+      "callbackSeconds": 0.0247378,
+      "meshes": 4096,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 169.8930832,
+      "callbackSeconds": 0.0061442,
+      "meshes": 980,
+      "processed": 163856,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.0285523,
+      "callbackSeconds": 0.0254461,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.0541467,
+      "callbackSeconds": 0.0268249,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.0811323,
+      "callbackSeconds": 0.0270066,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.1082894,
+      "callbackSeconds": 0.0264183,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.1348041,
+      "callbackSeconds": 0.0266379,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.1616002,
+      "callbackSeconds": 0.0268614,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.188625,
+      "callbackSeconds": 0.0258318,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.2145684,
+      "callbackSeconds": 0.026039,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.2407556,
+      "callbackSeconds": 0.0263105,
+      "meshes": 4096,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.26721,
+      "callbackSeconds": 0.0073219,
+      "meshes": 1115,
+      "processed": 167952,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.4173546,
+      "callbackSeconds": 0.0277057,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.4452168,
+      "callbackSeconds": 0.0269751,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.472336,
+      "callbackSeconds": 0.0263967,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.4988762,
+      "callbackSeconds": 0.0263381,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.5253495,
+      "callbackSeconds": 0.0274077,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.5528767,
+      "callbackSeconds": 0.0260181,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.5790411,
+      "callbackSeconds": 0.0261942,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.6053958,
+      "callbackSeconds": 0.025543,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.6310451,
+      "callbackSeconds": 0.0254198,
+      "meshes": 4096,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.6566166,
+      "callbackSeconds": 0.0222944,
+      "meshes": 3495,
+      "processed": 172048,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.7485364,
+      "callbackSeconds": 0.0267772,
+      "meshes": 4096,
+      "processed": 174157,
+      "total": 174157
+    },
+    {
+      "atSeconds": 170.7754123,
+      "callbackSeconds": 0.0184807,
+      "meshes": 3075,
+      "processed": 174157,
+      "total": 174157
+    }
+  ],
+  "callbackSeconds": 9.389997199999998,
+  "colorUpdatesSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "failure": null,
+  "fileReadSeconds": 0.0375585,
+  "firstMeshSeconds": 0.2706191,
+  "flatMeshes": 857930,
+  "instanceTaggedMeshes": 1228769,
+  "instances": 375914,
+  "meshes": 1233844,
+  "mode": "packet",
+  "orderedMeshSha256": "8355eccff243f42d19bbb2637cdb6b449ee367e93eadaee1e61b93ccb8671b62",
+  "orderedPacketSha256": "3e7a33dbb26807c0e2dbd111b126f8acceed56cedf0fd918267c05adfb291ddf",
+  "packetBytes": 4452779880,
+  "packets": 1308,
+  "pipelineSeconds": 171.2926187,
+  "scope": "Fresh-process canonical native worker-pool stream; excludes GUI, semantic extraction and transport waits. OS file cache uncontrolled; diagnostic attribution, not an interleaved performance claim.",
+  "source": "F:\\Working\\IFC Temp\\Nhip chinh.ifc",
+  "sourceBytes": 129987273,
+  "sourceSha256": "110b48aeb00b183667fe5f973685100f6dbbc9375b34c10f899ca5a75b8e3085",
+  "stats": {
+    "degenerate_triangles_dropped": 10285,
+    "entity_scan_time_ms": 197,
+    "faceted_brep_time_ms": 0,
+    "from_cache": false,
+    "geometry_diagnostics": {
+      "classification": {
+        "diagonal": 0,
+        "nonRectangular": 24792,
+        "rectangular": 0,
+        "total": 24792
+      },
+      "failuresByReason": [],
+      "hostsWithOpenings": 5075,
+      "oversizedRefDrops": 0,
+      "productsWithFailures": 0,
+      "rectFast": {
+        "deferHostNotBox": 0,
+        "deferNearEdge": 0,
+        "deferNoOpenings": 0,
+        "deferNotThrough": 0,
+        "deferOffFace": 0,
+        "deferTooManyOpenings": 0,
+        "fired": 0,
+        "openingsCut": 0
+      },
+      "schemaVersion": 3,
+      "silentNoOps": 0,
+      "totalCsgFailures": 0,
+      "totalUnsupportedItems": 0,
+      "unsupportedItemsByType": [],
+      "worstHosts": []
+    },
+    "geometry_time_ms": 170545,
+    "lookup_time_ms": 1,
+    "parse_time_ms": 222,
+    "point_cache_hits": 0,
+    "point_cache_misses": 0,
+    "preprocess_time_ms": 11,
+    "products_with_failures": 0,
+    "total_csg_failures": 0,
+    "total_meshes": 1233844,
+    "total_time_ms": 170769,
+    "total_triangles": 116699839,
+    "total_vertices": 134867054
+  },
+  "templates": 6948,
+  "triangles": 116699839,
+  "vertices": 134867054
+}

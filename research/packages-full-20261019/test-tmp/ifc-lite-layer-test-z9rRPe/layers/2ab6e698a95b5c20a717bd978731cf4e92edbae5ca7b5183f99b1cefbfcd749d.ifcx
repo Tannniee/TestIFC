@@ -1,0 +1,58 @@
+{
+  "header": {
+    "id": "blake3:2ab6e698a95b5c20a717bd978731cf4e92edbae5ca7b5183f99b1cefbfcd749d",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "carol",
+    "timestamp": "2026-10-19T03:35:24.965Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "carol"
+      },
+      "intent": "Merge blake3:4cad42a0bf7efd877f38abe944b30a8dfac88d017c4e617033eeedcb641f7cf8 into main",
+      "created": "2026-10-19T03:35:24.965Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:2e5915ba876641804f9f82eba4410bac3ec2951d2fdc48f961bb5ca10b9ce647"
+      },
+      "parents": [
+        "blake3:2e5915ba876641804f9f82eba4410bac3ec2951d2fdc48f961bb5ca10b9ce647"
+      ],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": {
+        "candidate": "blake3:4cad42a0bf7efd877f38abe944b30a8dfac88d017c4e617033eeedcb641f7cf8",
+        "into": "main",
+        "resolutions": [
+          {
+            "entity": "wall-1",
+            "choice": "theirs",
+            "componentKey": "pset:Pset_FireSafety"
+          }
+        ],
+        "waived_checks": [
+          {
+            "spec": "fire-safety.ids",
+            "reason": "spec not applicable",
+            "waivedBy": "carol"
+          }
+        ],
+        "resolver": "carol"
+      },
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI120"
+      }
+    }
+  ]
+}

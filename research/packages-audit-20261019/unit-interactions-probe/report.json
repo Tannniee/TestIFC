@@ -1,0 +1,380 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-packages-audit-20261019-r2\\IFC-Lite.exe",
+  "model": "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc",
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-colorizer-ux-FdndIS",
+  "assertions": [
+    {
+      "name": "quiet startup: no hierarchy, collapsed ribbon/sidebar, no welcome or privacy toast",
+      "evidence": {
+        "leftCollapsed": true,
+        "ribbonCollapsed": true,
+        "sidebarMode": "collapsed"
+      }
+    },
+    {
+      "name": "ribbon expands without resizing or moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "ribbon collapses without resizing or moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 16
+      }
+    },
+    {
+      "name": "one actual double-click toggles ribbon in both directions, four consecutive times"
+    },
+    {
+      "name": "Hierarchy opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "Hierarchy closes over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "properties opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "properties closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 20
+      }
+    },
+    {
+      "name": "model opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "model closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "appearance opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "appearance closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "bcf opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "bcf closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "validation opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "validation closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "lens opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "lens closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "clash opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 19
+      }
+    },
+    {
+      "name": "clash closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "sources opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "sources closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "zones opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 20
+      }
+    },
+    {
+      "name": "zones closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "loadReport opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "loadReport closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "cost opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "cost closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "environment opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "environment closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "pointclouds opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "pointclouds closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 16
+      }
+    },
+    {
+      "name": "measurements opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "measurements closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "changes opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "changes closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "colorizer opens over the stationary IFC view",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "colorizer closes without opening Properties",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "Plan/3D: Hierarchy opens without resizing the 3D pane",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "Plan/3D: Hierarchy closes without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 18
+      }
+    },
+    {
+      "name": "Plan/3D: Properties opens without resizing the 3D pane",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "Plan/3D: Properties closes without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 17
+      }
+    },
+    {
+      "name": "Plan/3D: ribbon expands without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 14
+      }
+    },
+    {
+      "name": "Plan/3D: ribbon collapses without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 12
+      }
+    },
+    {
+      "name": "bottom panel opens without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "bottom panel closes without moving IFC",
+      "evidence": {
+        "maxWorldPointDriftPx": 0,
+        "intermediateFrames": 21
+      }
+    },
+    {
+      "name": "group checkbox drives 3D selection highlight; compact Save as and visible transparency",
+      "evidence": {
+        "selected": 1968,
+        "saveBox": {
+          "x": 1300.09375,
+          "y": 888,
+          "width": 63.90625,
+          "height": 32
+        },
+        "panelBox": {
+          "x": 1059,
+          "y": 65,
+          "width": 317,
+          "height": 867
+        }
+      }
+    },
+    {
+      "name": "changing all grouping modes retains the identical preview layer without repeated colour uploads"
+    },
+    {
+      "name": "orbit selection / multi-selection / PAN preserve camera pose"
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    "[UnitExtractor] IFCPROJECT entity could not be read, defaulting to meters (unconfirmed — see issue #2104)",
+    "[Viewport] frameSelection: No selection or geometry"
+  ],
+  "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('menuitem', { name: '#ff0000', exact: true })\u001b[22m\n\n    at F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\packages-audit-20261019\\unit-interactions-probe.mjs:202:64",
+  "body": "10554\nIfcBeam\nFrame selection\nF\nHide\nDel, Backspace, Space\nColour selection\nSet Collection\nAdd to Collection\n=, +\nRemove from Collection\n−\nSave Collection View\nB\nSelect all IfcBeam\nSelect same storey\nCopy GlobalId\nExport anonymized…\nDuplicate\nCtrl+D\nTurn on Edit mode to change this model\nDuplicate in direction\nDelete entity\nTurn on Edit mode to change this model\nFile\nHome\nView\nElements\nAnalyze\nAuthor\nCommands…\nCtrl+K\nSearch\nSearch and filter elements\nShow all\nShow all (reset filters)\nHover tips\nShow entity tooltips on hover\nHover outline\nOutline the entity under the cursor\nELEMENTS\nIsolate\nIsolate selection (set collection)\nHide\nHide selection\nFrame\nCopy GlobalId\nEntity actions\nSELECTION · 5\nSpatial\nDisplays ifc spatial structure\nClass\nDisplays class of elements\nType\nDisplays type of elements\nMaterials\nDisplays materials of the model\nGroups\nDisplays groups of the model\nHIERARCHY\nFilter\nClass visibility (3 on)\nToggle Collection Visibility\nReset Colors\nVISIBILITY\nSORT: ELEVATION\nHIERARCHY\n8657\nStacked\nSolo\nExploded\nChoose Solo storey on a row to show only that level\n\n5383\nIfcMember\n\n5384\nIfcMember\n\n5387\nIfcMember\n\n5388\nIfcMember\n\n5392\nIfcMember\n\n5393\nIfcMember\n\n5396\nIfcMember\n\n5397\nIfcMember\n\n5398\nIfcMember\n\n5399\nIfcMember\n\n5400\nIfcMember\n\n5405\nIfcMember\n\n5406\nIfcMember\n\n5407\nIfcMember\n\n5409\nIfcMember\n\n5410\nIfcMember\n\n5413\nIfcMember\n\n5415\nIfcMember\n\n5416\nIfcMember\n\n5419\nIfcMember\n\n5420\nIfcMember\n\n5422\nIfcMember\n\n5423\nIfcMember\n\n5424\nIfcMember\n\n5486\nIfcMember\n\n5490\nIfcMember\n\n5585\nIfcMember\n\n5589\nIfcMember\n\n5591\nIfcMember\n\n5595\nIfcMember\n\n5599\nIfcMember\n\n5603\nIfcMember\n\n5607\nIfcMember\nCLICK TO SELECT · CTRL TOGGLE\nColorizer\n\nhangarvd_f10_ tan base_f01_colored.ifc\n\nPaint whole model gray\nGroup by\nSection\nIFC class\nMaterial\nStorey\nIFC property\n75 groups\nSelect filtered groups\nGroup\tObjects\n\nPIPE-267.4X8\n\t1968\n\nPIPE-216.3X8\n\t1278\n\nI-300x330x10x12\n\t1234\n\nTUBE-250X250X10\n\t976\n\nI-300x300x10x15\n\t858\n\nTUBE-250X250X8\n\t672\n\nI-400x400x10x18\n\t568\n\nI-400x400x12x18\n\t522\n\nI-250x250x9x14\n\t504\n\nPIPE-355.6X12.7\n\t494\n\nTUBE-400X400X16\n\t456\n\nI-600x330x10x18\n\t442\n\nTUBE-300X300X10\n\t441\n\nI-600x330x12x18\n\t360\n\nPIPE-139.8X6\n\t358\n\nTUBE-650X650X35\n\t329\n\nI-600x300x16x28\n\t283\n\nI-600x400x12x20\n\t262\n\nTUBE-650X650X30\n\t236\n\nPIPE-355.6X9.5\n\t220\n\nI-440x300x11x18\n\t184\n\nI-400x400x13x21\n\t180\n\nTUBE-250X250X12\n\t170\n\nI-400x400x14x25\n\t168\n\nTUBE-500X500X25\n\t140\n\nI-350x330x10x14\n\t126\n\nI-400x400x14x20\n\t106\n\nTUBE-300X300X12\n\t81\n\nPIPE-318.5X8\n\t76\n\nTUBE-750X750X40\n\t70\n\nI-600x330x12x25\n\t64\n\nTUBE-400X400X22\n\t50\n\nI-400x330x10x20\n\t46\n\nTUBE-300X300X16\n\t46\n\nPIPE-406.4X12.7\n\t38\n\nTUBE-800X800X50\n\t35\n\nI-350x330x8x14\n\t32\n\nI-400x400x12x20\n\t32\n\nI-500x500x14x28\n\t32\n\nPIPE-318.5X10.3\n\t32\n\nI-350x330x10x16\n\t28\n\nI-350x330x8x16\n\t28\n\nTUBE-600X600X25\n\t28\n\nI-300x300x8x14\n\t24\n\nI-600x330x12x20\n\t24\n\nI-400x400x12x22\n\t22\n\nTUBE-500X500X28\n\t20\n\nTUBE-900X900X50\n\t17\n\nI-400x400x14x30\n\t16\n\nI-400x400x12x25\n\t14\n\nTUBE-650X650X40\n\t14\n\nI-500x300x12x25\n\t12\n\nTUBE-350X350X12\n\t12\n\nI-550x500x14x30\n\t8\n\nTUBE-500X500X32\n\t8\n\nTUBE-600X600X32\n\t8\n\nI-350x330x10x18\n\t6\n\nI-400x400x14x24\n\t6\n\nI-400x400x16x30\n\t6\n\nI-400x330x14x24\n\t4\n\nI-400x400x12x24\n\t4\n\nI-450x400x20x30\n\t4\n\nI-600x400x12x24\n\t4\n\nI-350x250x10x16\n\t2\n\nI-350x330x12x18\n\t2\n\nI-350x330x12x20\n\t2\n\nI-400x330x12x24\n\t2\n\nI-400x330x12x25\n\t2\n\nI-400x400x18x25\n\t2\n\nI-600x330x10x20\n\t2\n\nI-600x330x18x25\n\t2\n\nTUBE-400X400X25\n\t2\n\nTUBE-600X600X28\n\t2\n\nTUBE-750X750X50\n\t2\n\nC500x500\n\t1\nColour\nTransparency (%)\nApply colour (0)\nPaint 3D selection\nUndo\nRedo\nMore options\nSave as\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n31.2m\nX\nZ\nY\nReady\n14.5K elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →",
+  "unitWarningProbe": [
+    {
+      "message": "[UnitExtractor] IFCPROJECT entity could not be read, defaulting to meters (unconfirmed — see issue #2104)",
+      "stack": "Error\n    at console.warn (eval at evaluate (:311:30), <anonymous>:7:79)\n    at Ra (http://tauri.localhost/assets/exporters-grpQ0fuH.js:380628:42)\n    at Ba (http://tauri.localhost/assets/exporters-grpQ0fuH.js:380635:40)\n    at za (http://tauri.localhost/assets/exporters-grpQ0fuH.js:380631:16)\n    at Uf (http://tauri.localhost/assets/sandbox-DzQXp63G.js:10368:21)\n    at J_ (http://tauri.localhost/assets/sandbox-DzQXp63G.js:15773:140)\n    at II (http://tauri.localhost/assets/store-CNG1BLxI.js:27018:17)\n    at http://tauri.localhost/assets/main-D3GeaW-X.js:78794:40\n    at Object.useMemo (http://tauri.localhost/assets/main-D3GeaW-X.js:4011:25)\n    at e.useMemo (http://tauri.localhost/assets/grid-layout-BbPGdHO4.js:1:7469)",
+      "text": "File\nHome\nView\nElements\nAnalyze\nAuthor\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nSORT: ELEVATION\nHIERARCHY\n45\nStacked\nSolo\nExploded\nChoose Solo storey on a row to show only that level\n\nhangarvd_f10_ tan base_f01\n+0.00m\n\nSite\n+0.00m\n\nBuilding\n+0.00m\n\nTOP LEVEL\n+41.50m\n\nLEVEL 41\n+41.26m\n\nLEVEL 40\n+41.05m\n\nLEVEL 39\n+40.83m\n\nLEVEL 38\n+40.61m\n\nLEVEL 37\n+40.49m\n\nLEVEL 36\n+40.38m\n\nLEVEL 35\n+40.16m\n\nLEVEL 34\n+39.94m\n\nLEVEL 33\n+39.73m\n\nLEVEL 32\n+39.54m\n\nLEVEL 31\n+39.33m\n\nLEVEL 30\n+39.22m\n\nLEVEL 29\n+39.11m\n\nLEVEL 28\n+38.91m\n\nLEVEL 27\n+38.71m\n\nLEVEL 26\n+38.49m\n\nLEVEL 25\n+38.29m\n\nLEVEL 24\n+38.08m\n\nLEVEL 23\n+37.98m\nCLICK TO SELECT · CTRL TOGGLE\nColorizer\n\nhangarvd_f10_ tan base_f01_colored.ifc\n\nPaint whole model gray\nGroup by\nSection\nIFC class\nMaterial\nStorey\nIFC property\n75 groups\nSelect filtered groups\nGroup\tObjects\n\nPIPE-267.4X8\n\t1968\n\nPIPE-216.3X8\n\t1278\n\nI-300x330x10x12\n\t1234\n\nTUBE-250X250X10\n\t976\n\nI-300x300x10x15\n\t858\n\nTUBE-250X250X8\n\t672\n\nI-400x400x10x18\n\t568\n\nI-400x400x12x18\n\t522\n\nI-250x250x9x14\n\t504\n\nPIPE-355.6X12.7\n\t494\n\nTUBE-400X400X16\n\t456\n\nI-6",
+      "models": [
+        {
+          "name": "hangarvd_f10_ tan base_f01_colored.ifc",
+          "scale": 1,
+          "sourceBytes": 0,
+          "projects": [
+            [
+              4,
+              {
+                "byType": {},
+                "monetary": null
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

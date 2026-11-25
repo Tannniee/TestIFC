@@ -1,0 +1,12 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017\\IFC-Lite.exe",
+  "model": "F:\\Working\\IFC Temp\\SVD TRONG DONG-22.09.2026 (8H).ifc",
+  "bytes": 883278635,
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-core104-large-U8ijpz",
+  "hostPid": 54668,
+  "errors": [],
+  "progress": [],
+  "ok": false,
+  "failure": "locator.setInputFiles: Cannot transfer files larger than 50Mb to a browser not co-located with the server\n    at async file:///F:/Steel/VBA/IFC-Lite-Core104/research/core-upgrade-20261017/large-model.mjs:48:3",
+  "exitedAfterClose": false
+}

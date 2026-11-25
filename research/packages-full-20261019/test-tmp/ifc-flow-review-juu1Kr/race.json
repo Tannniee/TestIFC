@@ -1,0 +1,166 @@
+{
+  "revision": 1,
+  "checkpoint": {
+    "version": 1,
+    "id": "first-run",
+    "graphId": "example-ai-wall-roles",
+    "graphName": "AI wall roles (reviewed)",
+    "graphDigest": "8ee5dd8d188ece78d47471060a1ba8e82430b3614360407a151aff03460ce4ca",
+    "sourceDigest": "sha256:a2e088d6c7a07ea7d3498ed494ae4070e9989a5ceac9eb6e2d69184a81e78e41",
+    "reviewNodes": [
+      "roles"
+    ],
+    "proposalDigest": "9992eae0785a0ef344941728c4bf2086a6f5441c88f1c5196e18033e69259068",
+    "outputs": {
+      "walls": {
+        "entities": {
+          "kind": "list",
+          "items": [
+            {
+              "globalId": "1AQAupaRP1txwK1AGiN61V",
+              "modelId": "default",
+              "expressId": 262
+            },
+            {
+              "globalId": "3wdauVJT5Fx9drrREiDqA$",
+              "modelId": "default",
+              "expressId": 291
+            },
+            {
+              "globalId": "0OfZwWc8j9QP5uX8xPTxDH",
+              "modelId": "default",
+              "expressId": 315
+            },
+            {
+              "globalId": "1uS5vfZPn9R8PlAaVd73on",
+              "modelId": "default",
+              "expressId": 353
+            }
+          ]
+        }
+      },
+      "table": {
+        "table": {
+          "kind": "item",
+          "value": {
+            "columns": [
+              {
+                "name": "GlobalId",
+                "type": "identifier"
+              },
+              {
+                "name": "Name",
+                "type": "label"
+              },
+              {
+                "name": "Pset_WallCommon.IsExternal",
+                "type": "boolean",
+                "binding": {
+                  "pset": "Pset_WallCommon",
+                  "prop": "IsExternal"
+                }
+              }
+            ],
+            "rows": [
+              {
+                "GlobalId": "1AQAupaRP1txwK1AGiN61V",
+                "Name": "house - outer wall - house right front",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "3wdauVJT5Fx9drrREiDqA$",
+                "Name": "house - outer wall - house right back",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "0OfZwWc8j9QP5uX8xPTxDH",
+                "Name": "house - outer wall - house left",
+                "Pset_WallCommon.IsExternal": true
+              },
+              {
+                "GlobalId": "1uS5vfZPn9R8PlAaVd73on",
+                "Name": "plumbing wall",
+                "Pset_WallCommon.IsExternal": false
+              }
+            ],
+            "key": "GlobalId"
+          }
+        }
+      },
+      "roles": {
+        "table": {
+          "kind": "item",
+          "value": {
+            "key": "key",
+            "columns": [
+              {
+                "name": "key",
+                "type": "identifier"
+              },
+              {
+                "name": "label",
+                "type": "label"
+              },
+              {
+                "name": "evidence",
+                "type": "text"
+              },
+              {
+                "name": "outcome",
+                "type": "enum"
+              }
+            ],
+            "rows": [
+              {
+                "key": "1AQAupaRP1txwK1AGiN61V",
+                "label": "Facade",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              },
+              {
+                "key": "3wdauVJT5Fx9drrREiDqA$",
+                "label": "Facade",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              },
+              {
+                "key": "0OfZwWc8j9QP5uX8xPTxDH",
+                "label": "Facade",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              },
+              {
+                "key": "1uS5vfZPn9R8PlAaVd73on",
+                "label": "Partition",
+                "evidence": "Pset_WallCommon.IsExternal",
+                "outcome": "classified"
+              }
+            ]
+          }
+        },
+        "coverage": {
+          "kind": "item",
+          "value": {
+            "model": "stand-in/model",
+            "categoriesVersion": "wall-roles-1",
+            "rows": 4,
+            "requests": 1,
+            "classified": 4,
+            "unknown": 0,
+            "failed": 0,
+            "notSent": 0
+          }
+        }
+      }
+    },
+    "budget": {
+      "maxRequests": 12,
+      "maxOutputTokens": 24000,
+      "requests": 1,
+      "outputTokens": 40
+    },
+    "state": "prepared",
+    "createdAt": 1792380315670,
+    "updatedAt": 1792380315670
+  }
+}

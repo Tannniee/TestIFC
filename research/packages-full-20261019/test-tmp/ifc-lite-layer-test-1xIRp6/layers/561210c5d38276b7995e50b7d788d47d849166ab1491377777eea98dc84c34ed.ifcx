@@ -1,0 +1,48 @@
+{
+  "header": {
+    "id": "blake3:561210c5d38276b7995e50b7d788d47d849166ab1491377777eea98dc84c34ed",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "carol"
+      },
+      "intent": "Add wall-2",
+      "created": "2026-10-19T03:18:19.892Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:702a14801d003ad57e616a94c46e299f3d29dca2857dd1f98f4c4bfed5cde1ba"
+      },
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "storey-eg",
+      "children": {
+        "Wall": "wall-1",
+        "Wall2": "wall-2"
+      }
+    },
+    {
+      "path": "wall-2",
+      "attributes": {
+        "bsi::ifc::class": {
+          "code": "IfcWall",
+          "uri": "u"
+        }
+      }
+    }
+  ]
+}

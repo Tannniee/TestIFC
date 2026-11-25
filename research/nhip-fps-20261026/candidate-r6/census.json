@@ -1,0 +1,103 @@
+{
+  "at": "2026-10-26T12:52:38.022Z",
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "blackwell"
+  },
+  "features": [
+    "core-features-and-limits",
+    "timestamp-query"
+  ],
+  "diagnostics": {
+    "calls": 377,
+    "skips": 0,
+    "errors": 0,
+    "lastError": "",
+    "batches": 1384,
+    "meshes": 0,
+    "contextOk": true,
+    "gpuErrors": 0,
+    "lastGpuError": "",
+    "camPos": "1179.2,748.3,641.9",
+    "camTgt": "323.2,34.9,-214.1",
+    "bounds": "-55..701 -5..76 -428..0"
+  },
+  "maps": {
+    "flatEntities": 103693,
+    "instancedEntities": 36410,
+    "boundingBoxes": 36410,
+    "flatBatches": 1384,
+    "templates": 6948,
+    "instances": 375914,
+    "batchTriangles": 104197127,
+    "instancedTriangles": 9193266
+  },
+  "batchKeys": [
+    "id",
+    "colorKey",
+    "vertexBuffer",
+    "indexBuffer",
+    "indexCount",
+    "color",
+    "expressIds",
+    "bindGroup",
+    "uniformBuffer",
+    "bounds",
+    "modelIndices",
+    "origin",
+    "lod1IndexBuffer",
+    "lod1IndexCount",
+    "quantized"
+  ],
+  "templateKeys": [
+    "modelIndex",
+    "vertexBuffer",
+    "indexBuffer",
+    "indexCount",
+    "instanceBuffer",
+    "instanceCount",
+    "canonicalAnchors",
+    "rteDeltas",
+    "bounds",
+    "maxOccRadius",
+    "selectedCount"
+  ],
+  "models": [
+    {
+      "id": "c7421322-0f22-45f1-be44-1b8e133ec11a",
+      "idOffset": 0,
+      "triangles": 116699839,
+      "vertices": 134867054,
+      "meshes": 857930,
+      "instances": 36410,
+      "loadPath": "native"
+    }
+  ],
+  "stats": {
+    "frame": {
+      "drawCalls": 1680,
+      "batchesDrawn": 1378,
+      "batchesFrustumCulled": 0,
+      "batchesContributionCulled": 6,
+      "batchesNotResident": 0,
+      "batchesAtLod1": 1128,
+      "instancedDrawn": 302,
+      "instancedFrustumCulled": 0,
+      "instancedContributionCulled": 6646,
+      "timestamp": 484508.8500000015
+    },
+    "gpu": {
+      "batches": 2630071008,
+      "meshes": 0,
+      "textured": 0,
+      "instanced": 57893232,
+      "total": 2687964240
+    },
+    "cpuBytes": 3985385412
+  },
+  "view": {
+    "width": 1440,
+    "height": 960,
+    "dpr": 1.5
+  }
+}

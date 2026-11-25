@@ -1,0 +1,1040 @@
+diff --git a/.changeset/smooth-oranges-bake.md b/.changeset/smooth-oranges-bake.md
+new file mode 100644
+index 00000000..128b0073
+--- /dev/null
++++ b/.changeset/smooth-oranges-bake.md
+@@ -0,0 +1,8 @@
++---
++"@ifc-lite/wasm": patch
++---
++
++Handle Reference geometry consistently across subtraction features, retain real
++Body cuts, and keep their optional overlays under the opening visibility toggle.
++For proven thin box extrusions, preserve through-holes, edge notches and every
++disconnected component using a guarded planar difference before re-extrusion.
+diff --git a/apps/viewer/src/store/typeVisibilityFilter.test.ts b/apps/viewer/src/store/typeVisibilityFilter.test.ts
+index 15a275df..36f335a1 100644
+--- a/apps/viewer/src/store/typeVisibilityFilter.test.ts
++++ b/apps/viewer/src/store/typeVisibilityFilter.test.ts
+@@ -63,6 +63,9 @@ describe('isTypeVisible', () => {
+       ['IfcOpeningElement', 'openings'],
+       // #5409: IFC4's standard-case opening rode no toggle at all.
+       ['IfcOpeningStandardCase', 'openings'],
++      // Nhip chinh: sibling subtraction features use the same visibility channel.
++      ['IfcVoidingFeature', 'openings'],
++      ['IfcEarthworksCut', 'openings'],
+       ['IfcVirtualElement', 'virtualElements'],
+       ['IfcSite', 'site'],
+       ['IfcGeographicElement', 'site'],
+@@ -113,7 +116,7 @@ describe('buildHiddenIfcTypes', () => {
+     const expected: Record<keyof typeof ALL_ON, string[]> = {
+       spaces: ['IfcSpace'],
+       spatialZones: ['IfcSpatialZone'],
+-      openings: ['IfcOpeningElement', 'IfcOpeningStandardCase'],
++      openings: ['IfcOpeningElement', 'IfcOpeningStandardCase', 'IfcVoidingFeature', 'IfcEarthworksCut'],
+       virtualElements: ['IfcVirtualElement'],
+       site: ['IfcSite', 'IfcGeographicElement'],
+       ifcAnnotations: ['IfcAnnotation'],
+@@ -132,6 +135,7 @@ describe('buildHiddenIfcTypes', () => {
+     };
+     assert.deepEqual([...buildHiddenIfcTypes(allOff)].sort(), [
+       'IfcAnnotation',
++      'IfcEarthworksCut',
+       'IfcGeographicElement',
+       'IfcOpeningElement',
+       'IfcOpeningStandardCase',
+@@ -139,6 +143,7 @@ describe('buildHiddenIfcTypes', () => {
+       'IfcSpace',
+       'IfcSpatialZone',
+       'IfcVirtualElement',
++      'IfcVoidingFeature',
+     ]);
+   });
+ });
+diff --git a/apps/viewer/src/store/typeVisibilityFilter.ts b/apps/viewer/src/store/typeVisibilityFilter.ts
+index c2b1cbcd..33aa6749 100644
+--- a/apps/viewer/src/store/typeVisibilityFilter.ts
++++ b/apps/viewer/src/store/typeVisibilityFilter.ts
+@@ -51,6 +51,9 @@ const IFC_TYPE_TO_VISIBILITY_KEY: Readonly<Record<string, TypeVisibilityKey>> =
+   // IFC4's standard-case opening is an opening too; matched by exact name
+   // like every row here, so it needs its own (#5409).
+   IfcOpeningStandardCase: 'openings',
++  // Sibling subtraction features use the same optional cutter overlay.
++  IfcVoidingFeature: 'openings',
++  IfcEarthworksCut: 'openings',
+   IfcVirtualElement: 'virtualElements',
+   IfcSite: 'site',
+   IfcGeographicElement: 'site',
+diff --git a/desktop/src-tauri/src/native.rs b/desktop/src-tauri/src/native.rs
+index 77a7cbf9..a53878a2 100644
+--- a/desktop/src-tauri/src/native.rs
++++ b/desktop/src-tauri/src/native.rs
+@@ -128,7 +128,9 @@ impl Jobs {
+                 let basis = OnceLock::new();
+                 let (mut flat_meshes, mut instanced_occurrences, mut instanced_templates) = (0, 0, 0);
+                 let result = process_geometry_streaming_filtered_with_baked_basis(&content, OpeningFilterMode::Default, StreamingOptions {
+-                    initial_batch_size: 16, throughput_batch_size: 65536,
++                    // Publish progress/geometry regularly on large models; a
++                    // 65,536-product batch hid minutes of Nhip chinh processing.
++                    initial_batch_size: 16, throughput_batch_size: 4096,
+                     retain_emitted_meshes: false, cancel: Some(job.cancel.clone()),
+                     ..StreamingOptions::default()
+                 }, &basis, |meshes, processed, total| {
+diff --git a/desktop/src-tauri/src/native_tests.rs b/desktop/src-tauri/src/native_tests.rs
+index d36d6c6c..ecdaec55 100644
+--- a/desktop/src-tauri/src/native_tests.rs
++++ b/desktop/src-tauri/src/native_tests.rs
+@@ -46,12 +46,20 @@ fn abandoned_bounded_stream_cancels_worker_and_deletes_its_owned_source() {
+         if !jobs.next_packet(&id).unwrap().is_empty() { break; }
+         std::thread::sleep(Duration::from_millis(5));
+     }
+-    std::thread::sleep(Duration::from_millis(100));
+-    let status = jobs.status(&id).unwrap();
++    // Nhip chinh: a 65,536-product batch withheld progress/geometry for minutes.
++    // Leave the real bounded channel full until the next batch is published.
++    let status = loop {
++        assert!(std::time::Instant::now() < deadline, "next progress batch must arrive");
++        let status = jobs.status(&id).unwrap();
++        if status.progress.processed_elements > 16 { break status; }
++        std::thread::sleep(Duration::from_millis(5));
++    };
+     assert!(!status.done, "producer must wait for a consumer");
+     assert!(status.progress.processed_elements > 0);
+     assert!(status.progress.processed_elements <= status.progress.total_elements);
+     assert!(status.progress.meshes > 0);
++    assert!(status.progress.processed_elements <= 16 + 4096,
++        "an abandoned consumer must not allow a giant unpublished batch");
+     jobs.close(&id).unwrap();
+     // The final Arc decrements its strong count before dropping Job's fields.
+     // Wait for the actual NamedTempFile cleanup as well as worker release.
+diff --git a/desktop/src-tauri/src/partition.rs b/desktop/src-tauri/src/partition.rs
+index bf4ccd24..a8a289cb 100644
+--- a/desktop/src-tauri/src/partition.rs
++++ b/desktop/src-tauri/src/partition.rs
+@@ -18,7 +18,8 @@ fn eligible(mesh: &MeshData) -> bool {
+     mesh.geometry_class == 0 && mesh.material_id.is_none() && mesh.color[3] >= 0.99
+         && mesh.texture.is_none() && mesh.uvs.is_none()
+         && !matches!(mesh.ifc_type.as_str(), "IfcSpace" | "IfcSpatialZone" | "IfcOpeningElement"
+-            | "IfcOpeningStandardCase" | "IfcVirtualElement" | "IfcSite" | "IfcGeographicElement" | "IfcAnnotation")
++            | "IfcOpeningStandardCase" | "IfcVoidingFeature" | "IfcEarthworksCut"
++            | "IfcVirtualElement" | "IfcSite" | "IfcGeographicElement" | "IfcAnnotation")
+ }
+ 
+ /// IFNS carries world Z-up/post-RTC vertices, as the existing renderer expects.
+diff --git a/desktop/src-tauri/src/partition_tests.rs b/desktop/src-tauri/src/partition_tests.rs
+index 70634221..179056c1 100644
+--- a/desktop/src-tauri/src/partition_tests.rs
++++ b/desktop/src-tauri/src/partition_tests.rs
+@@ -63,3 +63,19 @@ fn transparency_class_switches_and_shape_rejections_retain_flat_geometry() {
+     assert_eq!(result.flat_meshes + result.occurrences, meshes.len());
+     assert!(result.flat_meshes >= 4, "a mismatched shape cannot disappear into an invalid template");
+ }
++
++// Nhip chinh: negative feature overlays must obey class visibility even if
++// authored opaque and repeated; an IFNS shard cannot carry this class gate.
++#[test]
++fn subtraction_feature_overlays_never_enter_instanced_shards() {
++    for class in ["IfcVoidingFeature", "IfcEarthworksCut"] {
++        let meshes: Vec<_> = (0..8).map(|i| {
++            let mut mesh = pose(i);
++            mesh.ifc_type = class.into();
++            mesh
++        }).collect();
++        let result = encode(&meshes, &BASIS, &mut empty_bounds()).unwrap();
++        assert_eq!((result.flat_meshes, result.occurrences), (8, 0), "{class}");
++        assert!(!result.packets.is_empty(), "overlays remain available on the flat path");
++    }
++}
+diff --git a/rust/geometry/src/bool2d.rs b/rust/geometry/src/bool2d.rs
+index be2725e2..51da57b3 100644
+--- a/rust/geometry/src/bool2d.rs
++++ b/rust/geometry/src/bool2d.rs
+@@ -80,6 +80,30 @@ pub fn subtract_multiple_2d(
+     subtract_multiple_2d_counted(profile, void_contours).map(|(profile, _)| profile)
+ }
+ 
++/// Finished union difference retaining EVERY material component. Unlike the
++/// single-profile API this is suitable for a through-slot splitting a plate.
++/// Empty/degenerate output refuses the analytic route rather than losing a part.
++pub(crate) fn subtract_multiple_2d_all(
++    profile: &Profile2D,
++    void_contours: &[Vec<Point2<f64>>],
++) -> Result<Vec<Profile2D>> {
++    let subject = profile_to_paths(profile);
++    let clip = ccw_paths(void_contours.iter().map(Vec::as_slice));
++    let shapes = subject.overlay(&clip, OverlayRule::Difference, FillRule::NonZero);
++    if shapes.is_empty() {
++        return Err(Error::InvalidProfile("Boolean difference consumed the host".into()));
++    }
++    shapes.iter().map(|shape| {
++        if shape.is_empty() || shape.iter().any(|contour| {
++            let points = contour.iter().map(|p| Point2::new(p[0], p[1])).collect::<Vec<_>>();
++            !points.iter().all(|p| p.x.is_finite() && p.y.is_finite()) || !is_valid_contour(&points)
++        }) {
++            return Err(Error::InvalidProfile("Boolean difference has a degenerate contour".into()));
++        }
++        shapes_to_profile(std::slice::from_ref(shape))
++    }).collect()
++}
++
+ /// Like [`subtract_multiple_2d`], but also reports how many DISCONNECTED output
+ /// shapes the difference produced (each with non-degenerate area). The returned
+ /// `Profile2D` is the largest shape (as [`subtract_multiple_2d`]); a caller that
+diff --git a/rust/geometry/src/router/rep_filter.rs b/rust/geometry/src/router/rep_filter.rs
+index 0fa1a5e3..429a21d8 100644
+--- a/rust/geometry/src/router/rep_filter.rs
++++ b/rust/geometry/src/router/rep_filter.rs
+@@ -111,11 +111,11 @@ pub(crate) fn effective_rep_type(shape_rep: &DecodedEntity) -> Option<&str> {
+     })
+ }
+ 
+-/// Opening Reference geometry describes an existing hole, never a cutter.
+-/// Keep ordinary products' rendering convention unchanged; only opening
++/// Subtraction-feature Reference geometry describes an existing hole, never a cutter.
++/// Keep ordinary products' rendering convention unchanged; only feature
+ /// semantics override the otherwise type-first representation predicate (#4433).
+ pub(crate) fn effective_element_rep_type<'a>(element: &DecodedEntity, shape_rep: &'a DecodedEntity) -> Option<&'a str> {
+-    if element.ifc_type.is_subtype_of(ifc_lite_core::IfcType::IfcOpeningElement)
++    if element.ifc_type.is_subtype_of(IfcType::IfcFeatureElementSubtraction)
+         && shape_rep.get_string(1).is_some_and(|id| id.eq_ignore_ascii_case("Reference")) {
+         return Some("Reference");
+     }
+diff --git a/rust/geometry/src/router/voids/bool2d_path.rs b/rust/geometry/src/router/voids/bool2d_path.rs
+index 94895556..83652324 100644
+--- a/rust/geometry/src/router/voids/bool2d_path.rs
++++ b/rust/geometry/src/router/voids/bool2d_path.rs
+@@ -50,6 +50,7 @@ use ifc_lite_core::{DecodedEntity, EntityDecoder, IfcType};
+ use nalgebra::{Matrix4, Point2, Vector3};
+ 
+ mod footprint;
++mod thin_box;
+ use footprint::{footprint_interior, opening_solid_footprint};
+ 
+ /// `IFC_LITE_VOID_2D=0` disables the 2D opening-subtraction path (exact kernel
+@@ -77,6 +78,8 @@ pub fn take_bool2d_stats() -> (u64, u64) {
+ /// the cut mesh WITHOUT the decoder (so [`GeometryRouter::apply_void_context`]
+ /// can run it on pure geometry). Built in [`GeometryRouter::capture_bool2d`].
+ pub(super) struct Bool2dCut {
++    /// Proven thin-axis box: all cutters through, boundary cuts and splits valid.
++    all_components: bool,
+     /// Host profile (outer + any existing holes) in the solid's profile plane.
+     host_profile: Profile2D,
+     /// Host extrusion depth (> 0).
+@@ -108,6 +111,9 @@ impl GeometryRouter {
+         if opening_ids.is_empty() {
+             return None;
+         }
++        if let Some(cut) = self.capture_thin_box_cut(element, opening_ids, decoder) {
++            return Some(cut);
++        }
+         let host = self.host_extruded_solid(element, decoder)?;
+         let hm_inv = host.m.try_inverse()?;
+         let host_rot = host.m.fixed_view::<3, 3>(0, 0).into_owned();
+@@ -126,7 +132,7 @@ impl GeometryRouter {
+         let mut residual_ids: Vec<u32> = Vec::new();
+         for &oid in opening_ids {
+             let opening = match decoder.decode_by_id(oid) {
+-                Ok(e) if e.ifc_type == IfcType::IfcOpeningElement => e,
++                Ok(e) if e.ifc_type.is_subtype_of(IfcType::IfcFeatureElementSubtraction) => e,
+                 // A non-opening (or undecodable) id: hand it to the exact kernel.
+                 _ => {
+                     residual_ids.push(oid);
+@@ -204,6 +210,7 @@ impl GeometryRouter {
+         };
+ 
+         Some(Bool2dCut {
++            all_components: false,
+             host_profile: host.profile,
+             depth: host.depth,
+             dir_sign: host.dir_sign,
+@@ -219,6 +226,9 @@ impl GeometryRouter {
+     /// reconciliation or the watertight self-check fails. Deterministic f64 →
+     /// byte-identical native==wasm.
+     pub(super) fn try_bool2d_cut(&self, mesh: &Mesh, cut: &Bool2dCut) -> Option<(Mesh, Vec<Mesh>)> {
++        if cut.all_components {
++            return self.try_thin_box_cut(mesh, cut).map(|mesh| (mesh, Vec::new()));
++        }
+         // A -Z sweep places the profile plane at the TOP; shift the [0, depth]
+         // extrude down so the solid occupies [-depth, 0] in the profile frame,
+         // matching the extruded-solid processor's downward-extrusion handling.
+diff --git a/rust/geometry/src/router/voids/bool2d_path/thin_box.rs b/rust/geometry/src/router/voids/bool2d_path/thin_box.rs
+new file mode 100644
+index 00000000..db94bdb6
+--- /dev/null
++++ b/rust/geometry/src/router/voids/bool2d_path/thin_box.rs
+@@ -0,0 +1,189 @@
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++
++//! A clean box may be authored along its length while its voids cross its
++//! thickness (Nhip chinh Body #2444). Prove the box, cyclically reorient it,
++//! and subtract every through-cutter in its thin-axis plane. This separate
++//! all-or-nothing route does not relax the arbitrary-host interiority gates.
++
++use super::super::geom::{mesh_signed_volume, param_cut_watertight};
++use super::super::probe::ExtrudedSolidInfo;
++use super::super::RectParam;
++use super::{Bool2dCut, GeometryRouter, FIRES, FOOTPRINTS};
++use crate::bool2d::{compute_signed_area, subtract_multiple_2d_all};
++use crate::extrusion::{apply_transform, extrude_profile_watertight};
++use crate::{Mesh, Profile2D};
++use ifc_lite_core::{DecodedEntity, EntityDecoder, IfcType};
++use nalgebra::{Matrix3, Matrix4, Point2, Point3, Vector3};
++use std::sync::atomic::Ordering;
++
++/// Exact four-corner rectangle proof, including indexed-polycurve profiles.
++/// Unlike the tolerant rectangular probe, a trapezoid/shear cannot enter here.
++fn clean_box(host: &ExtrudedSolidInfo, scale: f64, rtc: (f64, f64, f64)) -> Option<RectParam> {
++    if !finite_solid(host, scale, rtc) { return None; }
++    let mut p = host.profile.outer.as_slice();
++    if p.len() == 5 && (p[0] - p[4]).norm() < 1e-10 { p = &p[..4]; }
++    if p.len() != 4 { return None; }
++    let a = p[1] - p[0];
++    let b = p[3] - p[0];
++    let tolerance = a.norm().max(b.norm()) * 1e-9;
++    if a.norm() <= 0.0 || b.norm() <= 0.0
++        || a.dot(&b).abs() > a.norm() * b.norm() * 1e-9
++        || (p[2] - (p[0] + a + b)).norm() > tolerance { return None; }
++    let rot = host.m.fixed_view::<3, 3>(0, 0);
++    let edges = [rot * Vector3::new(a.x, a.y, 0.0),
++        rot * Vector3::new(b.x, b.y, 0.0),
++        rot * Vector3::new(0.0, 0.0, host.dir_sign * host.depth)];
++    let axes = edges.map(|e| e.try_normalize(1e-12)).into_iter().collect::<Option<Vec<_>>>()?;
++    if (0..3).any(|i| axes[i].dot(&axes[(i + 1) % 3]).abs() > 1e-9) { return None; }
++    let c = (p[0].coords + p[2].coords) * 0.5;
++    let c = host.m.transform_point(&Point3::new(c.x, c.y, host.dir_sign * host.depth * 0.5));
++    let center = Point3::new(c.x * scale - rtc.0, c.y * scale - rtc.1, c.z * scale - rtc.2);
++    let half = edges.map(|e| e.norm() * scale * 0.5);
++    if !half.iter().all(|h| h.is_finite() && *h > 0.0) { return None; }
++    Some(RectParam { r: Matrix3::from_columns(&[axes[0], axes[1], axes[2]]), center, half })
++}
++
++impl GeometryRouter {
++    pub(super) fn capture_thin_box_cut(
++        &self, element: &DecodedEntity, opening_ids: &[u32], decoder: &mut EntityDecoder,
++    ) -> Option<Bool2dCut> {
++        let solid = self.host_extruded_solid(element, decoder)?;
++        let host = clean_box(&solid, self.unit_scale, self.rtc_offset)?;
++        let thin = (0..3).min_by(|&a, &b| host.half[a].total_cmp(&host.half[b]))?;
++        // Only reorient when the authored sweep is NOT the thickness, and the
++        // plate has an unambiguous thin axis. Normal sweeps keep the old route.
++        if thin == 2 || (0..3).any(|i| i != thin && host.half[thin] * 8.0 > host.half[i]) {
++            return None;
++        }
++        let x = (thin + 1) % 3;
++        let y = (thin + 2) % 3;
++        let mut r = Matrix3::from_columns(&[host.r.column(x).into_owned(),
++            host.r.column(y).into_owned(), host.r.column(thin).into_owned()]);
++        // Clockwise source profiles/reflections still need a right-handed sweep.
++        if r.determinant() < 0.0 { r.set_column(0, &(-r.column(0).into_owned())); }
++        let depth = host.half[thin] * 2.0;
++        let base = host.center.coords - r.column(2) * host.half[thin];
++        let mut wt = Matrix4::identity();
++        wt.fixed_view_mut::<3, 3>(0, 0).copy_from(&r);
++        wt.fixed_view_mut::<3, 1>(0, 3).copy_from(&base);
++        let inv = wt.try_inverse()?;
++        let mut footprints = Vec::new();
++        for &id in opening_ids {
++            let opening = decoder.decode_by_id(id).ok()?;
++            if !opening.ifc_type.is_subtype_of(IfcType::IfcFeatureElementSubtraction) { return None; }
++            // No residual route here: ANY blind/oblique/non-extruded constituent
++            // defers the complete opening set to established exact subtraction.
++            for op in self.opening_extruded_solids(&opening, decoder)? {
++                footprints.push(thin_footprint(&op, &inv, depth, self.unit_scale, self.rtc_offset)?);
++            }
++        }
++        if footprints.is_empty() { return None; }
++        let (a, b) = (host.half[x], host.half[y]);
++        Some(Bool2dCut {
++            all_components: true,
++            host_profile: Profile2D::new(vec![Point2::new(-a, -b), Point2::new(a, -b),
++                Point2::new(a, b), Point2::new(-a, b)]),
++            depth, dir_sign: 1.0, wt, footprints, residual: None,
++        })
++    }
++
++    pub(super) fn try_thin_box_cut(&self, mesh: &Mesh, cut: &Bool2dCut) -> Option<Mesh> {
++        if !reconciles(mesh, cut) { return None; }
++        let profiles = subtract_multiple_2d_all(&cut.host_profile, &cut.footprints).ok()?;
++        let area = |p: &Profile2D| compute_signed_area(&p.outer).abs()
++            - p.holes.iter().map(|h| compute_signed_area(h).abs()).sum::<f64>();
++        let expected = profiles.iter().map(area).sum::<f64>() * cut.depth;
++        if expected <= 0.0 { return None; }
++        // Put the f64 translation in origin BEFORE storing any transformed f32
++        // positions. Native and WASM both keep the 16 mm plate at small coords.
++        let origin = [cut.wt[(0, 3)], cut.wt[(1, 3)], cut.wt[(2, 3)]];
++        let mut wt = cut.wt;
++        for i in 0..3 { wt[(i, 3)] = 0.0; }
++        let mut out = Mesh::new();
++        for profile in profiles {
++            let mut part = extrude_profile_watertight(&profile, cut.depth, None).ok()?;
++            apply_transform(&mut part, &wt);
++            part.origin = origin;
++            part.clean_degenerate();
++            if !param_cut_watertight(&part) { return None; }
++            out.merge(&part);
++        }
++        // Preserve every disconnected solid; validate their summed material,
++        // so an empty/degenerate triangulation can never silently lose a part.
++        if !param_cut_watertight(&out)
++            || (mesh_signed_volume(&out).abs() - expected).abs() > expected * 1e-4 { return None; }
++        let footprints = cut.footprints.len() as u64;
++        crate::telemetry_transaction::record(move || {
++            FIRES.fetch_add(1, Ordering::Relaxed);
++            FOOTPRINTS.fetch_add(footprints, Ordering::Relaxed);
++        });
++        Some(out)
++    }
++}
++
++fn thin_footprint(
++    op: &ExtrudedSolidInfo, inv: &Matrix4<f64>, depth: f64, scale: f64, rtc: (f64, f64, f64),
++) -> Option<Vec<Point2<f64>>> {
++    if !finite_solid(op, scale, rtc) || !depth.is_finite() || depth <= 0.0
++        || !inv.iter().all(|x| x.is_finite()) { return None; }
++    let mut world = op.m;
++    for i in 0..3 { for j in 0..4 { world[(i, j)] *= scale; } }
++    for (i, shift) in [rtc.0, rtc.1, rtc.2].into_iter().enumerate() { world[(i, 3)] -= shift; }
++    let to_host = inv * world;
++    let sweep = to_host.transform_vector(&Vector3::new(0.0, 0.0, op.dir_sign * op.depth));
++    let axis = sweep.try_normalize(1e-12)?;
++    if axis.x.hypot(axis.y) > 1e-7 { return None; }
++    // At most 0.25 micrometres + 1 ppm of thickness may be treated as a
++    // coincident plane. Real #2444 has ~0.08 um exporter drift and 6.57e-8 rad
++    // axis drift; every profile vertex must independently span both faces.
++    // This narrow metric bound is unrelated to footprint/host size or location.
++    let tol = 2.5e-7 + depth * 1e-6;
++    if sweep.x.hypot(sweep.y) > tol { return None; }
++    let mut footprint = Vec::new();
++    for p in &op.profile.outer {
++        let base = to_host.transform_point(&Point3::new(p.x, p.y, 0.0));
++        let far = base + sweep;
++        if base.z.min(far.z) > tol || base.z.max(far.z) < depth - tol { return None; }
++        footprint.push(Point2::new((base.x + far.x) * 0.5, (base.y + far.y) * 0.5));
++    }
++    (footprint.len() >= 3 && compute_signed_area(&footprint).abs() > 0.0).then_some(footprint)
++}
++
++fn finite_solid(op: &ExtrudedSolidInfo, scale: f64, rtc: (f64, f64, f64)) -> bool {
++    op.profile.holes.is_empty() && op.depth.is_finite() && op.depth > 0.0
++        && op.dir_sign.is_finite() && op.dir_sign.abs() == 1.0 && scale.is_finite() && scale > 0.0
++        && [rtc.0, rtc.1, rtc.2].iter().all(|x| x.is_finite())
++        && op.m.iter().all(|x| x.is_finite())
++        && op.profile.outer.iter().all(|p| p.x.is_finite() && p.y.is_finite())
++}
++
++/// Reconcile the proven rectangle against the actual pre-cut mesh in its small
++/// box frame. Catches unit/RTC/placement mistakes and any source-shape mismatch.
++fn reconciles(mesh: &Mesh, cut: &Bool2dCut) -> bool {
++    let Some(inv) = cut.wt.try_inverse() else { return false; };
++    let mut lo = [f64::INFINITY; 3];
++    let mut hi = [f64::NEG_INFINITY; 3];
++    let mut magnitude = 0.0_f64;
++    for v in mesh.positions.as_chunks::<3>().0 {
++        let p = inv.transform_point(&Point3::new(v[0] as f64 + mesh.origin[0],
++            v[1] as f64 + mesh.origin[1], v[2] as f64 + mesh.origin[2]));
++        for i in 0..3 {
++            magnitude = magnitude.max(f64::from(v[i]).abs());
++            lo[i] = lo[i].min(p[i]); hi[i] = hi[i].max(p[i]);
++        }
++    }
++    let a = cut.host_profile.outer[2];
++    let expected_lo = [-a.x, -a.y, 0.0];
++    let expected_hi = [a.x, a.y, cut.depth];
++    let tolerance = 2e-5 + magnitude * f64::from(f32::EPSILON) * 4.0;
++    if (0..3).any(|i| (lo[i] - expected_lo[i]).abs() > tolerance
++        || (hi[i] - expected_hi[i]).abs() > tolerance) { return false; }
++    let volume = 4.0 * a.x * a.y * cut.depth;
++    (mesh_signed_volume(mesh).abs() - volume).abs() <= volume * 0.002
++}
++
++#[cfg(test)]
++#[path = "thin_box_tests.rs"]
++mod tests;
+diff --git a/rust/geometry/src/router/voids/bool2d_path/thin_box_tests.rs b/rust/geometry/src/router/voids/bool2d_path/thin_box_tests.rs
+new file mode 100644
+index 00000000..154fd70a
+--- /dev/null
++++ b/rust/geometry/src/router/voids/bool2d_path/thin_box_tests.rs
+@@ -0,0 +1,69 @@
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++
++use super::*;
++
++fn cutter(scale: f64, z: f64) -> ExtrudedSolidInfo {
++    ExtrudedSolidInfo {
++        profile: Profile2D::new(vec![Point2::new(-scale, -scale), Point2::new(scale, -scale),
++            Point2::new(scale, scale), Point2::new(-scale, scale)]),
++        depth: 0.016 * scale,
++        dir_sign: 1.0,
++        m: Matrix4::new_translation(&Vector3::new(0.0, 0.0, z)),
++    }
++}
++
++/// Nhip #2444: numerical face coincidence must not turn a measurable blind
++/// pocket into a through-cut. The allowance is physical, in metres.
++#[test]
++fn thin_axis_box_accepts_roundoff_but_refuses_blind_and_oblique_cutters() {
++    let inv = Matrix4::identity();
++    let zero = (0.0, 0.0, 0.0);
++    assert!(thin_footprint(&cutter(1.0, 8e-8), &inv, 0.016, 1.0, zero).is_some());
++    assert!(thin_footprint(&cutter(1.0, 1e-5), &inv, 0.016, 1.0, zero).is_none());
++    let mut oblique = cutter(1.0, 0.0);
++    oblique.m = nalgebra::Rotation3::from_axis_angle(&Vector3::x_axis(), 2e-7).to_homogeneous();
++    assert!(thin_footprint(&oblique, &inv, 0.016, 1.0, zero).is_none());
++    let mut annular = cutter(1.0, 0.0);
++    annular.profile.holes.push(vec![Point2::new(0.0, 0.0), Point2::new(0.1, 0.0), Point2::new(0.0, 0.1)]);
++    assert!(thin_footprint(&annular, &inv, 0.016, 1.0, zero).is_none());
++}
++
++#[test]
++fn thin_axis_box_projection_keeps_metric_tolerance_under_millimetres_and_rtc() {
++    let inv = Matrix4::identity();
++    let a = thin_footprint(&cutter(1.0, 8e-8), &inv, 0.016, 1.0, (0.0, 0.0, 0.0)).unwrap();
++    let mut mm = cutter(1000.0, 8e-5);
++    mm.m[(0, 3)] = 563_254_707.0;
++    mm.m[(1, 3)] = 1_100_446_627.0;
++    let rtc = (563_254.707, 1_100_446.627, 0.0);
++    let b = thin_footprint(&mm, &inv, 0.016, 0.001, rtc).unwrap();
++    assert!(a.iter().zip(b).all(|(a, b)| (a - b).norm() < 1e-9));
++    mm.m[(2, 3)] = 0.01; // A 0.01 mm blind skin is not roundoff.
++    assert!(thin_footprint(&mm, &inv, 0.016, 0.001, rtc).is_none());
++}
++
++#[test]
++fn thin_axis_box_proof_refuses_trapezoids_and_sheared_transforms() {
++    let source = cutter(1.0, 0.0);
++    assert!(clean_box(&source, 1.0, (0.0, 0.0, 0.0)).is_some());
++    let mut trapezoid = cutter(1.0, 0.0);
++    trapezoid.profile.outer[2].x += 1e-3;
++    assert!(clean_box(&trapezoid, 1.0, (0.0, 0.0, 0.0)).is_none());
++    let mut shear = cutter(1.0, 0.0);
++    shear.m[(0, 1)] = 1e-3;
++    assert!(clean_box(&shear, 1.0, (0.0, 0.0, 0.0)).is_none());
++    let mut nonfinite = cutter(1.0, 0.0);
++    nonfinite.profile.outer[2].x = f64::NAN;
++    assert!(clean_box(&nonfinite, 1.0, (0.0, 0.0, 0.0)).is_none());
++    assert!(thin_footprint(&nonfinite, &Matrix4::identity(), 0.016, 1.0, (0.0, 0.0, 0.0)).is_none());
++}
++
++#[test]
++fn thin_axis_box_difference_refuses_to_silently_fill_a_degenerate_hole() {
++    let profile = cutter(1.0, 0.0).profile;
++    let tiny = vec![Point2::new(0.0, 0.0), Point2::new(1e-6, 0.0),
++        Point2::new(1e-6, 1e-6), Point2::new(0.0, 1e-6)];
++    assert!(subtract_multiple_2d_all(&profile, &[tiny]).is_err());
++}
+diff --git a/rust/geometry/src/router/voids/bool2d_path_tests.rs b/rust/geometry/src/router/voids/bool2d_path_tests.rs
+index 0c7bc571..7c788553 100644
+--- a/rust/geometry/src/router/voids/bool2d_path_tests.rs
++++ b/rust/geometry/src/router/voids/bool2d_path_tests.rs
+@@ -303,6 +303,7 @@ pub(super) fn mixed_overlap_fixture() -> (Mesh, VoidContext) {
+         bool2d: None,
+     };
+     let cut = Bool2dCut {
++        all_components: false,
+         host_profile: profile.clone(), depth: 1.0, dir_sign: 1.0,
+         wt: Matrix4::identity(),
+         footprints: vec![rect(2.0, 2.0, 4.0, 4.0), rect(2.0, 2.0, 4.0, 4.0), rect(6.0, 6.0, 8.0, 8.0)],
+diff --git a/rust/geometry/src/router/voids/mod.rs b/rust/geometry/src/router/voids/mod.rs
+index 048fe4ec..c0275385 100644
+--- a/rust/geometry/src/router/voids/mod.rs
++++ b/rust/geometry/src/router/voids/mod.rs
+@@ -425,7 +425,7 @@ impl GeometryRouter {
+         let mut openings = Vec::with_capacity(opening_ids.len());
+         for &oid in opening_ids {
+             let opening = decoder.decode_by_id(oid).ok()?;
+-            if opening.ifc_type != IfcType::IfcOpeningElement {
++            if !opening.ifc_type.is_subtype_of(IfcType::IfcFeatureElementSubtraction) {
+                 return None;
+             }
+             // An opening may be a UNION OF RECTANGULAR PRISMS (Tekla multi-solid). Extract
+diff --git a/rust/geometry/src/router/voids/representation.rs b/rust/geometry/src/router/voids/representation.rs
+index baf32b4e..0011e6cb 100644
+--- a/rust/geometry/src/router/voids/representation.rs
++++ b/rust/geometry/src/router/voids/representation.rs
+@@ -13,7 +13,7 @@ impl GeometryRouter {
+     pub fn opening_requires_subtraction(&self, id:u32, decoder:&mut EntityDecoder<'_>)->bool {
+         let reference_only=(|| {
+             let opening=decoder.decode_by_id(id).ok()?;
+-            if !opening.ifc_type.is_subtype_of(IfcType::IfcOpeningElement) {return None;}
++            if !opening.ifc_type.is_subtype_of(IfcType::IfcFeatureElementSubtraction) {return None;}
+             let pds=decoder.decode_by_id(opening.get_ref(6)?).ok()?;
+             if pds.ifc_type!=IfcType::IfcProductDefinitionShape {return None;}
+             let representations=pds.get_list(2)?;
+diff --git a/rust/processing/src/style/mod.rs b/rust/processing/src/style/mod.rs
+index 3a7bf023..cda78a67 100644
+--- a/rust/processing/src/style/mod.rs
++++ b/rust/processing/src/style/mod.rs
+@@ -212,8 +212,9 @@ pub fn default_color_for_type(ifc_type: IfcType) -> Rgba {
+         // areas read apart when both are shown (#1075).
+         IfcType::IfcSpatialZone => Rgba::new(0.72, 0.35, 0.95, 0.28),
+ 
+-        // Opening elements — red-orange, transparent
+-        IfcType::IfcOpeningElement => Rgba::new(1.0, 0.42, 0.29, 0.4),
++        // Subtraction features — red-orange, transparent
++        IfcType::IfcOpeningElement | IfcType::IfcOpeningStandardCase
++            | IfcType::IfcVoidingFeature | IfcType::IfcEarthworksCut => Rgba::new(1.0, 0.42, 0.29, 0.4),
+ 
+         // Site — green
+         IfcType::IfcSite => Rgba::new(0.4, 0.8, 0.3, 1.0),
+@@ -229,8 +230,8 @@ pub fn default_color_for_type(ifc_type: IfcType) -> Rgba {
+ /// The colour a class ALWAYS renders with, overriding any authored styling, or
+ /// `None` for the ordinary style precedence.
+ ///
+-/// Only `IfcOpeningElement` (and its subtypes such as `IfcOpeningStandardCase`)
+-/// is fixed. An opening is a virtual subtraction volume, not a surface anyone
++/// Every `IfcFeatureElementSubtraction` subtype has a fixed overlay colour.
++/// A subtraction feature is a virtual volume, not a surface anyone
+ /// sees in the built object, so an authored style on it says nothing about
+ /// appearance: Revit, for one, writes its neutral grey onto opening geometry
+ /// through `IfcIndexedColourMap` / `IfcStyledItem`. Honouring that drew the
+@@ -240,7 +241,7 @@ pub fn default_color_for_type(ifc_type: IfcType) -> Rgba {
+ /// display contract.
+ pub fn fixed_display_color_for_type(ifc_type: &IfcType) -> Option<Rgba> {
+     ifc_type
+-        .is_subtype_of(IfcType::IfcOpeningElement)
++        .is_subtype_of(IfcType::IfcFeatureElementSubtraction)
+         .then(|| default_color_for_type(IfcType::IfcOpeningElement))
+ }
+ 
+diff --git a/rust/processing/tests/issue_5409_opening_display_colour.rs b/rust/processing/tests/issue_5409_opening_display_colour.rs
+index b46366d0..eff049de 100644
+--- a/rust/processing/tests/issue_5409_opening_display_colour.rs
++++ b/rust/processing/tests/issue_5409_opening_display_colour.rs
+@@ -109,3 +109,21 @@ fn every_opening_renders_the_overlay_colour_whatever_its_authored_style() {
+         proxy.color
+     );
+ }
++
++#[test]
++fn nhip_subtraction_features_keep_the_overlay_colour_with_authored_styles() {
++    // Nhip chinh exports IfcVoidingFeature rather than IfcOpeningElement.
++    // Exercise the same indexed/styled-item precedence with both sibling types.
++    for feature_type in ["IFCVOIDINGFEATURE", "IFCEARTHWORKSCUT"] {
++        let fixture = OPENINGS_IFC.replace("IFCOPENINGELEMENT", feature_type)
++            .replace("IFCOPENINGSTANDARDCASE", feature_type)
++            .replace("FILE_SCHEMA(('IFC4'))", "FILE_SCHEMA(('IFC4X3'))");
++        let result = process_geometry(&fixture);
++        for id in [10, 20, 30, 40] {
++            let meshes: Vec<_> = result.meshes.iter().filter(|m| m.express_id == id).collect();
++            assert!(!meshes.is_empty(), "{feature_type} #{id} has no overlay");
++            assert!(meshes.iter().all(|m| approx_eq(m.color, [1.0, 0.42, 0.29, 0.4])),
++                "{feature_type} #{id} must remain a transparent subtraction overlay");
++        }
++    }
++}
+diff --git a/rust/processing/tests/nhip_reference_voiding_feature.rs b/rust/processing/tests/nhip_reference_voiding_feature.rs
+new file mode 100644
+index 00000000..5be053f5
+--- /dev/null
++++ b/rust/processing/tests/nhip_reference_voiding_feature.rs
+@@ -0,0 +1,117 @@
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++
++//! Regression for the Nhip chinh Reference/Body defect researched in
++//! IFC-Lite/research/nhip-chinh-deep-20261024/NGHIEN-CUU-NHIP-CHINH.md.
++//! The invariant is IFC4 Reference Geometry: a reference shape describes an
++//! existing feature; it neither renders as a physical solid nor cuts the host.
++
++use ifc_lite_processing::{process_geometry, MeshData, ProcessingResult};
++
++fn fixture(body: bool, reference: bool, feature_type: &str) -> String {
++    let representations = match (body, reference) {
++        (true, true) => "#31,#32",
++        (true, false) => "#31",
++        (false, true) => "#32",
++        (false, false) => unreachable!("fixture needs geometry"),
++    };
++    let predefined_type = match feature_type {
++        "IFCVOIDINGFEATURE" => ".HOLE.",
++        "IFCBUILDINGELEMENTPROXY" | "IFCEARTHWORKSCUT" => ".NOTDEFINED.",
++        _ => ".OPENING.",
++    };
++    let schema = if feature_type == "IFCEARTHWORKSCUT" { "IFC4X3" } else { "IFC4" };
++    let relation = if feature_type == "IFCBUILDINGELEMENTPROXY" {
++        ""
++    } else {
++        "#41=IFCRELVOIDSELEMENT('0000000000000000000004',$,$,$,#20,#40);"
++    };
++    format!(r#"ISO-10303-21;
++HEADER;
++FILE_DESCRIPTION(('Reference feature regression'),'2;1');
++FILE_NAME('reference-feature.ifc','2026-10-24T00:00:00',(''),(''),'','','');
++FILE_SCHEMA(('{schema}'));
++ENDSEC;
++DATA;
++#1=IFCPROJECT('0000000000000000000001',$,'Project',$,$,$,$,(#5),#7);
++#2=IFCCARTESIANPOINT((0.,0.,0.));
++#3=IFCAXIS2PLACEMENT3D(#2,$,$);
++#4=IFCLOCALPLACEMENT($,#3);
++#5=IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,1.E-5,#3,$);
++#6=IFCSIUNIT(*,.LENGTHUNIT.,$,.METRE.);
++#7=IFCUNITASSIGNMENT((#6));
++#8=IFCDIRECTION((0.,0.,1.));
++#10=IFCRECTANGLEPROFILEDEF(.AREA.,$,$,10.,10.);
++#11=IFCEXTRUDEDAREASOLID(#10,#3,#8,1.);
++#12=IFCSHAPEREPRESENTATION(#5,'Body','SweptSolid',(#11));
++#13=IFCPRODUCTDEFINITIONSHAPE($,$,(#12));
++#20=IFCSLAB('0000000000000000000002',$,'Host',$,$,#4,#13,$,.FLOOR.);
++#21=IFCRECTANGLEPROFILEDEF(.AREA.,$,$,2.,2.);
++#22=IFCEXTRUDEDAREASOLID(#21,#3,#8,1.);
++#23=IFCCARTESIANPOINT((3.,0.,0.));
++#24=IFCAXIS2PLACEMENT3D(#23,$,$);
++#25=IFCEXTRUDEDAREASOLID(#21,#24,#8,1.);
++#31=IFCSHAPEREPRESENTATION(#5,'Body','SweptSolid',(#22));
++#32=IFCSHAPEREPRESENTATION(#5,'Reference','SweptSolid',(#25));
++#33=IFCPRODUCTDEFINITIONSHAPE($,$,({representations}));
++#40={feature_type}('0000000000000000000003',$,'Feature',$,$,#4,#33,$,{predefined_type});
++{relation}
++ENDSEC;
++END-ISO-10303-21;
++"#)
++}
++
++fn volume(mesh: &MeshData) -> f64 {
++    mesh.indices.as_chunks::<3>().0.iter().map(|triangle| {
++        let p = [triangle[0], triangle[1], triangle[2]].map(|index| {
++            let index = index as usize * 3;
++            [f64::from(mesh.positions[index]), f64::from(mesh.positions[index + 1]),
++                f64::from(mesh.positions[index + 2])]
++        });
++        p[0][0] * (p[1][1] * p[2][2] - p[1][2] * p[2][1])
++            + p[0][1] * (p[1][2] * p[2][0] - p[1][0] * p[2][2])
++            + p[0][2] * (p[1][0] * p[2][1] - p[1][1] * p[2][0])
++    }).sum::<f64>().abs() / 6.0
++}
++
++fn entity_volume(result: &ProcessingResult, id: u32) -> f64 {
++    result.meshes.iter().filter(|mesh| mesh.express_id == id).map(volume).sum()
++}
++
++#[test]
++fn nhip_reference_only_subtraction_features_leave_the_host_intact_and_emit_no_solid() {
++    for feature_type in ["IFCVOIDINGFEATURE", "IFCOPENINGELEMENT", "IFCOPENINGSTANDARDCASE", "IFCEARTHWORKSCUT"] {
++        let result = process_geometry(&fixture(false, true, feature_type));
++        assert!((entity_volume(&result, 20) - 100.0).abs() < 1e-4,
++            "Reference geometry must not cut the host: {feature_type}");
++        assert!(!result.meshes.iter().any(|mesh| mesh.express_id == 40),
++            "Reference geometry must not appear as an opaque feature: {feature_type}");
++        assert_eq!(result.stats.total_csg_failures, 0);
++    }
++}
++
++#[test]
++fn nhip_body_only_voiding_feature_cuts_the_real_hole() {
++    let result = process_geometry(&fixture(true, false, "IFCVOIDINGFEATURE"));
++    assert!((entity_volume(&result, 20) - 96.0).abs() < 1e-4,
++        "a real 2 x 2 through-cut must remove 4 cubic metres");
++    assert!((entity_volume(&result, 40) - 4.0).abs() < 1e-4,
++        "the optional feature overlay must describe only the Body cutter");
++}
++
++#[test]
++fn nhip_mixed_voiding_feature_cuts_only_body_and_ignores_the_disjoint_reference() {
++    let result = process_geometry(&fixture(true, true, "IFCVOIDINGFEATURE"));
++    assert!((entity_volume(&result, 20) - 96.0).abs() < 1e-4,
++        "Reference at x=3 must not create a second hole beside Body at x=0");
++    assert!((entity_volume(&result, 40) - 4.0).abs() < 1e-4,
++        "the feature overlay must exclude the separate Reference solid");
++}
++
++#[test]
++fn nhip_ordinary_product_reference_rendering_keeps_its_existing_convention() {
++    let result = process_geometry(&fixture(false, true, "IFCBUILDINGELEMENTPROXY"));
++    assert!((entity_volume(&result, 40) - 4.0).abs() < 1e-4);
++    assert!((entity_volume(&result, 20) - 100.0).abs() < 1e-4);
++}
+diff --git a/rust/processing/tests/nhip_thin_axis_box_cut.rs b/rust/processing/tests/nhip_thin_axis_box_cut.rs
+new file mode 100644
+index 00000000..94815c9d
+--- /dev/null
++++ b/rust/processing/tests/nhip_thin_axis_box_cut.rs
+@@ -0,0 +1,189 @@
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++
++//! Regression for the 2026-10-24 Nhip chinh investigation, Body host #2444.
++//! A plate is authored as a long extrusion, but every cutter goes through its
++//! thin axis. Interior rounded holes, boundary notches, and a splitting slot
++//! have an independent planar-area oracle; no original model data is embedded.
++
++use ifc_lite_processing::{process_geometry, MeshData};
++use std::collections::{HashMap, HashSet};
++
++const THICKNESS: f64 = 0.016;
++const WIDTH: f64 = 2.46;
++const LENGTH: f64 = 3.114;
++
++fn rounded_hole() -> Vec<[f64; 2]> {
++    let mut points = Vec::new();
++    for (cx, cy, degrees) in [
++        (0.53, 0.7, 270.0_f64),
++        (0.53, 2.414, 0.0),
++        (-0.53, 2.414, 90.0),
++        (-0.53, 0.7, 180.0),
++    ] {
++        for step in 0..=16 {
++            let angle = (degrees + f64::from(step) * 90.0 / 16.0).to_radians();
++            points.push([cx + 0.2 * angle.cos(), cy + 0.2 * angle.sin()]);
++        }
++    }
++    points
++}
++
++fn polygon_area(points: &[[f64; 2]]) -> f64 {
++    points.iter().zip(points.iter().cycle().skip(1)).take(points.len())
++        .map(|(a, b)| a[0] * b[1] - b[0] * a[1])
++        .sum::<f64>().abs() * 0.5
++}
++
++fn expected_volume(split: bool) -> f64 {
++    // Four quarter-circle corner notches remove one complete regular 32-gon.
++    let circle = (0..32).map(|i| {
++        let a = f64::from(i) * std::f64::consts::TAU / 32.0;
++        [0.035 * a.cos(), 0.035 * a.sin()]
++    }).collect::<Vec<_>>();
++    // The middle slot overlaps the rounded hole across width 1.46 m, so its
++    // additional removed area is 0.1 m * (2.46 - 1.46) m, not its whole area.
++    let slot_extra = if split { 0.1 * (WIDTH - 1.46) } else { 0.0 };
++    THICKNESS * (WIDTH * LENGTH - polygon_area(&rounded_hole()) - polygon_area(&circle) - slot_extra)
++}
++
++fn fixture(split: bool) -> String {
++    // The site anchor and tilted host force real frame/RTC composition. The
++    // plate still has exact analytic box dimensions in its own frame.
++    let mut out = String::from(r#"ISO-10303-21;
++HEADER;
++FILE_DESCRIPTION(('Synthetic thin-axis plate invariant'),'2;1');
++FILE_NAME('thin-axis.ifc','2026-10-24T00:00:00',(''),(''),'','','');
++FILE_SCHEMA(('IFC4'));
++ENDSEC;
++DATA;
++#1=IFCCARTESIANPOINT((0.,0.,0.));
++#2=IFCAXIS2PLACEMENT3D(#1,$,$);
++#3=IFCLOCALPLACEMENT($,#2);
++#4=IFCDIRECTION((0.,0.,1.));
++#5=IFCSIUNIT(*,.LENGTHUNIT.,$,.METRE.);
++#6=IFCUNITASSIGNMENT((#5));
++#7=IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,1.E-7,#2,$);
++#8=IFCPROJECT('0000000000000000000001',$,'P',$,$,$,$,(#7),#6);
++#9=IFCCARTESIANPOINT((1000000.,2000000.,0.));
++#10=IFCAXIS2PLACEMENT3D(#9,$,$);
++#11=IFCLOCALPLACEMENT($,#10);
++#12=IFCSITE('0000000000000000000002',$,'S',$,$,#11,$,$,.ELEMENT.,$,$,$,$,$);
++#13=IFCCARTESIANPOINT((16.,86.,56.));
++#14=IFCDIRECTION((0.7966496318,0.0312806458,-0.6036314151));
++#15=IFCDIRECTION((0.4771486302,0.5805057096,0.6598047483));
++#16=IFCAXIS2PLACEMENT3D(#13,#14,#15);
++#17=IFCLOCALPLACEMENT(#11,#16);
++#18=IFCRECTANGLEPROFILEDEF(.AREA.,$,$,0.016,2.46);
++#19=IFCEXTRUDEDAREASOLID(#18,#2,#4,3.114);
++#20=IFCSHAPEREPRESENTATION(#7,'Body','SweptSolid',(#19));
++#21=IFCPRODUCTDEFINITIONSHAPE($,$,(#20));
++#100=IFCMEMBER('0000000000000000000003',$,'Plate',$,$,#17,#21,$,.NOTDEFINED.);
++#22=IFCCARTESIANPOINT((-0.016,0.,0.));
++#23=IFCDIRECTION((1.,0.,0.));
++#24=IFCDIRECTION((0.,1.,0.));
++#25=IFCAXIS2PLACEMENT3D(#22,#23,#24);
++"#);
++    let mut contours = vec![rounded_hole()];
++    for (y, z) in [(-1.23, 0.0), (1.23, 0.0), (-1.23, LENGTH), (1.23, LENGTH)] {
++        contours.push((0..32).map(|step| {
++            let angle = f64::from(step) * std::f64::consts::TAU / 32.0;
++            [y + 0.035 * angle.cos(), z + 0.035 * angle.sin()]
++        }).collect());
++    }
++    if split {
++        contours.push(vec![[-1.4, 1.507], [1.4, 1.507], [1.4, 1.607], [-1.4, 1.607]]);
++    }
++    for (index, points) in contours.iter().enumerate() {
++        let id = 200 + index * 8;
++        let coordinates = points.iter().map(|p| format!("({:.12},{:.12})", p[0], p[1]))
++            .collect::<Vec<_>>().join(",");
++        let loop_indices = (1..=points.len()).map(|i| i.to_string()).collect::<Vec<_>>().join(",");
++        out.push_str(&format!(
++            "#{id}=IFCCARTESIANPOINTLIST2D(({coordinates}));\n\
++             #{}=IFCINDEXEDPOLYCURVE(#{id},(IFCLINEINDEX(({loop_indices},1))),$);\n\
++             #{}=IFCARBITRARYCLOSEDPROFILEDEF(.AREA.,$,#{});\n",
++            id + 1, id + 2, id + 1,
++        ));
++        out.push_str(&format!(
++            "#{}=IFCEXTRUDEDAREASOLID(#{},#25,#4,0.032);\n\
++             #{}=IFCSHAPEREPRESENTATION(#7,'Body','SweptSolid',(#{}));\n\
++             #{}=IFCPRODUCTDEFINITIONSHAPE($,$,(#{}));\n\
++             #{}=IFCVOIDINGFEATURE('000000000000000000{:04}',$,'Cut',$,$,#17,#{},$,.HOLE.);\n\
++             #{}=IFCRELVOIDSELEMENT('000000000000000000{:04}',$,$,$,#100,#{});\n",
++            id + 3, id + 2, id + 4, id + 3, id + 5, id + 4,
++            id + 6, id + 6, id + 5, id + 7, id + 7, id + 6,
++        ));
++    }
++    out.push_str("ENDSEC;\nEND-ISO-10303-21;\n");
++    out
++}
++
++fn vertices(mesh: &MeshData) -> Vec<[f64; 3]> {
++    mesh.positions.as_chunks::<3>().0.iter().map(|v| std::array::from_fn(|i| f64::from(v[i]) + mesh.origin[i])).collect()
++}
++
++fn volume(meshes: &[&MeshData]) -> f64 {
++    meshes.iter().map(|mesh| {
++        let v = vertices(mesh);
++        let center: [f64; 3] = std::array::from_fn(|i| v.iter().map(|p| p[i]).sum::<f64>() / v.len() as f64);
++        mesh.indices.as_chunks::<3>().0.iter().map(|t| {
++            let p = [t[0], t[1], t[2]].map(|i| std::array::from_fn::<_, 3, _>(|k| v[i as usize][k] - center[k]));
++            p[0][0] * (p[1][1]*p[2][2] - p[1][2]*p[2][1])
++                + p[0][1] * (p[1][2]*p[2][0] - p[1][0]*p[2][2])
++                + p[0][2] * (p[1][0]*p[2][1] - p[1][1]*p[2][0])
++        }).sum::<f64>().abs() / 6.0
++    }).sum()
++}
++
++fn connected_components(meshes: &[&MeshData]) -> usize {
++    let mut ids = HashMap::<[i64; 3], usize>::new();
++    let mut graph = Vec::<HashSet<usize>>::new();
++    for mesh in meshes {
++        let v = vertices(mesh);
++        for triangle in mesh.indices.as_chunks::<3>().0 {
++            let keys = [triangle[0], triangle[1], triangle[2]].map(|i| {
++                // 0.1 mm welding tolerates stored f32 error at this RTC anchor;
++                // all intentional openings and the 100 mm split are much wider.
++                v[i as usize].map(|c| (c * 10_000.0).round() as i64)
++            });
++            let tri = keys.map(|key| *ids.entry(key).or_insert_with(|| { graph.push(HashSet::new()); graph.len() - 1 }));
++            for i in 0..3 {
++                graph[tri[i]].insert(tri[(i + 1) % 3]);
++                graph[tri[(i + 1) % 3]].insert(tri[i]);
++            }
++        }
++    }
++    let mut seen = HashSet::new();
++    let mut components = 0;
++    for root in 0..graph.len() {
++        if !seen.insert(root) { continue; }
++        components += 1;
++        let mut pending = vec![root];
++        while let Some(id) = pending.pop() {
++            for &next in &graph[id] {
++                if seen.insert(next) { pending.push(next); }
++            }
++        }
++    }
++    components
++}
++
++fn check(split: bool) {
++    let source = fixture(split);
++    let result = process_geometry(source.as_bytes());
++    let hosts = result.meshes.iter().filter(|m| m.express_id == 100).collect::<Vec<_>>();
++    assert!(!hosts.is_empty(), "the plate must survive its boundary cuts");
++    let expected = expected_volume(split);
++    let actual = volume(&hosts);
++    assert!((actual - expected).abs() < 2e-5, "material volume {actual}, planar oracle {expected}");
++    assert_eq!(connected_components(&hosts), if split { 2 } else { 1 }, "every disconnected material component must be retained");
++    assert_eq!(result.stats.total_csg_failures, 0, "simple through-thickness cuts must emit closed geometry without topology failure");
++}
++
++#[test]
++fn nhip_thin_axis_body_cut_keeps_rounded_hole_and_boundary_notches() { check(false); }
++
++#[test]
++fn nhip_thin_axis_body_cut_retains_both_components_after_splitting_slot() { check(true); }
+diff --git a/rust/wasm-bindings/src/api/gpu_meshes/batch_partition.rs b/rust/wasm-bindings/src/api/gpu_meshes/batch_partition.rs
+index 347ba8ee..0624dafa 100644
+--- a/rust/wasm-bindings/src/api/gpu_meshes/batch_partition.rs
++++ b/rust/wasm-bindings/src/api/gpu_meshes/batch_partition.rs
+@@ -142,6 +142,8 @@ pub(super) const CLASS_TOGGLED_TYPES: &[&str] = &[
+     "IfcSpatialZone",
+     "IfcOpeningElement",
+     "IfcOpeningStandardCase",
++    "IfcVoidingFeature",
++    "IfcEarthworksCut",
+     "IfcVirtualElement",
+     "IfcSite",
+     "IfcGeographicElement",
+diff --git a/scripts/lib/class-toggle-shard-contract.mjs b/scripts/lib/class-toggle-shard-contract.mjs
+index b44f10de..7355f463 100644
+--- a/scripts/lib/class-toggle-shard-contract.mjs
++++ b/scripts/lib/class-toggle-shard-contract.mjs
+@@ -27,12 +27,14 @@ import { decodeInstancedShard } from '../../packages/geometry/dist/packed-instan
+ 
+ const GROUP = 8;
+ 
+-/** IFC4 attribute tails after `(GlobalId,$,Name,$,$,Placement,Representation`. */
++/** IFC attribute tails after `(GlobalId,$,Name,$,$,Placement,Representation`. */
+ const TAILS = {
+   IfcSpace: ',$,.ELEMENT.,.SPACE.,$',
+   IfcSpatialZone: ',$,.NOTDEFINED.',
+   IfcOpeningElement: ',$,.OPENING.',
+   IfcOpeningStandardCase: ',$,.OPENING.',
++  IfcVoidingFeature: ',$,.HOLE.',
++  IfcEarthworksCut: ',$,.NOTDEFINED.',
+   IfcVirtualElement: ',$',
+   IfcSite: ',$,.ELEMENT.,$,$,$,$,$',
+   IfcGeographicElement: ',$,.NOTDEFINED.',
+@@ -46,7 +48,7 @@ function fixture(classes) {
+   const owners = new Map();
+   for (const cls of classes) {
+     const tail = TAILS[cls];
+-    if (tail === undefined) throw new Error(`no IFC4 attribute tail for ${cls}: add one to TAILS`);
++    if (tail === undefined) throw new Error(`no IFC attribute tail for ${cls}: add one to TAILS`);
+     for (let i = 0; i < GROUP; i++) {
+       const eid = id++;
+       owners.set(eid, cls);
+@@ -57,7 +59,7 @@ function fixture(classes) {
+ HEADER;
+ FILE_DESCRIPTION(('Class toggle shard witness'),'2;1');
+ FILE_NAME('class-toggle.ifc','2026-09-24T00:00:00',('Test'),('Test'),'ifc-lite','ifc-lite','');
+-FILE_SCHEMA(('IFC4'));
++FILE_SCHEMA(('${classes.includes('IfcEarthworksCut') ? 'IFC4X3' : 'IFC4'}'));
+ ENDSEC;
+ DATA;
+ #1=IFCCARTESIANPOINT((0.,0.,0.));
+@@ -128,21 +130,27 @@ export async function runClassToggleShardContract(IfcAPI, test) {
+ 
+   test('every class the viewer toggles as a class renders flat, carrying its ifcType', () => {
+     assert.ok(toggled.length > 0, 'the viewer table yielded no classes');
+-    const { bytes, owners } = fixture([...toggled, 'IfcWall']);
+-    const { flat, instanced } = partition(IfcAPI, bytes);
++    // EarthworksCut was introduced in IFC4X3; keep the IFC4 standard-case
++    // opening cohort separate rather than creating a mixed-schema fixture.
++    const cohorts = [toggled.filter(cls => cls !== 'IfcEarthworksCut'),
++      toggled.filter(cls => cls === 'IfcEarthworksCut')].filter(classes => classes.length > 0);
++    for (const classes of cohorts) {
++      const { bytes, owners } = fixture([...classes, 'IfcWall']);
++      const { flat, instanced } = partition(IfcAPI, bytes);
+ 
+-    const walls = [...owners].filter(([, cls]) => cls === 'IfcWall').map(([eid]) => eid);
+-    assert.deepEqual(
+-      instanced.filter((eid) => owners.get(eid) === 'IfcWall').sort((a, b) => a - b),
+-      walls,
+-      'control: the repeated opaque IfcWall group must instance, or this fixture proves nothing',
+-    );
+-    const leaked = instanced.filter((eid) => owners.get(eid) !== 'IfcWall').map((eid) => `#${eid} ${owners.get(eid)}`);
+-    assert.deepEqual(leaked, [], 'class-toggled occurrences reached the shard, where no class toggle can hide them');
+-    for (const cls of toggled) {
+-      const members = [...owners].filter(([, c]) => c === cls).map(([eid]) => eid);
+-      const rendered = members.filter((eid) => flat.get(eid) === cls);
+-      assert.deepEqual(rendered, members, `${cls}: every occurrence must render flat as ${cls}`);
++      const walls = [...owners].filter(([, cls]) => cls === 'IfcWall').map(([eid]) => eid);
++      assert.deepEqual(
++        instanced.filter((eid) => owners.get(eid) === 'IfcWall').sort((a, b) => a - b),
++        walls,
++        'control: the repeated opaque IfcWall group must instance, or this fixture proves nothing',
++      );
++      const leaked = instanced.filter((eid) => owners.get(eid) !== 'IfcWall').map((eid) => `#${eid} ${owners.get(eid)}`);
++      assert.deepEqual(leaked, [], 'class-toggled occurrences reached the shard, where no class toggle can hide them');
++      for (const cls of classes) {
++        const members = [...owners].filter(([, c]) => c === cls).map(([eid]) => eid);
++        const rendered = members.filter((eid) => flat.get(eid) === cls);
++        assert.deepEqual(rendered, members, `${cls}: every occurrence must render flat as ${cls}`);
++      }
+     }
+   });
+ }

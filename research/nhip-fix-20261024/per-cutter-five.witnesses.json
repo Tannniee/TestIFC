@@ -1,0 +1,65 @@
+[
+  {
+    "stockPointYZ": [
+      1.46,
+      -0.02
+    ],
+    "actualIntersectionsX": [],
+    "oracleIntersectionsX": []
+  },
+  {
+    "stockPointYZ": [
+      1.46,
+      -3.98
+    ],
+    "actualIntersectionsX": [],
+    "oracleIntersectionsX": []
+  },
+  {
+    "stockPointYZ": [
+      1.46,
+      -0.08
+    ],
+    "actualIntersectionsX": [
+      -0.00799559,
+      0.00799562
+    ],
+    "oracleIntersectionsX": [
+      -0.00799705,
+      0.00800295
+    ]
+  },
+  {
+    "stockPointYZ": [
+      1.46,
+      -3.916
+    ],
+    "actualIntersectionsX": [
+      -0.00799563,
+      0.00799558
+    ],
+    "oracleIntersectionsX": [
+      -0.00799995,
+      0.00800005
+    ]
+  },
+  {
+    "stockPointYZ": [
+      -1.46,
+      -0.02
+    ],
+    "actualIntersectionsX": [],
+    "oracleIntersectionsX": [
+      -0.00799995,
+      -0.00786988
+    ]
+  },
+  {
+    "stockPointYZ": [
+      0.0,
+      -2.0
+    ],
+    "actualIntersectionsX": [],
+    "oracleIntersectionsX": []
+  }
+]

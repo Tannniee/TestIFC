@@ -1,0 +1,8 @@
+{
+  "url": "http://127.0.0.1:58132/",
+  "started": "2026-10-26T09:37:27.404Z",
+  "cases": [],
+  "errors": [],
+  "blockedWrites": [],
+  "failure": "AssertionError [ERR_ASSERTION]: browser must load the qualified WASM binary\n    at file:///F:/Steel/VBA/IFC-Lite-Core104/research/nhip-fix-20261024/accept-local-web.mjs:78:12"
+}

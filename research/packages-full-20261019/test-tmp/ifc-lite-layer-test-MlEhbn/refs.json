@@ -1,0 +1,14 @@
+{
+  "refs": {
+    "main": {
+      "layers": [
+        "blake3:35018e04387ba2e7984a27ecd76caedf19edf8b5f74dc5b8eef6a2b8ea4ce6fe"
+      ]
+    },
+    "other": {
+      "layers": [
+        "blake3:d8050d1b4c0bb2fe3de50db76789d7d955a9b0c296de4e10a8f25d80d0069184"
+      ]
+    }
+  }
+}

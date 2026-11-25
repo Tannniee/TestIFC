@@ -1,0 +1,64 @@
+{
+  "sourceFile": "F:\\Working\\IFC Temp\\Nhip chinh.ifc",
+  "ifcopenshellVersion": "0.8.5",
+  "analyticFirstVolumeM3": 0.09381406654124877,
+  "rows": [
+    {
+      "label": "first",
+      "linearDeflectionMetres": 5e-06,
+      "angularDeflectionRadians": 0.5,
+      "precisionSetting": 1e-05,
+      "vertices": 1280,
+      "triangles": 2560,
+      "volumeM3": 0.09381409946977194,
+      "minusAnalyticFirstM3": 3.292852317204886e-08
+    },
+    {
+      "label": "full",
+      "linearDeflectionMetres": 5e-06,
+      "angularDeflectionRadians": 0.5,
+      "precisionSetting": 1e-05,
+      "vertices": 2478,
+      "triangles": 4956,
+      "volumeM3": 0.09050677532381457
+    },
+    {
+      "label": "first",
+      "linearDeflectionMetres": 1e-06,
+      "angularDeflectionRadians": 0.5,
+      "precisionSetting": 1e-05,
+      "vertices": 2000,
+      "triangles": 4000,
+      "volumeM3": 0.09381407979261447,
+      "minusAnalyticFirstM3": 1.3251365699185058e-08
+    },
+    {
+      "label": "full",
+      "linearDeflectionMetres": 1e-06,
+      "angularDeflectionRadians": 0.5,
+      "precisionSetting": 1e-05,
+      "vertices": 3198,
+      "triangles": 6396,
+      "volumeM3": 0.09050675564233114
+    },
+    {
+      "label": "first",
+      "linearDeflectionMetres": 2e-07,
+      "angularDeflectionRadians": 0.5,
+      "precisionSetting": 1e-05,
+      "vertices": 2000,
+      "triangles": 4000,
+      "volumeM3": 0.09381407979261447,
+      "minusAnalyticFirstM3": 1.3251365699185058e-08
+    },
+    {
+      "label": "full",
+      "linearDeflectionMetres": 2e-07,
+      "angularDeflectionRadians": 0.5,
+      "precisionSetting": 1e-05,
+      "vertices": 3198,
+      "triangles": 6396,
+      "volumeM3": 0.09050675564233114
+    }
+  ]
+}

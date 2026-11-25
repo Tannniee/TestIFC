@@ -1,0 +1,45 @@
+{
+  "header": {
+    "id": "blake3:c9cd19f4ac346a6bd295f286dd90f40d5f35fb800b0e4aef42e22cf9f10a6d14",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "test",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "alice"
+      },
+      "intent": "Import base model",
+      "created": "2026-10-19T03:25:22.224Z",
+      "base": null,
+      "parents": [],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "storey-eg",
+      "children": {
+        "Wall": "wall-1"
+      }
+    },
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::class": {
+          "code": "IfcWall",
+          "uri": "u"
+        },
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI60"
+      }
+    }
+  ]
+}

@@ -1,0 +1,729 @@
+{
+  "done": true,
+  "stats": {
+    "total_meshes": 1233844,
+    "total_vertices": 136601907,
+    "total_triangles": 116154594,
+    "parse_time_ms": 231,
+    "entity_scan_time_ms": 208,
+    "lookup_time_ms": 1,
+    "preprocess_time_ms": 11,
+    "geometry_time_ms": 290333,
+    "total_time_ms": 290568,
+    "from_cache": false,
+    "total_csg_failures": 2565,
+    "products_with_failures": 1022,
+    "degenerate_triangles_dropped": 10198,
+    "point_cache_hits": 0,
+    "point_cache_misses": 0,
+    "faceted_brep_time_ms": 0,
+    "geometry_diagnostics": {
+      "schemaVersion": 3,
+      "totalCsgFailures": 2565,
+      "productsWithFailures": 1022,
+      "hostsWithOpenings": 5075,
+      "classification": {
+        "rectangular": 0,
+        "diagonal": 1563,
+        "nonRectangular": 23229,
+        "total": 24792
+      },
+      "failuresByReason": [
+        {
+          "reason": "KernelError",
+          "count": 2565
+        }
+      ],
+      "silentNoOps": 0,
+      "rectFast": {
+        "fired": 0,
+        "openingsCut": 0,
+        "deferHostNotBox": 14,
+        "deferNotThrough": 0,
+        "deferOffFace": 0,
+        "deferNearEdge": 0,
+        "deferNoOpenings": 0,
+        "deferTooManyOpenings": 0
+      },
+      "worstHosts": [
+        {
+          "productId": 150461,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 12,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              37.578632,
+              103.8004,
+              71.88918
+            ],
+            "max": [
+              39.035793,
+              106.118195,
+              74.56897
+            ]
+          },
+          "triangleCount": 6355
+        },
+        {
+          "productId": 152785,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 12,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              183.41922,
+              153.30287,
+              71.88918
+            ],
+            "max": [
+              184.23062,
+              155.91309,
+              74.56897
+            ]
+          },
+          "triangleCount": 8108
+        },
+        {
+          "productId": 152996,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 12,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              187.95595,
+              155.49208,
+              72.10141
+            ],
+            "max": [
+              189.25093,
+              157.85312,
+              74.764885
+            ]
+          },
+          "triangleCount": 6870
+        },
+        {
+          "productId": 167100,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 12,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              320.9408,
+              232.92003,
+              72.10141
+            ],
+            "max": [
+              321.89297,
+              235.43637,
+              74.764885
+            ]
+          },
+          "triangleCount": 6734
+        },
+        {
+          "productId": 242847,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 12,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              601.2772,
+              360.5705,
+              71.88918
+            ],
+            "max": [
+              602.0899,
+              363.18033,
+              74.56897
+            ]
+          },
+          "triangleCount": 6082
+        },
+        {
+          "productId": 244466,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 12,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              461.83505,
+              280.26718,
+              71.88918
+            ],
+            "max": [
+              462.6477,
+              282.87704,
+              74.56897
+            ]
+          },
+          "triangleCount": 6015
+        },
+        {
+          "productId": 244544,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 12,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              463.61566,
+              281.04517,
+              72.10141
+            ],
+            "max": [
+              464.56787,
+              283.56152,
+              74.764885
+            ]
+          },
+          "triangleCount": 6764
+        },
+        {
+          "productId": 152850,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              185.20018,
+              154.07991,
+              72.10141
+            ],
+            "max": [
+              186.15115,
+              156.59671,
+              74.764885
+            ]
+          },
+          "triangleCount": 7391
+        },
+        {
+          "productId": 152918,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              189.64023,
+              156.43137,
+              71.88918
+            ],
+            "max": [
+              191.0974,
+              158.74916,
+              74.56897
+            ]
+          },
+          "triangleCount": 7280
+        },
+        {
+          "productId": 166845,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              315.9957,
+              230.76541,
+              71.88918
+            ],
+            "max": [
+              317.45398,
+              233.0825,
+              74.56897
+            ]
+          },
+          "triangleCount": 6881
+        },
+        {
+          "productId": 166922,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              317.84167,
+              231.66228,
+              72.10141
+            ],
+            "max": [
+              319.13782,
+              234.02269,
+              74.764885
+            ]
+          },
+          "triangleCount": 7008
+        },
+        {
+          "productId": 167001,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              322.86093,
+              233.6045,
+              71.88918
+            ],
+            "max": [
+              323.6736,
+              236.21436,
+              74.56897
+            ]
+          },
+          "triangleCount": 7118
+        },
+        {
+          "productId": 242716,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              594.412,
+              357.7314,
+              71.88918
+            ],
+            "max": [
+              595.87024,
+              360.0485,
+              74.56897
+            ]
+          },
+          "triangleCount": 5796
+        },
+        {
+          "productId": 242781,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              596.258,
+              358.62827,
+              72.10141
+            ],
+            "max": [
+              597.55414,
+              360.98868,
+              74.764885
+            ]
+          },
+          "triangleCount": 6148
+        },
+        {
+          "productId": 242929,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              599.3571,
+              359.88602,
+              72.10141
+            ],
+            "max": [
+              600.30927,
+              362.40237,
+              74.764885
+            ]
+          },
+          "triangleCount": 9181
+        },
+        {
+          "productId": 244335,
+          "ifcType": "IfcPlate",
+          "openings": 13,
+          "csgFailures": 11,
+          "firstFailureLabel": "KernelError",
+          "bbox": {
+            "min": [
+              468.0547,
+              283.39902,
+              71.88918
+            ],
+            "max": [
+              469.51297,
+              285.71613,
+              74.56897
+            ]
+          },
+          "triangleCount": 9270
+        }
+      ],
+      "oversizedRefDrops": 0,
+      "totalUnsupportedItems": 0,
+      "unsupportedItemsByType": []
+    }
+  },
+  "diagnostics": {
+    "schemaVersion": 3,
+    "totalCsgFailures": 2565,
+    "productsWithFailures": 1022,
+    "hostsWithOpenings": 5075,
+    "classification": {
+      "rectangular": 0,
+      "diagonal": 1563,
+      "nonRectangular": 23229,
+      "total": 24792
+    },
+    "failuresByReason": [
+      {
+        "reason": "KernelError",
+        "count": 2565
+      }
+    ],
+    "silentNoOps": 0,
+    "rectFast": {
+      "fired": 0,
+      "openingsCut": 0,
+      "deferHostNotBox": 14,
+      "deferNotThrough": 0,
+      "deferOffFace": 0,
+      "deferNearEdge": 0,
+      "deferNoOpenings": 0,
+      "deferTooManyOpenings": 0
+    },
+    "worstHosts": [
+      {
+        "productId": 150461,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 12,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            37.578632,
+            103.8004,
+            71.88918
+          ],
+          "max": [
+            39.035793,
+            106.118195,
+            74.56897
+          ]
+        },
+        "triangleCount": 6355
+      },
+      {
+        "productId": 152785,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 12,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            183.41922,
+            153.30287,
+            71.88918
+          ],
+          "max": [
+            184.23062,
+            155.91309,
+            74.56897
+          ]
+        },
+        "triangleCount": 8108
+      },
+      {
+        "productId": 152996,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 12,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            187.95595,
+            155.49208,
+            72.10141
+          ],
+          "max": [
+            189.25093,
+            157.85312,
+            74.764885
+          ]
+        },
+        "triangleCount": 6870
+      },
+      {
+        "productId": 167100,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 12,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            320.9408,
+            232.92003,
+            72.10141
+          ],
+          "max": [
+            321.89297,
+            235.43637,
+            74.764885
+          ]
+        },
+        "triangleCount": 6734
+      },
+      {
+        "productId": 242847,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 12,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            601.2772,
+            360.5705,
+            71.88918
+          ],
+          "max": [
+            602.0899,
+            363.18033,
+            74.56897
+          ]
+        },
+        "triangleCount": 6082
+      },
+      {
+        "productId": 244466,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 12,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            461.83505,
+            280.26718,
+            71.88918
+          ],
+          "max": [
+            462.6477,
+            282.87704,
+            74.56897
+          ]
+        },
+        "triangleCount": 6015
+      },
+      {
+        "productId": 244544,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 12,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            463.61566,
+            281.04517,
+            72.10141
+          ],
+          "max": [
+            464.56787,
+            283.56152,
+            74.764885
+          ]
+        },
+        "triangleCount": 6764
+      },
+      {
+        "productId": 152850,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            185.20018,
+            154.07991,
+            72.10141
+          ],
+          "max": [
+            186.15115,
+            156.59671,
+            74.764885
+          ]
+        },
+        "triangleCount": 7391
+      },
+      {
+        "productId": 152918,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            189.64023,
+            156.43137,
+            71.88918
+          ],
+          "max": [
+            191.0974,
+            158.74916,
+            74.56897
+          ]
+        },
+        "triangleCount": 7280
+      },
+      {
+        "productId": 166845,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            315.9957,
+            230.76541,
+            71.88918
+          ],
+          "max": [
+            317.45398,
+            233.0825,
+            74.56897
+          ]
+        },
+        "triangleCount": 6881
+      },
+      {
+        "productId": 166922,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            317.84167,
+            231.66228,
+            72.10141
+          ],
+          "max": [
+            319.13782,
+            234.02269,
+            74.764885
+          ]
+        },
+        "triangleCount": 7008
+      },
+      {
+        "productId": 167001,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            322.86093,
+            233.6045,
+            71.88918
+          ],
+          "max": [
+            323.6736,
+            236.21436,
+            74.56897
+          ]
+        },
+        "triangleCount": 7118
+      },
+      {
+        "productId": 242716,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            594.412,
+            357.7314,
+            71.88918
+          ],
+          "max": [
+            595.87024,
+            360.0485,
+            74.56897
+          ]
+        },
+        "triangleCount": 5796
+      },
+      {
+        "productId": 242781,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            596.258,
+            358.62827,
+            72.10141
+          ],
+          "max": [
+            597.55414,
+            360.98868,
+            74.764885
+          ]
+        },
+        "triangleCount": 6148
+      },
+      {
+        "productId": 242929,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            599.3571,
+            359.88602,
+            72.10141
+          ],
+          "max": [
+            600.30927,
+            362.40237,
+            74.764885
+          ]
+        },
+        "triangleCount": 9181
+      },
+      {
+        "productId": 244335,
+        "ifcType": "IfcPlate",
+        "openings": 13,
+        "csgFailures": 11,
+        "firstFailureLabel": "KernelError",
+        "bbox": {
+          "min": [
+            468.0547,
+            283.39902,
+            71.88918
+          ],
+          "max": [
+            469.51297,
+            285.71613,
+            74.56897
+          ]
+        },
+        "triangleCount": 9270
+      }
+    ],
+    "oversizedRefDrops": 0,
+    "totalUnsupportedItems": 0,
+    "unsupportedItemsByType": []
+  }
+}

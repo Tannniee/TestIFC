@@ -1,0 +1,13 @@
+{
+  "refs": {
+    "main": {
+      "layers": [],
+      "policy": {
+        "requireHumanApproval": true,
+        "requiredChecks": [
+          "ids:clearance"
+        ]
+      }
+    }
+  }
+}

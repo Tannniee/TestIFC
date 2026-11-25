@@ -1,0 +1,477 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "pnpm": {
+      "name": "pnpm",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1111960,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm v10+ Bypass \"Dependency lifecycle scripts execution disabled by default\"",
+          "url": "https://github.com/advisories/GHSA-379q-355j-w6rj",
+          "severity": "high",
+          "cwe": [
+            "CWE-693"
+          ],
+          "cvss": {
+            "score": 8.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+          },
+          "range": ">=10.0.0 <10.26.0"
+        },
+        {
+          "source": 1111961,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm Has Lockfile Integrity Bypass that Allows Remote Dynamic Dependencies",
+          "url": "https://github.com/advisories/GHSA-7vhp-vf5g-r2fw",
+          "severity": "high",
+          "cwe": [
+            "CWE-494"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H"
+          },
+          "range": "<10.26.0"
+        },
+        {
+          "source": 1112536,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm has Path Traversal via arbitrary file permission modification ",
+          "url": "https://github.com/advisories/GHSA-v253-rj99-jwpq",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-22",
+            "CWE-732"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<10.28.2"
+        },
+        {
+          "source": 1112639,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Binary ZIP extraction allows arbitrary file write via path traversal (Zip Slip)",
+          "url": "https://github.com/advisories/GHSA-6pfh-p556-v868",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-22",
+            "CWE-23",
+            "CWE-426"
+          ],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:N"
+          },
+          "range": "<10.28.1"
+        },
+        {
+          "source": 1112679,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm has Windows-specific tarball Path Traversal",
+          "url": "https://github.com/advisories/GHSA-6x96-7vc8-cm3p",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-22"
+          ],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:N"
+          },
+          "range": "<10.28.1"
+        },
+        {
+          "source": 1112680,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm scoped bin name Path Traversal allows arbitrary file creation outside node_modules/.bin",
+          "url": "https://github.com/advisories/GHSA-xpqm-wm3m-f34h",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-23"
+          ],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:N"
+          },
+          "range": "<10.28.1"
+        },
+        {
+          "source": 1112681,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm has symlink traversal in file:/git dependencies",
+          "url": "https://github.com/advisories/GHSA-m733-5w8f-5ggw",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-22",
+            "CWE-59"
+          ],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N"
+          },
+          "range": "<10.28.2"
+        },
+        {
+          "source": 1117386,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm vulnerable to Command Injection via environment variable substitution",
+          "url": "https://github.com/advisories/GHSA-2phv-j68v-wwqx",
+          "severity": "high",
+          "cwe": [
+            "CWE-78",
+            "CWE-94"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:C/C:H/I:H/A:H"
+          },
+          "range": ">=6.25.0 <10.27.0"
+        },
+        {
+          "source": 1121805,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Tarball hash of GitHub git dependencies is not stored in lockfile",
+          "url": "https://github.com/advisories/GHSA-hg3w-7f8c-63hp",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-353"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<10.33.4"
+        },
+        {
+          "source": 1121809,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm Vulnerable to Arbitrary File Write/Delete via Malicious Patch File (Path Traversal)",
+          "url": "https://github.com/advisories/GHSA-rxhj-4m44-96r4",
+          "severity": "high",
+          "cwe": [
+            "CWE-22"
+          ],
+          "cvss": {
+            "score": 7.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:N/I:H/A:H"
+          },
+          "range": "<10.34.0"
+        },
+        {
+          "source": 1121811,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm binds unscoped user-level npm auth credentials to a repository-selected registry",
+          "url": "https://github.com/advisories/GHSA-cjhr-43r9-cfmw",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-200",
+            "CWE-522"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<10.34.0"
+        },
+        {
+          "source": 1121813,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Transitive dependency alias path traversal allows project path override via symlink replacement",
+          "url": "https://github.com/advisories/GHSA-hwx4-2j3j-g496",
+          "severity": "high",
+          "cwe": [
+            "CWE-23"
+          ],
+          "cvss": {
+            "score": 8.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+          },
+          "range": "<10.34.0"
+        },
+        {
+          "source": 1121815,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Git Fetch Argument Injection via Lockfile resolution.commit",
+          "url": "https://github.com/advisories/GHSA-p4xf-rf54-rj3x",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-88"
+          ],
+          "cvss": {
+            "score": 6.4,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:N"
+          },
+          "range": "<10.34.0"
+        },
+        {
+          "source": 1121816,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm Has an Integrity Check Bypass via Missing Lockfile Integrity Field",
+          "url": "https://github.com/advisories/GHSA-q6j5-fjx5-2mc3",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-354"
+          ],
+          "cvss": {
+            "score": 6.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N"
+          },
+          "range": "<10.34.1"
+        },
+        {
+          "source": 1121819,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Unsafe default behavior breaks integrity check",
+          "url": "https://github.com/advisories/GHSA-54hh-g5mx-jqcp",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-345"
+          ],
+          "cvss": {
+            "score": 6.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N"
+          },
+          "range": "<10.34.0"
+        },
+        {
+          "source": 1121824,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Manifest identity spoof satisfies allowBuilds and runs attacker lifecycle",
+          "url": "https://github.com/advisories/GHSA-5wx6-mg75-v57r",
+          "severity": "high",
+          "cwe": [
+            "CWE-346",
+            "CWE-693",
+            "CWE-829"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H"
+          },
+          "range": "<10.34.2"
+        },
+        {
+          "source": 1121826,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Repository config can expand victim environment secrets into registry requests before scripts run",
+          "url": "https://github.com/advisories/GHSA-3qhv-2rgh-x77r",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-200",
+            "CWE-201",
+            "CWE-522"
+          ],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N"
+          },
+          "range": "<10.34.2"
+        },
+        {
+          "source": 1121829,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Reserved bin name deletes PNPM_HOME during global remove",
+          "url": "https://github.com/advisories/GHSA-4gxm-v5v7-fqc4",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-22",
+            "CWE-73"
+          ],
+          "cvss": {
+            "score": 6.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+          },
+          "range": "<10.34.2"
+        },
+        {
+          "source": 1121831,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Project env lockfile can short-circuit package-manager resolution and execute lockfile-selected pnpm bytes",
+          "url": "https://github.com/advisories/GHSA-w466-c33r-3gjp",
+          "severity": "high",
+          "cwe": [
+            "CWE-345",
+            "CWE-494",
+            "CWE-829"
+          ],
+          "cvss": {
+            "score": 8.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+          },
+          "range": "<10.34.2"
+        },
+        {
+          "source": 1121833,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: `patch-remove` could delete project-selected files outside the patches directory",
+          "url": "https://github.com/advisories/GHSA-72r4-9c5j-mj57",
+          "severity": "high",
+          "cwe": [
+            "CWE-22",
+            "CWE-73"
+          ],
+          "cvss": {
+            "score": 7.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:L"
+          },
+          "range": "<10.34.4"
+        },
+        {
+          "source": 1121835,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Hoisted install imports lockfile alias outside node_modules",
+          "url": "https://github.com/advisories/GHSA-fr4h-3cph-29xv",
+          "severity": "high",
+          "cwe": [
+            "CWE-22",
+            "CWE-73"
+          ],
+          "cvss": {
+            "score": 7.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:L"
+          },
+          "range": "<10.34.4"
+        },
+        {
+          "source": 1121837,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Path traversal in configDependencies env lockfile allows symlink creation outside node_modules/.pnpm-config",
+          "url": "https://github.com/advisories/GHSA-qrv3-253h-g69c",
+          "severity": "high",
+          "cwe": [
+            "CWE-22"
+          ],
+          "cvss": {
+            "score": 8.2,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:N/I:H/A:L"
+          },
+          "range": "<10.34.4"
+        },
+        {
+          "source": 1139460,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Repository-controlled configDependencies can select a pacquet native install engine",
+          "url": "https://github.com/advisories/GHSA-gj8w-mvpf-x27x",
+          "severity": "high",
+          "cwe": [
+            "CWE-78",
+            "CWE-494",
+            "CWE-829"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H"
+          },
+          "range": "<10.34.2"
+        },
+        {
+          "source": 1153190,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Environment secrets exfiltrated via env-placeholder expansion in proxy settings read from an untrusted pnpm-workspace.yaml",
+          "url": "https://github.com/advisories/GHSA-vx52-2968-3vc6",
+          "severity": "high",
+          "cwe": [
+            "CWE-201",
+            "CWE-319",
+            "CWE-522"
+          ],
+          "cvss": {
+            "score": 7.4,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:N/A:N"
+          },
+          "range": ">=10.7.0 <10.34.5"
+        },
+        {
+          "source": 1158510,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: Virtual store linker path traversal via unvalidated depPath name in lockfileToDepGraph",
+          "url": "https://github.com/advisories/GHSA-c59q-g84q-2gj5",
+          "severity": "high",
+          "cwe": [
+            "CWE-22"
+          ],
+          "cvss": {
+            "score": 7.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:L"
+          },
+          "range": "<10.34.5"
+        },
+        {
+          "source": 1158512,
+          "name": "pnpm",
+          "dependency": "pnpm",
+          "title": "pnpm: A tarball dependency's manifest `name` escapes node_modules → arbitrary file write/overwrite on install",
+          "url": "https://github.com/advisories/GHSA-vq4v-j7r6-jq4m",
+          "severity": "high",
+          "cwe": [
+            "CWE-22",
+            "CWE-73",
+            "CWE-94"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H"
+          },
+          "range": "<10.34.5"
+        }
+      ],
+      "effects": [],
+      "range": "<=10.34.4",
+      "nodes": [
+        "node_modules/pnpm"
+      ],
+      "fixAvailable": {
+        "name": "pnpm",
+        "version": "10.34.7",
+        "isSemVerMajor": false
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 1,
+      "critical": 0,
+      "total": 1
+    },
+    "dependencies": {
+      "prod": 1,
+      "dev": 53,
+      "optional": 38,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 53
+    }
+  }
+}

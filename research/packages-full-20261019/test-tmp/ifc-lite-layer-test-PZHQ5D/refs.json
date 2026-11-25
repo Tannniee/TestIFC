@@ -1,0 +1,15 @@
+{
+  "refs": {
+    "main": {
+      "layers": [
+        "blake3:df1ea84f6d3ea6d6e7193773a931b8ca868c70be2ab5829fe51fdf632cca3021",
+        "blake3:ac0c840d90f1274b6b7d5d375d278b5036c5bb507b11130be6dd30b055c6d215"
+      ]
+    },
+    "other": {
+      "layers": [
+        "blake3:72cda59736a0c7d3fd02dd383f8b87b139369a743e3cd5a829d6c4a613ab9372"
+      ]
+    }
+  }
+}

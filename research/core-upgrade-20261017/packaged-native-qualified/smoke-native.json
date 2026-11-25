@@ -1,0 +1,83 @@
+{
+  "executable": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017\\IFC-Lite.exe",
+  "tests": [
+    {
+      "name": "native preview default engine without URL override"
+    },
+    {
+      "name": "local IFC import",
+      "models": [
+        {
+          "name": "building-architecture.ifc",
+          "meshes": 14,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "TestIFC Top sweep creates canonical Box, restores source orientation, six diamond handles"
+    },
+    {
+      "name": "IFC Y uses negative world Z with exchanged limits; inverted numeric input rejected"
+    },
+    {
+      "name": "Actual face drag changes clipping; Escape restores all bounds and releases capture"
+    },
+    {
+      "name": "Top-view elevation face can be dragged even when its axis projects to a point"
+    },
+    {
+      "name": "Draw again + Escape restores the exact previous camera and section state"
+    },
+    {
+      "name": "Outline and handle visibility are independent of active clipping"
+    },
+    {
+      "name": "Reset Bounds uses placed model bounds; Fit View preserves bounds and orientation"
+    },
+    {
+      "name": "Actual WebGPU cut toggle changes canvas pixels without changing bounds or camera"
+    },
+    {
+      "name": "Close/reopen preserves native cut; Front exits Box and keeps native plane controls"
+    },
+    {
+      "name": "Properties activity icon closes and reopens, including rapid clicks"
+    },
+    {
+      "name": "real wheel TestIFC ratio, no inertia, reversibility"
+    },
+    {
+      "name": "actual pointer orbit damping and stable pivot"
+    },
+    {
+      "name": "real screen pan retains all pointer movement and damping tail"
+    },
+    {
+      "name": "selection preserves the view and real orbit retains the stable TestIFC target"
+    }
+  ],
+  "errors": [],
+  "diagnostics": [
+    "warning: [Viewport] frameSelection: No selection or geometry",
+    "warning: [Viewport] frameSelection: No selection or geometry"
+  ],
+  "nativeBackend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.3.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "runtime": {
+    "url": "http://tauri.localhost/",
+    "secureContext": true,
+    "crossOriginIsolated": true,
+    "webgpu": true,
+    "adapter": {},
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "passed": false,
+  "failure": "page.waitForFunction: Timeout 30000ms exceeded.\n    at testTestIfcNavigation (F:\\Steel\\VBA\\IFC-Lite-Core104\\desktop\\testifc-navigation-smoke.mjs:91:14)\n    at async file:///F:/Steel/VBA/IFC-Lite-Core104/desktop/smoke-webview2.mjs:117:5"
+}

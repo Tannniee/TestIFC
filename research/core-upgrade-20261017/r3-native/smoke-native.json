@@ -1,0 +1,41 @@
+{
+  "executable": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017-r3\\IFC-Lite.exe",
+  "tests": [
+    {
+      "name": "native preview default engine without URL override"
+    },
+    {
+      "name": "local IFC import",
+      "models": [
+        {
+          "name": "building-architecture.ifc",
+          "meshes": 14,
+          "visible": true
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "diagnostics": [
+    "warning: [UnitExtractor] IFCPROJECT entity could not be read, defaulting to meters (unconfirmed — see issue #2104)",
+    "request failed: https://basemaps.cartocdn.com/gl/positron-gl-style/style.json net::ERR_ABORTED"
+  ],
+  "nativeBackend": {
+    "engine": "ifc-lite-processing",
+    "engineVersion": "20.4.0",
+    "instancedGeometry": true,
+    "packetVersion": 1,
+    "pointerBits": 64,
+    "queuedPackets": 2
+  },
+  "runtime": {
+    "url": "http://tauri.localhost/",
+    "secureContext": true,
+    "crossOriginIsolated": true,
+    "webgpu": true,
+    "adapter": {},
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "passed": false,
+  "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at testTestIfcSectionBox (file:///F:/Steel/VBA/IFC-Lite-Core104/desktop/testifc-section-box-smoke.mjs:51:10)\n    at async file:///F:/Steel/VBA/IFC-Lite-Core104/desktop/smoke-webview2.mjs:116:5"
+}

@@ -1,0 +1,4 @@
+{
+  "restored_custom_viewer_paths": [],
+  "reason": "Retain the customized UI and adapt its actual library contracts. Full upstream Flow/content workbench UI is a separate product/UI migration; all 62 library sources and behavior tests remain integrated."
+}

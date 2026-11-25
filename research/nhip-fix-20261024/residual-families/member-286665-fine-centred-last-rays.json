@@ -1,0 +1,95 @@
+[
+  {
+    "id": 286722,
+    "hostFrameRayOriginM": [
+      -0.02,
+      -1.42,
+      -3.94
+    ],
+    "direction": [
+      1,
+      0,
+      0
+    ],
+    "nativeIntersectionsXM": [
+      0.007876884196296688,
+      0.00799882749122435
+    ],
+    "oracleIntersectionsXM": [
+      0.007876896262726382,
+      0.007999984526949716
+    ],
+    "authoredCutterIntersectionsXM": {
+      "286722": [
+        -0.008123103773658295,
+        0.007876896278371823
+      ]
+    },
+    "worldWitnessAtStockCenterM": [
+      563470.3876814991,
+      1100563.9671567199,
+      22.61082035926873
+    ]
+  },
+  {
+    "id": 286728,
+    "hostFrameRayOriginM": [
+      -0.02,
+      1.42,
+      -0.02
+    ],
+    "direction": [
+      1,
+      0,
+      0
+    ],
+    "nativeIntersectionsXM": [
+      0.007996437031310375,
+      0.007998846570494674
+    ],
+    "oracleIntersectionsXM": [],
+    "authoredCutterIntersectionsXM": {
+      "286728": [
+        -0.008003592711303126,
+        0.007996407261558638
+      ]
+    },
+    "worldWitnessAtStockCenterM": [
+      563465.9542185897,
+      1100565.7964183344,
+      21.954917488046814
+    ]
+  },
+  {
+    "id": 286734,
+    "hostFrameRayOriginM": [
+      -0.02,
+      -1.42,
+      -0.02
+    ],
+    "direction": [
+      1,
+      0,
+      0
+    ],
+    "nativeIntersectionsXM": [
+      0.007873337099256146,
+      0.007998785275900132
+    ],
+    "oracleIntersectionsXM": [
+      0.007873310222537304,
+      0.007999866137305509
+    ],
+    "authoredCutterIntersectionsXM": {
+      "286734": [
+        -0.008126689770006239,
+        0.007873310255351658
+      ]
+    },
+    "worldWitnessAtStockCenterM": [
+      563467.0080296028,
+      1100563.4855777302,
+      20.68405240836539
+    ]
+  }
+]

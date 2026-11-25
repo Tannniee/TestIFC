@@ -1,0 +1,239 @@
+[
+  {
+    "label": "drop-two-rc150",
+    "count": 15,
+    "ids": [
+      198896,
+      198908,
+      198912,
+      198916,
+      198920,
+      198924,
+      198928,
+      198932,
+      198936,
+      198940,
+      198944,
+      198948,
+      198952,
+      198956,
+      198960
+    ],
+    "triangles": 3048,
+    "unpairedDirectedEdges": 0,
+    "origin": [
+      524.5329403853328,
+      66.75602681654533,
+      68.50521376186337
+    ],
+    "stats": {
+      "degenerate_triangles_dropped": 0,
+      "entity_scan_time_ms": 0,
+      "faceted_brep_time_ms": 0,
+      "from_cache": false,
+      "geometry_diagnostics": {
+        "classification": {
+          "diagonal": 0,
+          "nonRectangular": 15,
+          "rectangular": 0,
+          "total": 15
+        },
+        "failuresByReason": [],
+        "hostsWithOpenings": 1,
+        "oversizedRefDrops": 0,
+        "productsWithFailures": 0,
+        "rectFast": {
+          "deferHostNotBox": 0,
+          "deferNearEdge": 0,
+          "deferNoOpenings": 0,
+          "deferNotThrough": 0,
+          "deferOffFace": 0,
+          "deferTooManyOpenings": 0,
+          "fired": 0,
+          "openingsCut": 0
+        },
+        "schemaVersion": 3,
+        "silentNoOps": 0,
+        "totalCsgFailures": 0,
+        "totalUnsupportedItems": 0,
+        "unsupportedItemsByType": [],
+        "worstHosts": []
+      },
+      "geometry_time_ms": 7419,
+      "lookup_time_ms": 0,
+      "parse_time_ms": 0,
+      "point_cache_hits": 0,
+      "point_cache_misses": 0,
+      "preprocess_time_ms": 0,
+      "products_with_failures": 0,
+      "total_csg_failures": 0,
+      "total_meshes": 1,
+      "total_time_ms": 7419,
+      "total_triangles": 3048,
+      "total_vertices": 4020
+    }
+  },
+  {
+    "label": "drop-three-rc150",
+    "count": 14,
+    "ids": [
+      198896,
+      198912,
+      198916,
+      198920,
+      198924,
+      198928,
+      198932,
+      198936,
+      198940,
+      198944,
+      198948,
+      198952,
+      198956,
+      198960
+    ],
+    "triangles": 3610,
+    "unpairedDirectedEdges": 66,
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "stats": {
+      "degenerate_triangles_dropped": 0,
+      "entity_scan_time_ms": 0,
+      "faceted_brep_time_ms": 0,
+      "from_cache": false,
+      "geometry_diagnostics": {
+        "classification": {
+          "diagonal": 0,
+          "nonRectangular": 14,
+          "rectangular": 0,
+          "total": 14
+        },
+        "failuresByReason": [
+          {
+            "count": 1,
+            "reason": "KernelError"
+          }
+        ],
+        "hostsWithOpenings": 1,
+        "oversizedRefDrops": 0,
+        "productsWithFailures": 1,
+        "rectFast": {
+          "deferHostNotBox": 0,
+          "deferNearEdge": 0,
+          "deferNoOpenings": 0,
+          "deferNotThrough": 0,
+          "deferOffFace": 0,
+          "deferTooManyOpenings": 0,
+          "fired": 0,
+          "openingsCut": 0
+        },
+        "schemaVersion": 3,
+        "silentNoOps": 0,
+        "totalCsgFailures": 1,
+        "totalUnsupportedItems": 0,
+        "unsupportedItemsByType": [],
+        "worstHosts": [
+          {
+            "bbox": {
+              "max": [
+                450.3939208984375,
+                279.9866943359375,
+                69.91082763671875
+              ],
+              "min": [
+                448.72113037109375,
+                276.78997802734375,
+                67.0921859741211
+              ]
+            },
+            "csgFailures": 1,
+            "firstFailureLabel": "KernelError",
+            "ifcType": "IfcMember",
+            "openings": 14,
+            "productId": 198892,
+            "triangleCount": 3645
+          }
+        ]
+      },
+      "geometry_time_ms": 6561,
+      "lookup_time_ms": 0,
+      "parse_time_ms": 0,
+      "point_cache_hits": 0,
+      "point_cache_misses": 0,
+      "preprocess_time_ms": 0,
+      "products_with_failures": 1,
+      "total_csg_failures": 1,
+      "total_meshes": 1,
+      "total_time_ms": 6562,
+      "total_triangles": 3610,
+      "total_vertices": 10095
+    }
+  },
+  {
+    "label": "first-plus-four-d70",
+    "count": 5,
+    "ids": [
+      198896,
+      198948,
+      198952,
+      198956,
+      198960
+    ],
+    "triangles": 552,
+    "unpairedDirectedEdges": 0,
+    "origin": [
+      524.5370406094441,
+      66.76501771254306,
+      68.49760681774656
+    ],
+    "stats": {
+      "degenerate_triangles_dropped": 0,
+      "entity_scan_time_ms": 0,
+      "faceted_brep_time_ms": 0,
+      "from_cache": false,
+      "geometry_diagnostics": {
+        "classification": {
+          "diagonal": 0,
+          "nonRectangular": 5,
+          "rectangular": 0,
+          "total": 5
+        },
+        "failuresByReason": [],
+        "hostsWithOpenings": 1,
+        "oversizedRefDrops": 0,
+        "productsWithFailures": 0,
+        "rectFast": {
+          "deferHostNotBox": 0,
+          "deferNearEdge": 0,
+          "deferNoOpenings": 0,
+          "deferNotThrough": 0,
+          "deferOffFace": 0,
+          "deferTooManyOpenings": 0,
+          "fired": 0,
+          "openingsCut": 0
+        },
+        "schemaVersion": 3,
+        "silentNoOps": 0,
+        "totalCsgFailures": 0,
+        "totalUnsupportedItems": 0,
+        "unsupportedItemsByType": [],
+        "worstHosts": []
+      },
+      "geometry_time_ms": 62,
+      "lookup_time_ms": 0,
+      "parse_time_ms": 0,
+      "point_cache_hits": 0,
+      "point_cache_misses": 0,
+      "preprocess_time_ms": 0,
+      "products_with_failures": 0,
+      "total_csg_failures": 0,
+      "total_meshes": 1,
+      "total_time_ms": 63,
+      "total_triangles": 552,
+      "total_vertices": 695
+    }
+  }
+]

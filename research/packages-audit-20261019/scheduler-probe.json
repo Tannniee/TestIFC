@@ -1,0 +1,32 @@
+[
+  {
+    "iteration": 0,
+    "elapsedMs": 4908.117899999999,
+    "yields": 329,
+    "p50DelayMs": 15.313100000000304,
+    "p95DelayMs": 15.89179999999942,
+    "maxDelayMs": 19.464699999999993,
+    "inputRows": 3000,
+    "hostTaskRan": true
+  },
+  {
+    "iteration": 1,
+    "elapsedMs": 5027.6394,
+    "yields": 329,
+    "p50DelayMs": 15.399000000000342,
+    "p95DelayMs": 15.971400000000358,
+    "maxDelayMs": 16.420200000000477,
+    "inputRows": 3000,
+    "hostTaskRan": true
+  },
+  {
+    "iteration": 2,
+    "elapsedMs": 5021.740400000001,
+    "yields": 329,
+    "p50DelayMs": 15.385800000000017,
+    "p95DelayMs": 16.041400000000067,
+    "maxDelayMs": 16.438000000000102,
+    "inputRows": 3000,
+    "hostTaskRan": true
+  }
+]

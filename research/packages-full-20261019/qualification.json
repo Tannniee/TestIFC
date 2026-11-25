@@ -1,0 +1,74 @@
+{
+  "status": "passed with explicit scope and existing conditional skips",
+  "root_package_build_tasks": {
+    "passed": 62,
+    "total": 62
+  },
+  "package_tests": {
+    "covered_packages": 62,
+    "method": "composite full package suites plus corrected CLI cases; not a single green62-task run",
+    "original_59_successful_suites": ".turbo/runs/3KtZ1xuVx51ljpbllAysWbDSH79.json",
+    "mcp": {
+      "passed": 735,
+      "conditional_skips": 5,
+      "log": "packages-tests-6.log"
+    },
+    "flow_nodes": {
+      "passed": 248,
+      "conditional_skips": 16,
+      "log": "flow-nodes-qualified.log"
+    },
+    "cli": {
+      "unique_passed": 1471,
+      "conditional_skips": 16,
+      "full_log": "packages-tests-6.log",
+      "corrected_cases_log": "cli-corrected-qualified.log",
+      "final_exact_process_log": "cli-exact-process-qualified.log",
+      "final_filter_excluded_previously_passed_cases": 7
+    }
+  },
+  "root_typecheck": {
+    "passed_tasks": 120,
+    "total_tasks": 120,
+    "test_files_covered": 3597,
+    "log": "typecheck-final-handoff.log"
+  },
+  "viewer_selected_tests": {
+    "passed": 294,
+    "skipped": 0,
+    "log": "viewer-tests.log"
+  },
+  "packaged_quality": {
+    "passed": 15,
+    "total": 15,
+    "page_errors": 0,
+    "report": "reports/packaged-quality.json",
+    "info_packages": 62
+  },
+  "documentation_snippets": {
+    "compiled": 474,
+    "documents": 115,
+    "marked_illustrative_skips": 12
+  },
+  "api_snapshot": {
+    "published_packages": 57,
+    "export_surfaces": 104,
+    "exports": 10198
+  },
+  "bim_globals_namespaces": 14,
+  "templates": "passed",
+  "readmes": "57 published packages passed",
+  "module_size": {
+    "added_budgets": 0,
+    "raised_budgets": 0,
+    "removed_obsolete_rows": 6
+  },
+  "source_assertions": {
+    "allowlisted": 29,
+    "marked": 191,
+    "new": 0
+  },
+  "targeted_lint": "passed",
+  "aggregate_lint": "not requalified; prior Windows pnpm shim ENOENT remains documented",
+  "evidence_root": "F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\packages-full-20261019"
+}

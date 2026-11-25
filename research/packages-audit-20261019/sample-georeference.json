@@ -1,0 +1,54 @@
+{
+  "building-architecture.ifc": {
+    "schema": "IFC4",
+    "projectedCRS": [
+      {
+        "id": 18,
+        "type": "IfcProjectedCRS",
+        "Name": "EPSG:32760",
+        "Description": "EPSG:32760 - WGS 84 / UTM zone 60S",
+        "GeodeticDatum": "WGS 84",
+        "VerticalDatum": null,
+        "MapProjection": null,
+        "MapZone": null,
+        "MapUnit": {
+          "id": 15,
+          "type": "IfcSIUnit",
+          "Dimensions": null,
+          "UnitType": "LENGTHUNIT",
+          "Prefix": "MILLI",
+          "Name": "METRE"
+        }
+      }
+    ],
+    "mapConversions": [
+      "#19=IfcMapConversion(#11,#18,729013348.82970035,9063992684.6973629,1300.0000000000011,0.49999999999999989,0.86602540378443871,1.)"
+    ]
+  },
+  "building-architecture-rev-b.ifc": {
+    "schema": "IFC4",
+    "projectedCRS": [
+      {
+        "id": 18,
+        "type": "IfcProjectedCRS",
+        "Name": "EPSG:32760",
+        "Description": "EPSG:32760 - WGS 84 / UTM zone 60S",
+        "GeodeticDatum": "WGS 84",
+        "VerticalDatum": null,
+        "MapProjection": null,
+        "MapZone": null,
+        "MapUnit": {
+          "id": 15,
+          "type": "IfcSIUnit",
+          "Dimensions": null,
+          "UnitType": "LENGTHUNIT",
+          "Prefix": "MILLI",
+          "Name": "METRE"
+        }
+      }
+    ],
+    "mapConversions": [
+      "#19=IfcMapConversion(#11,#18,729013348.82970035,9063992684.6973629,1300.0000000000011,0.49999999999999989,0.86602540378443871,1.)"
+    ]
+  }
+}

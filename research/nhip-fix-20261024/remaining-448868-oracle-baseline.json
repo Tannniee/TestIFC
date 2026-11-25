@@ -1,0 +1,78 @@
+[
+  {
+    "input": "remaining-448868-full.json",
+    "id": 448868,
+    "native": {
+      "vertices": 8987,
+      "triangles": 4361,
+      "volume": 0.01577352480173093,
+      "area": 4.655430485958927
+    },
+    "oracle": {
+      "vertices": 752,
+      "triangles": 1504,
+      "volume": 0.022487660060158492,
+      "area": 4.656432476621786
+    },
+    "sampledMaxDistanceMm": 43.11562107063441,
+    "relativeVolumeErrorPercent": 29.856975961331933,
+    "maxBoundsDeltaMm": 0.07593235932290554
+  },
+  {
+    "input": "remaining-448868-full.json",
+    "id": 460997,
+    "native": {
+      "vertices": 8197,
+      "triangles": 4424,
+      "volume": 0.021225381953500377,
+      "area": 4.567207574446259
+    },
+    "oracle": {
+      "vertices": 752,
+      "triangles": 1504,
+      "volume": 0.022067664462664328,
+      "area": 4.569633358776516
+    },
+    "sampledMaxDistanceMm": 41.85333860932364,
+    "relativeVolumeErrorPercent": 3.8168176364516726,
+    "maxBoundsDeltaMm": 0.08275662548840046
+  },
+  {
+    "input": "remaining-448868-local.json",
+    "id": 448868,
+    "native": {
+      "vertices": 3384,
+      "triangles": 2732,
+      "volume": 0.022491317307472874,
+      "area": 4.657160417258876
+    },
+    "oracle": {
+      "vertices": 752,
+      "triangles": 1504,
+      "volume": 0.022487660060158492,
+      "area": 4.656432476621786
+    },
+    "sampledMaxDistanceMm": 0.8526608798114074,
+    "relativeVolumeErrorPercent": 0.016263352009936352,
+    "maxBoundsDeltaMm": 0.00020973425129966472
+  },
+  {
+    "input": "remaining-448868-local.json",
+    "id": 460997,
+    "native": {
+      "vertices": 3460,
+      "triangles": 2808,
+      "volume": 0.0220712156242448,
+      "area": 4.570340715265465
+    },
+    "oracle": {
+      "vertices": 752,
+      "triangles": 1504,
+      "volume": 0.022067664462664328,
+      "area": 4.569633358776516
+    },
+    "sampledMaxDistanceMm": 0.8527387662880346,
+    "relativeVolumeErrorPercent": 0.016092149608674174,
+    "maxBoundsDeltaMm": 8.550612307089978e-05
+  }
+]

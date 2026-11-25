@@ -1,0 +1,40 @@
+{
+  "header": {
+    "id": "blake3:2562f65343844d408bf467c5b35ae95cfe17b75c928536971b0c4199415999d1",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "carol",
+    "timestamp": "2026-10-19T03:25:22.216Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "carol"
+      },
+      "intent": "Revert layer blake3:8f49fcd7475aa947892863c9820d0f4cc2b48b7a3a24b86d281a812ec524a407",
+      "created": "2026-10-19T03:25:22.216Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:1b0207dae85e5499690f4c3c6820434c74469b3834e0e877e5c6710fe5a4a1c8"
+      },
+      "parents": [
+        "blake3:8f49fcd7475aa947892863c9820d0f4cc2b48b7a3a24b86d281a812ec524a407"
+      ],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": [
+    {
+      "path": "wall-1",
+      "attributes": {
+        "bsi::ifc::v5a::Pset_FireSafety::FireRating": "REI60"
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+cacache
+Content-addressable, key-value, high-performance, on-disk cache.
+version: 13.1.0
+license: Apache-2.0
+rust-version: unknown
+documentation: https://docs.rs/cacache/13.1.0
+homepage: https://github.com/zkat/cacache-rs
+repository: https://github.com/zkat/cacache-rs
+crates.io: https://crates.io/crates/cacache/13.1.0
+features:
+ +default       = [async-std, mmap]
+  async-std     = [dep:async-std, futures]
+  futures       = [dep:futures]
+  libc          = [dep:libc]
+  memmap2       = [dep:memmap2]
+  mmap          = [memmap2, libc]
+  link_to       = []
+  tokio         = [dep:tokio]
+  tokio-runtime = [tokio, tokio-stream, futures]
+  tokio-stream  = [dep:tokio-stream]

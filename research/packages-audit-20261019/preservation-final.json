@@ -1,0 +1,36 @@
+{
+  "checked_utc": "2026-10-20T02:15:15.328483+00:00",
+  "source_files_checked": 240,
+  "source_drift": [],
+  "protected_releases": {
+    "10.4.0-full-packages-20261019-r1": {
+      "sha256": "9e4bfb5d6d3594172735d5b453a6f93fb56bf678e0dccd660a9734a30f3380a1",
+      "preserved": true
+    },
+    "10.4.0-native-core-20261017-r3": {
+      "sha256": "b35d3d085edf89c776e3316d0e0e69b7f20915da72e264259a08a093865b789b",
+      "preserved": true
+    },
+    "10.4.0-packages-audit-20261019-r2": {
+      "sha256": "21af960205c35f931a6ed7af7227875ec238ab0ca698043920e070acf215ec2a",
+      "preserved": true
+    }
+  },
+  "input_models": {
+    "F:/Steel/VBA/IFC COLO/hangarvd_f10_ tan base_f01_colored.ifc": {
+      "sha256": "df595b8d150b09dabbc48e21f6efd1b26a0f35ab07636a02d0b51896b94894a2",
+      "bytes": 12087605,
+      "preserved": true
+    },
+    "F:/Working/IFC Temp/SVD TRONG DONG-22.09.2026 (8H).ifc": {
+      "sha256": "4ed3aeb10edb046b119bdc97106b02b9d7fd0861b88fdc52eda3ac588a811f73",
+      "bytes": 883278635,
+      "preserved": true
+    },
+    "F:/Working/IFC Temp/IFC_PVF.ifc": {
+      "sha256": "2b0127919e9ddb79f6ba9d7029c97a43f3d759f06f8572370e607c6572209b97",
+      "bytes": 1411171948,
+      "preserved": true
+    }
+  }
+}

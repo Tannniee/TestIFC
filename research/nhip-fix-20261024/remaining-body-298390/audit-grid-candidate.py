@@ -1,0 +1,10 @@
+from pathlib import Path
+import json,numpy as np,ast,collections
+p=Path(r'F:\Steel\VBA\IFC-Lite-Core104\research\nhip-fix-20261024\remaining-body-298390');research=Path(r'F:\Steel\VBA\IFC-Lite\research\nhip-chinh-deep-20261024');helpers=ast.parse((research/'compare-oracle.py').read_text());exec(compile(ast.Module(body=[n for n in helpers.body if isinstance(n,ast.FunctionDef)],type_ignores=[]),'<geometry-helpers>','exec'))
+d=json.loads((p/'candidate-grid-outward.json').read_text());lv=np.array(d['positions'],dtype=np.float32).reshape(-1,3);v=lv.astype(float)+d['origin']+np.array([563237.05656001,1100360.68735001,0.0]);t=np.array(d['indices']).reshape(-1,3);o=json.loads((p/'oracle.json').read_text());ov=np.array(o['vertices']);ot=np.array(o['indices']);c=ov.mean(0);a=distances(sample(v,t)-c,ov-c,ot);b=distances(sample(ov,ot)-c,v-c,t);n=stats(v,t);os=stats(ov,ot);edges=collections.Counter();directed=collections.Counter();degenerate=0
+for tri in t:
+ q=[tuple(map(float,lv[i])) for i in tri]
+ if len(set(q))<3:degenerate+=1
+ for aa,bb in zip(q,q[1:]+q[:1]):edges[tuple(sorted([aa,bb]))]+=1;directed[(aa,bb)]+=1
+tri=lv[t].astype(float);a0,b0,c0=tri[:,0],tri[:,1],tri[:,2];longest=np.maximum(np.linalg.norm(b0-a0,axis=1),np.maximum(np.linalg.norm(c0-b0,axis=1),np.linalg.norm(a0-c0,axis=1)));heights=np.linalg.norm(np.cross(b0-a0,c0-a0),axis=1)/longest
+r={'nativeCandidate':n,'oracle':os,'maxBoundsDeltaMm':float(abs(np.array([v.min(0),v.max(0)])-np.array(o['bounds'])).max()*1000),'sampledMaxDistanceMm':float(max(a.max(),b.max())*1000),'relativeVolumeErrorPercent':abs(n['volume']-os['volume'])/os['volume']*100,'exactBadEdgeMultiplicities':dict(collections.Counter(x for x in edges.values() if x!=2)),'collapsedTriangles':degenerate,'directedImbalanceEdges':sum(directed[(aa,bb)]!=directed[(bb,aa)] for aa,bb in edges),'minimumTriangleAltitudeUm':float(heights.min()*1e6),'note':'research-only outwardkernelgrid retry, strictclosureafterrotationandordinaryhygiene; not shipped'};print(json.dumps(r,indent=2));(p/'grid-outward-oracle.json').write_text(json.dumps(r,indent=2))

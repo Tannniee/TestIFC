@@ -1,0 +1,1 @@
+{"flowVersion":1,"id":"s","name":"s","capabilities":[],"inputs":[],"outputs":[],"nodes":[{"id":"req","type":"http.request","params":{"url":"https://api.example.invalid/","headers":{"Authorization":"Bearer {{secret:API_TOKEN}}"}}}],"edges":[]}

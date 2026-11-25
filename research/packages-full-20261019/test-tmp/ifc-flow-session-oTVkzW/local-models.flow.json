@@ -1,0 +1,1 @@
+{"flowVersion":2,"id":"local","name":"Local models","capabilities":["model.create"],"inputs":[],"outputs":[],"edges":[],"nodes":[{"id":"load","type":"session.loadModels","params":{"selectors":[]}}]}

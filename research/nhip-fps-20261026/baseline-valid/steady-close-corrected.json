@@ -1,0 +1,829 @@
+{
+  "label": "steady-close-corrected",
+  "profiled": false,
+  "zoomFactor": 0.15,
+  "gpuTiming": false,
+  "at": "2026-10-26T12:17:09.418Z",
+  "tests": [
+    {
+      "gesture": "orbit",
+      "durationMs": 8011.759999997914,
+      "rafFps": 141.37553015823858,
+      "renderedFps": 141.29230031856855,
+      "rafIntervals": {
+        "n": 1131,
+        "mean": 7.073359858532248,
+        "p50": 4.2049999999580905,
+        "p95": 12.5,
+        "p99": 20.880000000004657,
+        "max": 274.9649999999674,
+        "over25": 9,
+        "over50": 3,
+        "over100": 2
+      },
+      "renderIntervals": {
+        "n": 1131,
+        "mean": 7.074553492484791,
+        "p50": 5.795000001788139,
+        "p95": 11.905000001192093,
+        "p99": 20.964999996125698,
+        "max": 276.53999999910593,
+        "over25": 10,
+        "over50": 3,
+        "over100": 2
+      },
+      "textureCall": {
+        "n": 1132,
+        "mean": 0.016205830361312352,
+        "p50": 0.015000000596046448,
+        "p95": 0.02499999850988388,
+        "p99": 0.030000001192092896,
+        "max": 0.06499999761581421,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "longTasks": {
+        "n": 4,
+        "mean": 151.25,
+        "p50": 65,
+        "p95": 277,
+        "p99": 277,
+        "max": 277,
+        "over25": 4,
+        "over50": 3,
+        "over100": 2
+      },
+      "renderCpu": {
+        "n": 1132,
+        "mean": 3.5648056536241577,
+        "p50": 3.4550000056624413,
+        "p95": 4.600000001490116,
+        "p99": 5.384999997913837,
+        "max": 6.910000003874302,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "pickCpu": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "pickPhases": {},
+      "gpuMs": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "gpuErrors": [],
+      "candidates": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "exhaustivePicks": 0,
+      "throttles": {
+        "0": 1132
+      },
+      "inputDelay": {
+        "n": 240,
+        "mean": 5.822229166825612,
+        "p50": 3.4950000047683716,
+        "p95": 9.594999998807907,
+        "p99": 33.184999994933605,
+        "max": 243.27000000327826,
+        "over25": 4,
+        "over50": 2,
+        "over100": 2
+      },
+      "passes": {
+        "main": 1132
+      },
+      "stats": {
+        "frame": {
+          "drawCalls": 730,
+          "batchesDrawn": 404,
+          "batchesFrustumCulled": 980,
+          "batchesContributionCulled": 0,
+          "batchesNotResident": 0,
+          "batchesAtLod1": 44,
+          "instancedDrawn": 326,
+          "instancedFrustumCulled": 4804,
+          "instancedContributionCulled": 1818,
+          "timestamp": 654689.9300000072
+        },
+        "gpu": {
+          "batches": 2147432728,
+          "meshes": 0,
+          "textured": 0,
+          "instanced": 57893232,
+          "total": 2205325960
+        },
+        "cpuBytes": 3985385412
+      },
+      "pose": {
+        "position": {
+          "x": 1250.2574018085684,
+          "y": 1083.0552824426634,
+          "z": -86.44398220536884
+        },
+        "target": {
+          "x": 323.15025311516365,
+          "y": 34.94386291503906,
+          "z": -214.09075471421238
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialPose": {
+        "position": {
+          "x": 1179.159459224994,
+          "y": 748.2848680065644,
+          "z": 641.918451395618
+        },
+        "target": {
+          "x": 323.15025311516365,
+          "y": 34.94386291503906,
+          "z": -214.09075471421238
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialRotation": {
+        "azimuth": 45,
+        "elevation": 30.508958866202807
+      },
+      "finalRotation": {
+        "azimuth": 83.30047675573212,
+        "elevation": 48.6018290389242
+      }
+    },
+    {
+      "gesture": "pan",
+      "durationMs": 8017.640000000596,
+      "rafFps": 175.1922525815265,
+      "renderedFps": 175.11387390801977,
+      "rafIntervals": {
+        "n": 1403,
+        "mean": 5.708014967925854,
+        "p50": 4.184999999939464,
+        "p95": 8.364999999990687,
+        "p99": 12.485000000102445,
+        "max": 12.569999999948777,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "renderIntervals": {
+        "n": 1403,
+        "mean": 5.708121881680198,
+        "p50": 5.344999998807907,
+        "p95": 8.744999997317791,
+        "p99": 10.375,
+        "max": 13.765000000596046,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "textureCall": {
+        "n": 1404,
+        "mean": 0.0166844729217369,
+        "p50": 0.015000000596046448,
+        "p95": 0.02499999850988388,
+        "p99": 0.030000001192092896,
+        "max": 0.17499999701976776,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "longTasks": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "renderCpu": {
+        "n": 1404,
+        "mean": 3.420366809143555,
+        "p50": 3.3549999967217445,
+        "p95": 4.25,
+        "p99": 5.41499999910593,
+        "max": 5.969999998807907,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "pickCpu": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "pickPhases": {},
+      "gpuMs": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "gpuErrors": [],
+      "candidates": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "exhaustivePicks": 0,
+      "throttles": {
+        "0": 1404
+      },
+      "inputDelay": {
+        "n": 259,
+        "mean": 2.854652509697386,
+        "p50": 2.7400000020861626,
+        "p95": 5.554999999701977,
+        "p99": 7.215000003576279,
+        "max": 10.41499999910593,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "passes": {
+        "main": 1404
+      },
+      "stats": {
+        "frame": {
+          "drawCalls": 713,
+          "batchesDrawn": 380,
+          "batchesFrustumCulled": 1004,
+          "batchesContributionCulled": 0,
+          "batchesNotResident": 0,
+          "batchesAtLod1": 46,
+          "instancedDrawn": 333,
+          "instancedFrustumCulled": 4680,
+          "instancedContributionCulled": 1935,
+          "timestamp": 666107.7600000054
+        },
+        "gpu": {
+          "batches": 2136508532,
+          "meshes": 0,
+          "textured": 0,
+          "instanced": 57893232,
+          "total": 2194401764
+        },
+        "cpuBytes": 3985385412
+      },
+      "pose": {
+        "position": {
+          "x": 1186.0246113245757,
+          "y": 753.5171060078379,
+          "z": 630.6931009616416
+        },
+        "target": {
+          "x": 330.01540521474533,
+          "y": 40.176100916314084,
+          "z": -225.3161051481905
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialPose": {
+        "position": {
+          "x": 1179.159459224994,
+          "y": 748.2848680065644,
+          "z": 641.918451395618
+        },
+        "target": {
+          "x": 323.15025311516365,
+          "y": 34.94386291503906,
+          "z": -214.09075471421238
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialRotation": {
+        "azimuth": 45,
+        "elevation": 30.508958866202807
+      },
+      "finalRotation": {
+        "azimuth": 44.99999999999994,
+        "elevation": 30.508958866202725
+      }
+    },
+    {
+      "gesture": "zoom",
+      "durationMs": 8027.569999992847,
+      "rafFps": 172.55029080459104,
+      "renderedFps": 172.28127565393166,
+      "rafIntervals": {
+        "n": 1384,
+        "mean": 5.795411849710966,
+        "p50": 4.185000000055879,
+        "p95": 8.369999999995343,
+        "p99": 12.474999999976717,
+        "max": 50.04000000003725,
+        "over25": 1,
+        "over50": 1,
+        "over100": 0
+      },
+      "renderIntervals": {
+        "n": 1382,
+        "mean": 5.79857452966909,
+        "p50": 5.66499999910593,
+        "p95": 8.199999995529652,
+        "p99": 10.429999999701977,
+        "max": 51.53999999910593,
+        "over25": 1,
+        "over50": 1,
+        "over100": 0
+      },
+      "textureCall": {
+        "n": 1383,
+        "mean": 0.016963123709545218,
+        "p50": 0.015000000596046448,
+        "p95": 0.02499999850988388,
+        "p99": 0.03500000387430191,
+        "max": 0.1550000011920929,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "longTasks": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "renderCpu": {
+        "n": 1383,
+        "mean": 3.0982718727539953,
+        "p50": 3.024999998509884,
+        "p95": 3.940000005066395,
+        "p99": 5.170000001788139,
+        "max": 5.954999998211861,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "pickCpu": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "pickPhases": {},
+      "gpuMs": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "gpuErrors": [],
+      "candidates": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "exhaustivePicks": 0,
+      "throttles": {
+        "0": 1383
+      },
+      "inputDelay": {
+        "n": 204,
+        "mean": 14.711495097909197,
+        "p50": 14.365000002086163,
+        "p95": 20.035000003874302,
+        "p99": 26.100000001490116,
+        "max": 57.45499999821186,
+        "over25": 3,
+        "over50": 1,
+        "over100": 0
+      },
+      "passes": {
+        "main": 5532,
+        "selection-hover-outline": 1383
+      },
+      "stats": {
+        "frame": {
+          "drawCalls": 582,
+          "batchesDrawn": 399,
+          "batchesFrustumCulled": 984,
+          "batchesContributionCulled": 1,
+          "batchesNotResident": 0,
+          "batchesAtLod1": 48,
+          "instancedDrawn": 183,
+          "instancedFrustumCulled": 4595,
+          "instancedContributionCulled": 2170,
+          "timestamp": 677618.1200000048
+        },
+        "gpu": {
+          "batches": 2146560508,
+          "meshes": 0,
+          "textured": 0,
+          "instanced": 57893232,
+          "total": 2204453740
+        },
+        "cpuBytes": 3985385412
+      },
+      "pose": {
+        "position": {
+          "x": 1178.9560046473655,
+          "y": 748.7731589928737,
+          "z": 641.7149968179892
+        },
+        "target": {
+          "x": 322.9467985375348,
+          "y": 35.432153901348336,
+          "z": -214.29420929184136
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 64.60201810834458
+      },
+      "initialPose": {
+        "position": {
+          "x": 1179.159459224994,
+          "y": 748.2848680065644,
+          "z": 641.918451395618
+        },
+        "target": {
+          "x": 323.15025311516365,
+          "y": 34.94386291503906,
+          "z": -214.09075471421238
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialRotation": {
+        "azimuth": 45,
+        "elevation": 30.508958866202807
+      },
+      "finalRotation": {
+        "azimuth": 45,
+        "elevation": 30.508958866202796
+      }
+    },
+    {
+      "gesture": "hover",
+      "durationMs": 8003.329999998212,
+      "rafFps": 234.49970687536614,
+      "renderedFps": 11.24531913591219,
+      "rafIntervals": {
+        "n": 1876,
+        "mean": 4.264397654584227,
+        "p50": 4.165000000037253,
+        "p95": 4.2299999999813735,
+        "p99": 8.345000000088476,
+        "max": 16.64000000001397,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "renderIntervals": {
+        "n": 89,
+        "mean": 87.12112359551901,
+        "p50": 62.54499999433756,
+        "p95": 125.1900000050664,
+        "p99": 1054.4750000014901,
+        "max": 1054.4750000014901,
+        "over25": 89,
+        "over50": 89,
+        "over100": 17
+      },
+      "textureCall": {
+        "n": 90,
+        "mean": 0.022888888667027155,
+        "p50": 0.02499999850988388,
+        "p95": 0.0299999937415123,
+        "p99": 0.03500000387430191,
+        "max": 0.03500000387430191,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "longTasks": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "renderCpu": {
+        "n": 90,
+        "mean": 3.4767777778208258,
+        "p50": 3.4299999997019768,
+        "p95": 3.725000001490116,
+        "p99": 4.334999993443489,
+        "max": 4.334999993443489,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "pickCpu": {
+        "n": 129,
+        "mean": 0.14341085288644762,
+        "p50": 0.12999999523162842,
+        "p95": 0.23000000417232513,
+        "p99": 0.375,
+        "max": 0.41499999910593033,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "pickPhases": {},
+      "gpuMs": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "gpuErrors": [],
+      "candidates": {
+        "n": 0,
+        "mean": null,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "exhaustivePicks": 0,
+      "throttles": {
+        "0": 90
+      },
+      "inputDelay": {
+        "n": 258,
+        "mean": 2.4286046511269817,
+        "p50": 2.4200000017881393,
+        "p95": 4.315000005066395,
+        "p99": 4.464999996125698,
+        "max": 5.1400000005960464,
+        "over25": 0,
+        "over50": 0,
+        "over100": 0
+      },
+      "passes": {
+        "main": 288,
+        "ao": 90,
+        "ao-blur-h": 90,
+        "ao-blur-v": 90,
+        "ao-composite": 90,
+        "edges": 90,
+        "selection-hover-outline": 66
+      },
+      "stats": {
+        "frame": {
+          "drawCalls": 914,
+          "batchesDrawn": 384,
+          "batchesFrustumCulled": 999,
+          "batchesContributionCulled": 1,
+          "batchesNotResident": 0,
+          "batchesAtLod1": 43,
+          "instancedDrawn": 530,
+          "instancedFrustumCulled": 4688,
+          "instancedContributionCulled": 1730,
+          "timestamp": 688841.0550000072
+        },
+        "gpu": {
+          "batches": 2133871956,
+          "meshes": 0,
+          "textured": 0,
+          "instanced": 57893232,
+          "total": 2191765188
+        },
+        "cpuBytes": 3985385412
+      },
+      "pose": {
+        "position": {
+          "x": 1179.159459224994,
+          "y": 748.2848680065644,
+          "z": 641.918451395618
+        },
+        "target": {
+          "x": 323.15025311516365,
+          "y": 34.94386291503906,
+          "z": -214.09075471421238
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialPose": {
+        "position": {
+          "x": 1179.159459224994,
+          "y": 748.2848680065644,
+          "z": 641.918451395618
+        },
+        "target": {
+          "x": 323.15025311516365,
+          "y": 34.94386291503906,
+          "z": -214.09075471421238
+        },
+        "up": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "fov": 0.7853981633974483,
+        "projectionMode": "orthographic",
+        "orthoSize": 61.02769321852222
+      },
+      "initialRotation": {
+        "azimuth": 45,
+        "elevation": 30.508958866202807
+      },
+      "finalRotation": {
+        "azimuth": 45,
+        "elevation": 30.508958866202807
+      }
+    }
+  ],
+  "before": {
+    "loading": false,
+    "streaming": false,
+    "fastView": false,
+    "activeTool": "select",
+    "stats": {
+      "frame": {
+        "drawCalls": 914,
+        "batchesDrawn": 384,
+        "batchesFrustumCulled": 999,
+        "batchesContributionCulled": 1,
+        "batchesNotResident": 0,
+        "batchesAtLod1": 43,
+        "instancedDrawn": 530,
+        "instancedFrustumCulled": 4688,
+        "instancedContributionCulled": 1730,
+        "timestamp": 603877.9250000045
+      },
+      "gpu": {
+        "batches": 2133871956,
+        "meshes": 0,
+        "textured": 0,
+        "instanced": 57893232,
+        "total": 2191765188
+      },
+      "cpuBytes": 3985385412
+    },
+    "pose": {
+      "position": {
+        "x": 1179.159459224994,
+        "y": 748.2848680065644,
+        "z": 641.918451395618
+      },
+      "target": {
+        "x": 323.15025311516365,
+        "y": 34.94386291503906,
+        "z": -214.09075471421238
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 61.02769321852222
+    },
+    "canvas": [
+      {
+        "rect": {
+          "x": 1384,
+          "y": 823.3333740234375,
+          "width": 315.3333435058594,
+          "height": 180,
+          "top": 823.3333740234375,
+          "right": 1699.3333435058594,
+          "bottom": 1003.3333740234375,
+          "left": 1384
+        },
+        "w": 473,
+        "h": 270
+      },
+      {
+        "rect": {
+          "x": 0,
+          "y": 40.66666793823242,
+          "width": 1376,
+          "height": 891.3333740234375,
+          "top": 40.66666793823242,
+          "right": 1376,
+          "bottom": 932.0000419616699,
+          "left": 0
+        },
+        "w": 2064,
+        "h": 1337,
+        "viewport": "main"
+      }
+    ],
+    "view": {
+      "width": 1440,
+      "height": 960,
+      "dpr": 1.5,
+      "visibility": "visible"
+    },
+    "ui": "File\nHome\nView\nElements\nAnalyze\nAuthor\nCommands…\nCtrl+K\nReposition\nReposition models and pointclouds\nSelect\nWalk\nTOOLS\nMeasure\nSection\nAnnotate\nMEASURE & MARK\nHome\nHome (isometric camera + fit)\nSCENE\nSORT: ELEVATION\nHIERARCHY\n4\n\nTekla Structures Project Name\n+0.00m\n\nIfcSite\n+0.00m\n\nIfcBuilding\n+0.00m\n\nIfcBuildingStorey\n+0.00m\nCLICK TO SELECT · CTRL TOGGLE\nNHIP CHINH.IFC\n\nIFC Model\n\nIFC4\nFILE INFORMATION\nFile Size\n123.97 MB\nLoaded At\n10/26/26, 7:06:27 PM\nParse Time\n299,260 ms\nLENGTH UNIT\nMillimeters (0.001)\nPROJECT INFORMATION\nName\nTekla Structures Project Name\nGlobalId\n0Xyj1ZQLDAse1KMvAiP3ya\nSTATISTICS\nTotal Entities\n231,608\nBuilding Storeys\n1\nElements with Geometry\n134,522\nMax Express ID\n1,205,636\nCLASSIFICATION SYSTEMS\nNo classification systems\nEPSG:4326\nLegacy IfcSite geolocation\nEPSG\nPROJECTED CRS\nEPSG:4326\nCOORDINATE OPERATION\nE 0 N 0\nLOCATION\n0.00000, 0.00000\n© OpenStreetMap contributors © CARTO\nClick map to place pin\nGoogle Maps\nOpenStreetMap\nGoogle Earth\nToggle style\nCoordinate\nCheck\nQuantify\nAutomate\nSite\nAuthor\nRIGHT\nLEFT\nBACK\nFRONT\nTOP\nBOTTOM\n13.2m\nX\nZ\nY\nReady\n134.5K elements\nWebGPU\nModel\nPresent\nDefault\nv4.0.0\nifclite.dev →"
+  },
+  "settled": {
+    "queued": false,
+    "finalizing": false,
+    "fragments": false
+  }
+}

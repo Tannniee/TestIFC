@@ -1,0 +1,254 @@
+{
+  "oracle": "IfcOpenShell 0.8.5 / OpenCASCADE; Reference-only cutters disabled per IFC representation semantics",
+  "method": "symmetric sampled point-to-triangle distance; vertices, face centroids, and three 0.6/0.2/0.2 barycentric samples per triangle; not exact Hausdorff",
+  "sourceFile": "F:\\Working\\IFC Temp\\Nhip chinh.ifc",
+  "nativeFile": "F:\\Steel\\VBA\\IFC-Lite-Core104\\research\\nhip-fix-20261024\\branch-full-selected.json",
+  "nativeStats": {
+    "degenerate_triangles_dropped": 0,
+    "entity_scan_time_ms": 496,
+    "faceted_brep_time_ms": 0,
+    "from_cache": false,
+    "geometry_diagnostics": {
+      "classification": {
+        "diagonal": 0,
+        "nonRectangular": 14,
+        "rectangular": 0,
+        "total": 14
+      },
+      "failuresByReason": [],
+      "hostsWithOpenings": 2,
+      "oversizedRefDrops": 0,
+      "productsWithFailures": 0,
+      "rectFast": {
+        "deferHostNotBox": 0,
+        "deferNearEdge": 0,
+        "deferNoOpenings": 0,
+        "deferNotThrough": 0,
+        "deferOffFace": 0,
+        "deferTooManyOpenings": 0,
+        "fired": 0,
+        "openingsCut": 0
+      },
+      "schemaVersion": 3,
+      "silentNoOps": 0,
+      "totalCsgFailures": 0,
+      "totalUnsupportedItems": 0,
+      "unsupportedItemsByType": [],
+      "worstHosts": []
+    },
+    "geometry_time_ms": 97,
+    "lookup_time_ms": 2,
+    "parse_time_ms": 566,
+    "point_cache_hits": 0,
+    "point_cache_misses": 0,
+    "preprocess_time_ms": 31,
+    "products_with_failures": 0,
+    "total_csg_failures": 0,
+    "total_meshes": 8,
+    "total_time_ms": 664,
+    "total_triangles": 6216,
+    "total_vertices": 9601
+  },
+  "rows": [
+    {
+      "id": 434,
+      "type": "IfcPlate",
+      "referenceOnly": true,
+      "native": {
+        "vertices": 154,
+        "triangles": 100,
+        "volume": 1.545787616824261,
+        "area": 124.76198888505716
+      },
+      "oracle": {
+        "vertices": 52,
+        "triangles": 100,
+        "volume": 1.5458066069368919,
+        "area": 124.76191629337876
+      },
+      "maxBoundsDeltaMm": 0.0016621779650449753,
+      "sampledMaxSurfaceDistanceMm": 0.006949346854856486,
+      "sampledP99SurfaceDistanceMm": 0.005433918937132103,
+      "directedSampleCounts": [
+        554,
+        452
+      ],
+      "relativeVolumeErrorPercent": 0.0012284921377374394
+    },
+    {
+      "id": 820,
+      "type": "IfcBeam",
+      "referenceOnly": true,
+      "native": {
+        "vertices": 144,
+        "triangles": 92,
+        "volume": 1.2111586876360951,
+        "area": 97.94640492434026
+      },
+      "oracle": {
+        "vertices": 48,
+        "triangles": 92,
+        "volume": 1.2111553488009141,
+        "area": 97.946423763293
+      },
+      "maxBoundsDeltaMm": 0.006300164386630058,
+      "sampledMaxSurfaceDistanceMm": 0.006679254612615699,
+      "sampledP99SurfaceDistanceMm": 0.005344382008067481,
+      "directedSampleCounts": [
+        512,
+        416
+      ],
+      "relativeVolumeErrorPercent": 0.00027567356939841567
+    },
+    {
+      "id": 2361,
+      "type": "IfcMember",
+      "referenceOnly": false,
+      "native": {
+        "vertices": 1185,
+        "triangles": 584,
+        "volume": 0.07248233271100306,
+        "area": 9.342784117926028
+      },
+      "oracle": {
+        "vertices": 144,
+        "triangles": 288,
+        "volume": 0.07248511214232513,
+        "area": 9.342094718068473
+      },
+      "maxBoundsDeltaMm": 0.012756790965795517,
+      "sampledMaxSurfaceDistanceMm": 0.8551683755939684,
+      "sampledP99SurfaceDistanceMm": 0.7002958348835485,
+      "directedSampleCounts": [
+        3521,
+        1296
+      ],
+      "relativeVolumeErrorPercent": 0.0038344857860083963
+    },
+    {
+      "id": 2444,
+      "type": "IfcMember",
+      "referenceOnly": false,
+      "native": {
+        "vertices": 3754,
+        "triangles": 2544,
+        "volume": 0.07046339255229675,
+        "area": 9.201133003616775
+      },
+      "oracle": {
+        "vertices": 1296,
+        "triangles": 2592,
+        "volume": 0.07045904881485814,
+        "area": 9.200594628274429
+      },
+      "maxBoundsDeltaMm": 0.001335982233285904,
+      "sampledMaxSurfaceDistanceMm": 0.5314512625131749,
+      "sampledP99SurfaceDistanceMm": 0.3804446564644722,
+      "directedSampleCounts": [
+        13930,
+        11664
+      ],
+      "relativeVolumeErrorPercent": 0.006164910698734919
+    },
+    {
+      "id": 64951,
+      "type": "IfcBeam",
+      "referenceOnly": true,
+      "native": {
+        "vertices": 3840,
+        "triangles": 2560,
+        "volume": 0.08933996358281864,
+        "area": 11.636239809659994
+      },
+      "oracle": {
+        "vertices": 1280,
+        "triangles": 2560,
+        "volume": 0.08933984735676485,
+        "area": 11.636202423094979
+      },
+      "maxBoundsDeltaMm": 0.006620539352297783,
+      "sampledMaxSurfaceDistanceMm": 0.012961345248478825,
+      "sampledP99SurfaceDistanceMm": 0.0085572784747951,
+      "directedSampleCounts": [
+        14080,
+        11520
+      ],
+      "relativeVolumeErrorPercent": 0.00013009430530715318
+    },
+    {
+      "id": 266636,
+      "type": "IfcBeam",
+      "referenceOnly": true,
+      "native": {
+        "vertices": 167,
+        "triangles": 104,
+        "volume": 2.6233531557797303,
+        "area": 147.84014363868036
+      },
+      "oracle": {
+        "vertices": 52,
+        "triangles": 104,
+        "volume": 2.623089669963759,
+        "area": 147.8399982933281
+      },
+      "maxBoundsDeltaMm": 0.006064539775252342,
+      "sampledMaxSurfaceDistanceMm": 0.009014874361744921,
+      "sampledP99SurfaceDistanceMm": 0.008400974737684395,
+      "directedSampleCounts": [
+        583,
+        468
+      ],
+      "relativeVolumeErrorPercent": 0.010044864992167581
+    },
+    {
+      "id": 322443,
+      "type": "IfcBeam",
+      "referenceOnly": true,
+      "native": {
+        "vertices": 172,
+        "triangles": 104,
+        "volume": 2.622904446383053,
+        "area": 147.8399420600235
+      },
+      "oracle": {
+        "vertices": 52,
+        "triangles": 104,
+        "volume": 2.623089655059159,
+        "area": 147.83999849713177
+      },
+      "maxBoundsDeltaMm": 0.03933953121304512,
+      "sampledMaxSurfaceDistanceMm": 0.04193311066128815,
+      "sampledP99SurfaceDistanceMm": 0.03467244486340211,
+      "directedSampleCounts": [
+        588,
+        468
+      ],
+      "relativeVolumeErrorPercent": 0.007060707046328437
+    },
+    {
+      "id": 344051,
+      "type": "IfcPlate",
+      "referenceOnly": true,
+      "native": {
+        "vertices": 185,
+        "triangles": 128,
+        "volume": 2.7621366182071463,
+        "area": 155.6761189172757
+      },
+      "oracle": {
+        "vertices": 64,
+        "triangles": 128,
+        "volume": 2.762141468211698,
+        "area": 155.67617698120756
+      },
+      "maxBoundsDeltaMm": 0.02966378815472126,
+      "sampledMaxSurfaceDistanceMm": 0.04724994274449738,
+      "sampledP99SurfaceDistanceMm": 0.03655937618239847,
+      "directedSampleCounts": [
+        697,
+        576
+      ],
+      "relativeVolumeErrorPercent": 0.00017558856443687543
+    }
+  ]
+}

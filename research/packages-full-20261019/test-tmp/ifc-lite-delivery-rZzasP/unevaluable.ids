@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ids xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://standards.buildingsmart.org/IDS http://standards.buildingsmart.org/IDS/1.0/ids.xsd" xmlns="http://standards.buildingsmart.org/IDS">
+  <specifications>
+    <specification name="Project has a Name" ifcVersion="IFC4">
+      <applicability><entity><name><simpleValue>IFCPROJECT</simpleValue></name></entity></applicability>
+      <requirements><attribute><name><simpleValue>Name</simpleValue></name></attribute></requirements>
+    </specification>
+    <specification name="Storey name pattern" ifcVersion="IFC4">
+      <applicability><entity><name><simpleValue>IFCBUILDINGSTOREY</simpleValue></name></entity></applicability>
+      <requirements>
+        <attribute><name><simpleValue>Name</simpleValue></name><value><xs:restriction base="xs:string"><xs:pattern value="(a+)+b"/></xs:restriction></value></attribute>
+      </requirements>
+    </specification>
+  </specifications>
+</ids>

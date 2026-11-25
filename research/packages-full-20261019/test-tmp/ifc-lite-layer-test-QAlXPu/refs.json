@@ -1,0 +1,10 @@
+{
+  "refs": {
+    "main": {
+      "layers": [],
+      "policy": {
+        "requireHumanApproval": true
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-20T02:40:25.197Z",
+  "remote": "https://github.com/Tannniee/TestIFC.git",
+  "commit": "375b5bfc3cacb3cffe4060deb919a02b44e34651",
+  "tagObject": "7dd9c9242ee18b3cf25845f07c1caaff86a6f8d5",
+  "output": "",
+  "refs": "375b5bfc3cacb3cffe4060deb919a02b44e34651\trefs/heads/main\n9cf52a61e8eaa27fabf2d4ae4f57d85fd45ccd7d\trefs/tags/v2.0.0\n07428c14773fc91e372cecddc81bf79e03ee3614\trefs/tags/v2.0.0^{}\n7dd9c9242ee18b3cf25845f07c1caaff86a6f8d5\trefs/tags/v2.0.1\n375b5bfc3cacb3cffe4060deb919a02b44e34651\trefs/tags/v2.0.1^{}\n"
+}

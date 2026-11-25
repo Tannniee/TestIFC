@@ -1,0 +1,18 @@
+{
+  "refs": {
+    "zeta": {
+      "layers": []
+    },
+    "main": {
+      "layers": [
+        "blake3:4e371d64d0d4f790be4e9065cf27775416d9efd949e104ecb5251322e2a23c7e"
+      ],
+      "policy": {
+        "requiredChecks": [
+          "ids:x"
+        ],
+        "requireHumanApproval": true
+      }
+    }
+  }
+}

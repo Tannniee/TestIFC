@@ -1,0 +1,5 @@
+GlobalId,Cost,lineage_relation,lineage_from
+p0,100,split,w
+p1,100,split,w
+R,5,replaced,r
+same,1,unchanged,same

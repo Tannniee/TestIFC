@@ -1,0 +1,91 @@
+{
+  "note": "Real native loads/gestures/cleanup on exact r3 EXE. Counts match historical same-input runs; not a universal parity or performance improvement claim.",
+  "SVD": {
+    "ok": true,
+    "loaded": {
+      "milliseconds": 142955,
+      "loading": false,
+      "progress": {
+        "phase": "Complete",
+        "percent": 100
+      },
+      "models": [
+        {
+          "id": "dfcd8a14-40c7-407b-bd56-1cc32a5a2a37",
+          "path": "native",
+          "meshes": 163867,
+          "vertices": 304642800,
+          "triangles": 183466717,
+          "sourceBytes": 0
+        }
+      ]
+    },
+    "errors": [],
+    "hostExit": {
+      "code": 0,
+      "signal": null,
+      "at": "2026-10-20T01:53:42.354Z"
+    },
+    "countComparison": {
+      "meshes": {
+        "previous": 163867,
+        "actual": 163867,
+        "identical": true
+      },
+      "vertices": {
+        "previous": 304642800,
+        "actual": 304642800,
+        "identical": true
+      },
+      "triangles": {
+        "previous": 183466717,
+        "actual": 183466717,
+        "identical": true
+      }
+    }
+  },
+  "PVF": {
+    "ok": true,
+    "loaded": {
+      "milliseconds": 202450,
+      "loading": false,
+      "progress": {
+        "phase": "Complete",
+        "percent": 100
+      },
+      "models": [
+        {
+          "id": "0f93cf21-738f-4a6b-bd42-d5299521ecef",
+          "path": "native",
+          "meshes": 160673,
+          "vertices": 245093805,
+          "triangles": 148025417,
+          "sourceBytes": 0
+        }
+      ]
+    },
+    "errors": [],
+    "hostExit": {
+      "code": 0,
+      "signal": null,
+      "at": "2026-10-20T01:57:43.599Z"
+    },
+    "countComparison": {
+      "meshes": {
+        "previous": 160673,
+        "actual": 160673,
+        "identical": true
+      },
+      "vertices": {
+        "previous": 245093805,
+        "actual": 245093805,
+        "identical": true
+      },
+      "triangles": {
+        "previous": 148025417,
+        "actual": 148025417,
+        "identical": true
+      }
+    }
+  }
+}

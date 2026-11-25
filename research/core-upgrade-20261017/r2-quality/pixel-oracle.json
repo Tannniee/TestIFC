@@ -1,0 +1,26 @@
+[
+  {
+    "theme": "colorful",
+    "size": [
+      297,
+      178
+    ],
+    "changed_pixels": 0
+  },
+  {
+    "theme": "dark",
+    "size": [
+      297,
+      178
+    ],
+    "changed_pixels": 0
+  },
+  {
+    "theme": "light",
+    "size": [
+      297,
+      178
+    ],
+    "changed_pixels": 0
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "header": {
+    "id": "blake3:d5547a102e36855cc6bdc69f300c6cc0220dedcfb0847bd11212673bbdd5abcf",
+    "ifcxVersion": "ifcx_alpha",
+    "dataVersion": "1.0.0",
+    "author": "tanng",
+    "timestamp": "2026-10-19T03:35:32.909Z",
+    "ifclite::provenance": {
+      "v": 1,
+      "author": {
+        "kind": "human",
+        "principal": "tanng"
+      },
+      "intent": "Revert layer blake3:a4ce6de3175e8d027ce9eb7091879d5c59959f4db73e7205675c0fd6f43ca51f",
+      "created": "2026-10-19T03:35:32.909Z",
+      "base": {
+        "kind": "stack",
+        "id": "blake3:d297812d70cc088731ef1d471fa09feacf3ba675a96f4b94f54c3d9f9ed26062"
+      },
+      "parents": [
+        "blake3:a4ce6de3175e8d027ce9eb7091879d5c59959f4db73e7205675c0fd6f43ca51f"
+      ],
+      "scope_claim": [],
+      "identity_map": [],
+      "checks": [],
+      "merge": null,
+      "signatures": []
+    }
+  },
+  "imports": [],
+  "schemas": {},
+  "data": []
+}

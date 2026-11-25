@@ -1,0 +1,974 @@
+{
+  "exe": "F:\\Steel\\VBA\\IFC-Lite\\desktop\\release\\10.4.0-native-core-20261017\\IFC-Lite.exe",
+  "model": "F:\\Working\\IFC Temp\\SVD TRONG DONG-22.09.2026 (8H).ifc",
+  "bytes": 883278635,
+  "profile": "C:\\Users\\tanng\\AppData\\Local\\Temp\\ifclite-core104-large-EHSRjy",
+  "hostPid": 7192,
+  "errors": [],
+  "progress": [
+    {
+      "milliseconds": 1175,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 2253,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 3324,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 4404,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 5474,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 6604,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 7675,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 8765,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 9889,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 10966,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 12072,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 13150,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 14225,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 15296,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 16399,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 17534,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 18666,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 19769,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 20875,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 21990,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 23093,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 24601,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 26399,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 27405,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 28412,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 29428,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 30432,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 31438,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 32445,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 33454,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 34460,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 35468,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 36473,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 37480,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 38484,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 39495,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 40500,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 41506,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 42511,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 43521,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 44527,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 45530,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 46534,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 47536,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 48544,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 49545,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 50550,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 51559,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 52564,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 53566,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 54577,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 55583,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 56587,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 57594,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 58604,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 59613,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 60627,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 61632,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 62644,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 63650,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 64661,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 65670,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 66679,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 67684,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 68696,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 69714,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 70722,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 71730,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 72741,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 73760,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 74764,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 75778,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 76781,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 77788,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 78798,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 79811,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 80829,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 81838,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 82850,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 83857,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 84869,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 85876,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 86885,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 87890,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 88898,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 89908,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 90917,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 91930,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 92940,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 93949,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 94968,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 95985,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 96988,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 97999,
+      "loading": true,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10"
+        }
+      ]
+    },
+    {
+      "milliseconds": 102995,
+      "loading": false,
+      "models": [
+        {
+          "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10",
+          "path": "native",
+          "meshes": 163867,
+          "vertices": 304642800,
+          "triangles": 183466717,
+          "sourceBytes": 0
+        }
+      ]
+    }
+  ],
+  "loaded": {
+    "milliseconds": 102995,
+    "loading": false,
+    "models": [
+      {
+        "id": "5688799c-d71f-4cf0-a784-03e0e49c2f10",
+        "path": "native",
+        "meshes": 163867,
+        "vertices": 304642800,
+        "triangles": 183466717,
+        "sourceBytes": 0
+      }
+    ]
+  },
+  "selection": {
+    "modelId": "5688799c-d71f-4cf0-a784-03e0e49c2f10",
+    "expressId": 8871707
+  },
+  "gestures": {
+    "before": {
+      "position": {
+        "x": 469.2756654837452,
+        "y": 476.3906251671184,
+        "z": 470.9139101126514
+      },
+      "target": {
+        "x": -0.82025146484375,
+        "y": 84.64402770996094,
+        "z": 0.8179931640625
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "orbit": {
+      "position": {
+        "x": 271.41261228601246,
+        "y": 565.9046279603738,
+        "z": 539.0774486530951
+      },
+      "target": {
+        "x": -0.82025146484375,
+        "y": 84.64402770996094,
+        "z": 0.8179931640625
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "pan": {
+      "position": {
+        "x": 256.25751881727507,
+        "y": 571.6408468894322,
+        "z": 541.6112120310097
+      },
+      "target": {
+        "x": -15.903884950008642,
+        "y": 90.35006851501902,
+        "z": 3.3426026602762398
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 216.97390753399878
+    },
+    "zoom": {
+      "position": {
+        "x": 257.70796642632746,
+        "y": 571.0263841356085,
+        "z": 541.4272507176861
+      },
+      "target": {
+        "x": -14.453437340956322,
+        "y": 89.73560576119534,
+        "z": 3.158641346952668
+      },
+      "up": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "fov": 0.7853981633974483,
+      "projectionMode": "orthographic",
+      "orthoSize": 206.12521215729885
+    }
+  },
+  "cleared": true,
+  "ok": true,
+  "closeResponse": "Error: page.evaluate: Command plugin:window|close not allowed by ACL",
+  "exitedAfterClose": false
+}

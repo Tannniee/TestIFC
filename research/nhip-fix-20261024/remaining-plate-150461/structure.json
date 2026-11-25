@@ -1,0 +1,474 @@
+[
+  {
+    "host": {
+      "id": 150461,
+      "type": "IfcPlate",
+      "name": "GAN NGANG",
+      "placement": "#150452=IfcLocalPlacement(#149350,#150451)",
+      "reps": [
+        {
+          "id": 150457,
+          "identifier": "Body",
+          "type": "SolidModel",
+          "items": [
+            "#150456=IfcExtrudedAreaSolid(#150455,#150349,#59,16.)"
+          ]
+        },
+        {
+          "id": 150459,
+          "identifier": "CoG",
+          "type": "Point",
+          "items": [
+            "#150458=IfcCartesianPoint((1026.6723999999999,1017.11008,2.0000000000000002E-05))"
+          ]
+        }
+      ]
+    },
+    "cuts": [
+      {
+        "id": 150479,
+        "type": "IfcVoidingFeature",
+        "name": "CUTPART",
+        "placement": "#150472=IfcLocalPlacement(#150452,#150471)",
+        "reps": [
+          {
+            "id": 150477,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150476=IfcExtrudedAreaSolid(#150475,#64972,#59,22.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150485,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150482=IfcLocalPlacement(#150452,#150481)",
+        "reps": [
+          {
+            "id": 150483,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150491,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150488=IfcLocalPlacement(#150452,#150487)",
+        "reps": [
+          {
+            "id": 150489,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150497,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150494=IfcLocalPlacement(#150452,#150493)",
+        "reps": [
+          {
+            "id": 150495,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150503,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150500=IfcLocalPlacement(#150452,#150499)",
+        "reps": [
+          {
+            "id": 150501,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150509,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150506=IfcLocalPlacement(#150452,#150505)",
+        "reps": [
+          {
+            "id": 150507,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150515,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150512=IfcLocalPlacement(#150452,#150511)",
+        "reps": [
+          {
+            "id": 150513,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150521,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150518=IfcLocalPlacement(#150452,#150517)",
+        "reps": [
+          {
+            "id": 150519,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150527,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150524=IfcLocalPlacement(#150452,#150523)",
+        "reps": [
+          {
+            "id": 150525,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150533,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150530=IfcLocalPlacement(#150452,#150529)",
+        "reps": [
+          {
+            "id": 150531,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150539,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150536=IfcLocalPlacement(#150452,#150535)",
+        "reps": [
+          {
+            "id": 150537,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150545,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150542=IfcLocalPlacement(#150452,#150541)",
+        "reps": [
+          {
+            "id": 150543,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 150551,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#150548=IfcLocalPlacement(#150452,#150547)",
+        "reps": [
+          {
+            "id": 150549,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "host": {
+      "id": 152785,
+      "type": "IfcPlate",
+      "name": "GAN NGANG",
+      "placement": "#152781=IfcLocalPlacement(#152701,#150659)",
+      "reps": [
+        {
+          "id": 152782,
+          "identifier": "Body",
+          "type": "SolidModel",
+          "items": [
+            "#150664=IfcExtrudedAreaSolid(#150663,#150349,#59,16.)"
+          ]
+        },
+        {
+          "id": 152783,
+          "identifier": "CoG",
+          "type": "Point",
+          "items": [
+            "#150458=IfcCartesianPoint((1026.6723999999999,1017.11008,2.0000000000000002E-05))"
+          ]
+        }
+      ]
+    },
+    "cuts": [
+      {
+        "id": 152789,
+        "type": "IfcVoidingFeature",
+        "name": "CUTPART",
+        "placement": "#152786=IfcLocalPlacement(#152781,#150471)",
+        "reps": [
+          {
+            "id": 152787,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150476=IfcExtrudedAreaSolid(#150475,#64972,#59,22.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152793,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152790=IfcLocalPlacement(#152781,#150481)",
+        "reps": [
+          {
+            "id": 152791,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152797,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152794=IfcLocalPlacement(#152781,#150487)",
+        "reps": [
+          {
+            "id": 152795,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152801,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152798=IfcLocalPlacement(#152781,#150493)",
+        "reps": [
+          {
+            "id": 152799,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152805,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152802=IfcLocalPlacement(#152781,#150499)",
+        "reps": [
+          {
+            "id": 152803,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152809,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152806=IfcLocalPlacement(#152781,#150505)",
+        "reps": [
+          {
+            "id": 152807,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152813,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152810=IfcLocalPlacement(#152781,#150511)",
+        "reps": [
+          {
+            "id": 152811,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152817,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152814=IfcLocalPlacement(#152781,#150517)",
+        "reps": [
+          {
+            "id": 152815,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152821,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152818=IfcLocalPlacement(#152781,#150523)",
+        "reps": [
+          {
+            "id": 152819,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152825,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152822=IfcLocalPlacement(#152781,#150529)",
+        "reps": [
+          {
+            "id": 152823,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152829,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152826=IfcLocalPlacement(#152781,#150535)",
+        "reps": [
+          {
+            "id": 152827,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152833,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152830=IfcLocalPlacement(#152781,#150541)",
+        "reps": [
+          {
+            "id": 152831,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 152837,
+        "type": "IfcVoidingFeature",
+        "name": "BEAM",
+        "placement": "#152834=IfcLocalPlacement(#152781,#150547)",
+        "reps": [
+          {
+            "id": 152835,
+            "identifier": "Body",
+            "type": "SolidModel",
+            "items": [
+              "#150379=IfcExtrudedAreaSolid(#71614,#92498,#59,20.)"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

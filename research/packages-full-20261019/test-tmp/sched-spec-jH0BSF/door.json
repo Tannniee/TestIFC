@@ -1,0 +1,5 @@
+{
+  "type": "IfcDoor",
+  "columns": "Mark=Tag, Name, FireRating=Pset_DoorCommon.FireRating, IsExternal=Pset_DoorCommon.IsExternal, Width=Qto_DoorBaseQuantities.Width, Height=Qto_DoorBaseQuantities.Height",
+  "format": "csv"
+}
